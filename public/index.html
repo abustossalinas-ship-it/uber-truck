@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#F26522" />
+  <title>Uber Truck — Inteligencia en movimiento</title>
+  <link rel="icon" href="/brand/logo.png" type="image/png" />
+  <link rel="stylesheet" href="/theme.css" />
+</head>
+<body>
+  <header class="site-header">
+    <img class="brand-logo" src="/brand/logo.png" width="120" height="120" alt="Uber Truck" />
+    <div class="brand-copy">
+      <h1>Uber Truck</h1>
+      <p class="tagline">Inteligencia en movimiento</p>
+      <p class="lead">
+        Aprovecha cubicación ociosa en rutas ya planificadas. Las PYME publican pedidos extras sin
+        contratar un camión dedicado cada mes por imprevistos.
+      </p>
+      <span class="hero-tag" id="storage-badge">MVP demo</span>
+    </div>
+  </header>
+
+  <nav>
+    <button type="button" class="tab active" data-tab="shipper">Necesito mover carga</button>
+    <button type="button" class="tab" data-tab="carrier">Tengo espacio en ruta</button>
+    <button type="button" class="tab" data-tab="board">Tablero / emparejar</button>
+  </nav>
+
+  <main>
+    <section id="panel-shipper" class="panel active">
+      <div class="grid">
+        <form id="form-load" data-maps-form>
+          <h2>Publicar necesidad de carga</h2>
+          <p class="maps-banner muted" hidden>
+            Maps no configurado: agrega <code>GOOGLE_MAPS_API_KEY</code> en <code>.env</code> y reinicia el servidor.
+          </p>
+          <label>Empresa</label>
+          <input name="company_name" required placeholder="Ej. Distribuidora Norte" />
+
+          <h3 class="form-section">Origen</h3>
+          <div class="address-wrap" data-address="origin">
+            <label>Buscar dirección (Google Maps)</label>
+            <input class="address-search" type="text" placeholder="Ej. Av. Bernardo O'Higgins, Santiago" autocomplete="off" />
+            <ul class="address-suggestions" hidden></ul>
+          </div>
+          <input type="hidden" name="origin_place_id" />
+          <input type="hidden" name="origin_address" />
+          <input type="hidden" name="origin_lat" />
+          <input type="hidden" name="origin_lng" />
+          <div class="grid grid-2">
+            <div>
+              <label>Comuna origen</label>
+              <input name="origin_commune" placeholder="Se completa con Maps" />
+            </div>
+            <div>
+              <label>Ciudad origen</label>
+              <input name="origin_city" required placeholder="San Bernardo" />
+            </div>
+            <div>
+              <label>Región origen</label>
+              <input name="origin_region" value="RM" maxlength="10" required title="Ej. RM, V, VIII" />
+            </div>
+          </div>
+
+          <h3 class="form-section">Destino</h3>
+          <div class="address-wrap" data-address="destination">
+            <label>Buscar dirección destino</label>
+            <input class="address-search" type="text" placeholder="Ej. Puerto San Antonio" autocomplete="off" />
+            <ul class="address-suggestions" hidden></ul>
+          </div>
+          <input type="hidden" name="destination_place_id" />
+          <input type="hidden" name="destination_address" />
+          <input type="hidden" name="destination_lat" />
+          <input type="hidden" name="destination_lng" />
+          <div class="grid grid-2">
+            <div>
+              <label>Comuna destino</label>
+              <input name="destination_commune" placeholder="Se completa con Maps" />
+            </div>
+            <div>
+              <label>Ciudad destino</label>
+              <input name="destination_city" required placeholder="Valparaíso" />
+            </div>
+            <div>
+              <label>Región destino</label>
+              <input name="destination_region" value="V" maxlength="10" required />
+            </div>
+          </div>
+
+          <p class="distance-box muted" data-distance-box>Selecciona origen y destino para calcular distancia.</p>
+          <input type="hidden" name="distance_km" />
+          <input type="hidden" name="distance_duration_min" />
+
+          <label>Cubicación (preset)</label>
+          <select id="load-cubicacion-preset">
+            <option value="">Elegir cubicación…</option>
+          </select>
+          <div class="grid grid-2">
+            <div>
+              <label>Volumen (m³)</label>
+              <input name="volume_m3" type="number" step="0.1" min="0" placeholder="4" />
+            </div>
+            <div>
+              <label>Pallets</label>
+              <input name="pallets" type="number" min="0" placeholder="2" />
+            </div>
+            <div>
+              <label>Peso (kg)</label>
+              <input name="weight_kg" type="number" min="0" placeholder="1600" />
+            </div>
+          </div>
+          <label>Tipo de mercancía</label>
+          <input name="cargo_type" placeholder="Alimentos, retail…" />
+          <label>Urgencia</label>
+          <select name="urgency">
+            <option value="normal">Normal</option>
+            <option value="urgent">Urgente</option>
+          </select>
+          <label>Notas</label>
+          <textarea name="notes" rows="2" placeholder="Pedido extra; no tenemos cubicado para la fecha…"></textarea>
+          <button type="submit">Publicar carga</button>
+        </form>
+        <div class="card">
+          <h2>Problema que resolvemos</h2>
+          <p class="muted">
+            Muchas empresas terminan cotizando un <strong>camión adicional fijo</strong> por picos
+            imprevistos o porque no saben cuándo llegará el próximo pedido para coordinar retiro.
+          </p>
+          <p class="muted">
+            Con Maps se autocompletan comuna y región; la distancia en ruta ayuda a cotizar el flete incidental.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section id="panel-carrier" class="panel">
+      <form id="form-offer" data-maps-form>
+        <h2>Publicar capacidad disponible (backhaul)</h2>
+        <p class="muted" style="margin-top:-0.5rem;margin-bottom:1rem">
+          Paso previo al emparejamiento: sin oferta publicada, el tablero no puede crear un match.
+        </p>
+        <p class="maps-banner muted" hidden>
+          Maps no configurado: agrega <code>GOOGLE_MAPS_API_KEY</code> en <code>.env</code>.
+        </p>
+        <label>Transportista / flota</label>
+        <input name="carrier_name" required placeholder="Ej. Transportes Ruta Sur" />
+
+        <h3 class="form-section">Ruta planificada — origen</h3>
+        <div class="address-wrap" data-address="origin">
+          <label>Buscar dirección origen</label>
+          <input class="address-search" type="text" placeholder="Desde dónde sales" autocomplete="off" />
+          <ul class="address-suggestions" hidden></ul>
+        </div>
+        <input type="hidden" name="origin_address" />
+        <input type="hidden" name="origin_lat" />
+        <input type="hidden" name="origin_lng" />
+        <div class="grid grid-2">
+          <div>
+            <label>Comuna origen</label>
+            <input name="origin_commune" />
+          </div>
+          <div>
+            <label>Ciudad origen</label>
+            <input name="origin_city" required placeholder="Santiago" />
+          </div>
+          <div>
+            <label>Región origen</label>
+            <input name="origin_region" value="RM" required />
+          </div>
+        </div>
+
+        <h3 class="form-section">Ruta planificada — destino</h3>
+        <div class="address-wrap" data-address="destination">
+          <label>Buscar dirección destino</label>
+          <input class="address-search" type="text" placeholder="Hacia dónde vas" autocomplete="off" />
+          <ul class="address-suggestions" hidden></ul>
+        </div>
+        <input type="hidden" name="destination_address" />
+        <input type="hidden" name="destination_lat" />
+        <input type="hidden" name="destination_lng" />
+        <div class="grid grid-2">
+          <div>
+            <label>Comuna destino</label>
+            <input name="destination_commune" />
+          </div>
+          <div>
+            <label>Ciudad destino</label>
+            <input name="destination_city" required placeholder="San Bernardo" />
+          </div>
+          <div>
+            <label>Región destino</label>
+            <input name="destination_region" value="RM" required />
+          </div>
+        </div>
+
+        <p class="distance-box muted" data-distance-box>Selecciona origen y destino para calcular distancia.</p>
+        <input type="hidden" name="distance_km" />
+        <input type="hidden" name="distance_duration_min" />
+
+        <label>Espacio disponible (preset)</label>
+        <select id="offer-cubicacion-preset">
+          <option value="">Elegir espacio…</option>
+        </select>
+        <div class="grid grid-2">
+          <div>
+            <label>Cubicación libre (m³)</label>
+            <input name="free_volume_m3" type="number" step="0.1" min="0" />
+          </div>
+          <div>
+            <label>Peso máx. (kg)</label>
+            <input name="max_weight_kg" type="number" min="0" />
+          </div>
+        </div>
+        <label>Tipos de carga aceptados</label>
+        <input name="cargo_types" placeholder="Alimentos, retail…" />
+        <label>Notas</label>
+        <textarea name="notes" rows="2"></textarea>
+        <button type="submit">Publicar oferta</button>
+      </form>
+    </section>
+
+    <section id="panel-board" class="panel">
+      <div class="card" style="margin-bottom:1.25rem">
+        <h2>Proponer emparejamiento</h2>
+        <p id="board-hint" class="muted" hidden></p>
+        <form id="form-match" class="grid grid-2" novalidate>
+          <div>
+            <label>Carga</label>
+            <select id="match-load"></select>
+            <label>Oferta de capacidad</label>
+            <select id="match-offer"></select>
+          </div>
+          <div>
+            <label>Precio acordado (CLP, opcional)</label>
+            <input id="match-price" type="number" min="0" placeholder="150000" />
+            <button type="submit" style="margin-top:0.5rem">Crear match</button>
+          </div>
+        </form>
+      </div>
+      <div class="grid grid-2">
+        <div>
+          <h2>Cargas</h2>
+          <div id="list-loads"></div>
+        </div>
+        <div>
+          <h2>Ofertas</h2>
+          <div id="list-offers"></div>
+        </div>
+      </div>
+      <h2 style="margin-top:1.5rem">Emparejamientos</h2>
+      <div id="list-matches"></div>
+    </section>
+  </main>
+
+  <footer class="site-footer">Uber Truck · Maps + cubicación · docs/MAPS.md</footer>
+
+  <script src="/maps-ui.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

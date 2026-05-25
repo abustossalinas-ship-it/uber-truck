@@ -1,0 +1,25 @@
+-- Uber Truck v002 — direcciones, coordenadas y distancia
+
+ALTER TABLE load_requests
+  ADD COLUMN IF NOT EXISTS origin_address TEXT,
+  ADD COLUMN IF NOT EXISTS destination_address TEXT,
+  ADD COLUMN IF NOT EXISTS origin_commune TEXT,
+  ADD COLUMN IF NOT EXISTS destination_commune TEXT,
+  ADD COLUMN IF NOT EXISTS origin_lat DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS origin_lng DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS destination_lat DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS destination_lng DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS distance_km NUMERIC(10, 2),
+  ADD COLUMN IF NOT EXISTS distance_duration_min INT;
+
+ALTER TABLE capacity_offers
+  ADD COLUMN IF NOT EXISTS origin_address TEXT,
+  ADD COLUMN IF NOT EXISTS destination_address TEXT,
+  ADD COLUMN IF NOT EXISTS origin_commune TEXT,
+  ADD COLUMN IF NOT EXISTS destination_commune TEXT,
+  ADD COLUMN IF NOT EXISTS origin_lat DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS origin_lng DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS destination_lat DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS destination_lng DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS distance_km NUMERIC(10, 2),
+  ADD COLUMN IF NOT EXISTS distance_duration_min INT;

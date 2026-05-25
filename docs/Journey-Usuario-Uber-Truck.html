@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Journey de usuario — Uber Truck</title>
+</head>
+<body>
+  <h1>Journey de usuario — Uber Truck</h1>
+  <p><strong>Proyecto:</strong> Optimización dinámica de capacidad logística ociosa (backhaul)</p>
+  <p><strong>Fuente estratégica:</strong> Informe_Evaluacion_Estrategica_Uber_Truck.docx</p>
+  <p><strong>Versión:</strong> 1.0 · mayo 2026</p>
+
+  <h2>1. Propósito del documento</h2>
+  <p>Describir los recorridos end-to-end de los actores clave del MVP: <strong>transportista (oferta de capacidad)</strong> y <strong>empresa embarcadora (demanda)</strong>, incluyendo estados emocionales, puntos de fricción y métricas de éxito por etapa.</p>
+
+  <h2>2. Actores</h2>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <tr><th>Actor</th><th>Objetivo</th><th>Dolor principal</th></tr>
+    <tr><td><strong>Camionero / flota (oferta)</strong></td><td>Monetizar cubicación ociosa en ruta activa</td><td>Retorno vacío, combustible y tiempo sin facturar</td></tr>
+    <tr><td><strong>Empresa PYME (demanda)</strong></td><td>Mover carga urgente o incidental sin contrato marco</td><td>Cotizaciones lentas, falta de camión disponible</td></tr>
+    <tr><td><strong>Operaciones Uber Truck (concierge MVP)</strong></td><td>Emparejar oferta-demanda con confianza mínima</td><td>Fragmentación, informalidad LATAM</td></tr>
+  </table>
+
+  <h2>3. Journey — Transportista (oferta de capacidad)</h2>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <tr><th>Etapa</th><th>Acción</th><th>Canal MVP</th><th>Pensamiento / emoción</th><th>Éxito</th></tr>
+    <tr><td>1. Descubrimiento</td><td>Conoce Uber Truck por referido en ruta o nodo industrial</td><td>WhatsApp / boca a boca</td><td>«¿Me pagan algo por el espacio que ya iba vacío?»</td><td>Registra interés</td></tr>
+    <tr><td>2. Alta y verificación</td><td>Envía licencia, patente, tipo de camión, seguro básico</td><td>Formulario + revisión manual</td><td>Desconfianza si es muy largo</td><td>Perfil <strong>verificado</strong></td></tr>
+    <tr><td>3. Reporte de capacidad</td><td>Indica ubicación, destino planificado, cubicación libre (ej. 3 pallets), tipos de carga aceptados, ventana horaria</td><td>WhatsApp / app web v1</td><td>«No quiero perder tiempo»</td><td>Oferta publicada en &lt; 3 min</td></tr>
+    <tr><td>4. Notificación de match</td><td>Recibe solicitud compatible en su corredor</td><td>WhatsApp push</td><td>«¿Compensa parar?»</td><td>Responde en &lt; 30 min</td></tr>
+    <tr><td>5. Negociación / aceptación</td><td>Acuerda precio y punto de retiro (concierge al inicio)</td><td>WhatsApp + operador</td><td>«Que no me hagan esperar en planta»</td><td>Viaje <strong>asignado</strong></td></tr>
+    <tr><td>6. Ejecución</td><td>Retira carga, entrega, confirma POD (foto / firma)</td><td>WhatsApp + foto</td><td>Estrés por retrasos en bahía</td><td>Estado <strong>entregado</strong></td></tr>
+    <tr><td>7. Cobro y reputación</td><td>Recibe pago acordado; califica tiempos de carga en planta</td><td>Transferencia / plataforma (fase 2)</td><td>«¿Me volverán a llamar?»</td><td>Pago &lt; 48 h · rating bidireccional</td></tr>
+  </table>
+
+  <h2>4. Journey — Empresa embarcadora (demanda)</h2>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <tr><th>Etapa</th><th>Acción</th><th>Canal MVP</th><th>Pensamiento / emoción</th><th>Éxito</th></tr>
+    <tr><td>1. Necesidad</td><td>Urgencia: 2 pallets a región X mañana</td><td>Interno</td><td>«Corredor habitual no tiene espacio»</td><td>Decide buscar capacidad abierta</td></tr>
+    <tr><td>2. Publicación</td><td>Origen, destino, peso/volumen, urgencia, tipo mercancía</td><td>Formulario / WhatsApp</td><td>«Que sea rápido y barato»</td><td>Requerimiento registrado</td></tr>
+    <tr><td>3. Match</td><td>Ve 1–3 opciones con camión ya en ruta compatible</td><td>WhatsApp / dashboard</td><td>«¿Confío en un desconocido?»</td><td>Elige transportista verificado</td></tr>
+    <tr><td>4. Confirmación</td><td>Acepta precio, ventana retiro, microseguro (fase 2)</td><td>Plataforma / operador</td><td>Alivio si hay seguro y tracking básico</td><td>Estado <strong>asignado</strong></td></tr>
+    <tr><td>5. Seguimiento</td><td>Consulta estado: en ruta / entregado</td><td>WhatsApp</td><td>Ansiedad por SLA</td><td>Visibilidad sin llamar 10 veces</td></tr>
+    <tr><td>6. Cierre</td><td>Confirma entrega, califica puntualidad y cuidado</td><td>App / formulario</td><td>«¿Lo uso de nuevo?»</td><td>NPS ≥ 8 · recompra en 30 días</td></tr>
+  </table>
+
+  <h2>5. Mapa de estados del viaje (MVP)</h2>
+  <p><strong>Oferta capacidad:</strong> borrador → publicada → reservada → expirada</p>
+  <p><strong>Demanda carga:</strong> borrador → publicada → asignada → en_ruta → entregada → cancelada</p>
+  <p><strong>Match:</strong> propuesto → aceptado → en_ejecución → cerrado → disputa</p>
+
+  <h2>6. Fricciones críticas y mitigación (informe estratégico)</h2>
+  <ul>
+    <li><strong>Confianza:</strong> KYC conductor + revisión técnica vehículo antes de activación.</li>
+    <li><strong>Seguro:</strong> microseguro por trayecto vía InsurTech (fase piloto controlado).</li>
+    <li><strong>Reputación:</strong> rating bidireccional (empresa ↔ transportista).</li>
+    <li><strong>Espera en planta:</strong> registrar tiempos de bahía para desincentivar abusos.</li>
+  </ul>
+
+  <h2>7. Métricas por journey (piloto 20 emparejamientos)</h2>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <tr><th>Métrica</th><th>Meta piloto</th></tr>
+    <tr><td>Tiempo publicación → match</td><td>&lt; 4 horas (concierge)</td></tr>
+    <tr><td>% viajes con retorno monetizado</td><td>≥ 70% ofertas publicadas</td></tr>
+    <tr><td>Tasa de cancelación post-asignación</td><td>&lt; 10%</td></tr>
+    <tr><td>Repetición embarcador en 60 días</td><td>≥ 30%</td></tr>
+  </table>
+
+  <h2>8. Evolución post-MVP</h2>
+  <p>Consolidación LTL, pricing dinámico, red de capacidad abierta predictiva y monetización de datos agregados (fases 2–3 del informe estratégico).</p>
+</body>
+</html>

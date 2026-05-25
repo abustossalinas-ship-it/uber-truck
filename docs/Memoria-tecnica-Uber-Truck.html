@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Memoria técnica — Uber Truck</title>
+</head>
+<body>
+  <h1>Memoria técnica — Uber Truck</h1>
+  <p><strong>Producto:</strong> Plataforma de optimización dinámica de capacidad logística ociosa (backhaul)</p>
+  <p><strong>Versión documento:</strong> 1.0 · mayo 2026</p>
+  <p><strong>Estado implementación:</strong> Kickoff + skeleton Express; MVP digital en diseño</p>
+
+  <h2>1. Resumen ejecutivo técnico</h2>
+  <p>Uber Truck conecta <strong>oferta de cubicación disponible</strong> (camionero en ruta) con <strong>demanda incidental de carga</strong> (PYME). El MVP valida adopción sin sobreingeniería: primero <strong>concierge</strong> (WhatsApp + Airtable), luego producto digital (Node.js, Supabase, web).</p>
+
+  <h2>2. Objetivos del sistema</h2>
+  <ul>
+    <li>Registrar ofertas de capacidad con parámetros: ubicación, destino, cubicación, tipo carga, ventana horaria.</li>
+    <li>Registrar requerimientos de carga: origen, destino, peso/volumen, urgencia.</li>
+    <li>Emparejar oferta-demanda (manual → semi-automático → algoritmo).</li>
+    <li>Gestionar estados del viaje y trazabilidad mínima.</li>
+    <li>Soportar verificación de actores y reputación bidireccional (roadmap).</li>
+  </ul>
+
+  <h2>3. Arquitectura lógica</h2>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <tr><th>Capa</th><th>Tecnología</th><th>Responsabilidad</th></tr>
+    <tr><td>Canal MVP 0</td><td>WhatsApp Business + Airtable</td><td>20 emparejamientos piloto sin código</td></tr>
+    <tr><td>Frontend v1</td><td>HTML/JS en <code>public/</code> o PWA</td><td>Formularios oferta/demanda, tablero operador</td></tr>
+    <tr><td>API</td><td>Node.js 20 + Express 4</td><td>REST, auth, reglas de match</td></tr>
+    <tr><td>Datos</td><td>Supabase (PostgreSQL)</td><td>Usuarios, vehículos, ofertas, cargas, matches</td></tr>
+    <tr><td>Auth</td><td>Supabase Auth / JWT</td><td>Roles: carrier, shipper, admin</td></tr>
+    <tr><td>Deploy</td><td>Railway</td><td><code>/health</code>, variables entorno</td></tr>
+    <tr><td>Mapas (fase 2)</td><td>Google Maps / Mapbox</td><td>Geocoding, corredor ruta</td></tr>
+    <tr><td>KYC / seguro (fase 2)</td><td>APIs terceros</td><td>Licencia, revisión técnica, microseguro</td></tr>
+  </table>
+
+  <h2>4. Modelo de datos (v1 propuesto)</h2>
+  <h3>4.1 Entidades principales</h3>
+  <ul>
+    <li><strong>users</strong> — rol, KYC status, reputación agregada.</li>
+    <li><strong>vehicles</strong> — patente, tipo, capacidad m³, peso máx., tipos carga permitidos.</li>
+    <li><strong>capacity_offers</strong> — oferta del transportista (origen, destino planificado, cubicación libre, ventana).</li>
+    <li><strong>load_requests</strong> — demanda embarcador (origen, destino, pallets/peso, urgencia).</li>
+    <li><strong>matches</strong> — vinculación oferta-carga, precio acordado, comisión, estados.</li>
+    <li><strong>trip_events</strong> — auditoría: asignado, retiro, en_ruta, entregado, POD.</li>
+    <li><strong>ratings</strong> — calificación bidireccional post-viaje.</li>
+  </ul>
+
+  <h3>4.2 Estados</h3>
+  <p><strong>capacity_offers:</strong> draft | published | reserved | expired | cancelled</p>
+  <p><strong>load_requests:</strong> draft | published | matched | in_transit | delivered | cancelled</p>
+  <p><strong>matches:</strong> proposed | accepted | in_progress | completed | disputed</p>
+
+  <h2>5. API REST (MVP digital — borrador)</h2>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <tr><th>Método</th><th>Ruta</th><th>Descripción</th></tr>
+    <tr><td>GET</td><td>/health</td><td>Healthcheck</td></tr>
+    <tr><td>POST</td><td>/api/auth/register</td><td>Alta carrier / shipper</td></tr>
+    <tr><td>POST</td><td>/api/capacity-offers</td><td>Publicar capacidad ociosa</td></tr>
+    <tr><td>GET</td><td>/api/capacity-offers</td><td>Listar (filtro región, destino)</td></tr>
+    <tr><td>POST</td><td>/api/load-requests</td><td>Publicar necesidad de carga</td></tr>
+    <tr><td>GET</td><td>/api/load-requests</td><td>Listar abiertas</td></tr>
+    <tr><td>POST</td><td>/api/matches</td><td>Proponer / aceptar emparejamiento</td></tr>
+    <tr><td>PATCH</td><td>/api/matches/:id/status</td><td>Transición de estado</td></tr>
+    <tr><td>POST</td><td>/api/matches/:id/rating</td><td>Calificación post-viaje</td></tr>
+  </table>
+
+  <h2>6. Reglas de negocio MVP</h2>
+  <ul>
+    <li>Match inicial: coincidencia corredor origen-destino ± tolerancia km (configurable) + cubicación suficiente + tipo carga compatible.</li>
+    <li>Concierge: operador confirma match antes de notificar a ambas partes.</li>
+    <li>Comisión fase 1: take rate 12–15% sobre valor acordado del flete incidental.</li>
+    <li>Sin pricing dinámico en MVP; precio negociado o tabla simple por km/pallet.</li>
+  </ul>
+
+  <h2>7. Seguridad y cumplimiento</h2>
+  <ul>
+    <li>Variables sensibles en <code>.env</code>; nunca en repositorio.</li>
+    <li>RLS en Supabase por <code>user_id</code> y rol.</li>
+    <li>KYC documental antes de <code>published</code> en ofertas (fase piloto: revisión manual).</li>
+    <li>Logs sin PII innecesaria; retención acorde a Ley 19.628 (Chile).</li>
+    <li>Términos legales y alcance seguro de carga definidos antes de piloto pagado.</li>
+  </ul>
+
+  <h2>8. Estructura repositorio</h2>
+  <pre>
+uber-truck/
+  src/server.js, app.js
+  src/routes/
+  src/services/
+  src/lib/
+  supabase/migrations/
+  public/
+  docs/
+  </pre>
+
+  <h2>9. Fases técnicas</h2>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <tr><th>Fase</th><th>Entregable técnico</th></tr>
+    <tr><td>MVP 0 Concierge</td><td>WhatsApp + Airtable + 20 matches manuales</td></tr>
+    <tr><td>MVP 1 Digital</td><td>BD + API + formularios web + notificaciones WA</td></tr>
+    <tr><td>MVP 2 Confianza</td><td>KYC, ratings, microseguro integrado</td></tr>
+    <tr><td>Escala</td><td>Match automático, LTL, pricing dinámico, data product</td></tr>
+  </table>
+
+  <h2>10. Riesgos técnicos</h2>
+  <ul>
+    <li>Calidad de datos de ubicación (GPS manual vs automático).</li>
+    <li>Dependencia de concierge → cuello de botella operativo.</li>
+    <li>Integración seguros/KYC con proveedores locales aún no seleccionados.</li>
+  </ul>
+
+  <h2>11. Referencias</h2>
+  <ul>
+    <li>Informe_Evaluacion_Estrategica_Uber_Truck.docx</li>
+    <li>docs/Journey-Usuario-Uber-Truck.html</li>
+    <li>docs/Gantt-Uber-Truck.html</li>
+  </ul>
+</body>
+</html>

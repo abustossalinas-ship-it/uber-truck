@@ -1,0 +1,41 @@
+---
+description: Uber Truck — stack, carpetas y convenciones base
+alwaysApply: true
+---
+
+# Uber Truck
+
+Producto: **marketplace de transporte por camión** (publicar carga, ofertar viaje, seguimiento).
+
+## Stack (MVP propuesto)
+
+- **Node.js ≥ 20**, **CommonJS**, **Express 4**
+- Dependencias vía **npm**
+- Variables en `.env` (ver `.env.example`). **Nunca** commitear secretos.
+
+## Estructura objetivo
+
+| Ruta | Rol |
+|------|-----|
+| `src/server.js` | HTTP listen |
+| `src/app.js` | Express, middleware, rutas |
+| `src/routes/` | Endpoints |
+| `src/services/` | Integraciones |
+| `src/lib/` | Lógica pura |
+| `supabase/migrations/` | SQL versionado |
+| `public/` | Web estática / admin |
+| `docs/` | Kickoff, roadmap, memoria |
+
+## Convenciones
+
+- Cambios **mínimos** y acotados al pedido.
+- Mensajes al usuario final en **español**.
+- Git: commits **solo** si el usuario lo pide.
+
+## Comandos
+
+```bash
+npm install
+npm run dev
+npm start
+```

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Gantt — Uber Truck</title>
+</head>
+<body>
+  <h1>Plan Gantt — Uber Truck</h1>
+  <p><strong>Horizonte:</strong> jun 2026 – mar 2027 · alineado a Informe Evaluación Estratégica</p>
+  <p><strong>Prioridad ejecución:</strong> Máxima (validación B2B + piloto 20 emparejamientos)</p>
+
+  <h2>Resumen por fases</h2>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <tr><th>Fase</th><th>Nombre</th><th>Inicio</th><th>Fin</th><th>Duración</th></tr>
+    <tr><td>0</td><td>Descubrimiento y legal</td><td>2026-06-01</td><td>2026-06-28</td><td>4 sem</td></tr>
+    <tr><td>1</td><td>Concierge MVP (No-Code)</td><td>2026-06-15</td><td>2026-08-09</td><td>8 sem</td></tr>
+    <tr><td>2</td><td>MVP digital v1</td><td>2026-08-01</td><td>2026-10-25</td><td>12 sem</td></tr>
+    <tr><td>3</td><td>Piloto escalado + confianza</td><td>2026-10-01</td><td>2027-01-31</td><td>16 sem</td></tr>
+    <tr><td>4</td><td>Producto B2B (SaaS híbrido)</td><td>2027-02-01</td><td>2027-03-31</td><td>8 sem</td></tr>
+  </table>
+
+  <h2>Detalle de tareas (Gantt)</h2>
+  <p><em>Leyenda duración: semanas desde inicio fase 0 (2026-06-01). Responsable: E=Equipo, O=Operaciones/Concierge, L=Legal.</em></p>
+
+  <table border="1" cellpadding="5" cellspacing="0">
+    <tr>
+      <th>ID</th><th>Tarea</th><th>Resp.</th><th>Inicio</th><th>Fin</th><th>Dep.</th>
+      <th>Jun</th><th>Jul</th><th>Ago</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dic</th><th>Ene</th><th>Feb</th><th>Mar</th>
+    </tr>
+    <tr><td>0.1</td><td>Entrevistas 15 transportistas + 10 gerentes PYME (San Bernardo / nodo industrial)</td><td>O</td><td>01-jun</td><td>28-jun</td><td>—</td><td colspan="1">████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>0.2</td><td>Validación disposición precio / comisión 12–15%</td><td>O</td><td>15-jun</td><td>15-jul</td><td>0.1</td><td>██</td><td colspan="1">██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>0.3</td><td>Términos legales mínimos + alcance seguro piloto</td><td>L</td><td>01-jun</td><td>30-jun</td><td>—</td><td colspan="1">████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>1.1</td><td>Setup WhatsApp Business + Airtable (oferta / demanda / match)</td><td>O</td><td>15-jun</td><td>22-jun</td><td>0.3</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>1.2</td><td>Protocolo concierge: flujo match manual + plantillas mensajes</td><td>O</td><td>22-jun</td><td>06-jul</td><td>1.1</td><td>█</td><td colspan="1">█</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>1.3</td><td><strong>Piloto 20 emparejamientos</strong> reales</td><td>O</td><td>06-jul</td><td>09-ago</td><td>1.2</td><td></td><td colspan="2">████████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>1.4</td><td>Informe aprendizajes piloto (métricas journey)</td><td>E</td><td>02-ago</td><td>16-ago</td><td>1.3</td><td></td><td></td><td colspan="1">██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>2.1</td><td>Esquema BD Supabase (migraciones v001–v003)</td><td>E</td><td>01-ago</td><td>22-ago</td><td>1.4</td><td></td><td></td><td colspan="1">███</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>2.2</td><td>API Express: capacity-offers + load-requests</td><td>E</td><td>15-ago</td><td>19-sep</td><td>2.1</td><td></td><td></td><td>██</td><td colspan="1">███</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>2.3</td><td>Web v1: formularios carrier / shipper</td><td>E</td><td>01-sep</td><td>03-oct</td><td>2.2</td><td></td><td></td><td></td><td colspan="1">████</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>2.4</td><td>Panel operador + estados viaje</td><td>E</td><td>15-sep</td><td>25-oct</td><td>2.3</td><td></td><td></td><td></td><td>██</td><td colspan="1">██</td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>2.5</td><td>Deploy Railway + /health producción</td><td>E</td><td>18-oct</td><td>25-oct</td><td>2.4</td><td></td><td></td><td></td><td></td><td>█</td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>3.1</td><td>KYC manual + checklist vehículo</td><td>O/E</td><td>01-oct</td><td>15-nov</td><td>2.5</td><td></td><td></td><td></td><td></td><td>██</td><td colspan="1">█</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>3.2</td><td>Ratings bidireccionales post-viaje</td><td>E</td><td>15-oct</td><td>29-nov</td><td>2.5</td><td></td><td></td><td></td><td></td><td>██</td><td colspan="1">█</td><td></td><td></td><td></td><td></td></tr>
+    <tr><td>3.3</td><td>Alianza InsurTech microseguro (POC)</td><td>L/O</td><td>01-nov</td><td>31-dic</td><td>0.3</td><td></td><td></td><td></td><td></td><td></td><td colspan="2">████</td><td></td><td></td><td></td></tr>
+    <tr><td>3.4</td><td>Piloto 100 viajes digitales</td><td>O</td><td>01-nov</td><td>31-ene</td><td>3.1,3.2</td><td></td><td></td><td></td><td></td><td></td><td>██</td><td colspan="2">████</td><td></td><td></td></tr>
+    <tr><td>4.1</td><td>Match semi-automático por corredor</td><td>E</td><td>01-feb</td><td>28-feb</td><td>3.4</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td colspan="1">██</td><td></td><td></td></tr>
+    <tr><td>4.2</td><td>Dashboard embarcador frecuente (SaaS fase 2)</td><td>E</td><td>01-feb</td><td>31-mar</td><td>4.1</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td colspan="2">████</td></tr>
+    <tr><td>4.3</td><td>Informe red capacidad abierta (data strategy)</td><td>E</td><td>15-mar</td><td>31-mar</td><td>4.2</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>█</td></tr>
+  </table>
+
+  <h2>Hitos (milestones)</h2>
+  <ul>
+    <li><strong>M1 — 28-jun-2026:</strong> Descubrimiento completado (25 entrevistas + legal borrador).</li>
+    <li><strong>M2 — 09-ago-2026:</strong> 20 emparejamientos concierge ejecutados.</li>
+    <li><strong>M3 — 25-oct-2026:</strong> MVP digital en producción.</li>
+    <li><strong>M4 — 31-ene-2027:</strong> 100 viajes digitales + KYC/ratings operativos.</li>
+    <li><strong>M5 — 31-mar-2027:</strong> Match semi-auto + dashboard SaaS piloto.</li>
+  </ul>
+
+  <h2>Métricas de control</h2>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <tr><th>Métrica</th><th>Meta M2</th><th>Meta M4</th></tr>
+    <tr><td>Emparejamientos exitosos</td><td>20</td><td>100</td></tr>
+    <tr><td>Tiempo medio match</td><td>&lt; 4 h</td><td>&lt; 1 h (digital)</td></tr>
+    <tr><td>Take rate aplicado</td><td>12–15%</td><td>12–15%</td></tr>
+    <tr><td>NPS transportista</td><td>≥ 7</td><td>≥ 8</td></tr>
+  </table>
+</body>
+</html>

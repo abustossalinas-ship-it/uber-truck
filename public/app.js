@@ -293,8 +293,6 @@ fetch('/health')
   })
   .catch(() => {});
 
-$('match-load')?.addEventListener('change', (e) => loadSuggestionsFor(e.target.value));
-
 function showMatchReady() {
   const loadId = $('match-load').value;
   const offerId = $('match-offer').value;

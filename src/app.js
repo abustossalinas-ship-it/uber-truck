@@ -13,13 +13,18 @@ const repo = require('./lib/repository');
 app.get('/health', async (_req, res) => {
   const supabaseReady = supabaseService.isConfigured();
   let supabaseOk = false;
+  let supabaseError = null;
+  const supabaseUrl = process.env.SUPABASE_URL || '';
+  const projectRef = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] || null;
   if (supabaseReady) {
     try {
       const sb = supabaseService.getClient();
       const { error } = await sb.from('load_requests').select('id').limit(1);
       supabaseOk = !error;
-    } catch {
+      if (error) supabaseError = error.message;
+    } catch (e) {
       supabaseOk = false;
+      supabaseError = e.message;
     }
   }
   res.json({
@@ -27,9 +32,11 @@ app.get('/health', async (_req, res) => {
     service: 'uber-truck',
     storage: repo.backend(),
     supabase: {
-      project_ref: 'ljinhegtywixtbzjgjfn',
+      project_ref: projectRef || 'ljinhegtywixtbzjgjfn',
+      url_set: Boolean(supabaseUrl),
       configured: supabaseReady,
       connected: supabaseOk,
+      ...(supabaseError && !supabaseOk ? { error: supabaseError } : {}),
     },
     maps: { configured: googleMaps.isConfigured() },
   });

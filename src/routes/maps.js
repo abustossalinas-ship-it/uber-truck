@@ -3,6 +3,7 @@
 const express = require('express');
 const maps = require('../services/google-maps');
 const { LOAD_PRESETS, OFFER_PRESETS } = require('../lib/cubicacion-presets');
+const { densityOptions, STANDARD_PALLET_M3 } = require('../lib/cubicacion-estimate');
 
 const router = express.Router();
 
@@ -11,7 +12,15 @@ router.get('/status', (_req, res) => {
 });
 
 router.get('/cubicacion-presets', (_req, res) => {
-  res.json({ ok: true, load: LOAD_PRESETS, offer: OFFER_PRESETS });
+  res.json({
+    ok: true,
+    load: LOAD_PRESETS,
+    offer: OFFER_PRESETS,
+    density_options: densityOptions(),
+    weight_formula:
+      'Peso sugerido = max(pallets × kg/pallet, m³ × kg/m³) según densidad. El volumen no implica el mismo peso (ej. papas vs pañales).',
+    standard_pallet_m3: STANDARD_PALLET_M3,
+  });
 });
 
 router.get('/autocomplete', async (req, res) => {

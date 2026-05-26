@@ -30,6 +30,12 @@ function scoreMatch(load, offer) {
     score += 10;
     reasons.push('Oferta con espacio');
   }
+  const needW = Number(load.weight_kg) || 0;
+  const maxW = Number(offer.max_weight_kg) || 0;
+  if (needW > 0 && maxW > 0 && maxW >= needW) {
+    score += 10;
+    reasons.push('Peso dentro de capacidad');
+  }
   if (load.origin_city && offer.origin_city &&
     load.origin_city.toLowerCase() === offer.origin_city.toLowerCase()) {
     score += 5;

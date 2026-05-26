@@ -4,6 +4,7 @@ const express = require('express');
 const repo = require('../lib/repository');
 const { requiredString, optionalNumber, parseBody } = require('../lib/validate');
 const { addressPayload } = require('../lib/geo-fields');
+const { requireMapsAddresses } = require('../lib/geo-validate');
 
 const router = express.Router();
 
@@ -42,6 +43,8 @@ router.post('/', async (req, res) => {
     () => optionalNumber(body.free_volume_m3, 'free_volume_m3'),
     () => optionalNumber(body.max_weight_kg, 'max_weight_kg'),
   ]);
+  const geoErrors = requireMapsAddresses(body);
+  if (geoErrors.length) return res.status(400).json({ ok: false, errors: geoErrors });
   if (errors.length) return res.status(400).json({ ok: false, errors });
 
   try {

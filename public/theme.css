@@ -407,6 +407,27 @@ button[type="submit"]:disabled {
   color: var(--accent-hover);
 }
 
+.maps-gated-section.maps-gated-locked {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.maps-gate-hint {
+  margin: 0.5rem 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: #fff8f0;
+  border-left: 3px solid var(--accent);
+}
+
+.maps-weight-hint {
+  font-size: 0.85rem;
+  margin: 0.25rem 0 0.75rem;
+}
+
+.maps-geo-readonly:read-only {
+  background: #f3f4f6;
+}
+
 .address-wrap {
   position: relative;
 }

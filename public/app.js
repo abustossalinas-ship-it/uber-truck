@@ -820,7 +820,13 @@ document.body.addEventListener('click', (e) => {
 
 $('form-load').addEventListener('submit', async (e) => {
   e.preventDefault();
+  const mapsErr = typeof MapsUI !== 'undefined' ? MapsUI.assertFormReady(e.target) : null;
+  if (mapsErr) {
+    alert(mapsErr);
+    return;
+  }
   const body = cleanFormBody(new FormData(e.target));
+  delete body.cargo_density;
   const res = await API.postLoad(body);
   const json = await res.json();
   if (!res.ok) {
@@ -834,6 +840,11 @@ $('form-load').addEventListener('submit', async (e) => {
 
 $('form-offer').addEventListener('submit', async (e) => {
   e.preventDefault();
+  const mapsErr = typeof MapsUI !== 'undefined' ? MapsUI.assertFormReady(e.target) : null;
+  if (mapsErr) {
+    alert(mapsErr);
+    return;
+  }
   const body = cleanFormBody(new FormData(e.target));
   if (!body.carrier_name || !body.origin_city || !body.destination_city) {
     alert('Completa transportista, ciudad de origen y ciudad de destino.');

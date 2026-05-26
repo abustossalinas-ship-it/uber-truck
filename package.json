@@ -7,7 +7,6 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "export:kickoff-docx": "node scripts/export-kickoff-docx.cjs",
     "export:memoria-docx": "node scripts/export-memoria-docx.cjs",
     "export:all-docs": "node scripts/export-all-docs-docx.cjs"
   },

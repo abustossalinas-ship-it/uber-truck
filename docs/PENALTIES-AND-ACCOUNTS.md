@@ -48,4 +48,4 @@ Campos en `users` (migración `008`):
 - `GET /api/account/summary` — JWT, resumen multas y banco.
 - `PATCH /api/account/bank` — JWT, guardar datos bancarios.
 
-Ver `docs/ROADMAP.md` sección **Fase 2.10 — Multas y cobros**.
+Ver memoria técnica HTML — fase 2.10 multas/cobros y tabla de próximos pasos.

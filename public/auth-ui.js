@@ -31,7 +31,9 @@ const Auth = {
     if (!btn) return;
     if (this.user) {
       label.hidden = false;
-      label.textContent = `${this.user.name || this.user.email} (${this.user.role})`;
+      const rol =
+        typeof roleLabel === 'function' ? roleLabel(this.user.role) : this.user.role;
+      label.textContent = `${this.user.name || this.user.email} · ${rol}`;
       btn.textContent = 'Salir';
       if (btnReg) btnReg.hidden = true;
     } else {

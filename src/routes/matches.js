@@ -180,15 +180,14 @@ router.post('/:id/mutual-cancel', optionalAuth, async (req, res) => {
         : 'Transportista confirmó. Falta confirmación del embarcador.';
 
     const target = otherRole(role);
+    const whoConfirmed = role === 'shipper' ? 'Embarcador' : 'Transportista';
+    const whoMustAct = target === 'shipper' ? 'embarcador' : 'transportista';
     await comms.addNotification({
       match_id: match.id,
       for_role: target,
       type: 'mutual_cancel',
-      title: 'Acuerdo mutuo — confirma tu parte',
-      body:
-        role === 'shipper'
-          ? 'El embarcador confirmó cancelar por acuerdo mutuo. Abre «Cancelar emparejamiento» para confirmar.'
-          : 'El transportista confirmó cancelar por acuerdo mutuo. Abre «Cancelar emparejamiento» para confirmar.',
+      title: `Acuerdo mutuo — falta el ${whoMustAct}`,
+      body: `El ${whoConfirmed.toLowerCase()} confirmó cancelar sin multa. Pulsa «Confirmar acuerdo mutuo» en la notificación o en el emparejamiento.`,
     });
 
     res.json({ ok: true, data: updated, mutual_cancel: status, message });

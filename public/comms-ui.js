@@ -42,14 +42,21 @@ const Comms = {
       rows.length === 0
         ? '<p class="muted">Sin notificaciones.</p>'
         : rows
-            .map(
-              (n) => `
+            .map((n) => {
+              const mutual = n.type === 'mutual_cancel';
+              const actions = mutual
+                ? `<div class="notif-actions">
+          <button type="button" class="tab tab-sm notif-cta" data-open-cancel="${n.match_id}">Confirmar acuerdo mutuo</button>
+          <button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en tablero</button>
+        </div>`
+                : `<button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en tablero</button>`;
+              return `
         <article class="notif-item ${n.read_at ? '' : 'unread'}" data-id="${n.id}" data-match="${n.match_id}">
           <strong>${n.title}</strong>
           <p class="muted">${n.body}</p>
-          <button type="button" class="link-btn" data-open-match="${n.match_id}">Ver emparejamiento</button>
-        </article>`
-            )
+          ${actions}
+        </article>`;
+            })
             .join('');
     panel.hidden = false;
     await this.refreshBell();
@@ -110,7 +117,7 @@ const Comms = {
             .map(
               (m) => `
       <div class="chat-bubble ${m.sender_role === this.actorRole() ? 'mine' : 'theirs'}">
-        <span class="chat-role">${m.sender_role === 'shipper' ? 'Embarcador' : 'Transportista'}</span>
+        <span class="chat-role">${typeof roleLabel === 'function' ? roleLabel(m.sender_role) : m.sender_role}</span>
         <p>${m.body}</p>
       </div>`
             )
@@ -145,17 +152,32 @@ document.getElementById('notif-close')?.addEventListener('click', () => {
   document.getElementById('notif-panel').hidden = true;
 });
 document.getElementById('notif-list')?.addEventListener('click', async (e) => {
-  const open = e.target.closest('[data-open-match]');
-  if (open) {
-    const id = open.dataset.openMatch;
-    await Comms.markRead(e.target.closest('.notif-item')?.dataset.id);
+  const cancelBtn = e.target.closest('[data-open-cancel]');
+  if (cancelBtn) {
+    const id = cancelBtn.dataset.openCancel;
+    const item = e.target.closest('.notif-item');
+    if (item?.dataset.id) await Comms.markRead(item.dataset.id);
     document.getElementById('notif-panel').hidden = true;
     if (typeof showTab === 'function') showTab('board');
-    Comms.openChat(id);
+    if (typeof openCancelModalForMatch === 'function') {
+      await openCancelModalForMatch(id);
+    } else {
+      alert('Recarga la página (Ctrl+F5) e intenta de nuevo.');
+    }
+    return;
+  }
+  const scrollBtn = e.target.closest('[data-scroll-match]');
+  if (scrollBtn) {
+    const id = scrollBtn.dataset.scrollMatch;
+    const item = e.target.closest('.notif-item');
+    if (item?.dataset.id) await Comms.markRead(item.dataset.id);
+    document.getElementById('notif-panel').hidden = true;
+    if (typeof showTab === 'function') showTab('board');
+    if (typeof scrollToMatchCard === 'function') scrollToMatchCard(id);
     return;
   }
   const item = e.target.closest('.notif-item');
-  if (item?.dataset.id && !item.classList.contains('read')) {
+  if (item?.dataset.id && item.classList.contains('unread')) {
     await Comms.markRead(item.dataset.id);
     item.classList.remove('unread');
   }

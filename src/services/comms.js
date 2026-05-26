@@ -78,7 +78,7 @@ async function listNotifications(forRole) {
     const { match_notifications } = readJsonComms();
     return match_notifications
       .filter((n) => n.for_role === forRole)
-      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+      .sort((a, b) => new Date(a.created_at) - new Date(b.created_at))
       .map(rowToApi);
   }
   const sb = supabase.getClient();
@@ -86,7 +86,7 @@ async function listNotifications(forRole) {
     .from('match_notifications')
     .select('*')
     .eq('for_role', forRole)
-    .order('created_at', { ascending: false })
+    .order('created_at', { ascending: true })
     .limit(50);
   if (error) throw error;
   return (data || []).map(rowToApi);

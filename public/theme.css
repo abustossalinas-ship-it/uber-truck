@@ -573,6 +573,54 @@ select.offer-picked {
   margin-bottom: 0.35rem;
 }
 
+.notif-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-top: 0.5rem;
+}
+
+.notif-cta {
+  background: var(--accent);
+  color: #fff;
+  border: none;
+}
+
+.match-mutual-banner {
+  font-size: 0.88rem;
+  padding: 0.5rem 0.65rem;
+  border-radius: 8px;
+  margin: 0.35rem 0;
+}
+
+.match-mutual-banner.action-needed {
+  background: var(--accent-soft);
+  border: 1px solid var(--accent);
+}
+
+.match-mutual-banner.waiting {
+  background: var(--brand-gray-100);
+  color: var(--text-muted);
+}
+
+.match-mutual-banner.ready {
+  background: #e8f5e9;
+  border: 1px solid #81c784;
+}
+
+.match-item.match-highlight {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.mutual-cta-highlight {
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-color: var(--accent-hover) !important;
+  font-weight: 700;
+}
+
 .chat-drawer {
   position: fixed;
   right: 0;

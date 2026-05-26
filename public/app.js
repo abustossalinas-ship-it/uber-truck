@@ -155,6 +155,7 @@ async function refreshBoard() {
     if (matchBtn) matchBtn.disabled = false;
   }
   loadSuggestionsFor(loadSel.value);
+  showMatchReady();
 }
 
 async function loadSuggestionsFor(loadId) {
@@ -294,11 +295,43 @@ fetch('/health')
 
 $('match-load')?.addEventListener('change', (e) => loadSuggestionsFor(e.target.value));
 
+function showMatchReady() {
+  const loadId = $('match-load').value;
+  const offerId = $('match-offer').value;
+  const box = $('match-selected');
+  const btn = $('btn-create-match');
+  if (!box || !loadId || !offerId) {
+    if (box) box.hidden = true;
+    return;
+  }
+  const loadOpt = $('match-load').selectedOptions[0]?.text || 'Carga';
+  const offerOpt = $('match-offer').selectedOptions[0]?.text || 'Oferta';
+  box.hidden = false;
+  box.innerHTML = `Listo: <strong>${offerOpt}</strong> para <strong>${loadOpt}</strong>. Revisa el precio y pulsa el botón naranja abajo.`;
+  if (btn) {
+    btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+}
+
+$('match-load')?.addEventListener('change', (e) => {
+  loadSuggestionsFor(e.target.value);
+  showMatchReady();
+});
+
+$('match-offer')?.addEventListener('change', () => showMatchReady());
+
 document.getElementById('match-suggestions')?.addEventListener('click', (e) => {
   const btn = e.target.closest('.use-suggestion');
   if (!btn) return;
-  $('match-offer').value = btn.dataset.offerId;
-  $('match-offer').disabled = false;
+  const offerSel = $('match-offer');
+  const offerId = btn.dataset.offerId;
+  if (!offerSel.querySelector(`option[value="${offerId}"]`)) {
+    const label = btn.closest('.suggestion-item')?.querySelector('strong')?.textContent || 'Oferta';
+    offerSel.innerHTML += `<option value="${offerId}">${label} (sugerida)</option>`;
+  }
+  offerSel.value = offerId;
+  offerSel.disabled = false;
+  showMatchReady();
 });
 
 document.getElementById('btn-seed-demo')?.addEventListener('click', async () => {

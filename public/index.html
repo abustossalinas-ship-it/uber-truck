@@ -257,19 +257,21 @@
       <div class="card" style="margin-bottom:1.25rem">
         <h2>Proponer emparejamiento</h2>
         <p id="board-hint" class="muted" hidden></p>
-        <form id="form-match" class="grid grid-2" novalidate>
-          <div>
-            <label>Carga</label>
-            <select id="match-load"></select>
-            <div id="match-suggestions" class="suggestions-box muted" hidden></div>
-            <label>Oferta de capacidad</label>
-            <select id="match-offer"></select>
-          </div>
-          <div>
-            <label>Precio acordado (CLP, opcional)</label>
-            <input id="match-price" type="number" min="0" placeholder="150000" />
-            <button type="submit" style="margin-top:0.5rem">Crear match</button>
-          </div>
+        <form id="form-match" class="match-form" novalidate>
+          <p class="step-label">Paso 1 — Elige la carga</p>
+          <label>Carga</label>
+          <select id="match-load"></select>
+          <div id="match-suggestions" class="suggestions-box muted" hidden></div>
+
+          <p class="step-label">Paso 2 — Elige la oferta (o usa una sugerencia arriba)</p>
+          <label>Oferta de capacidad</label>
+          <select id="match-offer"></select>
+          <p id="match-selected" class="match-selected muted" hidden></p>
+
+          <p class="step-label">Paso 3 — Confirmar y emparejar</p>
+          <label>Precio acordado (CLP, opcional)</label>
+          <input id="match-price" type="number" min="0" placeholder="450000" />
+          <button type="submit" id="btn-create-match" class="btn-match-cta">Crear match — emparejar ahora</button>
         </form>
       </div>
       <div class="grid grid-2">

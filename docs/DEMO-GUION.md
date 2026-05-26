@@ -2,7 +2,7 @@
 
 **URL para testers:** https://uber-truck-production.up.railway.app
 
-**Guía invitados (sin Supabase/Railway):** [Probar-Uber-Truck.html](./Probar-Uber-Truck.html)
+**Guía invitados:** [Probar-Uber-Truck.html](./Probar-Uber-Truck.html) · [Journey](./Journey-Usuario-Uber-Truck.html)
 
 ## Antes de mostrar (solo dueño del proyecto)
 

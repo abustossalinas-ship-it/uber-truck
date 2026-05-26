@@ -25,7 +25,7 @@
   <img src="/brand/logo.png" width="72" height="72" alt="Uber Truck" />
   <div class="doc-title-wrap">
     <h1>Cómo probar Uber Truck</h1>
-    <p class="meta">Para testers · mayo 2026 · Sin instalar Supabase ni Railway</p>
+    <p class="meta">Para testers · mayo 2026 · Sin instalar programas ni acceder a la base de datos</p>
   </div>
 </div>
 
@@ -35,10 +35,12 @@
 <ul>
   <li>Navegador en el celular o PC (Chrome, Safari, Edge).</li>
   <li>Conexión a internet.</li>
-  <li><strong>No</strong> necesitas instalar programas, ni tener acceso a Supabase, Railway ni al código.</li>
+  <li><strong>No</strong> necesitas instalar programas, ni tener acceso a la base de datos, al servidor ni al código del proyecto.</li>
 </ul>
 
 <p><strong>Link de la app:</strong> <a href="https://uber-truck-production.up.railway.app">https://uber-truck-production.up.railway.app</a></p>
+
+<p><strong>Recorrido del usuario (journey):</strong> <a href="Journey-Usuario-Uber-Truck.html">Journey-Usuario-Uber-Truck.html</a> — paso a paso de embarcador y transportista en la app (solo lectura, para entender el flujo antes de probar).</p>
 
 <h2>2. Crear tu cuenta</h2>
 <ol>
@@ -73,15 +75,19 @@
 <h2>5. Si algo falla</h2>
 <table>
   <tr><th>Error</th><th>Qué hacer</th></tr>
-  <tr><td>«Registro requiere Supabase»</td><td>El servidor no está listo; avisa al dueño del proyecto (no es culpa tuya).</td></tr>
+  <tr><td>«Registro no disponible» o «base de datos no configurada»</td><td>El servidor aún no está listo; avisa al dueño del proyecto (no es culpa tuya).</td></tr>
   <tr><td>«Email ya registrado»</td><td>Usa <strong>Ingresar</strong> con esa cuenta o otro email.</td></tr>
   <tr><td>No ves notificaciones</td><td>Debes estar con <strong>Ingresar</strong>, no solo modo demo sin login.</td></tr>
 </table>
 
 <h2>6. Para el dueño del proyecto (solo Ariel)</h2>
-<p class="meta">Los testers no hacen esto. En Railway deben existir <code>SUPABASE_URL</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code>, <code>JWT_SECRET</code> y la migración <code>003_auth_password.sql</code> en Supabase.</p>
+<p class="meta">Los testers no hacen esto. El servidor (Railway) debe tener la base de datos conectada, variables de entorno y la migración <code>003_auth_password.sql</code> aplicada.</p>
 
-<p class="meta"><a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica</a> · <a href="DEMO-GUION.md">Guion demo 3 min</a></p>
+<p class="meta">
+  <a href="Journey-Usuario-Uber-Truck.html">Journey del usuario</a> ·
+  <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica</a> ·
+  <a href="DEMO-GUION.md">Guion demo 3 min</a>
+</p>
 
 </body>
 </html>

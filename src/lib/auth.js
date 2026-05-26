@@ -35,7 +35,7 @@ function authMiddleware(req, res, next) {
 
 async function registerUser({ email, password, full_name, role, company_name }) {
   if (!supabase.isConfigured()) {
-    const err = new Error('Registro requiere Supabase configurado');
+    const err = new Error('Registro no disponible: la base de datos del servidor no está configurada');
     err.status = 503;
     throw err;
   }

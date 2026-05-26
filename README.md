@@ -2,19 +2,20 @@
 
 > **Tesis:** monetizar cubicación disponible en rutas activas (backhaul), no solo “Uber de camiones”.
 
-## Documentación (Word)
+## Documentación
 
-Carpeta: `docs/`
+**Índice maestro:** [docs/00-INDICE-DOCUMENTACION.md](docs/00-INDICE-DOCUMENTACION.md)
 
-| Documento | Archivo |
-|-----------|---------|
-| **Índice** | `Indice-Documentacion-Uber-Truck.docx` |
-| **Informe estratégico (origen)** | `Informe_Evaluacion_Estrategica_Uber_Truck.docx` |
-| **Journey usuario** | `Journey-Usuario-Uber-Truck.docx` |
-| **Memoria técnica** | `Memoria-tecnica-Uber-Truck.docx` |
-| **Gantt** | `Gantt-Uber-Truck.docx` |
-| **Modelo de negocio** | `Modelo-Negocio-Uber-Truck.docx` |
-| **Kickoff** | `Kickoff-Uber-Truck.docx` |
+| Documento | Markdown / HTML | Notas |
+|-----------|-----------------|--------|
+| **Memoria técnica + Gantt + avance** | [docs/01-MEMORIA-TECNICA.md](docs/01-MEMORIA-TECNICA.md) | Documento central (estilo fintech) |
+| **Canvas estado avance** | `canvases/estado-avance.canvas.tsx` | Abrir en Cursor → panel Canvas |
+| **SQL Supabase (004–008)** | [docs/SQL-SUPABASE.md](docs/SQL-SUPABASE.md) | Pegar en SQL Editor |
+| Índice HTML | `docs/Indice-Documentacion-Uber-Truck.html` | |
+| Gantt detalle | `docs/Gantt-Uber-Truck.html` | También integrado en memoria §12 |
+| Journey / modelo / kickoff | `docs/*.html` | Export Word abajo |
+
+### Word (.docx)
 
 ### Regenerar todos los .docx
 

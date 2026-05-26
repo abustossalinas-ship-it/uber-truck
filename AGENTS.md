@@ -14,6 +14,8 @@ Proyecto **Uber Truck**: marketplace de transporte por camión (carga ↔ transp
 
 | Tarea | Archivos (cuando existan) |
 |-------|---------------------------|
+| **Índice / memoria / Gantt / avance** | `docs/00-INDICE-DOCUMENTACION.md`, `docs/01-MEMORIA-TECNICA.md`, `canvases/estado-avance.canvas.tsx` |
+| **SQL Supabase** | `docs/SQL-SUPABASE.md`, `supabase/migrations/RUN_PENDING.sql` |
 | Plan / prioridades | `docs/KICKOFF.md`, `docs/ROADMAP.md` |
 | API HTTP | `src/app.js`, `src/routes/` |
 | Modelo de datos | `supabase/migrations/` |

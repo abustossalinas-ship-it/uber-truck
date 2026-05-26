@@ -7,8 +7,13 @@
 <body>
   <h1>Memoria técnica — Uber Truck</h1>
   <p><strong>Producto:</strong> Plataforma de optimización dinámica de capacidad logística ociosa (backhaul)</p>
-  <p><strong>Versión documento:</strong> 1.0 · mayo 2026</p>
-  <p><strong>Estado implementación:</strong> Kickoff + skeleton Express; MVP digital en diseño</p>
+  <p><strong>Versión documento:</strong> 2.0 · mayo 2026</p>
+  <p><strong>Versión software:</strong> 0.0.19</p>
+  <p><strong>Estado implementación:</strong> MVP digital en producción (Railway) — adelanto vs Gantt oct 2026</p>
+  <p><strong>Producción:</strong> <a href="https://uber-truck-production.up.railway.app">uber-truck-production.up.railway.app</a></p>
+  <p><strong>Markdown vivo:</strong> <code>docs/01-MEMORIA-TECNICA.md</code> · <strong>Índice:</strong> <code>docs/00-INDICE-DOCUMENTACION.md</code></p>
+  <p><strong>Canvas (Cursor):</strong> <code>canvases/estado-avance.canvas.tsx</code></p>
+  <p><strong>SQL Supabase:</strong> <code>docs/SQL-SUPABASE.md</code> · <code>supabase/migrations/RUN_PENDING.sql</code></p>
 
   <h2>1. Resumen ejecutivo técnico</h2>
   <p>Uber Truck conecta <strong>oferta de cubicación disponible</strong> (camionero en ruta) con <strong>demanda incidental de carga</strong> (PYME). El MVP valida adopción sin sobreingeniería: primero <strong>concierge</strong> (WhatsApp + Airtable), luego producto digital (Node.js, Supabase, web).</p>
@@ -111,11 +116,60 @@ uber-truck/
     <li>Integración seguros/KYC con proveedores locales aún no seleccionados.</li>
   </ul>
 
-  <h2>11. Referencias</h2>
+  <h2>11. Referencias y documentación</h2>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <tr><th>Documento</th><th>Ruta</th></tr>
+    <tr><td>Índice maestro</td><td>docs/00-INDICE-DOCUMENTACION.md</td></tr>
+    <tr><td>Memoria técnica (MD)</td><td>docs/01-MEMORIA-TECNICA.md</td></tr>
+    <tr><td>SQL completo</td><td>docs/SQL-SUPABASE.md</td></tr>
+    <tr><td>Gantt detallado (HTML)</td><td>docs/Gantt-Uber-Truck.html</td></tr>
+    <tr><td>Canvas estado avance</td><td>canvases/estado-avance.canvas.tsx</td></tr>
+    <tr><td>Roadmap</td><td>docs/ROADMAP.md</td></tr>
+    <tr><td>Política cancelación</td><td>docs/MATCH-CANCEL-POLICY.md</td></tr>
+    <tr><td>Multas y cuenta bancaria</td><td>docs/PENALTIES-AND-ACCOUNTS.md</td></tr>
+  </table>
+
+  <h2>12. Cronograma Gantt y estado de avance (integrado)</h2>
+  <p>El Gantt planificado (jun 2026 – mar 2027) se mantiene en <a href="Gantt-Uber-Truck.html">Gantt-Uber-Truck.html</a> para export Word. Esta sección resume el <strong>avance real</strong> a mayo 2026.</p>
+
+  <h3>12.1 Hitos</h3>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <tr><th>Hito</th><th>Fecha plan</th><th>Estado real</th></tr>
+    <tr><td>M1 Descubrimiento + legal</td><td>28-jun-2026</td><td>En curso</td></tr>
+    <tr><td>M2 20 emparejamientos concierge</td><td>09-ago-2026</td><td>Pendiente</td></tr>
+    <tr><td>M3 MVP digital producción</td><td>25-oct-2026</td><td><strong>Hecho (adelantado)</strong></td></tr>
+    <tr><td>M4 100 viajes digitales</td><td>31-ene-2027</td><td>Pendiente</td></tr>
+    <tr><td>M5 Match semi-auto + SaaS</td><td>31-mar-2027</td><td>Pendiente</td></tr>
+  </table>
+
+  <h3>12.2 Fase 2 digital — tareas vs plan</h3>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <tr><th>ID</th><th>Tarea</th><th>Plan Gantt</th><th>Estado</th></tr>
+    <tr><td>2.1</td><td>Esquema BD Supabase</td><td>ago 2026</td><td>Hecho (001–008)</td></tr>
+    <tr><td>2.2</td><td>API Express</td><td>ago–sep 2026</td><td>Hecho</td></tr>
+    <tr><td>2.3</td><td>Web embarcador / transportista</td><td>sep–oct 2026</td><td>Hecho v0.0.19</td></tr>
+    <tr><td>2.4</td><td>Panel / estados viaje</td><td>sep–oct 2026</td><td>Hecho</td></tr>
+    <tr><td>2.5</td><td>Deploy Railway</td><td>oct 2026</td><td>Hecho</td></tr>
+    <tr><td>—</td><td>Chat, acuerdo mutuo, notificaciones, multas UI</td><td>extra MVP</td><td>Hecho</td></tr>
+    <tr><td>2.10</td><td>Cuenta bancaria + cobro</td><td>roadmap</td><td>UI/API sin pasarela</td></tr>
+  </table>
+
+  <h3>12.3 Avance estimado</h3>
   <ul>
-    <li>Informe_Evaluacion_Estrategica_Uber_Truck.docx</li>
-    <li>docs/Journey-Usuario-Uber-Truck.html</li>
-    <li>docs/Gantt-Uber-Truck.html</li>
+    <li>Fase 2 MVP digital núcleo: ~75%</li>
+    <li>Fase 2.10 multas/cobros: ~25%</li>
+    <li>Proyecto total (hasta M5): ~35%</li>
   </ul>
+  <p>Visualización interactiva: abrir canvas <code>estado-avance.canvas.tsx</code> en Cursor.</p>
+
+  <h2>13. API ampliada (v0.0.19)</h2>
+  <table border="1" cellpadding="6" cellspacing="0">
+    <tr><th>Método</th><th>Ruta</th><th>Descripción</th></tr>
+    <tr><td>POST</td><td>/api/matches/:id/mutual-cancel</td><td>Confirmar acuerdo mutuo</td></tr>
+    <tr><td>GET</td><td>/api/matches/cancel-options</td><td>Motivos y multas por rol</td></tr>
+    <tr><td>GET/POST</td><td>/api/comms/…</td><td>Chat y notificaciones</td></tr>
+    <tr><td>GET</td><td>/api/account/summary</td><td>Multas pendientes, plazos</td></tr>
+    <tr><td>PATCH</td><td>/api/account/bank</td><td>Cuenta bancaria</td></tr>
+  </table>
 </body>
 </html>

@@ -3,41 +3,58 @@
 <head>
   <meta charset="utf-8" />
   <title>Índice documentación — Uber Truck</title>
+  <style>
+    body { font-family: Segoe UI, sans-serif; max-width: 900px; margin: 2rem auto; line-height: 1.5; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background: #f3f4f6; }
+    a { color: #d95418; }
+    .central { background: #fff3e0; }
+  </style>
 </head>
 <body>
-  <h1>Índice de documentación — Uber Truck</h1>
-  <p><strong>Proyecto:</strong> Optimización dinámica de capacidad logística ociosa</p>
-  <p><strong>Actualizado:</strong> mayo 2026</p>
+  <h1>Índice maestro — Uber Truck</h1>
+  <p><strong>Producto:</strong> Optimización dinámica de capacidad logística ociosa</p>
+  <p><strong>Actualizado:</strong> mayo 2026 · <strong>App:</strong> v0.0.19</p>
+  <p><strong>Producción:</strong> <a href="https://uber-truck-production.up.railway.app">uber-truck-production.up.railway.app</a></p>
 
-  <h2>Documentos estratégicos (Word)</h2>
-  <table border="1" cellpadding="6" cellspacing="0">
-    <tr><th>Documento</th><th>Archivo .docx</th><th>Descripción</th></tr>
-    <tr><td>Informe evaluación estratégica (origen)</td><td>Informe_Evaluacion_Estrategica_Uber_Truck.docx</td><td>Fuente en Downloads del usuario</td></tr>
-    <tr><td>Kickoff</td><td>Kickoff-Uber-Truck.docx</td><td>Visión MVP y stack</td></tr>
-    <tr><td>Journey de usuario</td><td>Journey-Usuario-Uber-Truck.docx</td><td>Recorridos carrier / embarcador</td></tr>
-    <tr><td>Memoria técnica</td><td>Memoria-tecnica-Uber-Truck.docx</td><td>Arquitectura, API, datos</td></tr>
-    <tr><td>Gantt</td><td>Gantt-Uber-Truck.docx</td><td>Cronograma jun 2026 – mar 2027</td></tr>
-    <tr><td>Modelo de negocio</td><td>Modelo-Negocio-Uber-Truck.docx</td><td>Monetización y KPIs</td></tr>
+  <h2>Documento central (estilo fintech / memoria única)</h2>
+  <table>
+    <tr class="central"><th>Documento</th><th>Ubicación</th><th>Notas</th></tr>
+    <tr class="central"><td><strong>Memoria técnica + Gantt + avance</strong></td><td><a href="01-MEMORIA-TECNICA.md">01-MEMORIA-TECNICA.md</a></td><td>Incluye §12 cronograma y estado real</td></tr>
+    <tr class="central"><td>Memoria técnica HTML</td><td><a href="Memoria-tecnica-Uber-Truck.html">Memoria-tecnica-Uber-Truck.html</a></td><td>Export Word</td></tr>
+    <tr class="central"><td>Canvas estado avance</td><td><code>canvases/estado-avance.canvas.tsx</code></td><td>Abrir en Cursor → panel Canvas</td></tr>
+    <tr class="central"><td>SQL Supabase</td><td><a href="SQL-SUPABASE.md">SQL-SUPABASE.md</a></td><td>Script 004–008 listo para pegar</td></tr>
   </table>
 
-  <h2>Markdown editable (repo)</h2>
+  <h2>Estrategia y negocio</h2>
+  <table>
+    <tr><th>Documento</th><th>Archivo</th></tr>
+    <tr><td>Modelo de negocio</td><td><a href="Modelo-Negocio-Uber-Truck.html">Modelo-Negocio-Uber-Truck.html</a></td></tr>
+    <tr><td>Journey usuario</td><td><a href="Journey-Usuario-Uber-Truck.html">Journey-Usuario-Uber-Truck.html</a></td></tr>
+    <tr><td>Kickoff</td><td><a href="Kickoff-Uber-Truck.html">Kickoff-Uber-Truck.html</a> · KICKOFF.md</td></tr>
+    <tr><td>Gantt detallado</td><td><a href="Gantt-Uber-Truck.html">Gantt-Uber-Truck.html</a> (también en memoria §12)</td></tr>
+  </table>
+
+  <h2>Markdown operativo (repo)</h2>
   <ul>
-    <li>docs/KICKOFF.md</li>
-    <li>docs/ROADMAP.md</li>
-    <li>docs/PROXIMOS-HITOS.md</li>
+    <li><a href="00-INDICE-DOCUMENTACION.md">00-INDICE-DOCUMENTACION.md</a></li>
+    <li><a href="ROADMAP.md">ROADMAP.md</a></li>
+    <li><a href="MATCH-CANCEL-POLICY.md">MATCH-CANCEL-POLICY.md</a></li>
+    <li><a href="PENALTIES-AND-ACCOUNTS.md">PENALTIES-AND-ACCOUNTS.md</a></li>
+    <li><a href="DEPLOY.md">DEPLOY.md</a></li>
   </ul>
 
   <h2>Exportar todo a Word</h2>
   <p><code>npm run export:all-docs</code></p>
 
-  <h2>Orden de lectura sugerido</h2>
+  <h2>Orden de lectura</h2>
   <ol>
-    <li>Informe estratégico (origen)</li>
-    <li>Modelo de negocio</li>
-    <li>Journey de usuario</li>
-    <li>Memoria técnica</li>
-    <li>Gantt</li>
-    <li>Kickoff operativo</li>
+    <li>Índice (este archivo o 00-INDICE-DOCUMENTACION.md)</li>
+    <li><strong>Memoria técnica</strong> (Gantt + avance + arquitectura)</li>
+    <li>Canvas estado de avance (opcional, visual)</li>
+    <li>Modelo de negocio → Journey</li>
+    <li>SQL / deploy / políticas según tarea</li>
   </ol>
 </body>
 </html>

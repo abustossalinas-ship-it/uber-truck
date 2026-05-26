@@ -106,6 +106,20 @@ body {
   display: inline-block;
 }
 
+.tab-outline {
+  background: transparent;
+  color: var(--accent-hover);
+  border: 2px solid var(--accent);
+}
+
+.register-only {
+  display: none;
+}
+
+.auth-panel.is-register .register-only {
+  display: block;
+}
+
 .auth-panel {
   margin: 0 1.5rem 1rem;
   max-width: 420px;

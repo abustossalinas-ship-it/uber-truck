@@ -23,6 +23,7 @@
     <div class="header-actions">
       <span id="auth-user" class="auth-user muted" hidden></span>
       <button type="button" class="tab tab-sm" id="btn-auth">Ingresar</button>
+      <button type="button" class="tab tab-sm tab-outline" id="btn-register">Crear cuenta</button>
     </div>
   </header>
 
@@ -39,10 +40,10 @@
       <input name="email" type="email" required />
       <label>Contraseña</label>
       <input name="password" type="password" minlength="6" required />
-      <label id="auth-name-label" hidden>Nombre</label>
-      <input name="full_name" id="auth-full-name" hidden />
-      <label id="auth-role-label" hidden>Rol</label>
-      <select name="role" id="auth-role" hidden>
+      <label id="auth-name-label" class="register-only">Nombre</label>
+      <input name="full_name" id="auth-full-name" class="register-only" />
+      <label id="auth-role-label" class="register-only">Rol</label>
+      <select name="role" id="auth-role" class="register-only">
         <option value="shipper">Embarcador</option>
         <option value="carrier">Transportista</option>
       </select>

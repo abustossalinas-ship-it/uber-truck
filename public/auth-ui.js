@@ -26,47 +26,81 @@ const Auth = {
 
   render() {
     const btn = document.getElementById('btn-auth');
+    const btnReg = document.getElementById('btn-register');
     const label = document.getElementById('auth-user');
     if (!btn) return;
     if (this.user) {
       label.hidden = false;
       label.textContent = `${this.user.name || this.user.email} (${this.user.role})`;
       btn.textContent = 'Salir';
+      if (btnReg) btnReg.hidden = true;
     } else {
       label.hidden = true;
       btn.textContent = 'Ingresar';
+      if (btnReg) btnReg.hidden = false;
     }
   },
 };
 
+let authRegisterMode = false;
+
+function setAuthMode(register) {
+  authRegisterMode = register;
+  const panel = document.getElementById('auth-panel');
+  const title = document.getElementById('auth-title');
+  const submit = document.getElementById('auth-submit');
+  const toggle = document.getElementById('auth-toggle-mode');
+  if (!panel) return;
+  panel.classList.toggle('is-register', register);
+  title.textContent = register ? 'Crear cuenta' : 'Iniciar sesión';
+  submit.textContent = register ? 'Registrarse' : 'Entrar';
+  if (toggle) toggle.textContent = register ? 'Ya tengo cuenta — iniciar sesión' : '¿No tienes cuenta? Crear cuenta';
+}
+
+function openAuthPanel(register = false) {
+  const panel = document.getElementById('auth-panel');
+  if (!panel) return;
+  setAuthMode(register);
+  panel.hidden = false;
+  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
 document.getElementById('btn-auth')?.addEventListener('click', () => {
   if (Auth.user) {
     Auth.logout();
+    document.getElementById('auth-panel').hidden = true;
     return;
   }
   const panel = document.getElementById('auth-panel');
-  panel.hidden = !panel.hidden;
+  if (!panel.hidden && !authRegisterMode) {
+    panel.hidden = true;
+    return;
+  }
+  openAuthPanel(false);
 });
 
-let authRegisterMode = false;
+document.getElementById('btn-register')?.addEventListener('click', () => {
+  if (Auth.user) return;
+  openAuthPanel(true);
+});
+
 document.getElementById('auth-toggle-mode')?.addEventListener('click', () => {
-  authRegisterMode = !authRegisterMode;
-  document.getElementById('auth-title').textContent = authRegisterMode ? 'Crear cuenta' : 'Iniciar sesión';
-  document.getElementById('auth-submit').textContent = authRegisterMode ? 'Registrarse' : 'Entrar';
-  document.getElementById('auth-name-label').hidden = !authRegisterMode;
-  document.getElementById('auth-full-name').hidden = !authRegisterMode;
-  document.getElementById('auth-role-label').hidden = !authRegisterMode;
-  document.getElementById('auth-role').hidden = !authRegisterMode;
-  document.getElementById('auth-toggle-mode').textContent = authRegisterMode
-    ? 'Ya tengo cuenta'
-    : 'Crear cuenta';
+  openAuthPanel(!authRegisterMode);
 });
 
 document.getElementById('form-auth')?.addEventListener('submit', async (e) => {
   e.preventDefault();
   const body = Object.fromEntries(new FormData(e.target).entries());
+  if (authRegisterMode && !body.full_name?.trim()) {
+    alert('Ingresa tu nombre');
+    return;
+  }
   const url = authRegisterMode ? '/api/auth/register' : '/api/auth/login';
-  const res = await fetch(url, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
   const json = await res.json();
   if (!res.ok) {
     alert(json.error || 'Error de autenticación');

@@ -13,6 +13,13 @@ const {
   assertCanPublishLoad,
   assertCanMatchLoad,
 } = require('../lib/access-scope');
+const {
+  validateLoadBudget,
+  copyBudgetFromLoad,
+  assertCanAdjustLoadBudget,
+  outsideRangeMessages,
+  suggestReferenceBudget,
+} = require('../lib/match-price');
 
 const router = express.Router();
 
@@ -46,6 +53,60 @@ router.get('/:id/match-suggestions', optionalAuth, async (req, res) => {
   }
 });
 
+router.get('/:id/budget-hint', optionalAuth, async (req, res) => {
+  try {
+    const load = await repo.getById('load_requests', req.params.id);
+    if (!load) return res.status(404).json({ ok: false, error: 'Carga no encontrada' });
+    const hint = suggestReferenceBudget(load);
+    res.json({ ok: true, data: hint, disclaimer: 'Solo referencia; no obliga al transportista ni al embarcador.' });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al calcular referencia' });
+  }
+});
+
+router.patch('/:id/budget', optionalAuth, requireAuthIfDb, async (req, res) => {
+  try {
+    const load = await repo.getById('load_requests', req.params.id);
+    if (!load) return res.status(404).json({ ok: false, error: 'Carga no encontrada' });
+    if (req.user?.role !== 'shipper' && req.user?.role !== 'admin') {
+      return res.status(403).json({ ok: false, error: 'Solo el embarcador puede ajustar el rango' });
+    }
+    if (req.user?.role === 'shipper' && load.shipper_user_id && load.shipper_user_id !== req.user.sub) {
+      return res.status(403).json({ ok: false, error: 'No es tu carga' });
+    }
+    const lockErr = await assertCanAdjustLoadBudget(repo, load.id);
+    if (lockErr) return res.status(409).json({ ok: false, error: lockErr });
+
+    const min = req.body?.budget_min_clp != null ? Number(req.body.budget_min_clp) : load.budget_min_clp;
+    const max = req.body?.budget_max_clp != null ? Number(req.body.budget_max_clp) : load.budget_max_clp;
+    const budgetErrors = validateLoadBudget(min, max);
+    if (budgetErrors.length) return res.status(400).json({ ok: false, errors: budgetErrors });
+
+    const updated = await repo.update('load_requests', load.id, {
+      budget_min_clp: min,
+      budget_max_clp: max,
+    });
+    const budget = copyBudgetFromLoad(updated);
+    const matches = await repo.list('matches', {});
+    const proposed = matches.filter(
+      (m) => m.load_request_id === load.id && m.status === 'proposed'
+    );
+    for (const m of proposed) {
+      await repo.update('matches', m.id, budget);
+    }
+    res.json({
+      ok: true,
+      data: updated,
+      message: 'Rango actualizado en la carga y en propuestas abiertas.',
+      matches_updated: proposed.length,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al actualizar presupuesto' });
+  }
+});
+
 router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const row = await repo.getById('load_requests', req.params.id);
@@ -75,10 +136,7 @@ router.post('/', optionalAuth, requireAuthIfDb, async (req, res) => {
     () => optionalNumber(body.budget_min_clp, 'budget_min_clp'),
     () => optionalNumber(body.budget_max_clp, 'budget_max_clp'),
   ]);
-  const budgetErrors = require('../lib/match-price').validateLoadBudget(
-    body.budget_min_clp,
-    body.budget_max_clp
-  );
+  const budgetErrors = validateLoadBudget(body.budget_min_clp, body.budget_max_clp);
   if (budgetErrors.length) return res.status(400).json({ ok: false, errors: budgetErrors });
   const geoErrors = requireMapsAddresses(body);
   if (geoErrors.length) return res.status(400).json({ ok: false, errors: geoErrors });

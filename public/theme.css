@@ -452,6 +452,15 @@ button[type="submit"]:disabled {
   margin-right: 0.5rem;
 }
 
+.match-price-outside {
+  color: #b45309;
+  font-size: 0.88rem;
+  margin: 0.35rem 0;
+  padding: 0.4rem 0.5rem;
+  background: #fffbeb;
+  border-radius: 4px;
+}
+
 .maps-geo-readonly:read-only {
   background: #f3f4f6;
 }

@@ -46,6 +46,12 @@ const API = {
       headers: apiHeaders(),
       body: JSON.stringify({ actor_role: getActorRole() }),
     }).then((r) => r.json()),
+  patchLoadBudget: (loadId, budget_min_clp, budget_max_clp) =>
+    fetch(`/api/load-requests/${loadId}/budget`, {
+      method: 'PATCH',
+      headers: apiHeaders(),
+      body: JSON.stringify({ budget_min_clp, budget_max_clp }),
+    }).then((r) => r.json()),
   seedDemo: (key) =>
     fetch('/api/demo/seed', {
       method: 'POST',
@@ -96,9 +102,21 @@ function formatBudgetRange(min, max) {
   return 'sin rango definido';
 }
 
+function isOutsideBudget(m) {
+  if (m.carrier_offer_clp == null) return false;
+  const min = m.budget_min_clp;
+  const max = m.budget_max_clp;
+  if (min == null && max == null) return false;
+  const o = Number(m.carrier_offer_clp);
+  if (min != null && o < Number(min)) return true;
+  if (max != null && o > Number(max)) return true;
+  return false;
+}
+
 function buildMatchPriceBox(m) {
   const role = getActorRole() === 'carrier' ? 'carrier' : 'shipper';
   const range = formatBudgetRange(m.budget_min_clp, m.budget_max_clp);
+  const outside = isOutsideBudget(m);
   let html = `<div class="match-price-box"><p><strong>Precio</strong> · Rango embarcador: ${range}</p>`;
   if (m.agreed_price_clp) {
     html += `<p>Acordado: <strong>$${Number(m.agreed_price_clp).toLocaleString('es-CL')} CLP</strong></p></div>`;
@@ -106,8 +124,17 @@ function buildMatchPriceBox(m) {
   }
   if (m.carrier_offer_clp) {
     html += `<p>Oferta transportista: <strong>$${Number(m.carrier_offer_clp).toLocaleString('es-CL')} CLP</strong></p>`;
+    if (outside) {
+      html +=
+        role === 'shipper'
+          ? `<p class="match-price-outside">Fuera de tu rango publicado. Puedes <strong>aceptar</strong> igual o <strong>ampliar el rango</strong> si no cerraste con otro transportista.</p>`
+          : `<p class="match-price-outside">Fuera del rango del embarcador (referencia). Tu oferta sigue válida por peso, urgencia o ruta.</p>`;
+    }
     if (role === 'shipper') {
       html += `<button type="button" data-action="accept_offer" data-id="${m.id}">Aceptar precio y confirmar match</button>`;
+      if (outside) {
+        html += `<button type="button" class="btn-secondary" data-action="adjust_budget" data-load-id="${m.load_request_id}" data-id="${m.id}">Ampliar mi rango presupuesto</button>`;
+      }
     } else {
       html += `<p class="muted">Esperando que el embarcador acepte tu oferta.</p>`;
       html += `<input type="number" class="match-offer-input" data-id="${m.id}" min="1" step="1000" value="${m.carrier_offer_clp}" />`;
@@ -1005,11 +1032,10 @@ $('form-match').addEventListener('submit', async (e) => {
   stickyMatchOfferId = null;
   stickyMatchLoadId = null;
   const msg =
-    role === 'carrier'
-      ? json.within_budget === false
-        ? 'Propuesta creada. Tu oferta está fuera del rango del embarcador; igual puede evaluarla.'
-        : 'Propuesta creada con tu oferta. El embarcador puede aceptar el precio abajo.'
-      : 'Propuesta creada. El transportista debe enviar su oferta en CLP; luego aceptas el precio.';
+    json.range_message ||
+    (role === 'carrier'
+      ? 'Propuesta creada con tu oferta. El embarcador puede aceptar el precio abajo.'
+      : 'Propuesta creada. El transportista debe enviar su oferta en CLP; luego aceptas el precio.');
   alert(msg);
   refreshBoard().then(() => {
     $('list-matches')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -1045,11 +1071,37 @@ $('list-matches').addEventListener('click', async (e) => {
     const json = await API.patchCarrierOffer(id, amount);
     if (!json.ok) alert(json.error || 'Error');
     else {
-      alert(
-        json.within_budget === false
-          ? `${json.message || 'Oferta enviada'} (fuera del rango del embarcador)`
-          : json.message || 'Oferta enviada'
-      );
+      alert(json.range_message || json.message || 'Oferta enviada');
+      refreshBoard();
+    }
+    return;
+  }
+  if (action === 'adjust_budget') {
+    const loadId = btn.dataset.loadId;
+    const load = window._boardLoadsById?.[loadId];
+    const curMin = load?.budget_min_clp ?? '';
+    const curMax = load?.budget_max_clp ?? '';
+    const newMin = prompt(
+      `Monto mínimo CLP (actual: ${curMin || '—'}). Vacío = sin cambio.`,
+      curMin !== '' && curMin != null ? String(curMin) : ''
+    );
+    if (newMin === null) return;
+    const newMax = prompt(
+      `Monto máximo CLP (actual: ${curMax || '—'}). Vacío = sin cambio.`,
+      curMax !== '' && curMax != null ? String(curMax) : ''
+    );
+    if (newMax === null) return;
+    const body = {};
+    if (newMin.trim()) body.budget_min_clp = Number(newMin);
+    if (newMax.trim()) body.budget_max_clp = Number(newMax);
+    if (!body.budget_min_clp && !body.budget_max_clp) {
+      alert('Indica al menos un monto.');
+      return;
+    }
+    const json = await API.patchLoadBudget(loadId, body.budget_min_clp, body.budget_max_clp);
+    if (!json.ok) alert(json.error || json.errors?.join('\n') || 'Error');
+    else {
+      alert(json.message || 'Rango actualizado');
       refreshBoard();
     }
     return;

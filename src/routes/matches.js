@@ -29,7 +29,7 @@ const {
   assertCanMatchLoad,
   assertCanMatchOffer,
 } = require('../lib/access-scope');
-const { copyBudgetFromLoad, offerWithinBudget } = require('../lib/match-price');
+const { copyBudgetFromLoad, outsideRangeMessages } = require('../lib/match-price');
 
 const router = express.Router();
 
@@ -173,10 +173,16 @@ router.post('/', optionalAuth, async (req, res) => {
       });
     }
 
+    const rangeMsg = outsideRangeMessages(
+      carrierOffer,
+      budget.budget_min_clp,
+      budget.budget_max_clp
+    );
     res.status(201).json({
       ok: true,
       data: row,
-      within_budget: offerWithinBudget(carrierOffer, budget.budget_min_clp, budget.budget_max_clp),
+      within_budget: rangeMsg.within,
+      range_message: rangeMsg.carrier,
     });
   } catch (e) {
     console.error(e);
@@ -272,11 +278,19 @@ router.patch('/:id/carrier-offer', optionalAuth, async (req, res) => {
       title: 'Oferta de precio actualizada',
       body: `${parties?.carrier_name || 'Transportista'} ofrece $${amount.toLocaleString('es-CL')} CLP.`,
     });
+    const rangeMsg = outsideRangeMessages(
+      amount,
+      match.budget_min_clp,
+      match.budget_max_clp
+    );
     res.json({
       ok: true,
       data: updated,
-      within_budget: offerWithinBudget(amount, match.budget_min_clp, match.budget_max_clp),
-      message: 'Oferta enviada al embarcador',
+      within_budget: rangeMsg.within,
+      range_message: rangeMsg.carrier,
+      message: rangeMsg.carrier
+        ? 'Oferta enviada (fuera del rango publicado).'
+        : 'Oferta enviada al embarcador',
     });
   } catch (e) {
     console.error(e);

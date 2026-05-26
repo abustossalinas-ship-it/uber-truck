@@ -88,7 +88,7 @@ function matchMutualBanner(m) {
   }
   if (!myOk && otherOk) {
     return `<p class="match-mutual-banner action-needed"><strong>Te falta confirmar</strong> el acuerdo mutuo (eres ${getActorRoleLabel().toLowerCase()}).
-      <button type="button" class="tab tab-sm" data-action="mutual_confirm" data-id="${m.id}" data-phase="${phase}" data-price="${price}">Confirmar acuerdo mutuo</button></p>`;
+      <button type="button" class="btn-mutual-banner" data-action="mutual_confirm" data-id="${m.id}" data-phase="${phase}" data-price="${price}">Confirmar acuerdo mutuo</button></p>`;
   }
   if (myOk && !otherOk) {
     const other = role === 'carrier' ? 'embarcador' : 'transportista';

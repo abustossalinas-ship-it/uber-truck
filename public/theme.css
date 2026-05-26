@@ -595,8 +595,30 @@ select.offer-picked {
 }
 
 .match-mutual-banner.action-needed {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
   background: var(--accent-soft);
   border: 1px solid var(--accent);
+}
+
+.btn-mutual-banner {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0.55rem 1rem;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #fff;
+  background: var(--accent);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(242, 101, 34, 0.4);
+}
+
+.btn-mutual-banner:hover {
+  background: var(--accent-hover);
 }
 
 .match-mutual-banner.waiting {

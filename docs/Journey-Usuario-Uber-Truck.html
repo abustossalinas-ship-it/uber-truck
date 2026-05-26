@@ -28,7 +28,7 @@
   <div class="doc-title-wrap">
     <h1>Journey de usuario — Uber Truck</h1>
     <p class="meta"><strong>Producto:</strong> App tipo Uber para carga por camión (backhaul).<br />
-    <strong>Versión:</strong> 2.0 · mayo 2026 · Canal MVP: <strong>solo la app</strong> (web / PWA)</p>
+    <strong>Versión:</strong> 2.1 · mayo 2026 · Canal MVP: <strong>solo la app</strong> (web / PWA)</p>
   </div>
 </div>
 
@@ -52,10 +52,11 @@
   <tr><td>1. Descubrimiento</td><td>Referido en ruta / nodo industrial</td><td>Link a la web</td><td>«¿Me pagan el espacio vacío?»</td><td>Abre la app</td></tr>
   <tr><td>2. Registro</td><td>Login, rol transportista, empresa</td><td>Registro / JWT</td><td>Desconfianza si es largo</td><td>Cuenta activa</td></tr>
   <tr><td>3. Publicar capacidad</td><td>Origen, destino, m³, tipo carga, ventana</td><td>Formulario transportista</td><td>«Que sea rápido»</td><td>Oferta publicada (&lt; 3 min)</td></tr>
-  <tr><td>4. Match</td><td>Ve sugerencias o propone match a una carga</td><td>Tablero + emparejamientos</td><td>«¿Compensa la parada?»</td><td>Acepta en &lt; 30 min</td></tr>
-  <tr><td>5. Viaje activo</td><td>Estados: aceptado → en ejecución</td><td>Emparejamientos activos</td><td>Espera en planta</td><td>Estado actualizado</td></tr>
-  <tr><td>6. Chat</td><td>Coordina retiro/entrega con embarcador</td><td>Chat in-app</td><td>«¿Me responden?»</td><td>Mensaje &lt; 15 min</td></tr>
-  <tr><td>7. Cierre</td><td>Completado; cobro acordado; calificación (fase 3)</td><td>Estado completado + cuenta</td><td>«¿Vuelvo a usar?»</td><td>Pago acordado · vuelve a publicar</td></tr>
+  <tr><td>4. Propuesta + precio</td><td>Elige carga, envía <strong>oferta en CLP</strong> (puede estar fuera del rango del embarcador)</td><td>Tablero paso 3</td><td>«¿Me pagan bien el desvío?»</td><td>Oferta visible al embarcador</td></tr>
+  <tr><td>5. Match</td><td>Embarcador <strong>acepta precio</strong> → match confirmado</td><td>Emparejamientos</td><td>«¿Cierra el trato?»</td><td>Aceptado en &lt; 30 min</td></tr>
+  <tr><td>6. Viaje activo</td><td>Estados: aceptado → en ejecución</td><td>Emparejamientos activos</td><td>Espera en planta</td><td>Estado actualizado</td></tr>
+  <tr><td>7. Chat</td><td>Coordina retiro/entrega con embarcador</td><td>Chat in-app</td><td>«¿Me responden?»</td><td>Mensaje &lt; 15 min</td></tr>
+  <tr><td>8. Cierre</td><td>Completado; cobro acordado; calificación (fase 3)</td><td>Estado completado + cuenta</td><td>«¿Vuelvo a usar?»</td><td>Pago acordado · vuelve a publicar</td></tr>
 </table>
 
 <h2>4. Journey embarcador (demanda)</h2>
@@ -63,11 +64,12 @@
   <tr><th>Etapa</th><th>Acción</th><th>En la app</th><th>Emoción</th><th>Éxito</th></tr>
   <tr><td>1. Necesidad</td><td>Carga urgente (ej. 2 pallets mañana)</td><td>—</td><td>«No hay camión»</td><td>Entra a la app</td></tr>
   <tr><td>2. Registro</td><td>Login, rol embarcador</td><td>Registro / JWT</td><td>«¿Es confiable?»</td><td>Cuenta activa</td></tr>
-  <tr><td>3. Publicar carga</td><td>Origen, destino, peso/volumen, urgencia</td><td>Formulario embarcador</td><td>«Rápido y barato»</td><td>Carga publicada</td></tr>
-  <tr><td>4. Match</td><td>Ve ofertas / sugerencias compatibles</td><td>Sugerencias automáticas</td><td>«¿Confío?»</td><td>Acepta transportista</td></tr>
-  <tr><td>5. Viaje activo</td><td>Sigue estados y chat</td><td>Activos + notificaciones</td><td>Ansiedad SLA</td><td>Visibilidad sin llamar</td></tr>
-  <tr><td>6. Cancelar (si aplica)</td><td>Motivo, acuerdo mutuo o multa sugerida</td><td>Modal cancelación</td><td>«¿Cuánto me cobran?»</td><td>Regla clara</td></tr>
-  <tr><td>7. Cierre</td><td>Entregado; califica (fase 3)</td><td>Completado</td><td>«¿Lo uso otra vez?»</td><td>NPS ≥ 8</td></tr>
+  <tr><td>3. Publicar carga</td><td>Origen, destino, peso/volumen, urgencia, <strong>rango CLP</strong> (botón «Ver rango sugerido»)</td><td>Formulario embarcador</td><td>«Rápido y barato»</td><td>Carga publicada</td></tr>
+  <tr><td>4. Propuesta</td><td>Ve ofertas; transportista envía precio</td><td>Tablero + sugerencias</td><td>«¿Es justo?»</td><td>Compara ofertas</td></tr>
+  <tr><td>5. Aceptar precio</td><td><strong>Aceptar precio y confirmar match</strong> (o ampliar rango si la oferta venía fuera)</td><td>Emparejamientos</td><td>«¿Cierro?»</td><td>Match aceptado</td></tr>
+  <tr><td>6. Viaje activo</td><td>Sigue estados y chat</td><td>Activos + notificaciones</td><td>Ansiedad SLA</td><td>Visibilidad sin llamar</td></tr>
+  <tr><td>7. Cancelar (si aplica)</td><td>Motivo, acuerdo mutuo o multa sugerida</td><td>Modal cancelación</td><td>«¿Cuánto me cobran?»</td><td>Regla clara</td></tr>
+  <tr><td>8. Cierre</td><td>Entregado; califica (fase 3)</td><td>Completado</td><td>«¿Lo uso otra vez?»</td><td>NPS ≥ 8</td></tr>
 </table>
 
 <h2>5. Paridad con Uber (mapa rápido)</h2>
@@ -80,14 +82,23 @@
   <tr><td>Cancelar</td><td>Modal + multas / acuerdo mutuo</td></tr>
   <tr><td>Mis viajes</td><td>Mis cargas / mis ofertas (pendiente)</td></tr>
   <tr><td>Pago en app</td><td>Pasarela (pendiente)</td></tr>
+  <tr><td>Tarifa / oferta</td><td>Rango embarcador + oferta transportista + aceptación</td></tr>
 </table>
 
-<h2>6. Estados en la app (v0.0.19)</h2>
+<h2>6. Negociación de precio (oferta / demanda)</h2>
+<ol>
+  <li><strong>Embarcador</strong> publica un <strong>rango orientativo</strong> (mín–máx CLP). Puede usar «Ver rango sugerido» (referencia por km, peso y urgencia).</li>
+  <li><strong>Transportista</strong> crea propuesta de match y envía <strong>su monto en CLP</strong> (válido aunque esté fuera del rango).</li>
+  <li><strong>Embarcador</strong> acepta ese precio o <strong>amplía el rango</strong> (si no cerró antes con otro transportista).</li>
+  <li>A futuro: fórmula/tarifario más fino; hoy el rango no bloquea ofertas del mercado.</li>
+</ol>
+
+<h2>7. Estados en la app</h2>
 <p><strong>Oferta capacidad:</strong> draft · published · reserved · expired · cancelled</p>
 <p><strong>Demanda carga:</strong> draft · published · matched · in_transit · delivered · cancelled</p>
 <p><strong>Match:</strong> proposed · accepted · in_progress · completed · disputed (+ cancelación y multas)</p>
 
-<h2>7. Fricciones y mitigación</h2>
+<h2>8. Fricciones y mitigación</h2>
 <ul>
   <li><strong>Confianza:</strong> KYC y vehículo (manual en piloto).</li>
   <li><strong>Seguro:</strong> microseguro por trayecto (fase 3).</li>
@@ -95,7 +106,7 @@
   <li><strong>Espera en planta:</strong> rating futuro por tiempos de bahía.</li>
 </ul>
 
-<h2>8. Métricas piloto (20 viajes en app)</h2>
+<h2>9. Métricas piloto (20 viajes en app)</h2>
 <table>
   <tr><th>Métrica</th><th>Meta</th></tr>
   <tr><td>Publicación → match</td><td>&lt; 1 h</td></tr>
@@ -106,6 +117,6 @@
 
 <p class="meta">Modelo de negocio: <a href="Modelo-Negocio-Uber-Truck.html">Modelo-Negocio-Uber-Truck.html</a> · Gantt y backlog: <a href="Memoria-tecnica-Uber-Truck.html">Memoria-tecnica-Uber-Truck.html</a></p>
 
-<p class="meta"><em>Fin del documento — v2.0 · journey 100% en app · patrón Uber.</em></p>
+<p class="meta"><em>Fin del documento — v2.1 · precio oferta/demanda · patrón Uber.</em></p>
 </body>
 </html>

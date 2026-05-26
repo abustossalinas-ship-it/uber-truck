@@ -12,9 +12,9 @@
 ## Guion rápido
 
 1. Problema: carga incidental sin camión dedicado.
-2. Embarcador crea cuenta → publica carga.
-3. Transportista crea cuenta → publica capacidad.
-4. Tablero → match → estados → chat.
+2. Embarcador: cuenta → publica carga (Maps + rango CLP, opcional «Ver rango sugerido»).
+3. Transportista: cuenta → publica oferta → tablero → oferta precio CLP.
+4. Embarcador: acepta precio → en ruta → chat.
 5. Cierre: todo en la misma app web.
 
 ## Cuentas

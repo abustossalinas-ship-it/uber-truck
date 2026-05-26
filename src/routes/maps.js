@@ -4,11 +4,27 @@ const express = require('express');
 const maps = require('../services/google-maps');
 const { LOAD_PRESETS, OFFER_PRESETS } = require('../lib/cubicacion-presets');
 const { densityOptions, STANDARD_PALLET_M3 } = require('../lib/cubicacion-estimate');
+const { suggestReferenceBudget } = require('../lib/match-price');
 
 const router = express.Router();
 
 router.get('/status', (_req, res) => {
   res.json({ ok: true, configured: maps.isConfigured() });
+});
+
+router.post('/budget-estimate', (req, res) => {
+  const body = req.body || {};
+  const hint = suggestReferenceBudget({
+    distance_km: body.distance_km,
+    weight_kg: body.weight_kg,
+    urgency: body.urgency,
+  });
+  res.json({
+    ok: true,
+    data: hint,
+    disclaimer:
+      'Solo referencia (km, peso, urgencia). No obliga al transportista; puedes editar el rango.',
+  });
 });
 
 router.get('/cubicacion-presets', (_req, res) => {

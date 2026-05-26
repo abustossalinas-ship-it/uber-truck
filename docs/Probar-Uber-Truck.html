@@ -25,7 +25,7 @@
   <img src="/brand/logo.png" width="72" height="72" alt="Uber Truck" />
   <div class="doc-title-wrap">
     <h1>Cómo probar Uber Truck</h1>
-    <p class="meta">Para testers · mayo 2026 · Sin instalar programas ni acceder a la base de datos</p>
+    <p class="meta">Para testers · mayo 2026 (v2) · Sin instalar programas ni acceder a la base de datos</p>
   </div>
 </div>
 
@@ -64,15 +64,34 @@
   <tr><td>Dos personas</td><td>Una crea cuenta embarcador, otra transportista, y hacen match en el tablero</td></tr>
 </table>
 
-<h2>4. Flujo de prueba (5 minutos)</h2>
+<h2>4. Flujo de prueba (10 minutos)</h2>
 <ol>
-  <li><strong>Embarcador:</strong> pestaña «Necesito mover carga» → publicar carga (origen, destino, cubicación).</li>
-  <li><strong>Transportista:</strong> pestaña «Tengo espacio en ruta» → publicar capacidad compatible.</li>
-  <li><strong>Tablero / emparejar:</strong> elegir la carga → ver sugerencias → crear match → aceptar → pasar a en ruta → cerrar.</li>
-  <li>Probar <strong>chat</strong> y <strong>notificaciones</strong> (campana) con sesión iniciada.</li>
+  <li><strong>Embarcador</strong> — pestaña <strong>Mis cargas</strong>:
+    <ul>
+      <li>Origen y destino desde la <strong>lista de Google Maps</strong> (obligatorio elegir sugerencia).</li>
+      <li>Cubicación, peso y <strong>rango de presupuesto</strong> (mín–máx CLP). Opcional: <strong>Ver rango sugerido</strong> (usa distancia, peso y urgencia).</li>
+    </ul>
+  </li>
+  <li><strong>Transportista</strong> — pestaña <strong>Mis ofertas</strong>: publicar capacidad en ruta compatible (también con dirección validada en Maps).</li>
+  <li><strong>Tablero / emparejar</strong>:
+    <ul>
+      <li>Transportista: elige carga + oferta, ingresa <strong>tu oferta en CLP</strong>, crea propuesta.</li>
+      <li>Embarcador: en Emparejamientos, <strong>Aceptar precio y confirmar match</strong> (si la oferta está fuera del rango, puedes aceptar igual o <strong>Ampliar mi rango presupuesto</strong>).</li>
+      <li>Luego: <strong>En ruta</strong> → <strong>Cerrar</strong>.</li>
+    </ul>
+  </li>
+  <li><strong>Chat</strong> y <strong>notificaciones</strong> (campana) con sesión iniciada.</li>
 </ol>
 
-<h2>5. Si algo falla</h2>
+<h2>5. Precios (oferta / demanda)</h2>
+<table>
+  <tr><th>Situación</th><th>Qué esperar</th></tr>
+  <tr><td>Rango del embarcador</td><td>Orientativo; no impide que el transportista oferte otro monto.</td></tr>
+  <tr><td>Oferta fuera del rango</td><td>Mensaje amarillo; la propuesta sigue válida.</td></tr>
+  <tr><td>Ampliar rango</td><td>Solo embarcador; no si ya hay otro match con precio acordado.</td></tr>
+</table>
+
+<h2>6. Si algo falla</h2>
 <table>
   <tr><th>Error</th><th>Qué hacer</th></tr>
   <tr><td>«Registro no disponible» o «base de datos no configurada»</td><td>El servidor aún no está listo; avisa al dueño del proyecto (no es culpa tuya).</td></tr>
@@ -80,8 +99,8 @@
   <tr><td>No ves notificaciones</td><td>Debes estar con <strong>Ingresar</strong>, no solo modo demo sin login.</td></tr>
 </table>
 
-<h2>6. Para el dueño del proyecto (solo Ariel)</h2>
-<p class="meta">Los testers no hacen esto. El servidor (Railway) debe tener la base de datos conectada, variables de entorno y la migración <code>003_auth_password.sql</code> aplicada.</p>
+<h2>7. Para el dueño del proyecto (solo Ariel)</h2>
+<p class="meta">Los testers no hacen esto. Base de datos conectada, variables Railway y migraciones <code>003</code>–<code>010</code> (incluye presupuesto y precios en matches).</p>
 
 <p class="meta">
   <a href="Journey-Usuario-Uber-Truck.html">Journey del usuario</a> ·

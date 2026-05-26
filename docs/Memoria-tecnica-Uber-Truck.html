@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Memoria técnica — Uber Truck</title>
   <style>
@@ -9,250 +9,328 @@
     h1 { font-size: 18pt; border-bottom: 1px solid #333; padding-bottom: 6px; }
     h2 { font-size: 14pt; margin-top: 1.4em; }
     h3 { font-size: 12pt; margin-top: 1em; }
+    p { margin: 0.5em 0; text-align: justify; }
+    ul { margin: 0.4em 0 0.6em 1.2em; }
     table { border-collapse: collapse; width: 100%; margin: 0.8em 0; font-size: 10pt; }
     th, td { border: 1px solid #444; padding: 6px 8px; vertical-align: top; }
-    th { background: #e8e8e8; }
-    .meta { font-size: 10pt; color: #444; }
+    th { background: #e8e8e8; text-align: left; }
+    .meta { font-size: 10pt; color: #444; margin-bottom: 1em; }
+    .rule { border-top: 1px solid #ccc; margin: 2em 0; }
+    .check { margin: 0.4em 0; }
     .g-done { background: #c6e0b4; text-align: center; }
     .g-doing { background: #ffe599; text-align: center; }
     .g-todo { background: #e8e8e8; text-align: center; }
     .g-na { background: #fafafa; text-align: center; color: #999; }
     table.gantt th { font-size: 9pt; text-align: center; }
+    table.gantt td { font-size: 9pt; }
     .hito-head { font-weight: bold; background: #f0f0f0; }
+    .doc-header { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 1em; }
+    .doc-header img { width: 72px; height: 72px; flex-shrink: 0; border-radius: 12px; background: #fff; border: 1px solid #e5e7eb; }
+    .doc-title-wrap { flex: 1; min-width: 0; }
+    .doc-title-wrap h1 { margin-top: 0; }
+    code.block { display: block; white-space: pre-wrap; background: #f5f5f5; border: 1px solid #ccc; padding: 10px 12px; font-size: 9.5pt; margin: 0.6em 0; }
   </style>
 </head>
 <body>
-  <p class="meta"><a href="/docs/">← Índice documentación</a> · <a href="/">Inicio app</a></p>
-  <h1>Memoria técnica — Uber Truck</h1>
-  <p><strong>Producto:</strong> Plataforma de optimización dinámica de capacidad logística ociosa (backhaul)</p>
-  <p><strong>Versión documento:</strong> 2.1 · mayo 2026 (estructura alineada a Chanchi: Parte I + Parte II)</p>
-  <p><strong>Versión software:</strong> 0.0.19</p>
-  <p><strong>Estado implementación:</strong> MVP digital en producción (Railway) — adelanto vs Gantt oct 2026</p>
-  <p><strong>Producción:</strong> <a href="https://uber-truck-production.up.railway.app">uber-truck-production.up.railway.app</a></p>
-  <p><strong>Markdown vivo:</strong> <code>docs/01-MEMORIA-TECNICA.md</code> · <strong>Hub:</strong> <a href="/docs/">docs/index.html</a> · <strong>Bitácora hito:</strong> <code>docs/HITO-DIGITAL-MVP.md</code></p>
-  <p><strong>Canvas (Cursor):</strong> <code>canvases/estado-avance.canvas.tsx</code></p>
-  <p><strong>SQL Supabase:</strong> <code>docs/SQL-SUPABASE.md</code> · <code>supabase/migrations/RUN_PENDING.sql</code></p>
 
-  <h1>Parte II — Arquitectura y stack</h1>
+<div class="doc-header">
+  <img src="/brand/logo.png" width="72" height="72" alt="Uber Truck — marca" />
+  <div class="doc-title-wrap">
+    <h1>Memoria técnica del proyecto</h1>
+    <p class="meta"><strong>Producto:</strong> Uber Truck — marketplace de capacidad logística ociosa (backhaul), Chile.<br />
+    <strong>Documento:</strong> memoria técnica viva del repositorio y del despliegue Railway.<br />
+    <strong>Versión documento:</strong> 3.0 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.19 &nbsp;|&nbsp; <strong>Fecha:</strong> mayo 2026</p>
+  </div>
+</div>
 
-  <h2>1. Resumen ejecutivo técnico</h2>
-  <p>Uber Truck conecta <strong>oferta de cubicación disponible</strong> (camionero en ruta) con <strong>demanda incidental de carga</strong> (PYME). El MVP valida adopción sin sobreingeniería: primero <strong>concierge</strong> (WhatsApp + Airtable), luego producto digital (Node.js, Supabase, web).</p>
+<p class="meta"><a href="/docs/">← Documentación</a> · <a href="/">Inicio app</a> · <strong>Producción:</strong> <a href="https://uber-truck-production.up.railway.app">uber-truck-production.up.railway.app</a></p>
 
-  <h2>2. Objetivos del sistema</h2>
-  <ul>
-    <li>Registrar ofertas de capacidad con parámetros: ubicación, destino, cubicación, tipo carga, ventana horaria.</li>
-    <li>Registrar requerimientos de carga: origen, destino, peso/volumen, urgencia.</li>
-    <li>Emparejar oferta-demanda (manual → semi-automático → algoritmo).</li>
-    <li>Gestionar estados del viaje y trazabilidad mínima.</li>
-    <li>Soportar verificación de actores y reputación bidireccional (roadmap).</li>
-  </ul>
+<h2>Propósito y forma de mantenimiento</h2>
+<p>Este archivo es la <strong>referencia única</strong> de arquitectura, hitos, cronograma Gantt, próximos pasos y stack por capas. Actualizarlo cuando cambien migraciones Supabase, rutas API, reglas de cancelación/multas o el avance real frente al plan.</p>
+<p><strong>Formato Word:</strong> en la raíz del repo ejecutar <code>npm run export:memoria-docx</code> → <code>docs/Memoria-tecnica-Uber-Truck.docx</code> y copia en <code>Downloads/Proyecto Uber Truck/</code>. Pack completo: <code>npm run export:all-docs</code>.</p>
 
-  <h2>3. Arquitectura lógica</h2>
-  <table border="1" cellpadding="6" cellspacing="0">
-    <tr><th>Capa</th><th>Tecnología</th><th>Responsabilidad</th></tr>
-    <tr><td>Canal MVP 0</td><td>WhatsApp Business + Airtable</td><td>20 emparejamientos piloto sin código</td></tr>
-    <tr><td>Frontend v1</td><td>HTML/JS en <code>public/</code> o PWA</td><td>Formularios oferta/demanda, tablero operador</td></tr>
-    <tr><td>API</td><td>Node.js 20 + Express 4</td><td>REST, auth, reglas de match</td></tr>
-    <tr><td>Datos</td><td>Supabase (PostgreSQL)</td><td>Usuarios, vehículos, ofertas, cargas, matches</td></tr>
-    <tr><td>Auth</td><td>Supabase Auth / JWT</td><td>Roles: carrier, shipper, admin</td></tr>
-    <tr><td>Deploy</td><td>Railway</td><td><code>/health</code>, variables entorno</td></tr>
-    <tr><td>Mapas (fase 2)</td><td>Google Maps / Mapbox</td><td>Geocoding, corredor ruta</td></tr>
-    <tr><td>KYC / seguro (fase 2)</td><td>APIs terceros</td><td>Licencia, revisión técnica, microseguro</td></tr>
-  </table>
+<h2>Resumen ejecutivo del stack</h2>
+<p>Embarcadores y transportistas publican <strong>carga</strong> y <strong>capacidad ociosa</strong> vía web (<code>public/</code>). Un backend <strong>Node.js 20 + Express 4</strong> expone REST con <strong>JWT</strong>, persiste en <strong>Supabase (PostgreSQL)</strong>, gestiona <strong>emparejamientos</strong>, chat, notificaciones, cancelación (acuerdo mutuo / multas sugeridas) y resumen de cuenta. Despliegue en <strong>Railway</strong>; código en <strong>GitHub</strong>. Fase piloto previa: <strong>concierge</strong> (WhatsApp + Airtable) sin código.</p>
 
-  <h2>4. Modelo de datos (v1 propuesto)</h2>
-  <h3>4.1 Entidades principales</h3>
-  <ul>
-    <li><strong>users</strong> — rol, KYC status, reputación agregada.</li>
-    <li><strong>vehicles</strong> — patente, tipo, capacidad m³, peso máx., tipos carga permitidos.</li>
-    <li><strong>capacity_offers</strong> — oferta del transportista (origen, destino planificado, cubicación libre, ventana).</li>
-    <li><strong>load_requests</strong> — demanda embarcador (origen, destino, pallets/peso, urgencia).</li>
-    <li><strong>matches</strong> — vinculación oferta-carga, precio acordado, comisión, estados.</li>
-    <li><strong>trip_events</strong> — auditoría: asignado, retiro, en_ruta, entregado, POD.</li>
-    <li><strong>ratings</strong> — calificación bidireccional post-viaje.</li>
-  </ul>
+<h2>Principio de producto</h2>
+<p>Validar <strong>match carga–camión</strong> y take rate 12–15% antes de pagos integrados, app nativa o pricing dinámico completo.</p>
 
-  <h3>4.2 Estados</h3>
-  <p><strong>capacity_offers:</strong> draft | published | reserved | expired | cancelled</p>
-  <p><strong>load_requests:</strong> draft | published | matched | in_transit | delivered | cancelled</p>
-  <p><strong>matches:</strong> proposed | accepted | in_progress | completed | disputed</p>
+<div class="rule"></div>
 
-  <h2>5. API REST (MVP digital — borrador)</h2>
-  <table border="1" cellpadding="6" cellspacing="0">
-    <tr><th>Método</th><th>Ruta</th><th>Descripción</th></tr>
-    <tr><td>GET</td><td>/health</td><td>Healthcheck</td></tr>
-    <tr><td>POST</td><td>/api/auth/register</td><td>Alta carrier / shipper</td></tr>
-    <tr><td>POST</td><td>/api/capacity-offers</td><td>Publicar capacidad ociosa</td></tr>
-    <tr><td>GET</td><td>/api/capacity-offers</td><td>Listar (filtro región, destino)</td></tr>
-    <tr><td>POST</td><td>/api/load-requests</td><td>Publicar necesidad de carga</td></tr>
-    <tr><td>GET</td><td>/api/load-requests</td><td>Listar abiertas</td></tr>
-    <tr><td>POST</td><td>/api/matches</td><td>Proponer / aceptar emparejamiento</td></tr>
-    <tr><td>PATCH</td><td>/api/matches/:id/status</td><td>Transición de estado</td></tr>
-    <tr><td>POST</td><td>/api/matches/:id/rating</td><td>Calificación post-viaje</td></tr>
-  </table>
+<h1>Parte I — Hitos del proyecto</h1>
 
-  <h2>6. Reglas de negocio MVP</h2>
-  <ul>
-    <li>Match inicial: coincidencia corredor origen-destino ± tolerancia km (configurable) + cubicación suficiente + tipo carga compatible.</li>
-    <li>Concierge: operador confirma match antes de notificar a ambas partes.</li>
-    <li>Comisión fase 1: take rate 12–15% sobre valor acordado del flete incidental.</li>
-    <li>Sin pricing dinámico en MVP; precio negociado o tabla simple por km/pallet.</li>
-  </ul>
+<h2>Fase 0 — Descubrimiento y legal</h2>
+<h3>Objetivo</h3>
+<p>Entrevistas en nodo industrial (San Bernardo / RM), validación de precio/comisión y borrador legal + seguro piloto.</p>
+<h3>Estado (mayo 2026)</h3>
+<p class="check">En curso — paralelo al MVP digital ya desplegado.</p>
 
-  <h2>7. Seguridad y cumplimiento</h2>
-  <ul>
-    <li>Variables sensibles en <code>.env</code>; nunca en repositorio.</li>
-    <li>RLS en Supabase por <code>user_id</code> y rol.</li>
-    <li>KYC documental antes de <code>published</code> en ofertas (fase piloto: revisión manual).</li>
-    <li>Logs sin PII innecesaria; retención acorde a Ley 19.628 (Chile).</li>
-    <li>Términos legales y alcance seguro de carga definidos antes de piloto pagado.</li>
-  </ul>
+<h2>Fase 1 — Concierge MVP (no-code)</h2>
+<h3>Objetivo</h3>
+<p>WhatsApp Business + Airtable; protocolo match manual; <strong>20 emparejamientos</strong> reales (hito M2).</p>
+<h3>Estado</h3>
+<p class="check">Planificado — prioridad tras SQL 008 en prod.</p>
 
-  <h2>8. Estructura repositorio</h2>
-  <pre>
-uber-truck/
-  src/server.js, app.js
-  src/routes/
-  src/services/
-  src/lib/
+<h2>Fase 2 — MVP digital v1</h2>
+<h3>Lo realizado (adelantado vs Gantt oct 2026)</h3>
+<ul>
+  <li>Migraciones Supabase 001–008 (auth, matches, chat, notificaciones, banco, <code>penalty_charges</code>).</li>
+  <li>API: <code>capacity-offers</code>, <code>load-requests</code>, <code>matches</code>, sugerencias automáticas, comms, cuenta.</li>
+  <li>UI embarcador / transportista, emparejamientos activos, modal cancelar, acuerdo mutuo bilateral.</li>
+  <li>Notificaciones in-app (JWT); recuadro cuenta y multas (sin pasarela).</li>
+  <li>Railway producción + <code>/health</code> + documentación en <code>/docs/</code>.</li>
+</ul>
+<h3>Pendiente en fase 2</h3>
+<ul>
+  <li><strong>2.4–2.9:</strong> <code>owner_user_id</code> — mis cargas / mis ofertas.</li>
+  <li><strong>2.10e–f:</strong> generar cargo + pasarela; bloqueo por mora.</li>
+</ul>
+
+<h2>Fase 3 — Piloto confianza</h2>
+<p>KYC manual, ratings bidireccionales, microseguro POC, <strong>100 viajes digitales</strong> (M4).</p>
+
+<h2>Fase 4 — SaaS híbrido</h2>
+<p>Match semi-automático por corredor, dashboard embarcador frecuente, informe red de capacidad (M5).</p>
+
+<div class="rule"></div>
+
+<h1>Cronograma del proyecto — vista Gantt</h1>
+<p>Las fechas son <strong>orientativas</strong> (jun 2026 – mar 2027). El Gantt detallado por mes está <strong>en este mismo documento</strong> (no hace falta abrir otro archivo).</p>
+
+<h3>Leyenda</h3>
+<table>
+  <tr><th>Estilo</th><th>Significado</th></tr>
+  <tr><td class="g-done">Hecho</td><td>Entregado en repo / producción</td></tr>
+  <tr><td class="g-doing">En curso</td><td>Trabajo activo</td></tr>
+  <tr><td class="g-todo">Planificado</td><td>No iniciado o pendiente de priorización</td></tr>
+  <tr><td class="g-na">—</td><td>Fuera del trimestre</td></tr>
+</table>
+
+<h3>Resumen por fases</h3>
+<table>
+  <tr><th>Fase</th><th>Nombre</th><th>Inicio</th><th>Fin</th><th>Duración</th></tr>
+  <tr><td>0</td><td>Descubrimiento y legal</td><td>2026-06-01</td><td>2026-06-28</td><td>4 sem</td></tr>
+  <tr><td>1</td><td>Concierge MVP</td><td>2026-06-15</td><td>2026-08-09</td><td>8 sem</td></tr>
+  <tr><td>2</td><td>MVP digital v1</td><td>2026-08-01</td><td>2026-10-25</td><td>12 sem</td></tr>
+  <tr><td>3</td><td>Piloto escalado + confianza</td><td>2026-10-01</td><td>2027-01-31</td><td>16 sem</td></tr>
+  <tr><td>4</td><td>Producto B2B (SaaS)</td><td>2027-02-01</td><td>2027-03-31</td><td>8 sem</td></tr>
+</table>
+
+<h3>Diagrama Gantt por fase (trimestres)</h3>
+<table class="gantt">
+  <tr>
+    <th style="min-width:9em;">Fase</th>
+    <th>2026 T2<br /><span style="font-weight:normal">abr–jun</span></th>
+    <th>2026 T3<br /><span style="font-weight:normal">jul–sep</span></th>
+    <th>2026 T4<br /><span style="font-weight:normal">oct–dic</span></th>
+    <th>2027 T1<br /><span style="font-weight:normal">ene–mar</span></th>
+  </tr>
+  <tr>
+    <td class="hito-head">0 · Descubrimiento</td>
+    <td class="g-doing">En curso</td>
+    <td class="g-todo">Plan</td>
+    <td class="g-na">—</td>
+    <td class="g-na">—</td>
+  </tr>
+  <tr>
+    <td class="hito-head">1 · Concierge</td>
+    <td class="g-todo">Plan</td>
+    <td class="g-doing">En curso</td>
+    <td class="g-todo">Plan</td>
+    <td class="g-na">—</td>
+  </tr>
+  <tr>
+    <td class="hito-head">2 · MVP digital</td>
+    <td class="g-done">Hecho</td>
+    <td class="g-done">Hecho</td>
+    <td class="g-doing">Refino</td>
+    <td class="g-todo">Cobros</td>
+  </tr>
+  <tr>
+    <td class="hito-head">3 · Confianza</td>
+    <td class="g-na">—</td>
+    <td class="g-na">—</td>
+    <td class="g-todo">Plan</td>
+    <td class="g-doing">En curso</td>
+  </tr>
+  <tr>
+    <td class="hito-head">4 · SaaS</td>
+    <td class="g-na">—</td>
+    <td class="g-na">—</td>
+    <td class="g-na">—</td>
+    <td class="g-todo">Plan</td>
+  </tr>
+</table>
+
+<h3>Hitos (milestones)</h3>
+<table>
+  <tr><th>Hito</th><th>Fecha plan</th><th>Estado real (mayo 2026)</th></tr>
+  <tr><td>M1 Descubrimiento + legal</td><td>28-jun-2026</td><td class="g-doing">En curso</td></tr>
+  <tr><td>M2 20 emparejamientos concierge</td><td>09-ago-2026</td><td class="g-todo">Pendiente</td></tr>
+  <tr><td>M3 MVP digital en producción</td><td>25-oct-2026</td><td class="g-done"><strong>Hecho (adelantado)</strong></td></tr>
+  <tr><td>M4 100 viajes digitales</td><td>31-ene-2027</td><td class="g-todo">Pendiente</td></tr>
+  <tr><td>M5 Match semi-auto + SaaS</td><td>31-mar-2027</td><td class="g-todo">Pendiente</td></tr>
+</table>
+
+<h3>Métricas de control</h3>
+<table>
+  <tr><th>Métrica</th><th>Meta M2</th><th>Meta M4</th></tr>
+  <tr><td>Emparejamientos exitosos</td><td>20</td><td>100</td></tr>
+  <tr><td>Tiempo medio match</td><td>&lt; 4 h</td><td>&lt; 1 h (digital)</td></tr>
+  <tr><td>Take rate</td><td>12–15%</td><td>12–15%</td></tr>
+  <tr><td>NPS transportista</td><td>≥ 7</td><td>≥ 8</td></tr>
+</table>
+
+<p><strong>Interpretación mayo 2026:</strong> núcleo fase 2 (~75%) en prod; fase 2.10 cobros ~25%; proyecto total hasta M5 ~35%. Si una etapa se adelanta o retrasa, actualizar celdas del Gantt, la tabla de actividades siguiente y esta nota.</p>
+
+<h2>Próximos pasos — backlog de actividades (mayo 2026)</h2>
+<p>Prioridad: <strong>P0</strong> bloquea validación; <strong>P1</strong> siguiente entrega; <strong>P2</strong> planificado.</p>
+<table>
+  <tr><th>ID</th><th>P</th><th>Actividad</th><th>Entregable</th><th>Ventana</th><th>Estado</th></tr>
+  <tr><td>U1</td><td>P0</td><td>Ejecutar SQL 008 en Supabase prod</td><td>Tablas chat, notif, banco, penalty_charges</td><td>Inmediato</td><td class="g-doing">Pend. usuario</td></tr>
+  <tr><td>U2</td><td>P0</td><td>Validar prod /health + login JWT</td><td>Smoke test Railway</td><td>Inmediato</td><td class="g-done">Hecho</td></tr>
+  <tr><td>U3</td><td>P0</td><td>Memoria + /docs/ en prod</td><td>Gantt y próximos pasos en un solo HTML</td><td>May 2026</td><td class="g-done">Código listo</td></tr>
+  <tr><td>U4</td><td>P1</td><td>Mis cargas / mis ofertas</td><td><code>owner_user_id</code> + API <code>/mine</code></td><td>Jun 2026</td><td class="g-todo">Plan</td></tr>
+  <tr><td>U5</td><td>P1</td><td>Piloto concierge 20 match</td><td>WhatsApp + Airtable operativo</td><td>Jul–Ago 2026</td><td class="g-todo">Plan</td></tr>
+  <tr><td>U6</td><td>P1</td><td>Capturas memoria</td><td><code>docs/img/</code> post-piloto</td><td>Ago 2026</td><td class="g-todo">Plan</td></tr>
+  <tr><td>U7</td><td>P2</td><td>Generar cargo + pasarela</td><td>Webpay / transferencia</td><td>Post-piloto</td><td class="g-todo">Diseño</td></tr>
+  <tr><td>U8</td><td>P2</td><td>KYC + ratings</td><td>Fase 3 operativa</td><td>Oct 2026+</td><td class="g-todo">Plan</td></tr>
+  <tr><td>U9</td><td>P2</td><td>Match semi-auto corredor</td><td>Algoritmo v1</td><td>Feb 2027</td><td class="g-todo">Plan</td></tr>
+</table>
+<p><strong>No hacer aún:</strong> app móvil nativa, Open Finance, pricing dinámico completo.</p>
+
+<h3>Gantt detallado por tarea (2026–2027)</h3>
+<p>Responsable: <strong>E</strong>=Equipo, <strong>O</strong>=Operaciones/concierge, <strong>L</strong>=Legal. Barras ████ = ventana planificada.</p>
+<table class="gantt">
+  <tr>
+    <th>ID</th><th>Tarea</th><th>Resp.</th><th>Inicio</th><th>Fin</th>
+    <th>Jun</th><th>Jul</th><th>Ago</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dic</th><th>Ene</th><th>Feb</th><th>Mar</th>
+    <th>Estado</th>
+  </tr>
+  <tr><td>0.1</td><td>Entrevistas transportistas + PYME</td><td>O</td><td>01-jun</td><td>28-jun</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
+  <tr><td>0.2</td><td>Validación precio / comisión 12–15%</td><td>O</td><td>15-jun</td><td>15-jul</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
+  <tr><td>0.3</td><td>Términos legales + seguro piloto</td><td>L</td><td>01-jun</td><td>30-jun</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
+  <tr><td>1.1</td><td>WhatsApp + Airtable</td><td>O</td><td>15-jun</td><td>22-jun</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
+  <tr><td>1.2</td><td>Protocolo concierge + plantillas</td><td>O</td><td>22-jun</td><td>06-jul</td><td>█</td><td>█</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
+  <tr><td>1.3</td><td><strong>Piloto 20 emparejamientos</strong></td><td>O</td><td>06-jul</td><td>09-ago</td><td></td><td>████████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
+  <tr><td>1.4</td><td>Informe aprendizajes piloto</td><td>E</td><td>02-ago</td><td>16-ago</td><td></td><td></td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
+  <tr><td>2.1</td><td>Esquema BD Supabase (001–008)</td><td>E</td><td>01-ago</td><td>22-ago</td><td></td><td></td><td>███</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
+  <tr><td>2.2</td><td>API Express offers / loads / matches</td><td>E</td><td>15-ago</td><td>19-sep</td><td></td><td></td><td>██</td><td>███</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
+  <tr><td>2.3</td><td>Web carrier / shipper</td><td>E</td><td>01-sep</td><td>03-oct</td><td></td><td></td><td></td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
+  <tr><td>2.4</td><td>Panel matches + estados viaje</td><td>E</td><td>15-sep</td><td>25-oct</td><td></td><td></td><td></td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
+  <tr><td>2.5</td><td>Deploy Railway + /health</td><td>E</td><td>18-oct</td><td>25-oct</td><td></td><td></td><td></td><td></td><td>█</td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
+  <tr><td>2.x</td><td>Chat, acuerdo mutuo, notif, multas UI</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
+  <tr><td>2.10</td><td>Cuenta bancaria + cobro pasarela</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Parcial</td></tr>
+  <tr><td>3.1</td><td>KYC + checklist vehículo</td><td>O/E</td><td>01-oct</td><td>15-nov</td><td></td><td></td><td></td><td></td><td>██</td><td>█</td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
+  <tr><td>3.2</td><td>Ratings bidireccionales</td><td>E</td><td>15-oct</td><td>29-nov</td><td></td><td></td><td></td><td></td><td>██</td><td>█</td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
+  <tr><td>3.3</td><td>Microseguro InsurTech POC</td><td>L/O</td><td>01-nov</td><td>31-dic</td><td></td><td></td><td></td><td></td><td></td><td>████</td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
+  <tr><td>3.4</td><td>100 viajes digitales</td><td>O</td><td>01-nov</td><td>31-ene</td><td></td><td></td><td></td><td></td><td></td><td>██</td><td>████</td><td></td><td></td><td class="g-todo">Plan</td></tr>
+  <tr><td>4.1</td><td>Match semi-auto corredor</td><td>E</td><td>01-feb</td><td>28-feb</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>██</td><td></td><td></td><td class="g-todo">Plan</td></tr>
+  <tr><td>4.2</td><td>Dashboard embarcador SaaS</td><td>E</td><td>01-feb</td><td>31-mar</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>████</td><td class="g-todo">Plan</td></tr>
+  <tr><td>4.3</td><td>Informe red capacidad (data)</td><td>E</td><td>15-mar</td><td>31-mar</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>█</td><td class="g-todo">Plan</td></tr>
+</table>
+
+<h3>Avance fase 2 — resumen</h3>
+<ul>
+  <li>MVP digital núcleo: ~75%</li>
+  <li>Multas / cobros (2.10): ~25%</li>
+  <li>Proyecto total (hasta M5): ~35%</li>
+</ul>
+
+<div class="rule"></div>
+
+<h1>Parte II — Stack tecnológico por capas</h1>
+<p>Numeración de abajo hacia arriba y hacia el exterior (referencia en incidentes y actas).</p>
+
+<h2>Capa 01 — Node.js</h2>
+<p><strong>Rol:</strong> runtime del servidor (<code>src/server.js</code>). <strong>Engines:</strong> ≥ 20. <strong>Problemas:</strong> puerto ocupado, versión distinta a prod → alinear Railway y <code>package.json</code>.</p>
+
+<h2>Capa 02 — Express.js</h2>
+<p><strong>Rol:</strong> HTTP, JSON, estáticos <code>public/</code>, documentación <code>/docs/</code>, rutas <code>/api/*</code>, <code>/health</code>. <strong>Archivo:</strong> <code>src/app.js</code>.</p>
+
+<h2>Capa 03 — API REST</h2>
+<p><strong>Rol:</strong> marketplace — ofertas, cargas, matches, auth, comms, cuenta. <strong>Auth:</strong> JWT en rutas protegidas. Rutas en <code>src/routes/</code>.</p>
+
+<h2>Capa 04 — Supabase (PostgreSQL)</h2>
+<p><strong>Rol:</strong> persistencia; migraciones en <code>supabase/migrations/</code>. Proyecto prod: <code>ljinhegtywixtbzjgjfn</code>. Service role solo en servidor.</p>
+
+<h2>Capa 05 — Autenticación (JWT + bcrypt)</h2>
+<p><strong>Rol:</strong> registro/login; tabla <code>users</code>; roles <code>shipper</code> / <code>carrier</code>. Sin sesión → sin notificaciones ni cuenta personalizada.</p>
+
+<h2>Capa 06 — Lógica de dominio</h2>
+<p><strong>Rol:</strong> <code>src/lib/</code> — match, cancelación (<code>match-cancel-reasons.js</code>), ledger multas (<code>penalty-ledger.js</code>), repositorio.</p>
+
+<h2>Capa 07 — Servicios</h2>
+<p><strong>Rol:</strong> <code>src/services/</code> — Supabase client, comms, integraciones futuras (mapas, pagos).</p>
+
+<h2>Capa 08 — Frontend web (SPA ligera)</h2>
+<p><strong>Rol:</strong> <code>public/index.html</code>, <code>app.js</code>, <code>auth-ui.js</code>, <code>comms-ui.js</code>, <code>penalties-ui.js</code>, <code>theme.css</code>. Marca: naranja <code>#F26522</code>.</p>
+
+<h2>Capa 09 — Canal concierge (fase 1)</h2>
+<p><strong>Rol:</strong> WhatsApp Business + Airtable — match manual sin código; validación antes de escalar digital.</p>
+
+<h2>Capa 10 — Railway</h2>
+<p><strong>Rol:</strong> hosting, variables de entorno, healthcheck <code>/health</code>, deploy desde GitHub <code>main</code>.</p>
+
+<h2>Capa 11 — Git y GitHub</h2>
+<p><strong>Rol:</strong> versionado; nunca commitear <code>.env</code>. Workflow CI: validación (deploy vía integración Railway).</p>
+
+<h2>Capa 12 — Documentación HTML</h2>
+<p><strong>Rol:</strong> memoria viva, Gantt y próximos pasos en un solo HTML; export Word vía <code>html-to-docx</code>. Hub: <code>/docs/index.html</code>.</p>
+
+<h3>Extensiones planificadas</h3>
+<table>
+  <tr><th>Capa futura</th><th>Tecnología</th><th>Fase</th></tr>
+  <tr><td>Mapas / geocoding</td><td>Google Maps / Mapbox</td><td>2+</td></tr>
+  <tr><td>Pagos</td><td>Webpay u otro</td><td>2.10</td></tr>
+  <tr><td>KYC / seguro</td><td>APIs terceros Chile</td><td>3</td></tr>
+</table>
+
+<div class="rule"></div>
+
+<h2>Modelo de datos (resumen)</h2>
+<p><strong>Entidades:</strong> users, vehicles, capacity_offers, load_requests, matches, match_messages, match_notifications, penalty_charges, trip_events (roadmap), ratings (roadmap).</p>
+<p><strong>Estados matches:</strong> proposed → accepted → in_progress → completed | cancelled (con <code>reason_code</code>, multa sugerida, acuerdo mutuo).</p>
+
+<h2>API REST — contrato MVP (v0.0.19)</h2>
+<table>
+  <tr><th>Método</th><th>Ruta</th><th>Descripción</th></tr>
+  <tr><td>GET</td><td>/health</td><td>Health + versión app</td></tr>
+  <tr><td>POST</td><td>/api/auth/register</td><td>Alta usuario</td></tr>
+  <tr><td>POST</td><td>/api/auth/login</td><td>JWT</td></tr>
+  <tr><td>POST/GET</td><td>/api/capacity-offers</td><td>Oferta capacidad</td></tr>
+  <tr><td>POST/GET</td><td>/api/load-requests</td><td>Demanda carga</td></tr>
+  <tr><td>POST/PATCH</td><td>/api/matches</td><td>Emparejar y estados</td></tr>
+  <tr><td>POST</td><td>/api/matches/:id/mutual-cancel</td><td>Acuerdo mutuo</td></tr>
+  <tr><td>GET</td><td>/api/matches/cancel-options</td><td>Motivos y multas</td></tr>
+  <tr><td>GET/POST</td><td>/api/comms/…</td><td>Chat y notificaciones</td></tr>
+  <tr><td>GET</td><td>/api/account/summary</td><td>Multas y plazos</td></tr>
+  <tr><td>PATCH</td><td>/api/account/bank</td><td>Cuenta bancaria Chile</td></tr>
+</table>
+
+<h2>Reglas de negocio MVP</h2>
+<ul>
+  <li>Match: corredor origen–destino, cubicación, tipo de carga compatible; sugerencias automáticas en UI.</li>
+  <li>Cancelación: catálogo de motivos; multas <strong>sugeridas</strong> (sin cobro automático); acuerdo mutuo requiere confirmación de ambas partes.</li>
+  <li>Plazo multa: 7 días; banco obligatorio antes de «generar cargo» (fase 2.10).</li>
+  <li>Comisión: take rate 12–15% sobre flete acordado.</li>
+</ul>
+
+<h2>Seguridad y cumplimiento</h2>
+<ul>
+  <li>Secretos en <code>.env</code>; RLS Supabase por usuario cuando aplique.</li>
+  <li>Ley 19.628 (Chile): minimizar PII en logs.</li>
+  <li>Términos y seguro de carga antes de piloto con cobro real.</li>
+</ul>
+
+<h2>Estructura del repositorio</h2>
+<code class="block">uber-truck/
+  src/server.js, app.js, routes/, services/, lib/
   supabase/migrations/
-  public/
-  docs/
-  </pre>
+  public/          ← UI + brand/logo.png
+  docs/            ← memoria HTML (este archivo)
+  canvases/        ← estado de avance (Cursor)</code>
 
-  <h2>9. Fases técnicas</h2>
-  <table border="1" cellpadding="6" cellspacing="0">
-    <tr><th>Fase</th><th>Entregable técnico</th></tr>
-    <tr><td>MVP 0 Concierge</td><td>WhatsApp + Airtable + 20 matches manuales</td></tr>
-    <tr><td>MVP 1 Digital</td><td>BD + API + formularios web + notificaciones WA</td></tr>
-    <tr><td>MVP 2 Confianza</td><td>KYC, ratings, microseguro integrado</td></tr>
-    <tr><td>Escala</td><td>Match automático, LTL, pricing dinámico, data product</td></tr>
-  </table>
-
-  <h2>10. Riesgos técnicos</h2>
-  <ul>
-    <li>Calidad de datos de ubicación (GPS manual vs automático).</li>
-    <li>Dependencia de concierge → cuello de botella operativo.</li>
-    <li>Integración seguros/KYC con proveedores locales aún no seleccionados.</li>
-  </ul>
-
-  <h2>11. Referencias y documentación</h2>
-  <table border="1" cellpadding="6" cellspacing="0">
-    <tr><th>Documento</th><th>Ruta</th></tr>
-    <tr><td>Índice maestro</td><td>docs/00-INDICE-DOCUMENTACION.md</td></tr>
-    <tr><td>Memoria técnica (MD)</td><td>docs/01-MEMORIA-TECNICA.md</td></tr>
-    <tr><td>SQL completo</td><td>docs/SQL-SUPABASE.md</td></tr>
-    <tr><td>Gantt detallado (HTML)</td><td>docs/Gantt-Uber-Truck.html</td></tr>
-    <tr><td>Canvas estado avance</td><td>canvases/estado-avance.canvas.tsx</td></tr>
-    <tr><td>Roadmap</td><td>docs/ROADMAP.md</td></tr>
-    <tr><td>Política cancelación</td><td>docs/MATCH-CANCEL-POLICY.md</td></tr>
-    <tr><td>Multas y cuenta bancaria</td><td>docs/PENALTIES-AND-ACCOUNTS.md</td></tr>
-  </table>
-
-  <h1>Parte I — Hitos, Gantt y avance</h1>
-  <p>Patrón equivalente a <code>wa-fintech-mvp/docs/Memoria-tecnica-MVP-Fintech-IA.html</code> (Chanchi). Tabla detallada por mes: <a href="Gantt-Uber-Truck.html">Gantt-Uber-Truck.html</a>. Backlog: <code>docs/PROXIMOS-HITOS.md</code>.</p>
-
-  <h3>Leyenda Gantt</h3>
-  <table>
-    <tr><th>Estilo</th><th>Significado</th></tr>
-    <tr><td class="g-done">Hecho</td><td>Entregado en repo / prod</td></tr>
-    <tr><td class="g-doing">En curso</td><td>Trabajo activo</td></tr>
-    <tr><td class="g-todo">Planificado</td><td>No iniciado</td></tr>
-    <tr><td class="g-na">—</td><td>Fuera del trimestre</td></tr>
-  </table>
-
-  <h3>Gantt por fase (trimestres 2026–2027)</h3>
-  <table class="gantt">
-    <tr>
-      <th>Fase</th>
-      <th>2026 T2<br /><span style="font-weight:normal">abr–jun</span></th>
-      <th>2026 T3<br /><span style="font-weight:normal">jul–sep</span></th>
-      <th>2026 T4<br /><span style="font-weight:normal">oct–dic</span></th>
-      <th>2027 T1<br /><span style="font-weight:normal">ene–mar</span></th>
-    </tr>
-    <tr>
-      <td class="hito-head">0 · Descubrimiento</td>
-      <td class="g-doing">En curso</td>
-      <td class="g-todo">Planificado</td>
-      <td class="g-na">—</td>
-      <td class="g-na">—</td>
-    </tr>
-    <tr>
-      <td class="hito-head">1 · Concierge (20 match)</td>
-      <td class="g-todo">Planificado</td>
-      <td class="g-doing">En curso</td>
-      <td class="g-todo">Planificado</td>
-      <td class="g-na">—</td>
-    </tr>
-    <tr>
-      <td class="hito-head">2 · MVP digital</td>
-      <td class="g-done">Hecho</td>
-      <td class="g-done">Hecho</td>
-      <td class="g-doing">Refino</td>
-      <td class="g-todo">2.10 cobros</td>
-    </tr>
-    <tr>
-      <td class="hito-head">3 · Piloto confianza</td>
-      <td class="g-na">—</td>
-      <td class="g-na">—</td>
-      <td class="g-todo">Planificado</td>
-      <td class="g-doing">En curso</td>
-    </tr>
-    <tr>
-      <td class="hito-head">4 · SaaS / match auto</td>
-      <td class="g-na">—</td>
-      <td class="g-na">—</td>
-      <td class="g-na">—</td>
-      <td class="g-todo">Planificado</td>
-    </tr>
-  </table>
-  <p><strong>Interpretación mayo 2026:</strong> fase 2 adelantada (M3 producción antes de oct 2026). Prioridad inmediata: SQL 008 prod, piloto concierge M2, luego mis cargas por usuario.</p>
-
-  <h2>12. Cronograma — hitos y tareas</h2>
-
-  <h3>12.1 Hitos</h3>
-  <table border="1" cellpadding="6" cellspacing="0">
-    <tr><th>Hito</th><th>Fecha plan</th><th>Estado real</th></tr>
-    <tr><td>M1 Descubrimiento + legal</td><td>28-jun-2026</td><td>En curso</td></tr>
-    <tr><td>M2 20 emparejamientos concierge</td><td>09-ago-2026</td><td>Pendiente</td></tr>
-    <tr><td>M3 MVP digital producción</td><td>25-oct-2026</td><td><strong>Hecho (adelantado)</strong></td></tr>
-    <tr><td>M4 100 viajes digitales</td><td>31-ene-2027</td><td>Pendiente</td></tr>
-    <tr><td>M5 Match semi-auto + SaaS</td><td>31-mar-2027</td><td>Pendiente</td></tr>
-  </table>
-
-  <h3>12.2 Fase 2 digital — tareas vs plan</h3>
-  <table border="1" cellpadding="6" cellspacing="0">
-    <tr><th>ID</th><th>Tarea</th><th>Plan Gantt</th><th>Estado</th></tr>
-    <tr><td>2.1</td><td>Esquema BD Supabase</td><td>ago 2026</td><td>Hecho (001–008)</td></tr>
-    <tr><td>2.2</td><td>API Express</td><td>ago–sep 2026</td><td>Hecho</td></tr>
-    <tr><td>2.3</td><td>Web embarcador / transportista</td><td>sep–oct 2026</td><td>Hecho v0.0.19</td></tr>
-    <tr><td>2.4</td><td>Panel / estados viaje</td><td>sep–oct 2026</td><td>Hecho</td></tr>
-    <tr><td>2.5</td><td>Deploy Railway</td><td>oct 2026</td><td>Hecho</td></tr>
-    <tr><td>—</td><td>Chat, acuerdo mutuo, notificaciones, multas UI</td><td>extra MVP</td><td>Hecho</td></tr>
-    <tr><td>2.10</td><td>Cuenta bancaria + cobro</td><td>roadmap</td><td>UI/API sin pasarela</td></tr>
-  </table>
-
-  <h3>12.3 Avance estimado</h3>
-  <ul>
-    <li>Fase 2 MVP digital núcleo: ~75%</li>
-    <li>Fase 2.10 multas/cobros: ~25%</li>
-    <li>Proyecto total (hasta M5): ~35%</li>
-  </ul>
-  <p>Visualización: <a href="Canvas-Resumen-Uber-Truck.html">Canvas-Resumen-Uber-Truck.html</a> · canvas <code>estado-avance.canvas.tsx</code> en Cursor.</p>
-
-  <h3>12.4 Próximos pasos (backlog)</h3>
-  <p>Tabla operativa completa: <code>docs/PROXIMOS-HITOS.md</code>. Comparación con estructura Chanchi: <code>docs/COMPARACION-ESTRUCTURA-CHANCHI.md</code>.</p>
-
-  <h2>13. API ampliada (v0.0.19)</h2>
-  <table border="1" cellpadding="6" cellspacing="0">
-    <tr><th>Método</th><th>Ruta</th><th>Descripción</th></tr>
-    <tr><td>POST</td><td>/api/matches/:id/mutual-cancel</td><td>Confirmar acuerdo mutuo</td></tr>
-    <tr><td>GET</td><td>/api/matches/cancel-options</td><td>Motivos y multas por rol</td></tr>
-    <tr><td>GET/POST</td><td>/api/comms/…</td><td>Chat y notificaciones</td></tr>
-    <tr><td>GET</td><td>/api/account/summary</td><td>Multas pendientes, plazos</td></tr>
-    <tr><td>PATCH</td><td>/api/account/bank</td><td>Cuenta bancaria</td></tr>
-  </table>
-
-  <p class="meta"><em>Fin del documento — v2.1: Parte I Gantt coloreado, hub /docs/, alineación Chanchi.</em></p>
+<p class="meta"><em>Fin del documento — v3.0: estructura Chanchi (Parte I Gantt + próximos pasos integrados, Parte II stack por capas, logo).</em></p>
 </body>
 </html>

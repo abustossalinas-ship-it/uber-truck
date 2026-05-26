@@ -1,6 +1,6 @@
 {
   "version": "0.0.9",
-  "git_sha": "pending-push",
+  "git_sha": "50828a1",
   "ui": "match-cancel-v2",
-  "deployed_at": "2026-05-26"
+  "note": "Si /health build no coincide con git_sha, Railway no desplegó este código"
 }

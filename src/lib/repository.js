@@ -37,10 +37,23 @@ async function update(collection, id, patch) {
   return jsonStore.update(collection, id, patch);
 }
 
+async function findMatchPair(loadRequestId, capacityOfferId) {
+  if (backend() === 'supabase') {
+    return supabase.findMatchPair(loadRequestId, capacityOfferId);
+  }
+  const rows = await jsonStore.list('matches', {});
+  return (
+    rows.find(
+      (m) => m.load_request_id === loadRequestId && m.capacity_offer_id === capacityOfferId
+    ) || null
+  );
+}
+
 module.exports = {
   backend,
   list,
   getById,
+  findMatchPair,
   insert,
   update,
 };

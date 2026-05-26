@@ -49,6 +49,18 @@ async function getById(table, id) {
   return rowToApi(data);
 }
 
+async function findMatchPair(loadRequestId, capacityOfferId) {
+  const sb = getClient();
+  const { data, error } = await sb
+    .from('matches')
+    .select('*')
+    .eq('load_request_id', loadRequestId)
+    .eq('capacity_offer_id', capacityOfferId)
+    .maybeSingle();
+  if (error) throw error;
+  return rowToApi(data);
+}
+
 async function insert(table, row) {
   const sb = getClient();
   const { data, error } = await sb.from(table).insert(row).select().single();
@@ -68,6 +80,7 @@ module.exports = {
   getClient,
   list,
   getById,
+  findMatchPair,
   insert,
   update,
 };

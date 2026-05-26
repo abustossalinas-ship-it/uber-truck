@@ -126,11 +126,20 @@ async function refreshBoard() {
           )
           .join('');
 
+  const loadById = Object.fromEntries((loads.data || []).map((l) => [l.id, l]));
+  const offerById = Object.fromEntries((offers.data || []).map((o) => [o.id, o]));
+
   $('list-matches').innerHTML =
     matches.data?.length === 0
       ? '<p class="muted">Sin emparejamientos aún.</p>'
       : matches.data
           .map((m) => {
+            const load = loadById[m.load_request_id];
+            const offer = offerById[m.capacity_offer_id];
+            const title =
+              load && offer
+                ? `${load.company_name} ↔ ${offer.carrier_name}`
+                : `Carga · Oferta`;
             const actions =
               m.status === 'proposed'
                 ? `<button type="button" data-action="accept" data-id="${m.id}">Aceptar</button>`
@@ -140,9 +149,9 @@ async function refreshBoard() {
                     ? `<button type="button" data-action="complete" data-id="${m.id}">Cerrar</button>`
                     : '';
             return `
-      <article class="item">
+      <article class="item match-item">
+        <strong>${title}</strong>
         <span class="pill">${STATUS_LABEL[m.status] || m.status}</span>
-        <p class="muted">Carga ${m.load_request_id} · Oferta ${m.capacity_offer_id}</p>
         ${m.agreed_price_clp ? `<p>$${Number(m.agreed_price_clp).toLocaleString('es-CL')} CLP</p>` : ''}
         <div class="actions">${actions}</div>
       </article>`;
@@ -303,12 +312,20 @@ $('form-match').addEventListener('submit', async (e) => {
   const json = await res.json();
   if (!res.ok) {
     alert(json.error || json.errors?.join('\n') || 'Error');
+    if (res.status === 409) {
+      refreshBoard().then(() => {
+        $('list-matches')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      });
+    }
     return;
   }
   $('match-price').value = '';
   stickyMatchOfferId = null;
   stickyMatchLoadId = null;
-  refreshBoard();
+  alert('Emparejamiento creado. Abajo en Emparejamientos puedes pulsar Aceptar.');
+  refreshBoard().then(() => {
+    $('list-matches')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 });
 
 $('list-matches').addEventListener('click', async (e) => {

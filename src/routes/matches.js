@@ -43,6 +43,16 @@ router.post('/', async (req, res) => {
     const errors = parseBody([() => optionalNumber(body.agreed_price_clp, 'agreed_price_clp')]);
     if (errors.length) return res.status(400).json({ ok: false, errors });
 
+    const existing = await repo.findMatchPair(load.id, offer.id);
+    if (existing) {
+      return res.status(409).json({
+        ok: false,
+        error:
+          'Ya existe un emparejamiento para esta carga y esta oferta. Revisa la sección Emparejamientos más abajo.',
+        data: existing,
+      });
+    }
+
     const row = await repo.insert('matches', {
       load_request_id: load.id,
       capacity_offer_id: offer.id,
@@ -54,6 +64,14 @@ router.post('/', async (req, res) => {
     res.status(201).json({ ok: true, data: row });
   } catch (e) {
     console.error(e);
+    const dup = e.code === '23505' || /duplicate/i.test(e.message || '');
+    if (dup) {
+      return res.status(409).json({
+        ok: false,
+        error:
+          'Ya existe un emparejamiento para esta carga y esta oferta. Revisa la sección Emparejamientos más abajo.',
+      });
+    }
     res.status(500).json({ ok: false, error: 'Error al crear match' });
   }
 });

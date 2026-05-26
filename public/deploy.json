@@ -1,6 +1,6 @@
 {
-  "version": "0.0.9",
-  "git_sha": "1c958da",
+  "version": "0.0.10",
+  "git_sha": "pending",
   "ui": "match-cancel-v2",
-  "note": "Coincide con railway.git_commit_sha en /health"
+  "note": "Acuerdo mutuo requiere confirmacion bilateral"
 }

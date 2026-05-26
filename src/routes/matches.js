@@ -16,6 +16,11 @@ const {
   getReasonByCode,
 } = require('../lib/match-cancel');
 const { listReasonOptions, phaseLabel } = require('../lib/match-cancel-reasons');
+const {
+  isMutualCancelReady,
+  mutualCancelStatus,
+  fieldForRole,
+} = require('../lib/mutual-cancel');
 
 const router = express.Router();
 
@@ -33,7 +38,7 @@ function resolveActorRole(req) {
   return normalizeRole(req.body?.actor_role || req.query?.actor_role);
 }
 
-router.get('/cancel-options', optionalAuth, (req, res) => {
+router.get('/cancel-options', optionalAuth, async (req, res) => {
   const action = req.query.action;
   const phase = req.query.phase || req.query.status;
   const role = resolveActorRole(req);
@@ -41,11 +46,20 @@ router.get('/cancel-options', optionalAuth, (req, res) => {
     return res.status(400).json({ ok: false, error: 'Query: action y phase (estado del match)' });
   }
   const agreed = req.query.agreed_price_clp ? Number(req.query.agreed_price_clp) : null;
-  const options = listReasonOptions(action, phase, role, agreed);
+  let mutual = { ready: false, shipper_confirmed: false, carrier_confirmed: false };
+  const matchId = req.query.match_id;
+  if (matchId) {
+    const match = await repo.getById('matches', matchId);
+    if (match) mutual = mutualCancelStatus(match);
+  }
+  const options = listReasonOptions(action, phase, role, agreed, {
+    mutualReady: mutual.ready,
+  });
   res.json({
     ok: true,
     phase,
     phase_label: phaseLabel(phase),
+    mutual_cancel: mutual,
     data: options,
     limits: { note: 'Multas sugeridas; acuerdo entre partes. Sin cobro automático en MVP.' },
   });
@@ -93,6 +107,8 @@ router.post('/', async (req, res) => {
           penalty_type: null,
           penalty_amount_clp: null,
           agreement_accepted: false,
+          mutual_cancel_shipper_at: null,
+          mutual_cancel_carrier_at: null,
           notes: body.notes?.trim() || existing.notes,
         });
         return res.status(201).json({ ok: true, data: revived, revived: true });
@@ -125,6 +141,45 @@ router.post('/', async (req, res) => {
       });
     }
     res.status(500).json({ ok: false, error: 'Error al crear match' });
+  }
+});
+
+router.post('/:id/mutual-cancel', optionalAuth, async (req, res) => {
+  try {
+    const match = await repo.getById('matches', req.params.id);
+    if (!match) return res.status(404).json({ ok: false, error: 'No encontrado' });
+    if (!['accepted', 'in_progress'].includes(match.status)) {
+      return res.status(400).json({
+        ok: false,
+        error: 'Acuerdo mutuo solo aplica con emparejamiento aceptado o en ruta.',
+      });
+    }
+    const role = resolveActorRole(req);
+    const field = fieldForRole(role);
+    if (!field) {
+      return res.status(403).json({ ok: false, error: 'Rol no válido para confirmar acuerdo mutuo.' });
+    }
+    if (match[field]) {
+      return res.json({
+        ok: true,
+        data: match,
+        mutual_cancel: mutualCancelStatus(match),
+        message: 'Ya habías confirmado el acuerdo mutuo.',
+      });
+    }
+    const updated = await repo.update('matches', match.id, {
+      [field]: new Date().toISOString(),
+    });
+    const status = mutualCancelStatus(updated);
+    const message = status.ready
+      ? 'Ambos confirmaron. Ya puedes cancelar eligiendo «Acuerdo mutuo» en el modal.'
+      : role === 'shipper'
+        ? 'Embarcador confirmó. Falta confirmación del transportista.'
+        : 'Transportista confirmó. Falta confirmación del embarcador.';
+    res.json({ ok: true, data: updated, mutual_cancel: status, message });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al registrar acuerdo mutuo' });
   }
 });
 
@@ -166,6 +221,7 @@ router.patch('/:id/status', optionalAuth, async (req, res) => {
         reason_code: req.body?.reason_code,
         reason_detail: req.body?.reason_detail,
         agreement_accepted: req.body?.agreement_accepted,
+        mutualReady: isMutualCancelReady(match),
       });
       if (reasonErr) return res.status(400).json({ ok: false, error: reasonErr });
 

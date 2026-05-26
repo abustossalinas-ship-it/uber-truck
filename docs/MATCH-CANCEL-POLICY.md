@@ -31,7 +31,7 @@ Equivalente a **retirar propuesta** + elegir otra oferta. Mismos motivos y lími
 
 | Motivo | Quién | Multa sugerida |
 |--------|-------|----------------|
-| Acuerdo mutuo | Ambos | Ninguna (checkbox obligatorio) |
+| Acuerdo mutuo | Ambos | Ninguna — **solo** si embarcador y transportista pulsaron «Confirmar acuerdo mutuo» en el emparejamiento antes de cancelar |
 | Embarcador cambia planes | Embarcador | 15 % del precio acordado (mín. $30.000) |
 | Transportista no puede cumplir | Transportista | 10 % (mín. $20.000) al embarcador |
 | No show / falla grave | Transportista (en ruta) | 20 % (mín. $40.000) |

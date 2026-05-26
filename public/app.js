@@ -8,11 +8,18 @@ const API = {
   allLoads: () => fetch('/api/load-requests', { headers: apiHeaders() }).then((r) => r.json()),
   allOffers: () => fetch('/api/capacity-offers', { headers: apiHeaders() }).then((r) => r.json()),
   matches: () => fetch('/api/matches', { headers: apiHeaders() }).then((r) => r.json()),
-  cancelOptions: (action, phase, agreedPriceClp) => {
+  cancelOptions: (action, phase, agreedPriceClp, matchId) => {
     let url = `/api/matches/cancel-options?action=${encodeURIComponent(action)}&phase=${encodeURIComponent(phase)}&actor_role=${encodeURIComponent(getActorRole())}`;
     if (agreedPriceClp) url += `&agreed_price_clp=${encodeURIComponent(agreedPriceClp)}`;
+    if (matchId) url += `&match_id=${encodeURIComponent(matchId)}`;
     return fetch(url, { headers: apiHeaders() }).then((r) => r.json());
   },
+  confirmMutualCancel: (matchId) =>
+    fetch(`/api/matches/${matchId}/mutual-cancel`, {
+      method: 'POST',
+      headers: apiHeaders(),
+      body: JSON.stringify({ actor_role: getActorRole() }),
+    }).then((r) => r.json()),
   suggestions: (loadId) =>
     fetch(`/api/load-requests/${loadId}/match-suggestions`, { headers: apiHeaders() }).then((r) => r.json()),
   postLoad: (body) =>
@@ -93,13 +100,32 @@ function buildMatchActions(m) {
       html += `<button type="button" class="btn-secondary" data-action="reject" data-id="${m.id}" data-phase="proposed" data-price="${m.agreed_price_clp || ''}">Rechazar</button>`;
     }
   }
-  if (m.status === 'accepted') {
-    html += `<button type="button" data-action="progress" data-id="${m.id}">En ruta</button>`;
-    html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="accepted" data-price="${m.agreed_price_clp || ''}">Cancelar emparejamiento</button>`;
-  }
-  if (m.status === 'in_progress') {
-    html += `<button type="button" data-action="complete" data-id="${m.id}">Cerrar</button>`;
-    html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="in_progress" data-price="${m.agreed_price_clp || ''}">Cancelar en ejecución</button>`;
+  if (m.status === 'accepted' || m.status === 'in_progress') {
+    const shipperOk = Boolean(m.mutual_cancel_shipper_at);
+    const carrierOk = Boolean(m.mutual_cancel_carrier_at);
+    const mutualReady = shipperOk && carrierOk;
+    html += '<p class="mutual-status muted">';
+    if (mutualReady) {
+      html += '✓ Acuerdo mutuo confirmado por ambos. En «Cancelar» verás esa opción sin multa.';
+    } else {
+      html += `Acuerdo mutuo: embarcador ${shipperOk ? '✓' : 'pendiente'} · transportista ${carrierOk ? '✓' : 'pendiente'}`;
+    }
+    html += '</p>';
+    if (!mutualReady) {
+      if (role === 'shipper' && !shipperOk) {
+        html += `<button type="button" class="btn-secondary" data-action="mutual_confirm" data-id="${m.id}">Confirmar acuerdo mutuo (yo, embarcador)</button>`;
+      }
+      if (role === 'carrier' && !carrierOk) {
+        html += `<button type="button" class="btn-secondary" data-action="mutual_confirm" data-id="${m.id}">Confirmar acuerdo mutuo (yo, transportista)</button>`;
+      }
+    }
+    if (m.status === 'accepted') {
+      html += `<button type="button" data-action="progress" data-id="${m.id}">En ruta</button>`;
+      html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="accepted" data-price="${m.agreed_price_clp || ''}">Cancelar emparejamiento</button>`;
+    } else {
+      html += `<button type="button" data-action="complete" data-id="${m.id}">Cerrar</button>`;
+      html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="in_progress" data-price="${m.agreed_price_clp || ''}">Cancelar en ejecución</button>`;
+    }
   }
   return html;
 }
@@ -176,7 +202,7 @@ function closeCancelModal() {
 
 async function openCancelModal(ctx) {
   const { matchId, action, phase, title, lead, agreedPriceClp } = ctx;
-  const json = await API.cancelOptions(action, phase, agreedPriceClp);
+  const json = await API.cancelOptions(action, phase, agreedPriceClp, matchId);
   if (!json.ok || !json.data?.length) {
     alert(json.error || 'No hay motivos disponibles para esta acción.');
     return;
@@ -185,11 +211,18 @@ async function openCancelModal(ctx) {
   cancelReasonOptions = json.data;
   $('cancel-modal-title').textContent = title;
   const stageLine = json.phase_label ? `Etapa: ${json.phase_label}. ` : '';
-  $('cancel-modal-lead').textContent = lead || '';
+  let leadText = lead || '';
+  if (json.mutual_cancel && action === 'cancel' && !json.mutual_cancel.ready) {
+    leadText +=
+      ' La opción «Acuerdo mutuo» solo aparece cuando embarcador y transportista confirmaron antes (botones en la tarjeta del emparejamiento).';
+  }
+  $('cancel-modal-lead').textContent = leadText;
   const badge = $('cancel-stage-badge');
   if (badge && json.phase_label) {
     badge.hidden = false;
-    badge.textContent = `Etapa actual: ${json.phase_label}`;
+    let badgeText = `Etapa actual: ${json.phase_label}`;
+    if (json.mutual_cancel?.ready) badgeText += ' · Acuerdo mutuo listo';
+    badge.textContent = badgeText;
   } else if (badge) badge.hidden = true;
   const sel = $('cancel-reason-code');
   sel.innerHTML = json.data
@@ -260,6 +293,16 @@ function runMatchCancel(matchId, action, phase, agreedPriceClp) {
     title: titles[action] || 'Cancelar',
     lead: leads[action] || '',
   });
+}
+
+async function runMutualConfirm(matchId) {
+  const json = await API.confirmMutualCancel(matchId);
+  if (!json.ok) {
+    alert(json.error || 'No se pudo confirmar');
+    return;
+  }
+  alert(json.message || 'Confirmado');
+  refreshBoard();
 }
 
 function runChangeOffer(matchId, loadId) {

@@ -65,6 +65,8 @@ async function applyCancelPatch(match, action, role, body) {
     penalty_type: penalty.type,
     penalty_amount_clp: penalty.amount_clp,
     agreement_accepted: Boolean(body.agreement_accepted),
+    mutual_cancel_shipper_at: null,
+    mutual_cancel_carrier_at: null,
   });
 }
 

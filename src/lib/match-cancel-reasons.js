@@ -87,7 +87,8 @@ const REASONS = [
     roles: ['shipper', 'carrier', 'admin'],
     penalty: { type: 'none' },
     requiresDetail: false,
-    requiresAgreement: true,
+    requiresAgreement: false,
+    requiresMutualConfirm: true,
   },
   {
     code: 'shipper_change_plans',
@@ -192,13 +193,15 @@ function normalizeRole(role) {
   return 'shipper';
 }
 
-function listReasonOptions(action, matchStatus, role, agreedPriceClp = null) {
+function listReasonOptions(action, matchStatus, role, agreedPriceClp = null, opts = {}) {
   const r = normalizeRole(role);
+  const mutualReady = Boolean(opts.mutualReady);
   return REASONS.filter(
     (x) =>
       x.actions.includes(action) &&
       x.phases.includes(matchStatus) &&
-      x.roles.includes(r)
+      x.roles.includes(r) &&
+      (!x.requiresMutualConfirm || mutualReady)
   ).map((x) => {
     const penaltyPreview = computePenalty(x, agreedPriceClp);
     const feeLabel =
@@ -249,7 +252,15 @@ function buildReasonSummary(reason, detail) {
   return text;
 }
 
-function validateReasonPayload({ action, matchStatus, role, reason_code, reason_detail, agreement_accepted }) {
+function validateReasonPayload({
+  action,
+  matchStatus,
+  role,
+  reason_code,
+  reason_detail,
+  agreement_accepted,
+  mutualReady,
+}) {
   const reason = getReasonByCode(reason_code);
   if (!reason) return 'Selecciona un motivo válido.';
   if (!reason.actions.includes(action) || !reason.phases.includes(matchStatus)) {
@@ -257,6 +268,9 @@ function validateReasonPayload({ action, matchStatus, role, reason_code, reason_
   }
   if (!reason.roles.includes(normalizeRole(role))) {
     return 'Tu rol no puede usar este motivo.';
+  }
+  if (reason.requiresMutualConfirm && !mutualReady) {
+    return 'Acuerdo mutuo: ambas partes deben confirmar primero en Emparejamientos (botones Confirmar acuerdo mutuo).';
   }
   const detail = (reason_detail || '').trim();
   if (reason.requiresDetail) {

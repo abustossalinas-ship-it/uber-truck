@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cómo probar Uber Truck</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.35; max-width: 900px; margin: 2cm auto; color: #111; }
+    h1 { font-size: 18pt; border-bottom: 1px solid #333; padding-bottom: 6px; }
+    h2 { font-size: 14pt; margin-top: 1.2em; }
+    table { border-collapse: collapse; width: 100%; margin: 0.6em 0; font-size: 10pt; }
+    th, td { border: 1px solid #444; padding: 6px 8px; }
+    th { background: #e8e8e8; }
+    .meta { font-size: 10pt; color: #444; }
+    .doc-header { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 1em; }
+    .doc-header img { width: 72px; height: 72px; flex-shrink: 0; border-radius: 12px; border: 1px solid #e5e7eb; }
+    .doc-title-wrap h1 { margin-top: 0; }
+    ol { margin: 0.4em 0 0.6em 1.2em; }
+    code { background: #f5f5f5; padding: 2px 6px; }
+  </style>
+</head>
+<body>
+
+<div class="doc-header">
+  <img src="/brand/logo.png" width="72" height="72" alt="Uber Truck" />
+  <div class="doc-title-wrap">
+    <h1>Cómo probar Uber Truck</h1>
+    <p class="meta">Para testers · mayo 2026 · Sin instalar Supabase ni Railway</p>
+  </div>
+</div>
+
+<p class="meta"><a href="/">← Abrir la app</a> · <a href="/docs/">Documentación</a></p>
+
+<h2>1. Qué necesitas</h2>
+<ul>
+  <li>Navegador en el celular o PC (Chrome, Safari, Edge).</li>
+  <li>Conexión a internet.</li>
+  <li><strong>No</strong> necesitas instalar programas, ni tener acceso a Supabase, Railway ni al código.</li>
+</ul>
+
+<p><strong>Link de la app:</strong> <a href="https://uber-truck-production.up.railway.app">https://uber-truck-production.up.railway.app</a></p>
+
+<h2>2. Crear tu cuenta</h2>
+<ol>
+  <li>Abre el link de arriba.</li>
+  <li>Pulsa <strong>Crear cuenta</strong> (arriba a la derecha).</li>
+  <li>Completa email, contraseña (mínimo 6 caracteres), tu nombre y el <strong>rol</strong>:
+    <ul>
+      <li><strong>Embarcador</strong> — si quieres publicar una carga que necesitas mover.</li>
+      <li><strong>Transportista</strong> — si tienes espacio libre en un camión en ruta.</li>
+    </ul>
+  </li>
+  <li>Pulsa <strong>Registrarse</strong>. Quedas con sesión iniciada.</li>
+</ol>
+
+<h2>3. Probar los dos roles (embarcador y transportista)</h2>
+<p>Cada cuenta tiene <strong>un solo rol</strong>. Para probar ambos como en un juego de roles:</p>
+<table>
+  <tr><th>Opción</th><th>Cómo</th></tr>
+  <tr><td>Dos cuentas (recomendado)</td><td>Registro 1: <code>tucorreo+embarcador@gmail.com</code> · Registro 2: <code>tucorreo+transportista@gmail.com</code> (mismo buzón en Gmail si usas +alias)</td></tr>
+  <tr><td>Dos navegadores</td><td>Chrome normal + ventana incógnito, una cuenta en cada uno</td></tr>
+  <tr><td>Dos personas</td><td>Una crea cuenta embarcador, otra transportista, y hacen match en el tablero</td></tr>
+</table>
+
+<h2>4. Flujo de prueba (5 minutos)</h2>
+<ol>
+  <li><strong>Embarcador:</strong> pestaña «Necesito mover carga» → publicar carga (origen, destino, cubicación).</li>
+  <li><strong>Transportista:</strong> pestaña «Tengo espacio en ruta» → publicar capacidad compatible.</li>
+  <li><strong>Tablero / emparejar:</strong> elegir la carga → ver sugerencias → crear match → aceptar → pasar a en ruta → cerrar.</li>
+  <li>Probar <strong>chat</strong> y <strong>notificaciones</strong> (campana) con sesión iniciada.</li>
+</ol>
+
+<h2>5. Si algo falla</h2>
+<table>
+  <tr><th>Error</th><th>Qué hacer</th></tr>
+  <tr><td>«Registro requiere Supabase»</td><td>El servidor no está listo; avisa al dueño del proyecto (no es culpa tuya).</td></tr>
+  <tr><td>«Email ya registrado»</td><td>Usa <strong>Ingresar</strong> con esa cuenta o otro email.</td></tr>
+  <tr><td>No ves notificaciones</td><td>Debes estar con <strong>Ingresar</strong>, no solo modo demo sin login.</td></tr>
+</table>
+
+<h2>6. Para el dueño del proyecto (solo Ariel)</h2>
+<p class="meta">Los testers no hacen esto. En Railway deben existir <code>SUPABASE_URL</code>, <code>SUPABASE_SERVICE_ROLE_KEY</code>, <code>JWT_SECRET</code> y la migración <code>003_auth_password.sql</code> en Supabase.</p>
+
+<p class="meta"><a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica</a> · <a href="DEMO-GUION.md">Guion demo 3 min</a></p>
+
+</body>
+</html>

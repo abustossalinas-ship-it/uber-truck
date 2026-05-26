@@ -20,6 +20,7 @@ const PACK = [
   { html: 'docs/Politica-Cancelacion-Uber-Truck.html', out: 'docs/Politica-Cancelacion-Uber-Truck.docx', copy: 'Politica-Cancelacion-Uber-Truck.docx', title: 'Política cancelación' },
   { html: 'docs/Multas-Cuenta-Uber-Truck.html', out: 'docs/Multas-Cuenta-Uber-Truck.docx', copy: 'Multas-Cuenta-Uber-Truck.docx', title: 'Multas y cuenta' },
   { html: 'docs/Sql-Supabase-Uber-Truck.html', out: 'docs/Sql-Supabase-Uber-Truck.docx', copy: 'Sql-Supabase-Uber-Truck.docx', title: 'SQL Supabase' },
+  { html: 'docs/Probar-Uber-Truck.html', out: 'docs/Probar-Uber-Truck.docx', copy: 'Probar-Uber-Truck.docx', title: 'Cómo probar Uber Truck' },
 ];
 
 async function main() {

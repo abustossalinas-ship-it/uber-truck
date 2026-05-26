@@ -85,6 +85,34 @@ body {
   padding: 0.35rem 0.75rem;
 }
 
+.invite-tester {
+  margin: 1rem 1.5rem 0;
+  padding: 1rem 1.25rem;
+  background: var(--accent-soft);
+  border: 2px solid var(--accent);
+  border-radius: var(--radius);
+}
+
+.invite-tester h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1.05rem;
+}
+
+.invite-steps {
+  margin: 0.5rem 0 0.75rem 1.2rem;
+  padding: 0;
+}
+
+.invite-link-wrap {
+  margin: 0.75rem 0 0.5rem;
+  font-size: 0.9rem;
+}
+
+.invite-link-wrap a {
+  color: var(--accent-hover);
+  font-weight: 600;
+}
+
 .demo-bar {
   display: flex;
   flex-wrap: wrap;

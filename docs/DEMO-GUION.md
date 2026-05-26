@@ -1,39 +1,22 @@
 # Guion demo Uber Truck (3 minutos)
 
-**URL:** https://uber-truck-production.up.railway.app
+**URL para testers:** https://uber-truck-production.up.railway.app
 
-## Antes de mostrar
+**Guía invitados (sin Supabase/Railway):** [Probar-Uber-Truck.html](./Probar-Uber-Truck.html)
 
-1. Ejecutar migración `003_auth_password.sql` en Supabase (si usar login).
-2. Opcional: cargar datos demo → botón **“Cargar demo”** en la web (requiere `DEMO_SEED_KEY` en Railway) o `POST /api/demo/seed`.
+## Antes de mostrar (solo dueño del proyecto)
 
-## Guion
+1. Supabase con migración `003_auth_password.sql` (y 004–008 si usas chat/multas).
+2. Variables en Railway: `SUPABASE_*`, `JWT_SECRET`.
 
-### 1. Problema (30 s)
+## Guion rápido
 
-> “Las PYME publican pedidos extras y muchas veces terminan cotizando un camión dedicado casi fijo, aunque solo necesitan 2–4 pallets en un corredor que otro transportista ya recorre.”
+1. Problema: carga incidental sin camión dedicado.
+2. Embarcador crea cuenta → publica carga.
+3. Transportista crea cuenta → publica capacidad.
+4. Tablero → match → estados → chat.
+5. Cierre: todo en la misma app web.
 
-### 2. Publicar carga (45 s)
+## Cuentas
 
-Pestaña **Necesito mover carga** → buscar dirección con Maps → comuna/región se rellenan → elegir cubicación → **Publicar carga**.
-
-### 3. Oferta de capacidad (30 s)
-
-**Tengo espacio en ruta** → publicar camión con m³ libres en el mismo corredor.
-
-### 4. Match inteligente (45 s)
-
-**Tablero** → elegir carga → ver **Sugerencias automáticas** (puntaje por región y cubicación) → **Crear match** → **Aceptar** → **En ruta** → **Cerrar**.
-
-### 5. Cierre (30 s)
-
-> “Todo queda en Supabase; el piloto valida tiempo a match y repetición de embarcadores sin contratar camión extra mensual.”
-
-## Cuentas demo (opcional)
-
-Registrar en la app:
-
-- Embarcador: `demo@embarcador.cl` / rol embarcador  
-- Transportista: `demo@transportista.cl` / rol transportista  
-
-Contraseña mínimo 6 caracteres.
+Cada tester se registra solo. Para dos roles: dos emails (ej. `nombre+embarcador@gmail.com` y `nombre+transportista@gmail.com`).

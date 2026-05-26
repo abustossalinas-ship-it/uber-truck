@@ -33,6 +33,7 @@ No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitáco
 
 | Tema | Documento |
 |------|-----------|
+| **Probar sin instalar (testers)** | [Probar-Uber-Truck.html](./Probar-Uber-Truck.html) |
 | Deploy | [DEPLOY.md](./DEPLOY.md) |
 | Demo | [DEMO-GUION.md](./DEMO-GUION.md) |
 | Marca / logo | [BRAND.md](./BRAND.md) |

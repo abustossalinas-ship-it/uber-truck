@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#F26522" />
   <title>Uber Truck — Inteligencia en movimiento</title>
   <link rel="icon" href="/brand/logo.png" type="image/png" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.19" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.20" />
 </head>
 <body>
   <header class="site-header">
@@ -32,10 +32,28 @@
 
   <section id="account-penalties-panel" class="account-penalties-panel card" hidden></section>
 
+  <section class="invite-tester card" id="invite-tester">
+    <h2>Probar Uber Truck (sin instalar nada)</h2>
+    <p class="muted">
+      Solo necesitas este enlace en el celular o PC. <strong>No</strong> hace falta Supabase, Railway ni código.
+      Crea tu cuenta como <strong>embarcador</strong> o <strong>transportista</strong> (usa dos emails si quieres probar ambos roles).
+    </p>
+    <ol class="invite-steps">
+      <li>Pulsa <strong>Crear cuenta</strong> arriba a la derecha.</li>
+      <li>Elige rol: embarcador (publica carga) o transportista (publica capacidad).</li>
+      <li>Publica en las pestañas correspondientes y empareja en <strong>Tablero / emparejar</strong>.</li>
+    </ol>
+    <p class="invite-link-wrap">
+      <strong>Link para compartir:</strong>
+      <a id="invite-share-url" href="https://uber-truck-production.up.railway.app">uber-truck-production.up.railway.app</a>
+      <button type="button" class="tab tab-sm" id="btn-copy-invite-link">Copiar link</button>
+    </p>
+    <a class="tab tab-sm tab-outline" href="/docs/Probar-Uber-Truck.html" target="_blank" rel="noopener">Guía completa para testers</a>
+  </section>
+
   <div class="demo-bar">
-    <span>Demo en vivo · <strong id="demo-url">uber-truck-production.up.railway.app</strong></span>
-    <button type="button" class="tab tab-sm" id="btn-seed-demo">Cargar datos demo</button>
-    <a class="tab tab-sm" href="/docs/DEMO-GUION.md" target="_blank" rel="noopener">Guion 3 min</a>
+    <span>Entorno en vivo · <strong id="demo-url">uber-truck-production.up.railway.app</strong></span>
+    <button type="button" class="tab tab-sm" id="btn-seed-demo" hidden>Cargar datos demo</button>
   </div>
 
   <div id="auth-panel" class="auth-panel card" hidden>
@@ -49,9 +67,11 @@
       <input name="full_name" id="auth-full-name" class="register-only" />
       <label id="auth-role-label" class="register-only">Rol</label>
       <select name="role" id="auth-role" class="register-only">
-        <option value="shipper">Embarcador</option>
-        <option value="carrier">Transportista</option>
+        <option value="shipper">Embarcador — publica carga</option>
+        <option value="carrier">Transportista — publica capacidad en ruta</option>
       </select>
+      <label id="auth-company-label" class="register-only">Empresa (opcional)</label>
+      <input name="company_name" id="auth-company" class="register-only" placeholder="Ej. Transportes Sur" />
       <button type="submit" id="auth-submit">Entrar</button>
     </form>
     <p class="muted">
@@ -403,6 +423,7 @@
     </div>
   </div>
 
+  <script src="/invite-ui.js?v=0.0.20"></script>
   <script src="/roles-ui.js?v=0.0.19"></script>
   <script src="/maps-ui.js?v=0.0.19"></script>
   <script src="/auth-ui.js?v=0.0.19"></script>

@@ -12,7 +12,7 @@ Uber Truck **no** debe vivir en el proyecto Railway ni en el proyecto Supabase d
 | **Dashboard** | https://supabase.com/dashboard/project/ljinhegtywixtbzjgjfn |
 | **API URL** | `https://ljinhegtywixtbzjgjfn.supabase.co` |
 
-1. [SQL Editor](https://supabase.com/dashboard/project/ljinhegtywixtbzjgjfn/sql/new) → ejecutar migraciones en orden: `001_init.sql`, `002_address_geo.sql`, `003_auth_password.sql`, `004_match_cancel.sql`.
+1. [SQL Editor](https://supabase.com/dashboard/project/ljinhegtywixtbzjgjfn/sql/new) → ejecutar migraciones en orden: `001` … `005_match_cancel_reasons.sql` (ver `supabase/migrations/`).
 2. [Settings → API](https://supabase.com/dashboard/project/ljinhegtywixtbzjgjfn/settings/api) → copiar **service_role** (no la anon key en el servidor MVP).
 3. En `.env` (local) y Railway (producción):
 

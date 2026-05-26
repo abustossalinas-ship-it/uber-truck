@@ -511,6 +511,70 @@ select.offer-picked {
   font-size: 0.8rem;
 }
 
+.cancel-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+.cancel-modal[hidden] {
+  display: none;
+}
+
+.cancel-modal-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.cancel-modal-card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 440px;
+  background: var(--surface);
+  border-radius: var(--radius);
+  padding: 1.25rem;
+  box-shadow: var(--shadow);
+  border: 2px solid var(--accent);
+}
+
+.cancel-modal-card h3 {
+  margin: 0 0 0.5rem;
+}
+
+.cancel-modal-card select,
+.cancel-modal-card textarea {
+  width: 100%;
+  margin-bottom: 0.65rem;
+}
+
+.penalty-box {
+  padding: 0.55rem 0.65rem;
+  background: #fff0e8;
+  border-radius: 8px;
+  margin-bottom: 0.65rem;
+  font-size: 0.85rem;
+}
+
+.cancel-agreement {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.cancel-modal-actions {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+}
+
 .match-form .step-label {
   margin: 1rem 0 0.35rem;
   font-size: 0.8rem;

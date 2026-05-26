@@ -1,8 +1,14 @@
 'use strict';
 
 const repo = require('./repository');
+const {
+  validateReasonPayload,
+  checkWithdrawLimit,
+  getReasonByCode,
+  computePenalty,
+  buildReasonSummary,
+} = require('./match-cancel-reasons');
 
-/** Quién puede ejecutar cada acción según estado del match */
 const PERMISSIONS = {
   proposed: {
     withdraw: ['shipper', 'admin'],
@@ -33,21 +39,6 @@ function canPerform(matchStatus, action, role) {
   return allowed.includes(normalizeRole(role));
 }
 
-function validateReason(action, matchStatus, reason) {
-  if (action === 'withdraw' || action === 'reject') return null;
-  const text = (reason || '').trim();
-  if (matchStatus === 'in_progress') {
-    if (text.length < 10) {
-      return 'Indica un motivo de al menos 10 caracteres para cancelar en ejecución.';
-    }
-    return null;
-  }
-  if (text.length < 5) {
-    return 'Indica un motivo de al menos 5 caracteres.';
-  }
-  return null;
-}
-
 async function releaseLoadAndOffer(match) {
   const load = await repo.getById('load_requests', match.load_request_id);
   const offer = await repo.getById('capacity_offers', match.capacity_offer_id);
@@ -59,11 +50,34 @@ async function releaseLoadAndOffer(match) {
   }
 }
 
+async function applyCancelPatch(match, action, role, body) {
+  const reason = getReasonByCode(body.reason_code);
+  const penalty = computePenalty(reason, match.agreed_price_clp);
+  const summary = buildReasonSummary(reason, body.reason_detail?.trim());
+
+  return repo.update('matches', match.id, {
+    status: 'cancelled',
+    cancel_action: action,
+    cancelled_by: role,
+    cancel_reason: summary,
+    reason_code: body.reason_code,
+    reason_detail: body.reason_detail?.trim() || null,
+    penalty_type: penalty.type,
+    penalty_amount_clp: penalty.amount_clp,
+    agreement_accepted: Boolean(body.agreement_accepted),
+  });
+}
+
 module.exports = {
   PERMISSIONS,
   ACTION_LABELS,
   normalizeRole,
   canPerform,
-  validateReason,
+  validateReasonPayload,
+  checkWithdrawLimit,
+  applyCancelPatch,
   releaseLoadAndOffer,
+  computePenalty,
+  buildReasonSummary,
+  getReasonByCode,
 };

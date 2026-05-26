@@ -8,6 +8,11 @@ const API = {
   allLoads: () => fetch('/api/load-requests', { headers: apiHeaders() }).then((r) => r.json()),
   allOffers: () => fetch('/api/capacity-offers', { headers: apiHeaders() }).then((r) => r.json()),
   matches: () => fetch('/api/matches', { headers: apiHeaders() }).then((r) => r.json()),
+  cancelOptions: (action, phase) =>
+    fetch(
+      `/api/matches/cancel-options?action=${encodeURIComponent(action)}&phase=${encodeURIComponent(phase)}&actor_role=${encodeURIComponent(getActorRole())}`,
+      { headers: apiHeaders() }
+    ).then((r) => r.json()),
   suggestions: (loadId) =>
     fetch(`/api/load-requests/${loadId}/match-suggestions`, { headers: apiHeaders() }).then((r) => r.json()),
   postLoad: (body) =>
@@ -69,6 +74,9 @@ function buildMatchActions(m) {
     const parts = [];
     if (m.cancel_action) parts.push(CANCEL_ACTION_LABEL[m.cancel_action] || m.cancel_action);
     if (m.cancel_reason) parts.push(m.cancel_reason);
+    if (m.penalty_type === 'fee_suggested' && m.penalty_amount_clp) {
+      parts.push(`Multa sugerida $${Number(m.penalty_amount_clp).toLocaleString('es-CL')}`);
+    }
     if (m.cancelled_by) parts.push(`rol ${m.cancelled_by}`);
     return parts.length
       ? `<p class="muted match-cancel-meta">${parts.join(' · ')}</p>`
@@ -111,60 +119,156 @@ function updateActiveProposalBanner(matches, loadId) {
   banner.innerHTML = `<strong>Propuesta activa</strong> (${active.length}). Puedes comparar más ofertas, <em>retirar</em> o <em>cambiar oferta</em> en Emparejamientos. ${names ? `Actual: ${names}.` : ''}`;
 }
 
-async function runMatchCancel(matchId, action, phase) {
-  let reason = null;
-  if (action === 'cancel') {
-    const hint =
-      phase === 'in_progress'
-        ? 'Motivo obligatorio (mín. 10 caracteres). El viaje ya estaba en ejecución:'
-        : 'Motivo de cancelación (mín. 5 caracteres):';
-    reason = prompt(hint);
-    if (reason === null) return;
-    if (phase === 'in_progress') {
-      const ok = confirm(
-        '¿Confirmas cancelar un emparejamiento en ejecución? La carga y la oferta volverán a publicarse.'
-      );
-      if (!ok) return;
-    }
+function formatPenaltyLine(penalty) {
+  if (!penalty) return 'Sin multa sugerida.';
+  if (penalty.type === 'fee_suggested' && penalty.percentOfAgreed) {
+    const pct = penalty.percentOfAgreed;
+    const min = penalty.minClp ? ` (mín. $${penalty.minClp.toLocaleString('es-CL')})` : '';
+    return `Multa sugerida: ~${pct}% del precio acordado${min}. ${penalty.note || ''}`.trim();
   }
-  const res = await API.patchMatch(matchId, { status: 'cancelled', action, reason });
+  if (penalty.type === 'mediation') return penalty.note || 'Se recomienda mediación.';
+  if (penalty.type === 'review') return penalty.note || 'Quedará sujeto a revisión.';
+  return penalty.note || 'Sin multa sugerida.';
+}
+
+function updateCancelReasonForm() {
+  const code = $('cancel-reason-code')?.value;
+  const opt = cancelReasonOptions.find((o) => o.code === code);
+  const detailEl = $('cancel-reason-detail');
+  const detailLabel = $('cancel-detail-label');
+  const penaltyBox = $('cancel-penalty-box');
+  const agreeLabel = $('cancel-agreement-label');
+  const agreeText = $('cancel-agreement-text');
+  if (!opt) return;
+  const showDetail = opt.requiresDetail;
+  detailLabel.hidden = !showDetail;
+  detailEl.hidden = !showDetail;
+  detailEl.required = showDetail;
+  penaltyBox.hidden = false;
+  penaltyBox.textContent = formatPenaltyLine(opt.penalty);
+  if (opt.requiresAgreement) {
+    agreeLabel.hidden = false;
+    agreeText.textContent =
+      opt.penalty?.type === 'fee_suggested'
+        ? 'Confirmo el acuerdo o acepto registrar la multa sugerida (sin cobro automático en esta fase).'
+        : 'Confirmo que ambas partes están de acuerdo o acepto las condiciones indicadas.';
+  } else {
+    agreeLabel.hidden = true;
+    $('cancel-agreement').checked = false;
+  }
+}
+
+function closeCancelModal() {
+  const modal = $('cancel-modal');
+  if (modal) {
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
+  }
+  cancelModalCtx = null;
+  cancelReasonOptions = [];
+}
+
+async function openCancelModal(ctx) {
+  const { matchId, action, phase, title, lead } = ctx;
+  const json = await API.cancelOptions(action, phase);
+  if (!json.ok || !json.data?.length) {
+    alert(json.error || 'No hay motivos disponibles para esta acción.');
+    return;
+  }
+  cancelModalCtx = ctx;
+  cancelReasonOptions = json.data;
+  $('cancel-modal-title').textContent = title;
+  $('cancel-modal-lead').textContent = lead;
+  const sel = $('cancel-reason-code');
+  sel.innerHTML = json.data.map((o) => `<option value="${o.code}">${o.label}</option>`).join('');
+  $('cancel-reason-detail').value = '';
+  $('cancel-agreement').checked = false;
+  updateCancelReasonForm();
+  const modal = $('cancel-modal');
+  modal.hidden = false;
+  modal.setAttribute('aria-hidden', 'false');
+}
+
+async function submitCancelModal(e) {
+  e.preventDefault();
+  if (!cancelModalCtx) return;
+  const { matchId, action, phase } = cancelModalCtx;
+  if (phase === 'in_progress' && action === 'cancel') {
+    const ok = confirm(
+      '¿Confirmas cancelar un emparejamiento en ejecución? La carga y la oferta volverán a publicarse.'
+    );
+    if (!ok) return;
+  }
+  const body = {
+    status: 'cancelled',
+    action,
+    reason_code: $('cancel-reason-code').value,
+    reason_detail: $('cancel-reason-detail').value,
+    agreement_accepted: $('cancel-agreement').checked,
+  };
+  const res = await API.patchMatch(matchId, body);
   const json = await res.json();
   if (!res.ok) {
     alert(json.error || 'No se pudo completar la acción');
     return;
   }
-  alert(json.message || 'Listo');
-  stickyMatchOfferId = null;
-  refreshBoard();
-}
-
-async function runChangeOffer(matchId, loadId, offerId) {
-  const ok = confirm(
-    '¿Retirar la propuesta actual y elegir otra oferta? La carga seguirá publicada para comparar el abanico.'
-  );
-  if (!ok) return;
-  const res = await API.patchMatch(matchId, { status: 'cancelled', action: 'withdraw' });
-  const json = await res.json();
-  if (!res.ok) {
-    alert(json.error || 'Error');
-    return;
+  const afterSuccess = cancelModalCtx?.afterSuccess;
+  closeCancelModal();
+  let msg = json.message || 'Listo';
+  if (json.penalty?.amount_clp) {
+    msg += `\nMulta sugerida: $${Number(json.penalty.amount_clp).toLocaleString('es-CL')} CLP (acuerdo entre partes).`;
   }
-  stickyMatchLoadId = loadId;
+  alert(msg);
   stickyMatchOfferId = null;
   await refreshBoard();
-  if (loadId) {
-    $('match-load').value = loadId;
-    loadSuggestionsFor(loadId);
-    $('match-offer').value = '';
-    $('match-offer')?.focus();
-    $('form-match')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    alert('Propuesta retirada. Elige otra oferta en el Paso 2 o usa una sugerencia.');
-  }
+  if (afterSuccess) await afterSuccess();
+}
+
+function runMatchCancel(matchId, action, phase) {
+  const titles = {
+    withdraw: 'Retirar propuesta',
+    reject: 'Rechazar propuesta',
+    cancel: 'Cancelar emparejamiento',
+  };
+  const leads = {
+    withdraw: 'La carga seguirá publicada. Elige un motivo (sin cobro automático).',
+    reject: 'La oferta seguirá publicada para otras cargas.',
+    cancel: 'Se liberan carga y oferta. Algunos motivos incluyen multa sugerida por acuerdo.',
+  };
+  openCancelModal({
+    matchId,
+    action,
+    phase,
+    title: titles[action] || 'Cancelar',
+    lead: leads[action] || '',
+  });
+}
+
+function runChangeOffer(matchId, loadId) {
+  openCancelModal({
+    matchId,
+    action: 'withdraw',
+    phase: 'proposed',
+    title: 'Cambiar oferta',
+    lead: 'Retiramos la propuesta actual para que puedas elegir otra en el tablero.',
+    afterSuccess: async () => {
+      stickyMatchLoadId = loadId;
+      stickyMatchOfferId = null;
+      if (loadId) {
+        $('match-load').value = loadId;
+        loadSuggestionsFor(loadId);
+        $('match-offer').value = '';
+        $('form-match')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    },
+  });
 }
 
 let boardRefreshGen = 0;
 let stickyMatchLoadId = null;
 let stickyMatchOfferId = null;
+let cancelModalCtx = null;
+let cancelReasonOptions = [];
 
 function showTab(name) {
   document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
@@ -451,15 +555,15 @@ $('list-matches').addEventListener('click', async (e) => {
   const id = btn.dataset.id;
   const action = btn.dataset.action;
   if (action === 'change_offer') {
-    await runChangeOffer(id, btn.dataset.loadId, btn.dataset.offerId);
+    runChangeOffer(id, btn.dataset.loadId);
     return;
   }
   if (action === 'withdraw' || action === 'reject') {
-    await runMatchCancel(id, action, null);
+    runMatchCancel(id, action, 'proposed');
     return;
   }
   if (action === 'cancel') {
-    await runMatchCancel(id, 'cancel', btn.dataset.phase);
+    runMatchCancel(id, 'cancel', btn.dataset.phase);
     return;
   }
   const map = { accept: 'accepted', progress: 'in_progress', complete: 'completed' };
@@ -476,8 +580,8 @@ fetch('/health')
   .then((h) => {
     const el = document.getElementById('storage-badge');
     if (!el) return;
-    if (h.ui === 'match-cancel-v1' || h.ui === 'match-flow-v3' || h.ui === 'match-flow-v2') {
-      el.textContent = `v${h.version || '?'} · emparejar + cancelar`;
+    if (h.ui?.startsWith('match-cancel') || h.ui === 'match-flow-v3') {
+      el.textContent = `v${h.version || '?'} · motivos y multas sugeridas`;
     } else if (h.storage === 'supabase' && h.supabase?.connected) {
       el.textContent = 'Conectado a Supabase (actualiza deploy)';
     } else if (h.storage === 'supabase') {
@@ -542,6 +646,12 @@ document.getElementById('btn-seed-demo')?.addEventListener('click', async () => 
 
 window.renderBoardActor = renderBoardActor;
 window.refreshBoard = refreshBoard;
+
+$('cancel-reason-code')?.addEventListener('change', updateCancelReasonForm);
+$('form-cancel-reason')?.addEventListener('submit', submitCancelModal);
+document.querySelectorAll('[data-close-cancel]').forEach((el) => {
+  el.addEventListener('click', closeCancelModal);
+});
 
 renderBoardActor();
 showTab('shipper');

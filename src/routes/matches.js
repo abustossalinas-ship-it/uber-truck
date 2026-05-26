@@ -6,11 +6,16 @@ const { optionalNumber, parseBody } = require('../lib/validate');
 const { optionalAuth } = require('../lib/optional-auth');
 const {
   canPerform,
-  validateReason,
+  validateReasonPayload,
+  checkWithdrawLimit,
+  applyCancelPatch,
   releaseLoadAndOffer,
   normalizeRole,
   ACTION_LABELS,
+  computePenalty,
+  getReasonByCode,
 } = require('../lib/match-cancel');
+const { listReasonOptions } = require('../lib/match-cancel-reasons');
 
 const router = express.Router();
 
@@ -25,8 +30,19 @@ const MATCH_TRANSITIONS = {
 
 function resolveActorRole(req) {
   if (req.user?.role) return normalizeRole(req.user.role);
-  return normalizeRole(req.body?.actor_role);
+  return normalizeRole(req.body?.actor_role || req.query?.actor_role);
 }
+
+router.get('/cancel-options', optionalAuth, (req, res) => {
+  const action = req.query.action;
+  const phase = req.query.phase || req.query.status;
+  const role = resolveActorRole(req);
+  if (!action || !phase) {
+    return res.status(400).json({ ok: false, error: 'Query: action y phase (estado del match)' });
+  }
+  const options = listReasonOptions(action, phase, role);
+  res.json({ ok: true, data: options, limits: { note: 'Multas sugeridas; acuerdo entre partes.' } });
+});
 
 router.get('/', async (_req, res) => {
   try {
@@ -65,6 +81,11 @@ router.post('/', async (req, res) => {
           cancel_action: null,
           cancelled_by: null,
           cancel_reason: null,
+          reason_code: null,
+          reason_detail: null,
+          penalty_type: null,
+          penalty_amount_clp: null,
+          agreement_accepted: false,
           notes: body.notes?.trim() || existing.notes,
         });
         return res.status(201).json({ ok: true, data: revived, revived: true });
@@ -131,18 +152,31 @@ router.patch('/:id/status', optionalAuth, async (req, res) => {
           error: `Tu rol (${role}) no puede ${ACTION_LABELS[action] || action} en estado ${match.status}`,
         });
       }
-      const reasonErr = validateReason(action, match.status, req.body?.reason);
+      const reasonErr = validateReasonPayload({
+        action,
+        matchStatus: match.status,
+        role,
+        reason_code: req.body?.reason_code,
+        reason_detail: req.body?.reason_detail,
+        agreement_accepted: req.body?.agreement_accepted,
+      });
       if (reasonErr) return res.status(400).json({ ok: false, error: reasonErr });
 
-      const patch = {
-        status: 'cancelled',
-        cancel_action: action,
-        cancelled_by: role,
-        cancel_reason: req.body?.reason?.trim() || null,
-      };
-      const updated = await repo.update('matches', match.id, patch);
+      if (action === 'withdraw') {
+        const limitErr = await checkWithdrawLimit(repo, match.load_request_id);
+        if (limitErr) return res.status(429).json({ ok: false, error: limitErr });
+      }
+
+      const reason = getReasonByCode(req.body.reason_code);
+      const penalty = computePenalty(reason, match.agreed_price_clp);
+      const updated = await applyCancelPatch(match, action, role, req.body);
       await releaseLoadAndOffer(match);
-      return res.json({ ok: true, data: updated, message: cancelMessage(action) });
+      return res.json({
+        ok: true,
+        data: updated,
+        message: cancelMessage(action),
+        penalty,
+      });
     }
 
     const updated = await repo.update('matches', match.id, { status: next });
@@ -173,7 +207,7 @@ function cancelMessage(action) {
   if (action === 'reject') {
     return 'Propuesta rechazada. La oferta sigue publicada para otras cargas.';
   }
-  return 'Emparejamiento cancelado. Carga y oferta liberadas.';
+  return 'Emparejamiento cancelado. Carga y oferta liberadas. Revisa multa sugerida si aplica.';
 }
 
 module.exports = router;

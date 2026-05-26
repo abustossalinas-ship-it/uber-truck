@@ -12,3 +12,9 @@ jobs:
       - name: POST deploy hook
         if: ${{ secrets.RAILWAY_DEPLOY_HOOK != '' }}
         run: curl -fsS -X POST "${{ secrets.RAILWAY_DEPLOY_HOOK }}"
+      - name: Aviso si falta deploy hook
+        if: ${{ secrets.RAILWAY_DEPLOY_HOOK == '' }}
+        run: |
+          echo "::warning::Agrega el secret RAILWAY_DEPLOY_HOOK en GitHub (URL desde Railway Settings → Deploy)."
+          echo "Mientras tanto, en Railway usa Deploy del ultimo commit de main, no solo Redeploy."
+          exit 0

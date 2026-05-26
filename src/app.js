@@ -1,6 +1,16 @@
 const path = require('path');
+const fs = require('fs');
 const express = require('express');
 const pkg = require('../package.json');
+
+function readDeployManifest() {
+  try {
+    const raw = fs.readFileSync(path.join(__dirname, '..', 'public', 'deploy.json'), 'utf8');
+    return JSON.parse(raw);
+  } catch {
+    return null;
+  }
+}
 
 const app = express();
 
@@ -35,13 +45,25 @@ app.get('/health', async (_req, res) => {
       supabaseError = e.message;
     }
   }
+  const manifest = readDeployManifest();
+  const railwaySha = process.env.RAILWAY_GIT_COMMIT_SHA || '';
   res.json({
     ok: true,
     service: 'uber-truck',
     version: pkg.version,
-    build: process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) || process.env.GIT_COMMIT || 'local',
+    build: railwaySha.slice(0, 7) || process.env.GIT_COMMIT || 'local',
     ui: 'match-cancel-v2',
     features: ['cancel-reasons-modal', 'penalty-by-phase'],
+    deploy_manifest: manifest,
+    railway: {
+      git_commit_sha: railwaySha || null,
+      git_branch: process.env.RAILWAY_GIT_BRANCH || null,
+      replica: process.env.RAILWAY_REPLICA_ID || null,
+    },
+    hint:
+      manifest && railwaySha && !railwaySha.startsWith(manifest.git_sha?.slice(0, 7) || '---')
+        ? 'Deploy desactualizado: en Railway usa Deploy del último commit de main (ver docs/RAILWAY-DEPLOY-FIX.md)'
+        : null,
     storage: repo.backend(),
     supabase: {
       project_ref: projectRef || 'ljinhegtywixtbzjgjfn',

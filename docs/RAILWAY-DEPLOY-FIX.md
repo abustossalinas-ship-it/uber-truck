@@ -28,9 +28,13 @@ Deben coincidir el **build** (primeros 7 del commit) con el último commit de Gi
 
 ## Solución C — Deploy Hook (auto en cada push)
 
-1. Railway → servicio → **Settings** → **Deploy** → copia **Deploy Hook URL**.
-2. GitHub → repo → **Settings** → **Secrets** → `RAILWAY_DEPLOY_HOOK` = esa URL.
-3. Cada `git push` a `main` dispara el workflow `.github/workflows/railway-deploy.yml`.
+### Correos "Run failed" de GitHub (deploy OK en Railway)
+
+Railway puede mostrar **Deployment successful** y aun así GitHub envía **run failed** si el workflow hacía `curl` a un Deploy Hook inválido o sin secret. El deploy real es **Railway ↔ GitHub**, no ese hook.
+
+- El workflow `.github/workflows/railway-deploy.yml` ya solo confirma el push (siempre verde).
+- Opcional: GitHub → **Settings → Notifications** → menos alertas de Actions.
+- Deploy Hook (`RAILWAY_DEPLOY_HOOK`) solo si lo necesitas a propósito.
 
 ## Solución D — Root directory
 

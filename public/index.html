@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#F26522" />
   <title>Uber Truck — Inteligencia en movimiento</title>
   <link rel="icon" href="/brand/logo.png" type="image/png" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.12" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.13" />
 </head>
 <body>
   <header class="site-header">
@@ -333,18 +333,28 @@
       <p id="cancel-modal-lead" class="muted"></p>
       <p id="cancel-stage-badge" class="cancel-stage-badge" hidden></p>
 
-      <section id="cancel-mutual-panel" class="cancel-mutual-panel" hidden>
+      <section id="cancel-mutual-panel" class="cancel-mutual-panel cancel-path-panel" hidden>
+        <p class="cancel-path-tag" id="cancel-mutual-tag">Opción seleccionada</p>
         <h4>Acuerdo mutuo (sin multa)</h4>
         <p id="cancel-mutual-status" class="muted"></p>
         <button type="button" class="btn-secondary" id="btn-mutual-confirm-in-modal">Confirmar mi parte del acuerdo mutuo</button>
         <button type="button" class="btn-danger" id="btn-mutual-cancel-now" hidden>Cancelar con acuerdo mutuo</button>
+        <p class="cancel-path-switch">
+          <button type="button" class="link-btn" id="btn-cancel-use-other">
+            No hay acuerdo — cancelar con otro motivo (puede tener multa)
+          </button>
+        </p>
       </section>
 
-      <section id="cancel-other-panel" class="cancel-other-panel">
+      <section id="cancel-other-panel" class="cancel-other-panel cancel-path-panel" hidden>
+        <p class="cancel-path-tag cancel-path-tag-alt" id="cancel-other-tag">Opción seleccionada</p>
+        <button type="button" class="link-btn cancel-path-back" id="btn-cancel-use-mutual" hidden>
+          ← Volver a acuerdo mutuo (sin multa)
+        </button>
         <h4>Otro motivo (puede incluir multa sugerida)</h4>
         <form id="form-cancel-reason">
           <label for="cancel-reason-code">Motivo según etapa del camión</label>
-          <select id="cancel-reason-code" name="reason_code" required></select>
+          <select id="cancel-reason-code" name="reason_code"></select>
           <label id="cancel-detail-label" for="cancel-reason-detail" hidden>Detalle</label>
           <textarea id="cancel-reason-detail" name="reason_detail" rows="2" hidden></textarea>
           <p id="cancel-penalty-box" class="penalty-box muted" hidden></p>
@@ -352,19 +362,20 @@
             <input type="checkbox" id="cancel-agreement" name="agreement_accepted" />
             <span id="cancel-agreement-text"></span>
           </label>
-          <div class="cancel-modal-actions">
-            <button type="button" class="btn-secondary" data-close-cancel>Cerrar</button>
-            <button type="submit" class="btn-danger">Confirmar cancelación</button>
-          </div>
+          <button type="submit" class="btn-danger">Confirmar cancelación</button>
         </form>
       </section>
+
+      <div class="cancel-modal-footer">
+        <button type="button" class="btn-secondary" data-close-cancel>Cerrar</button>
+      </div>
     </div>
   </div>
 
-  <script src="/roles-ui.js?v=0.0.12"></script>
-  <script src="/maps-ui.js?v=0.0.12"></script>
-  <script src="/auth-ui.js?v=0.0.12"></script>
-  <script src="/comms-ui.js?v=0.0.12"></script>
-  <script src="/app.js?v=0.0.12"></script>
+  <script src="/roles-ui.js?v=0.0.13"></script>
+  <script src="/maps-ui.js?v=0.0.13"></script>
+  <script src="/auth-ui.js?v=0.0.13"></script>
+  <script src="/comms-ui.js?v=0.0.13"></script>
+  <script src="/app.js?v=0.0.13"></script>
 </body>
 </html>

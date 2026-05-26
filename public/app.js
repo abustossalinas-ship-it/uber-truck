@@ -202,6 +202,89 @@ function updateCancelReasonForm() {
   }
 }
 
+let cancelModalMode = 'mutual';
+
+function otherCancelReasonOptions() {
+  return (cancelReasonOptions || []).filter((o) => o.code !== 'mutual_agreement');
+}
+
+function populateOtherReasonSelect() {
+  const sel = $('cancel-reason-code');
+  if (!sel) return;
+  const opts = otherCancelReasonOptions();
+  if (opts.length === 0) {
+    sel.innerHTML = '<option value="">Sin motivos para tu rol</option>';
+    return;
+  }
+  sel.innerHTML = opts
+    .map((o) => `<option value="${o.code}">${o.label_short || o.label}</option>`)
+    .join('');
+  updateCancelReasonForm();
+}
+
+function applyCancelModalLayout(mode, mutual) {
+  const isCancel = cancelModalCtx?.action === 'cancel';
+  const mutualPanel = $('cancel-mutual-panel');
+  const otherPanel = $('cancel-other-panel');
+  const useOther = $('btn-cancel-use-other');
+  const useMutual = $('btn-cancel-use-mutual');
+  const reasonSel = $('cancel-reason-code');
+  const lead = $('cancel-modal-lead');
+
+  if (!isCancel) {
+    cancelModalMode = 'other';
+    if (mutualPanel) mutualPanel.hidden = true;
+    if (otherPanel) {
+      otherPanel.hidden = false;
+      otherPanel.classList.add('cancel-path-active');
+    }
+    if (reasonSel) reasonSel.required = true;
+    return;
+  }
+
+  const ready = Boolean(mutual?.ready);
+  if (ready) cancelModalMode = 'mutual';
+
+  if (cancelModalMode === 'mutual' || ready) {
+    cancelModalMode = 'mutual';
+    if (mutualPanel) {
+      mutualPanel.hidden = false;
+      mutualPanel.classList.add('cancel-path-active');
+    }
+    if (otherPanel) {
+      otherPanel.hidden = true;
+      otherPanel.classList.remove('cancel-path-active');
+    }
+    if (useOther) useOther.hidden = ready;
+    if (useMutual) useMutual.hidden = true;
+    if (reasonSel) reasonSel.required = false;
+    if (lead) {
+      lead.textContent = ready
+        ? 'Acuerdo mutuo listo. Finaliza sin multa con el botón naranja.'
+        : 'Opción activa: acuerdo mutuo (sin multa). Confirma tu parte aquí.';
+    }
+    return;
+  }
+
+  cancelModalMode = 'other';
+  if (mutualPanel) {
+    mutualPanel.hidden = true;
+    mutualPanel.classList.remove('cancel-path-active');
+  }
+  if (otherPanel) {
+    otherPanel.hidden = false;
+    otherPanel.classList.add('cancel-path-active');
+  }
+  if (useOther) useOther.hidden = true;
+  if (useMutual) useMutual.hidden = false;
+  if (reasonSel) reasonSel.required = true;
+  if (lead) {
+    lead.textContent =
+      'Opción activa: otro motivo (puede incluir multa). Vuelve arriba si logran acuerdo mutuo.';
+  }
+  populateOtherReasonSelect();
+}
+
 function closeCancelModal() {
   const modal = $('cancel-modal');
   if (modal) {
@@ -209,9 +292,18 @@ function closeCancelModal() {
     modal.setAttribute('aria-hidden', 'true');
   }
   const mutualPanel = $('cancel-mutual-panel');
-  if (mutualPanel) mutualPanel.hidden = true;
+  const otherPanel = $('cancel-other-panel');
+  if (mutualPanel) {
+    mutualPanel.hidden = true;
+    mutualPanel.classList.remove('cancel-path-active');
+  }
+  if (otherPanel) {
+    otherPanel.hidden = true;
+    otherPanel.classList.remove('cancel-path-active');
+  }
   cancelModalCtx = null;
   cancelReasonOptions = [];
+  cancelModalMode = 'mutual';
 }
 
 function renderCancelMutualPanel(ctx, mutual) {
@@ -249,6 +341,8 @@ function renderCancelMutualPanel(ctx, mutual) {
     btnConfirm.classList.toggle('mutual-cta-highlight', !myOk && (m.shipper_confirmed || m.carrier_confirmed));
   }
   if (btnNow) btnNow.hidden = !m.ready;
+  lastMutualCancelForLayout = m;
+  applyCancelModalLayout(cancelModalMode, m);
 }
 
 async function refreshCancelModalState() {
@@ -258,13 +352,6 @@ async function refreshCancelModalState() {
   if (!json.ok) return;
   cancelReasonOptions = json.data || [];
   renderCancelMutualPanel(cancelModalCtx, json.mutual_cancel);
-  const sel = $('cancel-reason-code');
-  if (sel) {
-    sel.innerHTML = cancelReasonOptions
-      .map((o) => `<option value="${o.code}">${o.label_short || o.label}</option>`)
-      .join('');
-    updateCancelReasonForm();
-  }
   if (typeof Comms !== 'undefined') Comms.refreshBell();
 }
 
@@ -277,14 +364,22 @@ async function openCancelModal(ctx) {
   }
   cancelModalCtx = ctx;
   cancelReasonOptions = json.data;
+  cancelModalMode = action === 'cancel' ? 'mutual' : 'other';
   $('cancel-modal-title').textContent = title;
-  let leadText = lead || '';
-  if (action === 'cancel') {
-    leadText =
-      'Primero usa «Acuerdo mutuo» (ambos confirman aquí). Si no hay acuerdo, elige otro motivo abajo.';
-  }
-  $('cancel-modal-lead').textContent = leadText;
+  $('cancel-modal-lead').textContent = lead || '';
+  $('cancel-reason-detail').value = '';
+  $('cancel-agreement').checked = false;
   renderCancelMutualPanel(ctx, json.mutual_cancel);
+  if (action !== 'cancel') {
+    const sel = $('cancel-reason-code');
+    if (sel) {
+      sel.innerHTML = json.data
+        .map((o) => `<option value="${o.code}">${o.label_short || o.label}</option>`)
+        .join('');
+      updateCancelReasonForm();
+    }
+    applyCancelModalLayout('other', null);
+  }
   const badge = $('cancel-stage-badge');
   if (badge && json.phase_label) {
     badge.hidden = false;
@@ -292,13 +387,6 @@ async function openCancelModal(ctx) {
     if (json.mutual_cancel?.ready) badgeText += ' · Acuerdo mutuo listo';
     badge.textContent = badgeText;
   } else if (badge) badge.hidden = true;
-  const sel = $('cancel-reason-code');
-  sel.innerHTML = json.data
-    .map((o) => `<option value="${o.code}">${o.label_short || o.label}</option>`)
-    .join('');
-  $('cancel-reason-detail').value = '';
-  $('cancel-agreement').checked = false;
-  updateCancelReasonForm();
   const modal = $('cancel-modal');
   modal.hidden = false;
   modal.setAttribute('aria-hidden', 'false');
@@ -307,6 +395,12 @@ async function openCancelModal(ctx) {
 async function submitCancelModal(e) {
   e.preventDefault();
   if (!cancelModalCtx) return;
+  if (cancelModalCtx.action === 'cancel' && cancelModalMode === 'mutual') {
+    alert(
+      'Estás en acuerdo mutuo (sin multa). Confirma tu parte arriba o usa el enlace para cambiar a otro motivo.'
+    );
+    return;
+  }
   const { matchId, action, phase } = cancelModalCtx;
   if (phase === 'in_progress' && action === 'cancel') {
     const ok = confirm(
@@ -450,6 +544,7 @@ let stickyMatchLoadId = null;
 let stickyMatchOfferId = null;
 let cancelModalCtx = null;
 let cancelReasonOptions = [];
+let lastMutualCancelForLayout = null;
 
 function showTab(name) {
   document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
@@ -864,6 +959,16 @@ $('cancel-reason-code')?.addEventListener('change', updateCancelReasonForm);
 $('form-cancel-reason')?.addEventListener('submit', submitCancelModal);
 $('btn-mutual-confirm-in-modal')?.addEventListener('click', confirmMutualInModal);
 $('btn-mutual-cancel-now')?.addEventListener('click', cancelWithMutualNow);
+$('btn-cancel-use-other')?.addEventListener('click', () => {
+  if (!cancelModalCtx) return;
+  cancelModalMode = 'other';
+  applyCancelModalLayout('other', lastMutualCancelForLayout);
+});
+$('btn-cancel-use-mutual')?.addEventListener('click', () => {
+  if (!cancelModalCtx) return;
+  cancelModalMode = 'mutual';
+  applyCancelModalLayout('mutual', lastMutualCancelForLayout);
+});
 document.querySelectorAll('[data-close-cancel]').forEach((el) => {
   el.addEventListener('click', closeCancelModal);
 });

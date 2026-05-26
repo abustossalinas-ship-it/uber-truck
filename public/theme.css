@@ -696,12 +696,57 @@ select.offer-picked {
   max-width: 480px;
 }
 
+.cancel-path-panel.cancel-path-active {
+  padding: 0.85rem;
+  margin-bottom: 1rem;
+  background: var(--accent-soft);
+  border-radius: 10px;
+  border: 2px solid var(--accent);
+  box-shadow: 0 0 0 1px rgba(242, 101, 34, 0.2);
+}
+
+.cancel-path-panel.cancel-path-active .cancel-path-tag {
+  display: inline-block;
+}
+
+.cancel-path-tag {
+  display: none;
+  font-size: 0.7rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--accent-hover);
+  margin: 0 0 0.35rem;
+}
+
+.cancel-path-tag-alt {
+  color: var(--brand-gray-700);
+}
+
+.cancel-path-switch {
+  margin: 0.75rem 0 0;
+  font-size: 0.85rem;
+}
+
+.cancel-path-back {
+  margin: 0 0 0.5rem;
+  font-size: 0.85rem;
+}
+
+.cancel-modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
+
 .cancel-mutual-panel {
   padding: 0.75rem;
   margin-bottom: 1rem;
-  background: var(--accent-soft);
+  background: var(--brand-gray-50);
   border-radius: 8px;
-  border: 1px solid var(--accent);
+  border: 1px solid var(--border);
 }
 
 .cancel-mutual-panel h4,

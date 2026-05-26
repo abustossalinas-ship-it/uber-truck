@@ -1,6 +1,6 @@
 {
   "version": "0.0.9",
-  "git_sha": "50828a1",
+  "git_sha": "1c958da",
   "ui": "match-cancel-v2",
-  "note": "Si /health build no coincide con git_sha, Railway no desplegó este código"
+  "note": "Coincide con railway.git_commit_sha en /health"
 }

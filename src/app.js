@@ -61,8 +61,8 @@ app.get('/health', async (_req, res) => {
       replica: process.env.RAILWAY_REPLICA_ID || null,
     },
     hint:
-      manifest && railwaySha && !railwaySha.startsWith(manifest.git_sha?.slice(0, 7) || '---')
-        ? 'Deploy desactualizado: en Railway usa Deploy del último commit de main (ver docs/RAILWAY-DEPLOY-FIX.md)'
+      manifest && railwaySha && manifest.version && pkg.version !== manifest.version
+        ? 'Deploy desactualizado: version en servidor distinta al manifest. Haz Deploy del ultimo commit en Railway.'
         : null,
     storage: repo.backend(),
     supabase: {

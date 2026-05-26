@@ -1,20 +1,16 @@
-# Dispara redeploy en Railway si configuraste RAILWAY_DEPLOY_HOOK (secret en GitHub).
-name: Railway deploy hook
+# Railway ya despliega automáticamente desde GitHub (Settings → Source → main).
+# Este job solo confirma el push; NO llama al deploy hook (evita "run failed" por curl).
+name: Post-push check
 
 on:
   push:
     branches: [main]
 
 jobs:
-  trigger:
+  ok:
     runs-on: ubuntu-latest
     steps:
-      - name: POST deploy hook
-        if: ${{ secrets.RAILWAY_DEPLOY_HOOK != '' }}
-        run: curl -fsS -X POST "${{ secrets.RAILWAY_DEPLOY_HOOK }}"
-      - name: Aviso si falta deploy hook
-        if: ${{ secrets.RAILWAY_DEPLOY_HOOK == '' }}
+      - name: Deploy vía Railway GitHub
         run: |
-          echo "::warning::Agrega el secret RAILWAY_DEPLOY_HOOK en GitHub (URL desde Railway Settings → Deploy)."
-          echo "Mientras tanto, en Railway usa Deploy del ultimo commit de main, no solo Redeploy."
-          exit 0
+          echo "Deploy automático: Railway está conectado al repo (no hace falta deploy hook)."
+          echo "Si el deploy falla, revisa Railway → Deployments, no este workflow."

@@ -627,6 +627,10 @@ $('list-matches').addEventListener('click', async (e) => {
   if (!btn) return;
   const id = btn.dataset.id;
   const action = btn.dataset.action;
+  if (action === 'mutual_confirm') {
+    await runMutualConfirm(id);
+    return;
+  }
   if (action === 'change_offer') {
     runChangeOffer(id, btn.dataset.loadId);
     return;

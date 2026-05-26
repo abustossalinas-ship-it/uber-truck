@@ -2,26 +2,28 @@
 
 const express = require('express');
 const repo = require('../lib/repository');
+const supabaseService = require('../services/supabase');
 const { requiredString, optionalNumber, parseBody } = require('../lib/validate');
 const { addressPayload } = require('../lib/geo-fields');
 const { requireMapsAddresses } = require('../lib/geo-validate');
+const { optionalAuth } = require('../lib/optional-auth');
+const { requireAuthIfDb } = require('../lib/require-auth');
+const { offerListFilters, assertCanPublishOffer } = require('../lib/access-scope');
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/', optionalAuth, async (req, res) => {
   try {
-    const rows = await repo.list('capacity_offers', {
-      region: req.query.region,
-      status: req.query.status,
-    });
-    res.json({ ok: true, data: rows });
+    const filters = offerListFilters(req.user, req.query);
+    const rows = await repo.list('capacity_offers', filters);
+    res.json({ ok: true, data: rows, scope: req.user?.role || 'public' });
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al listar ofertas' });
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const row = await repo.getById('capacity_offers', req.params.id);
     if (!row) return res.status(404).json({ ok: false, error: 'No encontrado' });
@@ -32,8 +34,12 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', optionalAuth, requireAuthIfDb, async (req, res) => {
   const body = req.body || {};
+  if (supabaseService.isConfigured()) {
+    const pubErr = assertCanPublishOffer(req.user);
+    if (pubErr) return res.status(403).json({ ok: false, error: pubErr });
+  }
   const errors = parseBody([
     () => requiredString(body.carrier_name, 'carrier_name'),
     () => requiredString(body.origin_city, 'origin_city'),
@@ -47,9 +53,15 @@ router.post('/', async (req, res) => {
   if (geoErrors.length) return res.status(400).json({ ok: false, errors: geoErrors });
   if (errors.length) return res.status(400).json({ ok: false, errors });
 
+  const carrierName =
+    req.user?.role === 'carrier' && req.user.company_name
+      ? req.user.company_name
+      : body.carrier_name.trim();
+
   try {
     const row = await repo.insert('capacity_offers', {
-      carrier_name: body.carrier_name.trim(),
+      carrier_user_id: req.user?.sub || null,
+      carrier_name: carrierName,
       origin_city: body.origin_city.trim(),
       origin_region: body.origin_region.trim().toUpperCase(),
       destination_city: body.destination_city.trim(),

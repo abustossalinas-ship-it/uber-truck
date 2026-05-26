@@ -2,30 +2,41 @@
 
 const express = require('express');
 const repo = require('../lib/repository');
+const supabaseService = require('../services/supabase');
 const { requiredString, optionalNumber, parseBody } = require('../lib/validate');
 const { addressPayload } = require('../lib/geo-fields');
 const { requireMapsAddresses } = require('../lib/geo-validate');
+const { optionalAuth } = require('../lib/optional-auth');
+const { requireAuthIfDb } = require('../lib/require-auth');
+const {
+  loadListFilters,
+  assertCanPublishLoad,
+  assertCanMatchLoad,
+} = require('../lib/access-scope');
 
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/', optionalAuth, async (req, res) => {
   try {
-    const rows = await repo.list('load_requests', {
-      region: req.query.region,
-      status: req.query.status,
-    });
-    res.json({ ok: true, data: rows });
+    const filters = loadListFilters(req.user, req.query);
+    const rows = await repo.list('load_requests', filters);
+    res.json({ ok: true, data: rows, scope: req.user?.role || 'public' });
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al listar cargas' });
   }
 });
 
-router.get('/:id/match-suggestions', async (req, res) => {
+router.get('/:id/match-suggestions', optionalAuth, async (req, res) => {
   try {
     const load = await repo.getById('load_requests', req.params.id);
     if (!load) return res.status(404).json({ ok: false, error: 'Carga no encontrada' });
-    const offers = await repo.list('capacity_offers', { status: 'published' });
+    const scopeErr = assertCanMatchLoad(req.user, load);
+    if (scopeErr) return res.status(403).json({ ok: false, error: scopeErr });
+    const offerFilters = req.user?.role === 'carrier'
+      ? { carrier_user_id: req.user.sub, status: 'published' }
+      : { status: 'published' };
+    const offers = await repo.list('capacity_offers', offerFilters);
     const { rankOffersForLoad } = require('../lib/match-score');
     const ranked = rankOffersForLoad(load, offers);
     res.json({ ok: true, load_id: load.id, data: ranked });
@@ -35,7 +46,7 @@ router.get('/:id/match-suggestions', async (req, res) => {
   }
 });
 
-router.get('/:id', async (req, res) => {
+router.get('/:id', optionalAuth, async (req, res) => {
   try {
     const row = await repo.getById('load_requests', req.params.id);
     if (!row) return res.status(404).json({ ok: false, error: 'No encontrado' });
@@ -46,8 +57,12 @@ router.get('/:id', async (req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', optionalAuth, requireAuthIfDb, async (req, res) => {
   const body = req.body || {};
+  if (supabaseService.isConfigured()) {
+    const pubErr = assertCanPublishLoad(req.user);
+    if (pubErr) return res.status(403).json({ ok: false, error: pubErr });
+  }
   const errors = parseBody([
     () => requiredString(body.company_name, 'company_name'),
     () => requiredString(body.origin_city, 'origin_city'),
@@ -62,9 +77,15 @@ router.post('/', async (req, res) => {
   if (geoErrors.length) return res.status(400).json({ ok: false, errors: geoErrors });
   if (errors.length) return res.status(400).json({ ok: false, errors });
 
+  const companyName =
+    req.user?.role === 'shipper' && req.user.company_name
+      ? req.user.company_name
+      : body.company_name.trim();
+
   try {
     const row = await repo.insert('load_requests', {
-      company_name: body.company_name.trim(),
+      shipper_user_id: req.user?.sub || null,
+      company_name: companyName,
       origin_city: body.origin_city.trim(),
       origin_region: body.origin_region.trim().toUpperCase(),
       destination_city: body.destination_city.trim(),

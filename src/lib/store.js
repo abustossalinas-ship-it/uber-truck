@@ -106,6 +106,12 @@ function list(collection, filters = {}) {
   if (filters.status) {
     rows = rows.filter((row) => row.status === filters.status);
   }
+  if (filters.shipper_user_id) {
+    rows = rows.filter((row) => row.shipper_user_id === filters.shipper_user_id);
+  }
+  if (filters.carrier_user_id) {
+    rows = rows.filter((row) => row.carrier_user_id === filters.carrier_user_id);
+  }
   return rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 }
 

@@ -6,15 +6,26 @@ const { registerUser, loginUser, authMiddleware } = require('../lib/auth');
 const router = express.Router();
 
 router.post('/register', async (req, res) => {
-  const { email, password, full_name, role, company_name } = req.body || {};
+  const { email, password, full_name, role, company_name, phone, admin_key } = req.body || {};
   if (!email?.trim() || !password || password.length < 6) {
     return res.status(400).json({ ok: false, error: 'Email y contraseña (mín. 6) requeridos' });
   }
   if (!full_name?.trim()) {
-    return res.status(400).json({ ok: false, error: 'Nombre requerido' });
+    return res.status(400).json({ ok: false, error: 'Nombre de contacto requerido' });
+  }
+  if (!company_name?.trim() && role !== 'admin') {
+    return res.status(400).json({ ok: false, error: 'Nombre de empresa requerido' });
   }
   try {
-    const result = await registerUser({ email, password, full_name, role, company_name });
+    const result = await registerUser({
+      email,
+      password,
+      full_name,
+      role,
+      company_name,
+      phone,
+      admin_key,
+    });
     res.status(201).json({ ok: true, ...result });
   } catch (e) {
     console.error(e);

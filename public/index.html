@@ -61,18 +61,25 @@
     <h2 id="auth-title">Iniciar sesión</h2>
     <form id="form-auth">
       <label>Email</label>
-      <input name="email" type="email" required />
+      <input name="email" type="email" required autocomplete="username" />
       <label>Contraseña</label>
-      <input name="password" type="password" minlength="6" required />
-      <label id="auth-name-label" class="register-only">Nombre</label>
-      <input name="full_name" id="auth-full-name" class="register-only" />
-      <label id="auth-role-label" class="register-only">Rol</label>
+      <input name="password" type="password" minlength="6" required autocomplete="current-password" />
+      <p id="auth-register-intro" class="register-only muted">
+        Datos mínimos de tu empresa. Cada cuenta ve solo lo de su organización; el administrador ve todo.
+      </p>
+      <label id="auth-role-label" class="register-only">Tipo de cuenta</label>
       <select name="role" id="auth-role" class="register-only">
-        <option value="shipper">Embarcador — publica carga</option>
-        <option value="carrier">Transportista — publica capacidad en ruta</option>
+        <option value="shipper">Empresa embarcadora (publica cargas)</option>
+        <option value="carrier">Empresa transportista (publica capacidad)</option>
       </select>
-      <label id="auth-company-label" class="register-only">Empresa (opcional)</label>
-      <input name="company_name" id="auth-company" class="register-only" placeholder="Ej. Transportes Sur" />
+      <label id="auth-company-label" class="register-only">Razón social / nombre empresa</label>
+      <input name="company_name" id="auth-company" class="register-only" required placeholder="Ej. Distribuidora Norte SpA" />
+      <label id="auth-name-label" class="register-only">Nombre contacto</label>
+      <input name="full_name" id="auth-full-name" class="register-only" required placeholder="Ej. María González" />
+      <label class="register-only">Teléfono (opcional)</label>
+      <input name="phone" id="auth-phone" type="tel" class="register-only" placeholder="+56 9 …" />
+      <label id="auth-admin-key-label" class="register-only admin-only" hidden>Clave registro administrador</label>
+      <input name="admin_key" id="auth-admin-key" class="register-only admin-only" hidden autocomplete="off" />
       <button type="submit" id="auth-submit">Entrar</button>
     </form>
     <p class="muted">
@@ -80,10 +87,10 @@
     </p>
   </div>
 
-  <nav>
-    <button type="button" class="tab active" data-tab="shipper">Necesito mover carga</button>
-    <button type="button" class="tab" data-tab="carrier">Tengo espacio en ruta</button>
-    <button type="button" class="tab" data-tab="board">Tablero / emparejar</button>
+  <nav id="main-nav">
+    <button type="button" class="tab active" data-tab="shipper" id="tab-shipper">Mis cargas</button>
+    <button type="button" class="tab" data-tab="carrier" id="tab-carrier">Mis ofertas</button>
+    <button type="button" class="tab" data-tab="board" id="tab-board">Tablero / emparejar</button>
   </nav>
 
   <main>
@@ -331,11 +338,11 @@
       </div>
       <div class="grid grid-2">
         <div>
-          <h2>Cargas</h2>
+          <h2 id="board-loads-title">Cargas</h2>
           <div id="list-loads"></div>
         </div>
         <div>
-          <h2>Ofertas</h2>
+          <h2 id="board-offers-title">Ofertas</h2>
           <div id="list-offers"></div>
         </div>
       </div>
@@ -447,6 +454,7 @@
 
   <script src="/invite-ui.js?v=0.0.20"></script>
   <script src="/roles-ui.js?v=0.0.19"></script>
+  <script src="/role-shell-ui.js?v=0.0.22"></script>
   <script src="/maps-ui.js?v=0.0.21"></script>
   <script src="/auth-ui.js?v=0.0.19"></script>
   <script src="/penalties-ui.js?v=0.0.19"></script>

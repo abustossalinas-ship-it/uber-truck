@@ -148,6 +148,14 @@ body {
   display: block;
 }
 
+.auth-panel .admin-only {
+  display: none;
+}
+
+.auth-panel.is-register .admin-only {
+  display: none;
+}
+
 .auth-panel {
   margin: 0 1.5rem 1rem;
   max-width: 420px;

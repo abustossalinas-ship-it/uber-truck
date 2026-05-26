@@ -9,7 +9,13 @@ const JWT_EXPIRES = '7d';
 
 function signToken(user) {
   return jwt.sign(
-    { sub: user.id, email: user.email, role: user.role, name: user.full_name },
+    {
+      sub: user.id,
+      email: user.email,
+      role: user.role,
+      name: user.full_name,
+      company_name: user.company_name || null,
+    },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES }
   );
@@ -33,11 +39,26 @@ function authMiddleware(req, res, next) {
   next();
 }
 
-async function registerUser({ email, password, full_name, role, company_name }) {
+async function registerUser({ email, password, full_name, role, company_name, phone, admin_key }) {
   if (!supabase.isConfigured()) {
     const err = new Error('Registro no disponible: la base de datos del servidor no está configurada');
     err.status = 503;
     throw err;
+  }
+  let resolvedRole = role === 'carrier' ? 'carrier' : 'shipper';
+  if (role === 'admin') {
+    const secret = process.env.ADMIN_REGISTER_KEY;
+    if (!secret || admin_key !== secret) {
+      const e = new Error('Registro administrador no autorizado');
+      e.status = 403;
+      throw e;
+    }
+    resolvedRole = 'admin';
+  }
+  if (!company_name?.trim()) {
+    const e = new Error('Nombre de empresa requerido');
+    e.status = 400;
+    throw e;
   }
   const hash = await bcrypt.hash(password, 10);
   const sb = supabase.getClient();
@@ -46,12 +67,13 @@ async function registerUser({ email, password, full_name, role, company_name }) 
     .insert({
       email: email.trim().toLowerCase(),
       full_name: full_name.trim(),
-      role: role === 'carrier' ? 'carrier' : 'shipper',
-      company_name: company_name?.trim() || null,
+      role: resolvedRole,
+      company_name: company_name.trim(),
+      phone: phone?.trim() || null,
       password_hash: hash,
       kyc_status: 'pending',
     })
-    .select('id, email, full_name, role, company_name')
+    .select('id, email, full_name, role, company_name, phone')
     .single();
   if (error) {
     if (error.code === '23505') {
@@ -73,7 +95,7 @@ async function loginUser({ email, password }) {
   const sb = supabase.getClient();
   const { data, error } = await sb
     .from('users')
-    .select('id, email, full_name, role, company_name, password_hash')
+    .select('id, email, full_name, role, company_name, phone, password_hash')
     .eq('email', email.trim().toLowerCase())
     .maybeSingle();
   if (error) throw error;
@@ -94,6 +116,7 @@ async function loginUser({ email, password }) {
     full_name: data.full_name,
     role: data.role,
     company_name: data.company_name,
+    phone: data.phone,
   };
   return { user, token: signToken(user) };
 }

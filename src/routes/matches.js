@@ -24,6 +24,11 @@ const {
 const comms = require('../services/comms');
 const { otherRole } = require('../lib/match-comms');
 const { getMatchParties } = require('../lib/match-parties');
+const {
+  filterMatchesForUser,
+  assertCanMatchLoad,
+  assertCanMatchOffer,
+} = require('../lib/access-scope');
 
 const router = express.Router();
 
@@ -68,9 +73,10 @@ router.get('/cancel-options', optionalAuth, async (req, res) => {
   });
 });
 
-router.get('/', async (_req, res) => {
+router.get('/', optionalAuth, async (req, res) => {
   try {
-    const rows = await repo.list('matches', {});
+    let rows = await repo.list('matches', {});
+    rows = await filterMatchesForUser(rows, req.user);
     res.json({ ok: true, data: rows });
   } catch (e) {
     console.error(e);
@@ -78,7 +84,7 @@ router.get('/', async (_req, res) => {
   }
 });
 
-router.post('/', async (req, res) => {
+router.post('/', optionalAuth, async (req, res) => {
   const body = req.body || {};
   try {
     const load = await repo.getById('load_requests', body.load_request_id);
@@ -86,6 +92,10 @@ router.post('/', async (req, res) => {
     if (!load || !offer) {
       return res.status(400).json({ ok: false, error: 'Carga u oferta no válida' });
     }
+    const loadErr = assertCanMatchLoad(req.user, load);
+    if (loadErr) return res.status(403).json({ ok: false, error: loadErr });
+    const offerErr = assertCanMatchOffer(req.user, offer);
+    if (offerErr) return res.status(403).json({ ok: false, error: offerErr });
     if (load.status !== 'published') {
       return res.status(400).json({ ok: false, error: 'La carga ya no está disponible' });
     }

@@ -820,6 +820,18 @@ document.body.addEventListener('click', (e) => {
 
 $('form-load').addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (typeof Auth !== 'undefined' && Auth.user?.role === 'carrier') {
+    alert('Tu cuenta es transportista. Publica en «Mis ofertas».');
+    showTab('carrier');
+    return;
+  }
+  if (typeof Auth !== 'undefined' && !Auth.user) {
+    const h = await fetch('/health').then((r) => r.json()).catch(() => ({}));
+    if (h.storage === 'supabase' && h.supabase?.connected) {
+      alert('Inicia sesión como empresa embarcadora para publicar una carga.');
+      return;
+    }
+  }
   const mapsErr = typeof MapsUI !== 'undefined' ? MapsUI.assertFormReady(e.target) : null;
   if (mapsErr) {
     alert(mapsErr);
@@ -840,6 +852,18 @@ $('form-load').addEventListener('submit', async (e) => {
 
 $('form-offer').addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (typeof Auth !== 'undefined' && Auth.user?.role === 'shipper') {
+    alert('Tu cuenta es embarcadora. Publica en «Mis cargas».');
+    showTab('shipper');
+    return;
+  }
+  if (typeof Auth !== 'undefined' && !Auth.user) {
+    const h = await fetch('/health').then((r) => r.json()).catch(() => ({}));
+    if (h.storage === 'supabase' && h.supabase?.connected) {
+      alert('Inicia sesión como empresa transportista para publicar una oferta.');
+      return;
+    }
+  }
   const mapsErr = typeof MapsUI !== 'undefined' ? MapsUI.assertFormReady(e.target) : null;
   if (mapsErr) {
     alert(mapsErr);

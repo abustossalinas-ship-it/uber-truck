@@ -438,8 +438,10 @@ button[type="submit"]:disabled {
   border-bottom: none;
 }
 
-.suggestion-item .use-suggestion {
+.suggestion-item .use-suggestion,
+.suggestion-item .match-suggestion-now {
   margin-top: 0.35rem;
+  margin-right: 0.4rem;
   background: var(--accent);
   color: #fff;
   border: none;
@@ -447,6 +449,15 @@ button[type="submit"]:disabled {
   padding: 0.4rem 0.75rem;
   font-weight: 700;
   cursor: pointer;
+}
+
+.suggestion-item .match-suggestion-now {
+  background: var(--brand-black);
+}
+
+select.offer-picked {
+  border: 2px solid var(--accent);
+  background: var(--accent-soft);
 }
 
 .match-form .step-label {

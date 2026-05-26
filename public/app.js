@@ -46,6 +46,10 @@ function $(id) {
   return document.getElementById(id);
 }
 
+let boardRefreshGen = 0;
+let stickyMatchLoadId = null;
+let stickyMatchOfferId = null;
+
 function showTab(name) {
   document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
   document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
@@ -66,8 +70,32 @@ function routeLine(row) {
   return line;
 }
 
+function setMatchOffer(offerId, label) {
+  const offerSel = $('match-offer');
+  if (!offerSel || !offerId) return false;
+  stickyMatchOfferId = offerId;
+  offerSel.disabled = false;
+  const id = String(offerId);
+  if (!offerSel.querySelector(`option[value="${id}"]`)) {
+    const opt = document.createElement('option');
+    opt.value = id;
+    opt.textContent = label ? `${label} (sugerida)` : 'Oferta sugerida';
+    offerSel.appendChild(opt);
+  }
+  offerSel.value = id;
+  offerSel.classList.add('offer-picked');
+  offerSel.dispatchEvent(new Event('change', { bubbles: true }));
+  showMatchReady();
+  return true;
+}
+
 async function refreshBoard() {
+  const gen = ++boardRefreshGen;
+  const keepLoad = stickyMatchLoadId || $('match-load')?.value || '';
+  const keepOffer = stickyMatchOfferId || $('match-offer')?.value || '';
+
   const [loads, offers, matches] = await Promise.all([API.allLoads(), API.allOffers(), API.matches()]);
+  if (gen !== boardRefreshGen) return;
   $('list-loads').innerHTML =
     loads.data?.length === 0
       ? '<p class="muted">Sin cargas.</p>'
@@ -135,6 +163,10 @@ async function refreshBoard() {
   publishedLoads.forEach((l) => {
     loadSel.innerHTML += `<option value="${l.id}">${l.company_name} — ${routeLine(l)}</option>`;
   });
+  if (keepLoad && loadSel.querySelector(`option[value="${keepLoad}"]`)) {
+    loadSel.value = keepLoad;
+    stickyMatchLoadId = keepLoad;
+  }
 
   if (publishedOffers.length === 0) {
     offerSel.innerHTML = '<option value="">Sin ofertas — ve a «Tengo espacio en ruta»</option>';
@@ -153,6 +185,12 @@ async function refreshBoard() {
     });
     if (hint) hint.hidden = true;
     if (matchBtn) matchBtn.disabled = false;
+    if (keepOffer) {
+      setMatchOffer(
+        keepOffer,
+        publishedOffers.find((o) => o.id === keepOffer)?.carrier_name
+      );
+    }
   }
   loadSuggestionsFor(loadSel.value);
   showMatchReady();
@@ -183,7 +221,8 @@ async function loadSuggestionsFor(loadId) {
         <span class="pill">${s.score}% match</span>
         <strong>${s.offer.carrier_name}</strong>
         <p class="muted">${s.reasons.join(' · ')}</p>
-        <button type="button" class="use-suggestion" data-offer-id="${s.offer.id}">Usar esta oferta</button>
+        <button type="button" class="use-suggestion" data-offer-id="${s.offer.id}" data-carrier="${s.offer.carrier_name.replace(/"/g, '')}">Usar esta oferta</button>
+        <button type="button" class="match-suggestion-now" data-offer-id="${s.offer.id}" data-carrier="${s.offer.carrier_name.replace(/"/g, '')}">Emparejar con esta oferta</button>
       </div>`
         )
         .join('');
@@ -267,6 +306,8 @@ $('form-match').addEventListener('submit', async (e) => {
     return;
   }
   $('match-price').value = '';
+  stickyMatchOfferId = null;
+  stickyMatchLoadId = null;
   refreshBoard();
 });
 
@@ -285,7 +326,7 @@ fetch('/health')
   .then((h) => {
     const el = document.getElementById('storage-badge');
     if (!el) return;
-    if (h.ui === 'match-flow-v2') {
+    if (h.ui === 'match-flow-v3' || h.ui === 'match-flow-v2') {
       el.textContent = `v${h.version || '?'} · emparejar mejorado`;
     } else if (h.storage === 'supabase' && h.supabase?.connected) {
       el.textContent = 'Conectado a Supabase (actualiza deploy)';
@@ -314,24 +355,28 @@ function showMatchReady() {
 }
 
 $('match-load')?.addEventListener('change', (e) => {
+  stickyMatchLoadId = e.target.value || null;
+  stickyMatchOfferId = null;
   loadSuggestionsFor(e.target.value);
   showMatchReady();
 });
 
-$('match-offer')?.addEventListener('change', () => showMatchReady());
+$('match-offer')?.addEventListener('change', (e) => {
+  stickyMatchOfferId = e.target.value || null;
+  showMatchReady();
+});
 
 document.getElementById('match-suggestions')?.addEventListener('click', (e) => {
-  const btn = e.target.closest('.use-suggestion');
+  const useBtn = e.target.closest('.use-suggestion');
+  const nowBtn = e.target.closest('.match-suggestion-now');
+  const btn = useBtn || nowBtn;
   if (!btn) return;
-  const offerSel = $('match-offer');
-  const offerId = btn.dataset.offerId;
-  if (!offerSel.querySelector(`option[value="${offerId}"]`)) {
-    const label = btn.closest('.suggestion-item')?.querySelector('strong')?.textContent || 'Oferta';
-    offerSel.innerHTML += `<option value="${offerId}">${label} (sugerida)</option>`;
-  }
-  offerSel.value = offerId;
-  offerSel.disabled = false;
-  showMatchReady();
+  e.preventDefault();
+  const offerId = btn.getAttribute('data-offer-id');
+  const label = btn.getAttribute('data-carrier') || btn.closest('.suggestion-item')?.querySelector('strong')?.textContent;
+  if (!offerId) return;
+  setMatchOffer(offerId, label);
+  if (nowBtn) $('form-match')?.requestSubmit();
 });
 
 document.getElementById('btn-seed-demo')?.addEventListener('click', async () => {

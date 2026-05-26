@@ -11,6 +11,8 @@ const EMPTY = {
   load_requests: [],
   capacity_offers: [],
   matches: [],
+  match_messages: [],
+  match_notifications: [],
 };
 
 const SEED = {
@@ -73,6 +75,8 @@ function readStore() {
       load_requests: data.load_requests || [],
       capacity_offers: data.capacity_offers || [],
       matches: data.matches || [],
+      match_messages: data.match_messages || [],
+      match_notifications: data.match_notifications || [],
     };
   } catch {
     return structuredClone(EMPTY);

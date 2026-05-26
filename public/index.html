@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#F26522" />
   <title>Uber Truck — Inteligencia en movimiento</title>
   <link rel="icon" href="/brand/logo.png" type="image/png" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.10" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.11" />
 </head>
 <body>
   <header class="site-header">
@@ -21,6 +21,9 @@
       <span class="hero-tag" id="storage-badge">MVP demo</span>
     </div>
     <div class="header-actions">
+      <button type="button" class="notif-bell" id="btn-notifications" title="Notificaciones" aria-label="Notificaciones">
+        🔔 <span id="notif-count" class="notif-count" hidden>0</span>
+      </button>
       <span id="auth-user" class="auth-user muted" hidden></span>
       <button type="button" class="tab tab-sm" id="btn-auth">Ingresar</button>
       <button type="button" class="tab tab-sm tab-outline" id="btn-register">Crear cuenta</button>
@@ -303,32 +306,64 @@
 
   <footer class="site-footer">Uber Truck · Maps + cubicación · docs/MAPS.md</footer>
 
+  <div id="notif-panel" class="notif-panel" hidden>
+    <h3>Notificaciones</h3>
+    <div id="notif-list"></div>
+    <button type="button" class="link-btn" id="notif-close">Cerrar</button>
+  </div>
+
+  <div id="chat-drawer" class="chat-drawer" hidden aria-hidden="true">
+    <div class="chat-drawer-header">
+      <h3 id="chat-title">Chat del emparejamiento</h3>
+      <button type="button" class="link-btn" id="chat-close">Cerrar</button>
+    </div>
+    <div id="chat-messages" class="chat-messages"></div>
+    <p class="muted chat-presets-label">Mensajes rápidos</p>
+    <div id="chat-presets" class="chat-presets"></div>
+    <form id="form-chat" class="chat-form">
+      <input id="chat-input" type="text" placeholder="Escribe un mensaje…" maxlength="500" />
+      <button type="submit">Enviar</button>
+    </form>
+  </div>
+
   <div id="cancel-modal" class="cancel-modal" hidden aria-hidden="true">
     <div class="cancel-modal-backdrop" data-close-cancel></div>
-    <div class="cancel-modal-card" role="dialog" aria-labelledby="cancel-modal-title">
-      <h3 id="cancel-modal-title">Motivo de cancelación</h3>
+    <div class="cancel-modal-card cancel-modal-card-wide" role="dialog" aria-labelledby="cancel-modal-title">
+      <h3 id="cancel-modal-title">Cancelar emparejamiento</h3>
       <p id="cancel-modal-lead" class="muted"></p>
       <p id="cancel-stage-badge" class="cancel-stage-badge" hidden></p>
-      <form id="form-cancel-reason">
-        <label for="cancel-reason-code">Motivo (lista según etapa del camión)</label>
-        <select id="cancel-reason-code" name="reason_code" required></select>
-        <label id="cancel-detail-label" for="cancel-reason-detail" hidden>Detalle</label>
-        <textarea id="cancel-reason-detail" name="reason_detail" rows="2" hidden></textarea>
-        <p id="cancel-penalty-box" class="penalty-box muted" hidden></p>
-        <label id="cancel-agreement-label" class="cancel-agreement" hidden>
-          <input type="checkbox" id="cancel-agreement" name="agreement_accepted" />
-          <span id="cancel-agreement-text"></span>
-        </label>
-        <div class="cancel-modal-actions">
-          <button type="button" class="btn-secondary" data-close-cancel>cerrar</button>
-          <button type="submit" class="btn-danger">Confirmar</button>
-        </div>
-      </form>
+
+      <section id="cancel-mutual-panel" class="cancel-mutual-panel" hidden>
+        <h4>Acuerdo mutuo (sin multa)</h4>
+        <p id="cancel-mutual-status" class="muted"></p>
+        <button type="button" class="btn-secondary" id="btn-mutual-confirm-in-modal">Confirmar mi parte del acuerdo mutuo</button>
+        <button type="button" class="btn-danger" id="btn-mutual-cancel-now" hidden>Cancelar con acuerdo mutuo</button>
+      </section>
+
+      <section id="cancel-other-panel" class="cancel-other-panel">
+        <h4>Otro motivo (puede incluir multa sugerida)</h4>
+        <form id="form-cancel-reason">
+          <label for="cancel-reason-code">Motivo según etapa del camión</label>
+          <select id="cancel-reason-code" name="reason_code" required></select>
+          <label id="cancel-detail-label" for="cancel-reason-detail" hidden>Detalle</label>
+          <textarea id="cancel-reason-detail" name="reason_detail" rows="2" hidden></textarea>
+          <p id="cancel-penalty-box" class="penalty-box muted" hidden></p>
+          <label id="cancel-agreement-label" class="cancel-agreement" hidden>
+            <input type="checkbox" id="cancel-agreement" name="agreement_accepted" />
+            <span id="cancel-agreement-text"></span>
+          </label>
+          <div class="cancel-modal-actions">
+            <button type="button" class="btn-secondary" data-close-cancel>Cerrar</button>
+            <button type="submit" class="btn-danger">Confirmar cancelación</button>
+          </div>
+        </form>
+      </section>
     </div>
   </div>
 
-  <script src="/maps-ui.js?v=0.0.10"></script>
-  <script src="/auth-ui.js?v=0.0.10"></script>
-  <script src="/app.js?v=0.0.10"></script>
+  <script src="/maps-ui.js?v=0.0.11"></script>
+  <script src="/auth-ui.js?v=0.0.11"></script>
+  <script src="/comms-ui.js?v=0.0.11"></script>
+  <script src="/app.js?v=0.0.11"></script>
 </body>
 </html>

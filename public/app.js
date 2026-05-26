@@ -101,24 +101,8 @@ function buildMatchActions(m) {
     }
   }
   if (m.status === 'accepted' || m.status === 'in_progress') {
-    const shipperOk = Boolean(m.mutual_cancel_shipper_at);
-    const carrierOk = Boolean(m.mutual_cancel_carrier_at);
-    const mutualReady = shipperOk && carrierOk;
-    html += '<p class="mutual-status muted">';
-    if (mutualReady) {
-      html += '✓ Acuerdo mutuo confirmado por ambos. En «Cancelar» verás esa opción sin multa.';
-    } else {
-      html += `Acuerdo mutuo: embarcador ${shipperOk ? '✓' : 'pendiente'} · transportista ${carrierOk ? '✓' : 'pendiente'}`;
-    }
-    html += '</p>';
-    if (!mutualReady) {
-      if (role === 'shipper' && !shipperOk) {
-        html += `<button type="button" class="btn-secondary" data-action="mutual_confirm" data-id="${m.id}">Confirmar acuerdo mutuo (yo, embarcador)</button>`;
-      }
-      if (role === 'carrier' && !carrierOk) {
-        html += `<button type="button" class="btn-secondary" data-action="mutual_confirm" data-id="${m.id}">Confirmar acuerdo mutuo (yo, transportista)</button>`;
-      }
-    }
+    const title = m._matchTitle || 'Emparejamiento';
+    html += `<button type="button" class="btn-secondary" data-action="chat" data-id="${m.id}" data-title="${title.replace(/"/g, '')}">Chat</button>`;
     if (m.status === 'accepted') {
       html += `<button type="button" data-action="progress" data-id="${m.id}">En ruta</button>`;
       html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="accepted" data-price="${m.agreed_price_clp || ''}">Cancelar emparejamiento</button>`;
@@ -196,8 +180,50 @@ function closeCancelModal() {
     modal.hidden = true;
     modal.setAttribute('aria-hidden', 'true');
   }
+  const mutualPanel = $('cancel-mutual-panel');
+  if (mutualPanel) mutualPanel.hidden = true;
   cancelModalCtx = null;
   cancelReasonOptions = [];
+}
+
+function renderCancelMutualPanel(ctx, mutual) {
+  const panel = $('cancel-mutual-panel');
+  if (!panel) return;
+  if (ctx.action !== 'cancel') {
+    panel.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  const m = mutual || {};
+  const role = getActorRole() === 'carrier' ? 'carrier' : 'shipper';
+  const myOk = role === 'carrier' ? m.carrier_confirmed : m.shipper_confirmed;
+  const statusEl = $('cancel-mutual-status');
+  if (statusEl) {
+    statusEl.textContent = m.ready
+      ? 'Ambas partes confirmaron en el sistema. Puedes finalizar sin multa.'
+      : `Confirmaciones: embarcador ${m.shipper_confirmed ? '✓' : 'pendiente'} · transportista ${m.carrier_confirmed ? '✓' : 'pendiente'}${myOk ? ' (ya confirmaste tú)' : ''}`;
+  }
+  const btnConfirm = $('btn-mutual-confirm-in-modal');
+  const btnNow = $('btn-mutual-cancel-now');
+  if (btnConfirm) btnConfirm.hidden = Boolean(myOk);
+  if (btnNow) btnNow.hidden = !m.ready;
+}
+
+async function refreshCancelModalState() {
+  if (!cancelModalCtx) return;
+  const { matchId, action, phase, agreedPriceClp } = cancelModalCtx;
+  const json = await API.cancelOptions(action, phase, agreedPriceClp, matchId);
+  if (!json.ok) return;
+  cancelReasonOptions = json.data || [];
+  renderCancelMutualPanel(cancelModalCtx, json.mutual_cancel);
+  const sel = $('cancel-reason-code');
+  if (sel) {
+    sel.innerHTML = cancelReasonOptions
+      .map((o) => `<option value="${o.code}">${o.label_short || o.label}</option>`)
+      .join('');
+    updateCancelReasonForm();
+  }
+  if (typeof Comms !== 'undefined') Comms.refreshBell();
 }
 
 async function openCancelModal(ctx) {
@@ -210,13 +236,13 @@ async function openCancelModal(ctx) {
   cancelModalCtx = ctx;
   cancelReasonOptions = json.data;
   $('cancel-modal-title').textContent = title;
-  const stageLine = json.phase_label ? `Etapa: ${json.phase_label}. ` : '';
   let leadText = lead || '';
-  if (json.mutual_cancel && action === 'cancel' && !json.mutual_cancel.ready) {
-    leadText +=
-      ' La opción «Acuerdo mutuo» solo aparece cuando embarcador y transportista confirmaron antes (botones en la tarjeta del emparejamiento).';
+  if (action === 'cancel') {
+    leadText =
+      'Primero usa «Acuerdo mutuo» (ambos confirman aquí). Si no hay acuerdo, elige otro motivo abajo.';
   }
   $('cancel-modal-lead').textContent = leadText;
+  renderCancelMutualPanel(ctx, json.mutual_cancel);
   const badge = $('cancel-stage-badge');
   if (badge && json.phase_label) {
     badge.hidden = false;
@@ -269,6 +295,7 @@ async function submitCancelModal(e) {
     msg += `\nMulta sugerida: $${Number(json.penalty.amount_clp).toLocaleString('es-CL')} CLP (acuerdo entre partes).`;
   }
   alert(msg);
+  if (typeof Comms !== 'undefined') Comms.refreshBell();
   if (json.data?.status === 'cancelled') {
     $('matches-history-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
@@ -295,14 +322,34 @@ function runMatchCancel(matchId, action, phase, agreedPriceClp) {
   });
 }
 
-async function runMutualConfirm(matchId) {
-  const json = await API.confirmMutualCancel(matchId);
+async function confirmMutualInModal() {
+  if (!cancelModalCtx?.matchId) return;
+  const json = await API.confirmMutualCancel(cancelModalCtx.matchId);
   if (!json.ok) {
     alert(json.error || 'No se pudo confirmar');
     return;
   }
-  alert(json.message || 'Confirmado');
+  await refreshCancelModalState();
   refreshBoard();
+}
+
+async function cancelWithMutualNow() {
+  if (!cancelModalCtx?.matchId) return;
+  const res = await API.patchMatch(cancelModalCtx.matchId, {
+    status: 'cancelled',
+    action: 'cancel',
+    reason_code: 'mutual_agreement',
+    agreement_accepted: true,
+  });
+  const json = await res.json();
+  if (!res.ok) {
+    alert(json.error || 'Error');
+    return;
+  }
+  closeCancelModal();
+  await refreshBoard();
+  if (typeof Comms !== 'undefined') Comms.refreshBell();
+  alert(json.message || 'Emparejamiento cancelado por acuerdo mutuo.');
 }
 
 function runChangeOffer(matchId, loadId) {
@@ -425,9 +472,10 @@ async function refreshBoard() {
       .map((m) => {
         const load = loadById[m.load_request_id];
         const offer = offerById[m.capacity_offer_id];
-        const title =
-          load && offer ? `${load.company_name} ↔ ${offer.carrier_name}` : `Carga · Oferta`;
-        const actions = buildMatchActions(m);
+            const title =
+              load && offer ? `${load.company_name} ↔ ${offer.carrier_name}` : `Carga · Oferta`;
+            m._matchTitle = title;
+            const actions = buildMatchActions(m);
         return `
       <article class="item match-item" data-match-id="${m.id}">
         <strong>${title}</strong>
@@ -497,6 +545,7 @@ async function refreshBoard() {
   loadSuggestionsFor(loadSel.value);
   showMatchReady();
   renderBoardActor();
+  if (typeof Comms !== 'undefined') Comms.refreshBell();
 }
 
 async function loadSuggestionsFor(loadId) {
@@ -627,8 +676,9 @@ $('list-matches').addEventListener('click', async (e) => {
   if (!btn) return;
   const id = btn.dataset.id;
   const action = btn.dataset.action;
-  if (action === 'mutual_confirm') {
-    await runMutualConfirm(id);
+  if (action === 'chat') {
+    const title = btn.dataset.title || '';
+    if (typeof Comms !== 'undefined') Comms.openChat(id, title);
     return;
   }
   if (action === 'change_offer') {
@@ -727,9 +777,12 @@ window.refreshBoard = refreshBoard;
 
 $('cancel-reason-code')?.addEventListener('change', updateCancelReasonForm);
 $('form-cancel-reason')?.addEventListener('submit', submitCancelModal);
+$('btn-mutual-confirm-in-modal')?.addEventListener('click', confirmMutualInModal);
+$('btn-mutual-cancel-now')?.addEventListener('click', cancelWithMutualNow);
 document.querySelectorAll('[data-close-cancel]').forEach((el) => {
   el.addEventListener('click', closeCancelModal);
 });
 
 renderBoardActor();
 showTab('shipper');
+if (typeof Comms !== 'undefined') Comms.refreshBell();

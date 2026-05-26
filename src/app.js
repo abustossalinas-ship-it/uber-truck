@@ -53,7 +53,7 @@ app.get('/health', async (_req, res) => {
     version: pkg.version,
     build: railwaySha.slice(0, 7) || process.env.GIT_COMMIT || 'local',
     ui: 'match-cancel-v2',
-    features: ['cancel-reasons-modal', 'penalty-by-phase', 'mutual-cancel-bilateral'],
+    features: ['cancel-reasons-modal', 'penalty-by-phase', 'mutual-in-cancel-modal', 'chat', 'notifications'],
     deploy_manifest: manifest,
     railway: {
       git_commit_sha: railwaySha || null,
@@ -97,5 +97,6 @@ app.use('/api/demo', require('./routes/demo'));
 app.use('/api/load-requests', require('./routes/load-requests'));
 app.use('/api/capacity-offers', require('./routes/capacity-offers'));
 app.use('/api/matches', require('./routes/matches'));
+app.use('/api/comms', require('./routes/match-comms'));
 
 module.exports = app;

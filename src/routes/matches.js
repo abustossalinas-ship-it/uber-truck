@@ -21,6 +21,8 @@ const {
   mutualCancelStatus,
   fieldForRole,
 } = require('../lib/mutual-cancel');
+const comms = require('../services/comms');
+const { otherRole } = require('../lib/match-comms');
 
 const router = express.Router();
 
@@ -172,10 +174,23 @@ router.post('/:id/mutual-cancel', optionalAuth, async (req, res) => {
     });
     const status = mutualCancelStatus(updated);
     const message = status.ready
-      ? 'Ambos confirmaron. Ya puedes cancelar eligiendo «Acuerdo mutuo» en el modal.'
+      ? 'Ambos confirmaron. En «Cancelar emparejamiento» puedes finalizar con acuerdo mutuo.'
       : role === 'shipper'
         ? 'Embarcador confirmó. Falta confirmación del transportista.'
         : 'Transportista confirmó. Falta confirmación del embarcador.';
+
+    const target = otherRole(role);
+    await comms.addNotification({
+      match_id: match.id,
+      for_role: target,
+      type: 'mutual_cancel',
+      title: 'Acuerdo mutuo — confirma tu parte',
+      body:
+        role === 'shipper'
+          ? 'El embarcador confirmó cancelar por acuerdo mutuo. Abre «Cancelar emparejamiento» para confirmar.'
+          : 'El transportista confirmó cancelar por acuerdo mutuo. Abre «Cancelar emparejamiento» para confirmar.',
+    });
+
     res.json({ ok: true, data: updated, mutual_cancel: status, message });
   } catch (e) {
     console.error(e);

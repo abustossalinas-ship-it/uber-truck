@@ -29,6 +29,7 @@ const {
   assertCanMatchLoad,
   assertCanMatchOffer,
 } = require('../lib/access-scope');
+const { copyBudgetFromLoad, offerWithinBudget } = require('../lib/match-price');
 
 const router = express.Router();
 
@@ -103,15 +104,31 @@ router.post('/', optionalAuth, async (req, res) => {
       return res.status(400).json({ ok: false, error: 'La oferta ya no está disponible' });
     }
 
-    const errors = parseBody([() => optionalNumber(body.agreed_price_clp, 'agreed_price_clp')]);
+    const errors = parseBody([
+      () => optionalNumber(body.carrier_offer_clp, 'carrier_offer_clp'),
+      () => optionalNumber(body.agreed_price_clp, 'agreed_price_clp'),
+    ]);
     if (errors.length) return res.status(400).json({ ok: false, errors });
+
+    const budget = copyBudgetFromLoad(load);
+    const role = resolveActorRole(req);
+    let carrierOffer =
+      body.carrier_offer_clp != null ? Number(body.carrier_offer_clp) : null;
+    if (body.agreed_price_clp != null && carrierOffer == null) {
+      carrierOffer = Number(body.agreed_price_clp);
+    }
+    let priceStatus = 'pending_offer';
+    if (carrierOffer != null) priceStatus = 'pending_acceptance';
 
     const existing = await repo.findMatchPair(load.id, offer.id);
     if (existing) {
       if (existing.status === 'cancelled') {
         const revived = await repo.update('matches', existing.id, {
           status: 'proposed',
-          agreed_price_clp: body.agreed_price_clp != null ? Number(body.agreed_price_clp) : null,
+          ...budget,
+          carrier_offer_clp: carrierOffer,
+          price_status: priceStatus,
+          agreed_price_clp: null,
           cancel_action: null,
           cancelled_by: null,
           cancel_reason: null,
@@ -137,12 +154,30 @@ router.post('/', optionalAuth, async (req, res) => {
     const row = await repo.insert('matches', {
       load_request_id: load.id,
       capacity_offer_id: offer.id,
-      agreed_price_clp: body.agreed_price_clp != null ? Number(body.agreed_price_clp) : null,
+      ...budget,
+      carrier_offer_clp: carrierOffer,
+      price_status: priceStatus,
+      agreed_price_clp: null,
       status: 'proposed',
       notes: body.notes?.trim() || null,
     });
 
-    res.status(201).json({ ok: true, data: row });
+    if (carrierOffer != null && role === 'carrier') {
+      const parties = await getMatchParties(repo, row);
+      await comms.addNotification({
+        match_id: row.id,
+        for_role: 'shipper',
+        type: 'price_offer',
+        title: 'Nueva oferta de precio',
+        body: `${parties?.carrier_name || 'Transportista'} ofrece $${carrierOffer.toLocaleString('es-CL')} CLP.`,
+      });
+    }
+
+    res.status(201).json({
+      ok: true,
+      data: row,
+      within_budget: offerWithinBudget(carrierOffer, budget.budget_min_clp, budget.budget_max_clp),
+    });
   } catch (e) {
     console.error(e);
     const dup = e.code === '23505' || /duplicate/i.test(e.message || '');
@@ -210,12 +245,102 @@ router.post('/:id/mutual-cancel', optionalAuth, async (req, res) => {
   }
 });
 
+router.patch('/:id/carrier-offer', optionalAuth, async (req, res) => {
+  try {
+    const match = await repo.getById('matches', req.params.id);
+    if (!match) return res.status(404).json({ ok: false, error: 'No encontrado' });
+    if (match.status !== 'proposed') {
+      return res.status(400).json({ ok: false, error: 'Solo en propuesta puedes ofertar precio' });
+    }
+    const role = resolveActorRole(req);
+    if (role !== 'carrier' && req.user?.role !== 'admin') {
+      return res.status(403).json({ ok: false, error: 'Solo el transportista puede ofertar precio' });
+    }
+    const amount = Number(req.body?.carrier_offer_clp);
+    if (!amount || amount < 1) {
+      return res.status(400).json({ ok: false, error: 'Indica un monto válido en CLP' });
+    }
+    const updated = await repo.update('matches', match.id, {
+      carrier_offer_clp: amount,
+      price_status: 'pending_acceptance',
+    });
+    const parties = await getMatchParties(repo, match);
+    await comms.addNotification({
+      match_id: match.id,
+      for_role: 'shipper',
+      type: 'price_offer',
+      title: 'Oferta de precio actualizada',
+      body: `${parties?.carrier_name || 'Transportista'} ofrece $${amount.toLocaleString('es-CL')} CLP.`,
+    });
+    res.json({
+      ok: true,
+      data: updated,
+      within_budget: offerWithinBudget(amount, match.budget_min_clp, match.budget_max_clp),
+      message: 'Oferta enviada al embarcador',
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al guardar oferta' });
+  }
+});
+
+router.patch('/:id/accept-offer', optionalAuth, async (req, res) => {
+  try {
+    const match = await repo.getById('matches', req.params.id);
+    if (!match) return res.status(404).json({ ok: false, error: 'No encontrado' });
+    if (match.status !== 'proposed') {
+      return res.status(400).json({ ok: false, error: 'El match ya no está en propuesta' });
+    }
+    const role = resolveActorRole(req);
+    if (role !== 'shipper' && req.user?.role !== 'admin') {
+      return res.status(403).json({ ok: false, error: 'Solo el embarcador puede aceptar el precio' });
+    }
+    if (!match.carrier_offer_clp) {
+      return res.status(400).json({
+        ok: false,
+        error: 'Aún no hay oferta del transportista. Espera su monto o elige otra oferta.',
+      });
+    }
+    const updated = await repo.update('matches', match.id, {
+      status: 'accepted',
+      agreed_price_clp: Number(match.carrier_offer_clp),
+      price_status: 'agreed',
+    });
+    await repo.update('load_requests', match.load_request_id, { status: 'matched' });
+    await repo.update('capacity_offers', match.capacity_offer_id, { status: 'reserved' });
+    const parties = await getMatchParties(repo, match);
+    await comms.addNotification({
+      match_id: match.id,
+      for_role: 'carrier',
+      type: 'price_accepted',
+      title: 'Precio aceptado',
+      body: `${parties?.shipper_name || 'Embarcador'} aceptó $${Number(match.carrier_offer_clp).toLocaleString('es-CL')} CLP.`,
+    });
+    res.json({
+      ok: true,
+      data: updated,
+      message: 'Precio aceptado. Emparejamiento confirmado.',
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al aceptar oferta' });
+  }
+});
+
 router.patch('/:id/status', optionalAuth, async (req, res) => {
   try {
     const match = await repo.getById('matches', req.params.id);
     if (!match) return res.status(404).json({ ok: false, error: 'No encontrado' });
 
     const next = req.body?.status;
+    if (next === 'accepted' && match.status === 'proposed') {
+      return res.status(400).json({
+        ok: false,
+        error:
+          'Usa «Aceptar precio» cuando el transportista haya enviado su oferta en CLP.',
+      });
+    }
+
     const allowed = MATCH_TRANSITIONS[match.status] || [];
     if (!next || !allowed.includes(next)) {
       return res.status(400).json({

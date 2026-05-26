@@ -69,3 +69,14 @@ CREATE TABLE IF NOT EXISTS penalty_charges (
 
 CREATE INDEX IF NOT EXISTS idx_penalty_charges_debtor ON penalty_charges (debtor_user_id, status);
 CREATE INDEX IF NOT EXISTS idx_penalty_charges_due ON penalty_charges (due_at);
+
+-- 010 — negociación de precio (rango embarcador + oferta transportista)
+ALTER TABLE load_requests
+  ADD COLUMN IF NOT EXISTS budget_min_clp BIGINT,
+  ADD COLUMN IF NOT EXISTS budget_max_clp BIGINT;
+
+ALTER TABLE matches
+  ADD COLUMN IF NOT EXISTS budget_min_clp BIGINT,
+  ADD COLUMN IF NOT EXISTS budget_max_clp BIGINT,
+  ADD COLUMN IF NOT EXISTS carrier_offer_clp BIGINT,
+  ADD COLUMN IF NOT EXISTS price_status TEXT DEFAULT 'pending_offer';

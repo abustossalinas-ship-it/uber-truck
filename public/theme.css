@@ -432,6 +432,26 @@ button[type="submit"]:disabled {
   margin: 0.25rem 0 0.75rem;
 }
 
+.match-budget-hint {
+  padding: 0.5rem 0.75rem;
+  background: #f0f9ff;
+  border-left: 3px solid #0284c7;
+  margin: 0.5rem 0;
+}
+
+.match-price-box {
+  margin: 0.5rem 0 0.75rem;
+  padding: 0.5rem 0.75rem;
+  background: #fff8f0;
+  border-radius: var(--radius);
+  font-size: 0.9rem;
+}
+
+.match-price-box input[type='number'] {
+  max-width: 10rem;
+  margin-right: 0.5rem;
+}
+
 .maps-geo-readonly:read-only {
   background: #f3f4f6;
 }

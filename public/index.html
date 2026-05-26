@@ -195,6 +195,18 @@
             <option value="normal">Normal</option>
             <option value="urgent">Urgente</option>
           </select>
+          <h3 class="form-section">Presupuesto para el flete</h3>
+          <p class="muted">Rango que tu empresa está dispuesta a pagar (oferta/demanda).</p>
+          <div class="grid grid-2">
+            <div>
+              <label>Monto mínimo (CLP)</label>
+              <input name="budget_min_clp" type="number" min="0" step="1000" placeholder="350000" />
+            </div>
+            <div>
+              <label>Monto máximo (CLP)</label>
+              <input name="budget_max_clp" type="number" min="0" step="1000" placeholder="500000" />
+            </div>
+          </div>
           <label>Notas</label>
           <textarea name="notes" rows="2" placeholder="Pedido extra; no tenemos cubicado para la fecha…"></textarea>
           <button type="submit">Publicar carga</button>
@@ -330,10 +342,14 @@
           <select id="match-offer"></select>
           <p id="match-selected" class="match-selected muted" hidden></p>
 
-          <p class="step-label">Paso 3 — Confirmar y emparejar</p>
-          <label>Precio acordado (CLP, opcional)</label>
-          <input id="match-price" type="number" min="0" placeholder="450000" />
-          <button type="submit" id="btn-create-match" class="btn-match-cta">Crear match — emparejar ahora</button>
+          <p class="step-label">Paso 3 — Precio y emparejar</p>
+          <p id="match-budget-hint" class="match-budget-hint muted">Selecciona una carga para ver el rango del embarcador.</p>
+          <div id="match-carrier-offer-wrap" hidden>
+            <label for="match-carrier-offer">Tu oferta al embarcador (CLP)</label>
+            <input id="match-carrier-offer" type="number" min="1" step="1000" placeholder="450000" />
+            <p class="muted">El embarcador verá tu monto y podrá aceptarlo para confirmar el match.</p>
+          </div>
+          <button type="submit" id="btn-create-match" class="btn-match-cta">Crear propuesta de emparejamiento</button>
         </form>
       </div>
       <div class="grid grid-2">
@@ -459,6 +475,6 @@
   <script src="/auth-ui.js?v=0.0.19"></script>
   <script src="/penalties-ui.js?v=0.0.19"></script>
   <script src="/comms-ui.js?v=0.0.19"></script>
-  <script src="/app.js?v=0.0.19"></script>
+  <script src="/app.js?v=0.0.22"></script>
 </body>
 </html>

@@ -72,7 +72,14 @@ router.post('/', optionalAuth, requireAuthIfDb, async (req, res) => {
     () => optionalNumber(body.volume_m3, 'volume_m3'),
     () => optionalNumber(body.weight_kg, 'weight_kg'),
     () => optionalNumber(body.pallets, 'pallets', { max: 500 }),
+    () => optionalNumber(body.budget_min_clp, 'budget_min_clp'),
+    () => optionalNumber(body.budget_max_clp, 'budget_max_clp'),
   ]);
+  const budgetErrors = require('../lib/match-price').validateLoadBudget(
+    body.budget_min_clp,
+    body.budget_max_clp
+  );
+  if (budgetErrors.length) return res.status(400).json({ ok: false, errors: budgetErrors });
   const geoErrors = requireMapsAddresses(body);
   if (geoErrors.length) return res.status(400).json({ ok: false, errors: geoErrors });
   if (errors.length) return res.status(400).json({ ok: false, errors });
@@ -98,6 +105,8 @@ router.post('/', optionalAuth, requireAuthIfDb, async (req, res) => {
       needed_by: body.needed_by || null,
       status: 'published',
       notes: body.notes?.trim() || null,
+      budget_min_clp: body.budget_min_clp != null ? Number(body.budget_min_clp) : null,
+      budget_max_clp: body.budget_max_clp != null ? Number(body.budget_max_clp) : null,
       ...addressPayload(body),
     });
     res.status(201).json({ ok: true, data: row });

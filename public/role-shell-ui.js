@@ -54,6 +54,7 @@ function applyRoleUi() {
   if (panelCarrier) panelCarrier.hidden = role === 'shipper';
 
   prefillOrgFields(role, user);
+  if (typeof updateMatchPriceStep === 'function') updateMatchPriceStep();
 
   const activeTab = document.querySelector('nav .tab.active[data-tab]');
   if (role === 'shipper' && activeTab?.dataset.tab === 'carrier') showTab('shipper');

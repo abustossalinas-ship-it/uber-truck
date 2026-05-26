@@ -34,6 +34,18 @@ const API = {
       headers: apiHeaders(),
       body: JSON.stringify({ actor_role: getActorRole(), ...body }),
     }),
+  patchCarrierOffer: (id, carrier_offer_clp) =>
+    fetch(`/api/matches/${id}/carrier-offer`, {
+      method: 'PATCH',
+      headers: apiHeaders(),
+      body: JSON.stringify({ carrier_offer_clp, actor_role: getActorRole() }),
+    }).then((r) => r.json()),
+  patchAcceptOffer: (id) =>
+    fetch(`/api/matches/${id}/accept-offer`, {
+      method: 'PATCH',
+      headers: apiHeaders(),
+      body: JSON.stringify({ actor_role: getActorRole() }),
+    }).then((r) => r.json()),
   seedDemo: (key) =>
     fetch('/api/demo/seed', {
       method: 'POST',
@@ -72,6 +84,64 @@ function getActorRole() {
 function getActorRoleLabel() {
   const role = getActorRole();
   return typeof roleLabel === 'function' ? roleLabel(role) : role;
+}
+
+function formatBudgetRange(min, max) {
+  const fmt = (n) => (n != null && n !== '' ? `$${Number(n).toLocaleString('es-CL')}` : null);
+  const a = fmt(min);
+  const b = fmt(max);
+  if (a && b) return `${a} – ${b}`;
+  if (b) return `hasta ${b}`;
+  if (a) return `desde ${a}`;
+  return 'sin rango definido';
+}
+
+function buildMatchPriceBox(m) {
+  const role = getActorRole() === 'carrier' ? 'carrier' : 'shipper';
+  const range = formatBudgetRange(m.budget_min_clp, m.budget_max_clp);
+  let html = `<div class="match-price-box"><p><strong>Precio</strong> · Rango embarcador: ${range}</p>`;
+  if (m.agreed_price_clp) {
+    html += `<p>Acordado: <strong>$${Number(m.agreed_price_clp).toLocaleString('es-CL')} CLP</strong></p></div>`;
+    return html;
+  }
+  if (m.carrier_offer_clp) {
+    html += `<p>Oferta transportista: <strong>$${Number(m.carrier_offer_clp).toLocaleString('es-CL')} CLP</strong></p>`;
+    if (role === 'shipper') {
+      html += `<button type="button" data-action="accept_offer" data-id="${m.id}">Aceptar precio y confirmar match</button>`;
+    } else {
+      html += `<p class="muted">Esperando que el embarcador acepte tu oferta.</p>`;
+      html += `<input type="number" class="match-offer-input" data-id="${m.id}" min="1" step="1000" value="${m.carrier_offer_clp}" />`;
+      html += `<button type="button" class="btn-secondary" data-action="offer_price" data-id="${m.id}">Actualizar oferta</button>`;
+    }
+  } else if (role === 'carrier') {
+    html += `<input type="number" class="match-offer-input" data-id="${m.id}" min="1" step="1000" placeholder="Tu oferta CLP" />`;
+    html += `<button type="button" data-action="offer_price" data-id="${m.id}">Enviar oferta al embarcador</button>`;
+  } else {
+    html += `<p class="muted">Esperando oferta de precio del transportista.</p>`;
+  }
+  html += '</div>';
+  return html;
+}
+
+function updateMatchPriceStep() {
+  const hint = $('match-budget-hint');
+  const wrap = $('match-carrier-offer-wrap');
+  const loadId = $('match-load')?.value;
+  const load = window._boardLoadsById?.[loadId];
+  const role = getActorRole();
+  if (hint) {
+    if (load) {
+      hint.textContent = `Rango que paga el embarcador: ${formatBudgetRange(load.budget_min_clp, load.budget_max_clp)}`;
+    } else {
+      hint.textContent = 'Selecciona una carga para ver el rango del embarcador.';
+    }
+  }
+  if (wrap) {
+    const showCarrier =
+      role === 'carrier' ||
+      (typeof Auth === 'undefined' || !Auth.user) && $('demo-actor-role')?.value === 'carrier';
+    wrap.hidden = !showCarrier;
+  }
 }
 
 function matchMutualBanner(m) {
@@ -119,7 +189,6 @@ function buildMatchActions(m) {
   }
   let html = '';
   if (m.status === 'proposed') {
-    html += `<button type="button" data-action="accept" data-id="${m.id}">Aceptar</button>`;
     if (role === 'shipper') {
       html += `<button type="button" class="btn-secondary" data-action="withdraw" data-id="${m.id}" data-phase="proposed" data-price="${m.agreed_price_clp || ''}">Retirar propuesta</button>`;
       html += `<button type="button" class="btn-secondary" data-action="change_offer" data-load-id="${m.load_request_id}" data-offer-id="${m.capacity_offer_id}" data-id="${m.id}" data-price="${m.agreed_price_clp || ''}">Cambiar oferta</button>`;
@@ -650,6 +719,7 @@ async function refreshBoard() {
         <span class="pill">${STATUS_LABEL[l.status] || l.status}</span>
         <p>${routeLine(l)}</p>
         <p class="muted">${l.pallets ? l.pallets + ' pallets · ' : ''}${l.volume_m3 ? l.volume_m3 + ' m³ · ' : ''}${l.cargo_type || ''}${l.distance_duration_min ? ' · ~' + l.distance_duration_min + ' min' : ''}</p>
+        ${l.budget_min_clp || l.budget_max_clp ? `<p class="muted">Presupuesto: ${formatBudgetRange(l.budget_min_clp, l.budget_max_clp)}</p>` : ''}
       </article>`
           )
           .join('');
@@ -699,7 +769,7 @@ async function refreshBoard() {
         <strong>${title}</strong>
         <span class="pill">${STATUS_LABEL[m.status] || m.status}</span>
         ${mutualBanner}
-        ${m.agreed_price_clp ? `<p>$${Number(m.agreed_price_clp).toLocaleString('es-CL')} CLP</p>` : ''}
+        ${buildMatchPriceBox(m)}
         <div class="actions match-actions">${actions}</div>
       </article>`;
       })
@@ -718,6 +788,7 @@ async function refreshBoard() {
   }
 
   const publishedLoads = (loads.data || []).filter((l) => l.status === 'published');
+  window._boardLoadsById = Object.fromEntries((loads.data || []).map((l) => [l.id, l]));
   const publishedOffers = (offers.data || []).filter((o) => o.status === 'published');
   const loadSel = $('match-load');
   const offerSel = $('match-offer');
@@ -729,7 +800,11 @@ async function refreshBoard() {
       ? '<option value="">No hay cargas publicadas</option>'
       : '<option value="">Elegir carga publicada…</option>';
   publishedLoads.forEach((l) => {
-    loadSel.innerHTML += `<option value="${l.id}">${l.company_name} — ${routeLine(l)}</option>`;
+    const br =
+      l.budget_min_clp || l.budget_max_clp
+        ? ` · ${formatBudgetRange(l.budget_min_clp, l.budget_max_clp)}`
+        : '';
+    loadSel.innerHTML += `<option value="${l.id}">${l.company_name} — ${routeLine(l)}${br}</option>`;
   });
   if (keepLoad && loadSel.querySelector(`option[value="${keepLoad}"]`)) {
     loadSel.value = keepLoad;
@@ -762,6 +837,7 @@ async function refreshBoard() {
   }
   updateActiveProposalBanner(matchRows, loadSel.value);
   loadSuggestionsFor(loadSel.value);
+  updateMatchPriceStep();
   showMatchReady();
   renderBoardActor();
   if (typeof Comms !== 'undefined') Comms.refreshBell();
@@ -903,8 +979,17 @@ $('form-match').addEventListener('submit', async (e) => {
   const body = {
     load_request_id: loadId,
     capacity_offer_id: offerId,
-    agreed_price_clp: $('match-price').value || null,
+    actor_role: getActorRole(),
   };
+  const role = getActorRole();
+  if (role === 'carrier') {
+    const offerClp = $('match-carrier-offer')?.value;
+    if (!offerClp) {
+      alert('Ingresa tu oferta en CLP al embarcador.');
+      return;
+    }
+    body.carrier_offer_clp = offerClp;
+  }
   const res = await API.postMatch(body);
   const json = await res.json();
   if (!res.ok) {
@@ -916,10 +1001,16 @@ $('form-match').addEventListener('submit', async (e) => {
     }
     return;
   }
-  $('match-price').value = '';
+  $('match-carrier-offer') && ($('match-carrier-offer').value = '');
   stickyMatchOfferId = null;
   stickyMatchLoadId = null;
-  alert('Emparejamiento creado. Abajo en Emparejamientos puedes pulsar Aceptar.');
+  const msg =
+    role === 'carrier'
+      ? json.within_budget === false
+        ? 'Propuesta creada. Tu oferta está fuera del rango del embarcador; igual puede evaluarla.'
+        : 'Propuesta creada con tu oferta. El embarcador puede aceptar el precio abajo.'
+      : 'Propuesta creada. El transportista debe enviar su oferta en CLP; luego aceptas el precio.';
+  alert(msg);
   refreshBoard().then(() => {
     $('list-matches')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   });
@@ -933,6 +1024,34 @@ $('list-matches').addEventListener('click', async (e) => {
   if (action === 'chat') {
     const title = btn.dataset.title || '';
     if (typeof Comms !== 'undefined') Comms.openChat(id, title);
+    return;
+  }
+  if (action === 'accept_offer') {
+    const json = await API.patchAcceptOffer(id);
+    if (!json.ok) alert(json.error || 'Error');
+    else {
+      alert(json.message || 'Precio aceptado');
+      refreshBoard();
+    }
+    return;
+  }
+  if (action === 'offer_price') {
+    const input = document.querySelector(`.match-offer-input[data-id="${id}"]`);
+    const amount = input?.value;
+    if (!amount) {
+      alert('Ingresa el monto en CLP');
+      return;
+    }
+    const json = await API.patchCarrierOffer(id, amount);
+    if (!json.ok) alert(json.error || 'Error');
+    else {
+      alert(
+        json.within_budget === false
+          ? `${json.message || 'Oferta enviada'} (fuera del rango del embarcador)`
+          : json.message || 'Oferta enviada'
+      );
+      refreshBoard();
+    }
     return;
   }
   if (action === 'mutual_confirm') {
@@ -954,14 +1073,17 @@ $('list-matches').addEventListener('click', async (e) => {
     runMatchCancel(id, 'cancel', btn.dataset.phase, price);
     return;
   }
-  const map = { accept: 'accepted', progress: 'in_progress', complete: 'completed' };
+  if (action === 'accept') {
+    alert('Primero el transportista debe ofertar precio; luego usa «Aceptar precio y confirmar match».');
+    return;
+  }
+  const map = { progress: 'in_progress', complete: 'completed' };
   const res = await API.patchMatch(id, { status: map[action] });
   const json = await res.json();
   if (!res.ok) alert(json.error || 'Error');
   else refreshBoard();
 });
 
-$('demo-actor-role')?.addEventListener('change', () => refreshBoard());
 
 fetch('/health')
   .then((r) => r.json())
@@ -990,7 +1112,12 @@ function showMatchReady() {
   const loadOpt = $('match-load').selectedOptions[0]?.text || 'Carga';
   const offerOpt = $('match-offer').selectedOptions[0]?.text || 'Oferta';
   box.hidden = false;
-  box.innerHTML = `Listo: <strong>${offerOpt}</strong> para <strong>${loadOpt}</strong>. Revisa el precio y pulsa el botón naranja abajo.`;
+  const role = getActorRole();
+  const priceNote =
+    role === 'carrier'
+      ? 'Ingresa <strong>tu oferta en CLP</strong> y crea la propuesta.'
+      : 'El transportista debe <strong>ofertar precio</strong>; tú lo aceptas en Emparejamientos.';
+  box.innerHTML = `Listo: <strong>${offerOpt}</strong> para <strong>${loadOpt}</strong>. ${priceNote}`;
   if (btn) {
     btn.scrollIntoView({ behavior: 'smooth', block: 'center' });
   }
@@ -1000,7 +1127,13 @@ $('match-load')?.addEventListener('change', (e) => {
   stickyMatchLoadId = e.target.value || null;
   stickyMatchOfferId = null;
   loadSuggestionsFor(e.target.value);
+  updateMatchPriceStep();
   showMatchReady();
+});
+
+$('demo-actor-role')?.addEventListener('change', () => {
+  updateMatchPriceStep();
+  refreshBoard();
 });
 
 $('match-offer')?.addEventListener('change', (e) => {

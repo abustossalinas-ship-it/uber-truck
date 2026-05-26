@@ -39,7 +39,7 @@
     <h1>Memoria técnica del proyecto</h1>
     <p class="meta"><strong>Producto:</strong> Uber Truck — marketplace de capacidad logística ociosa (backhaul), Chile.<br />
     <strong>Documento:</strong> memoria técnica viva del repositorio y del despliegue Railway.<br />
-    <strong>Versión documento:</strong> 3.0 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.19 &nbsp;|&nbsp; <strong>Fecha:</strong> mayo 2026</p>
+    <strong>Versión documento:</strong> 3.1 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.19 &nbsp;|&nbsp; <strong>Fecha:</strong> mayo 2026</p>
   </div>
 </div>
 
@@ -49,11 +49,32 @@
 <p>Este archivo es la <strong>referencia única</strong> de arquitectura, hitos, cronograma Gantt, próximos pasos y stack por capas. Actualizarlo cuando cambien migraciones Supabase, rutas API, reglas de cancelación/multas o el avance real frente al plan.</p>
 <p><strong>Formato Word:</strong> en la raíz del repo ejecutar <code>npm run export:memoria-docx</code> → <code>docs/Memoria-tecnica-Uber-Truck.docx</code> y copia en <code>Downloads/Proyecto Uber Truck/</code>. Pack completo: <code>npm run export:all-docs</code>.</p>
 
+<h2>Visión de producto</h2>
+<p><strong>MVP final = una sola app web</strong> con funcionamiento lo más parecido posible a <strong>Uber</strong> (pedir → emparejar → viaje en curso → chat → cancelar → cuenta), adaptado a <strong>carga por camión</strong>. El usuario ya sabe usar Uber; la curva de aprendizaje debe ser mínima.</p>
+<p><strong>Objetivo comercial:</strong> ganar usuarios y viajes reales con esta app propia. <strong>Objetivo estratégico a futuro:</strong> demostrar tracción y ofrecer el producto como <strong>add-on / integración</strong> a plataformas grandes (ej. marketplace logístico o apps de movilidad), no reemplazarlas desde el día uno.</p>
+<p><strong>Descartado para el MVP:</strong> piloto paralelo con WhatsApp + Airtable fuera de la app. Todo el piloto y la operación van <strong>dentro de Uber Truck</strong>.</p>
+
 <h2>Resumen ejecutivo del stack</h2>
-<p>Embarcadores y transportistas publican <strong>carga</strong> y <strong>capacidad ociosa</strong> vía web (<code>public/</code>). Un backend <strong>Node.js 20 + Express 4</strong> expone REST con <strong>JWT</strong>, persiste en <strong>Supabase (PostgreSQL)</strong>, gestiona <strong>emparejamientos</strong>, chat, notificaciones, cancelación (acuerdo mutuo / multas sugeridas) y resumen de cuenta. Despliegue en <strong>Railway</strong>; código en <strong>GitHub</strong>. Fase piloto previa: <strong>concierge</strong> (WhatsApp + Airtable) sin código.</p>
+<p>Embarcadores y transportistas usan la <strong>misma app</strong> (<code>public/</code>): publicar demanda u oferta, ver sugerencias de match, aceptar, seguir estados, chatear, cancelar y revisar multas/cuenta. Backend <strong>Node.js 20 + Express 4</strong>, datos en <strong>Supabase</strong>, auth <strong>JWT</strong>, deploy <strong>Railway</strong>, código en <strong>GitHub</strong>.</p>
 
 <h2>Principio de producto</h2>
-<p>Validar <strong>match carga–camión</strong> y take rate 12–15% antes de pagos integrados, app nativa o pricing dinámico completo.</p>
+<p>Priorizar <strong>paridad de flujo Uber</strong> y usuarios activos en la app antes que integraciones B2B o Open Finance. Pagos in-app y mapa en vivo entran cuando el flujo base ya se usa sin fricción.</p>
+
+<h3>Paridad UX — Uber vs Uber Truck (MVP final)</h3>
+<table>
+  <tr><th>Flujo tipo Uber</th><th>Uber Truck</th><th>Estado mayo 2026</th></tr>
+  <tr><td>Pedir un viaje</td><td>Embarcador publica <strong>carga</strong></td><td class="g-done">Hecho</td></tr>
+  <tr><td>Conductor disponible / acepta</td><td>Transportista publica <strong>capacidad</strong> y acepta match</td><td class="g-done">Hecho</td></tr>
+  <tr><td>Viaje en curso (estados)</td><td>Emparejamiento: propuesto → aceptado → en ejecución → completado</td><td class="g-done">Hecho</td></tr>
+  <tr><td>Chat con la otra parte</td><td>Chat in-app por match</td><td class="g-done">Hecho</td></tr>
+  <tr><td>Cancelar con reglas</td><td>Modal motivos, acuerdo mutuo, multas sugeridas</td><td class="g-done">Hecho</td></tr>
+  <tr><td>Notificaciones</td><td>Campana in-app (JWT)</td><td class="g-done">Hecho</td></tr>
+  <tr><td>Mis viajes</td><td><strong>Mis cargas</strong> / <strong>Mis ofertas</strong> por usuario</td><td class="g-todo">Pendiente (2.4–2.9)</td></tr>
+  <tr><td>Mapa / seguimiento</td><td>Origen–destino + mapas (fase siguiente)</td><td class="g-todo">Plan</td></tr>
+  <tr><td>Pago en app</td><td>Pasarela + generar cargo</td><td class="g-doing">Parcial (2.10)</td></tr>
+  <tr><td>Calificación ★</td><td>Ratings post-viaje</td><td class="g-todo">Fase 3</td></tr>
+  <tr><td>Perfil y cuenta</td><td>Login, empresa, banco, multas</td><td class="g-doing">Parcial</td></tr>
+</table>
 
 <div class="rule"></div>
 
@@ -65,13 +86,17 @@
 <h3>Estado (mayo 2026)</h3>
 <p class="check">En curso — paralelo al MVP digital ya desplegado.</p>
 
-<h2>Fase 1 — Concierge MVP (no-code)</h2>
+<h2>Fase 1 — MVP final app tipo Uber (producto único)</h2>
 <h3>Objetivo</h3>
-<p>WhatsApp Business + Airtable; protocolo match manual; <strong>20 emparejamientos</strong> reales (hito M2).</p>
-<h3>Estado</h3>
-<p class="check">Planificado — prioridad tras SQL 008 en prod.</p>
+<p>Cerrar la <strong>paridad de flujo</strong> en la misma app: mis viajes por cuenta, copy y pasos al estilo Uber, piloto con <strong>20 viajes reales</strong> hechos 100% en la plataforma (hito M2).</p>
+<h3>Pendiente clave</h3>
+<ul>
+  <li><code>owner_user_id</code> — mis cargas / mis ofertas (como “Mis viajes” en Uber).</li>
+  <li>Refino UX: publicar → match → activos → historial (sin herramientas externas).</li>
+  <li>SQL 008 en prod; luego capturas en <code>docs/img/</code> para memoria y pitch.</li>
+</ul>
 
-<h2>Fase 2 — MVP digital v1</h2>
+<h2>Fase 2 — Núcleo digital (ya en producción)</h2>
 <h3>Lo realizado (adelantado vs Gantt oct 2026)</h3>
 <ul>
   <li>Migraciones Supabase 001–008 (auth, matches, chat, notificaciones, banco, <code>penalty_charges</code>).</li>
@@ -89,8 +114,11 @@
 <h2>Fase 3 — Piloto confianza</h2>
 <p>KYC manual, ratings bidireccionales, microseguro POC, <strong>100 viajes digitales</strong> (M4).</p>
 
-<h2>Fase 4 — SaaS híbrido</h2>
+<h2>Fase 4 — Escala producto</h2>
 <p>Match semi-automático por corredor, dashboard embarcador frecuente, informe red de capacidad (M5).</p>
+
+<h2>Fase 5 — Estrategia add-on (visión, post-tracción)</h2>
+<p>Con métricas de uso (viajes, retención, NPS), empaquetar capacidad ociosa como <strong>módulo integrable</strong> (API + widgets) para socios tipo marketplace o apps de movilidad. Requiere MVP propio maduro y casos de éxito en Chile.</p>
 
 <div class="rule"></div>
 
@@ -110,7 +138,7 @@
 <table>
   <tr><th>Fase</th><th>Nombre</th><th>Inicio</th><th>Fin</th><th>Duración</th></tr>
   <tr><td>0</td><td>Descubrimiento y legal</td><td>2026-06-01</td><td>2026-06-28</td><td>4 sem</td></tr>
-  <tr><td>1</td><td>Concierge MVP</td><td>2026-06-15</td><td>2026-08-09</td><td>8 sem</td></tr>
+    <tr><td>1</td><td>MVP final app (paridad Uber + piloto)</td><td>2026-06-01</td><td>2026-08-31</td><td>12 sem</td></tr>
   <tr><td>2</td><td>MVP digital v1</td><td>2026-08-01</td><td>2026-10-25</td><td>12 sem</td></tr>
   <tr><td>3</td><td>Piloto escalado + confianza</td><td>2026-10-01</td><td>2027-01-31</td><td>16 sem</td></tr>
   <tr><td>4</td><td>Producto B2B (SaaS)</td><td>2027-02-01</td><td>2027-03-31</td><td>8 sem</td></tr>
@@ -132,13 +160,13 @@
     <td class="g-na">—</td>
     <td class="g-na">—</td>
   </tr>
-  <tr>
-    <td class="hito-head">1 · Concierge</td>
-    <td class="g-todo">Plan</td>
-    <td class="g-doing">En curso</td>
-    <td class="g-todo">Plan</td>
-    <td class="g-na">—</td>
-  </tr>
+    <tr>
+      <td class="hito-head">1 · MVP final app</td>
+      <td class="g-doing">En curso</td>
+      <td class="g-doing">En curso</td>
+      <td class="g-todo">Piloto 20</td>
+      <td class="g-na">—</td>
+    </tr>
   <tr>
     <td class="hito-head">2 · MVP digital</td>
     <td class="g-done">Hecho</td>
@@ -166,7 +194,7 @@
 <table>
   <tr><th>Hito</th><th>Fecha plan</th><th>Estado real (mayo 2026)</th></tr>
   <tr><td>M1 Descubrimiento + legal</td><td>28-jun-2026</td><td class="g-doing">En curso</td></tr>
-  <tr><td>M2 20 emparejamientos concierge</td><td>09-ago-2026</td><td class="g-todo">Pendiente</td></tr>
+  <tr><td>M2 20 viajes en la app (piloto)</td><td>31-ago-2026</td><td class="g-todo">Pendiente</td></tr>
   <tr><td>M3 MVP digital en producción</td><td>25-oct-2026</td><td class="g-done"><strong>Hecho (adelantado)</strong></td></tr>
   <tr><td>M4 100 viajes digitales</td><td>31-ene-2027</td><td class="g-todo">Pendiente</td></tr>
   <tr><td>M5 Match semi-auto + SaaS</td><td>31-mar-2027</td><td class="g-todo">Pendiente</td></tr>
@@ -181,7 +209,7 @@
   <tr><td>NPS transportista</td><td>≥ 7</td><td>≥ 8</td></tr>
 </table>
 
-<p><strong>Interpretación mayo 2026:</strong> núcleo fase 2 (~75%) en prod; fase 2.10 cobros ~25%; proyecto total hasta M5 ~35%. Si una etapa se adelanta o retrasa, actualizar celdas del Gantt, la tabla de actividades siguiente y esta nota.</p>
+<p><strong>Interpretación mayo 2026:</strong> núcleo digital (~75%) en prod; <strong>foco actual = MVP final tipo Uber</strong> (mis viajes + piloto 20 en app); cobros 2.10 ~25%. Add-on a terceros solo tras M2/M4. Actualizar Gantt y backlog cuando cambie prioridad.</p>
 
 <h2>Próximos pasos — backlog de actividades (mayo 2026)</h2>
 <p>Prioridad: <strong>P0</strong> bloquea validación; <strong>P1</strong> siguiente entrega; <strong>P2</strong> planificado.</p>
@@ -190,9 +218,10 @@
   <tr><td>U1</td><td>P0</td><td>Ejecutar SQL 008 en Supabase prod</td><td>Tablas chat, notif, banco, penalty_charges</td><td>Inmediato</td><td class="g-doing">Pend. usuario</td></tr>
   <tr><td>U2</td><td>P0</td><td>Validar prod /health + login JWT</td><td>Smoke test Railway</td><td>Inmediato</td><td class="g-done">Hecho</td></tr>
   <tr><td>U3</td><td>P0</td><td>Memoria + /docs/ en prod</td><td>Gantt y próximos pasos en un solo HTML</td><td>May 2026</td><td class="g-done">Código listo</td></tr>
-  <tr><td>U4</td><td>P1</td><td>Mis cargas / mis ofertas</td><td><code>owner_user_id</code> + API <code>/mine</code></td><td>Jun 2026</td><td class="g-todo">Plan</td></tr>
-  <tr><td>U5</td><td>P1</td><td>Piloto concierge 20 match</td><td>WhatsApp + Airtable operativo</td><td>Jul–Ago 2026</td><td class="g-todo">Plan</td></tr>
-  <tr><td>U6</td><td>P1</td><td>Capturas memoria</td><td><code>docs/img/</code> post-piloto</td><td>Ago 2026</td><td class="g-todo">Plan</td></tr>
+  <tr><td>U4</td><td>P0</td><td>Mis cargas / mis ofertas («Mis viajes»)</td><td><code>owner_user_id</code> + API <code>/mine</code> + UI</td><td>Jun 2026</td><td class="g-todo">Plan</td></tr>
+  <tr><td>U5</td><td>P1</td><td>UX paridad Uber (copy y pasos)</td><td>Flujo publicar → match → activos unificado</td><td>Jun–Jul 2026</td><td class="g-doing">En curso</td></tr>
+  <tr><td>U6</td><td>P1</td><td>Piloto 20 viajes <strong>solo en la app</strong></td><td>M2 — embarcadores + transportistas reales</td><td>Jul–Ago 2026</td><td class="g-todo">Plan</td></tr>
+  <tr><td>U6b</td><td>P1</td><td>Capturas y métricas piloto</td><td><code>docs/img/</code> + tiempo match, NPS</td><td>Ago 2026</td><td class="g-todo">Plan</td></tr>
   <tr><td>U7</td><td>P2</td><td>Generar cargo + pasarela</td><td>Webpay / transferencia</td><td>Post-piloto</td><td class="g-todo">Diseño</td></tr>
   <tr><td>U8</td><td>P2</td><td>KYC + ratings</td><td>Fase 3 operativa</td><td>Oct 2026+</td><td class="g-todo">Plan</td></tr>
   <tr><td>U9</td><td>P2</td><td>Match semi-auto corredor</td><td>Algoritmo v1</td><td>Feb 2027</td><td class="g-todo">Plan</td></tr>
@@ -200,7 +229,7 @@
 <p><strong>No hacer aún:</strong> app móvil nativa, Open Finance, pricing dinámico completo.</p>
 
 <h3>Gantt detallado por tarea (2026–2027)</h3>
-<p>Responsable: <strong>E</strong>=Equipo, <strong>O</strong>=Operaciones/concierge, <strong>L</strong>=Legal. Barras ████ = ventana planificada.</p>
+<p>Responsable: <strong>E</strong>=Equipo, <strong>O</strong>=Operaciones/piloto en app, <strong>L</strong>=Legal. Barras ████ = ventana planificada.</p>
 <table class="gantt">
   <tr>
     <th>ID</th><th>Tarea</th><th>Resp.</th><th>Inicio</th><th>Fin</th>
@@ -210,10 +239,10 @@
   <tr><td>0.1</td><td>Entrevistas transportistas + PYME</td><td>O</td><td>01-jun</td><td>28-jun</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
   <tr><td>0.2</td><td>Validación precio / comisión 12–15%</td><td>O</td><td>15-jun</td><td>15-jul</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
   <tr><td>0.3</td><td>Términos legales + seguro piloto</td><td>L</td><td>01-jun</td><td>30-jun</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
-  <tr><td>1.1</td><td>WhatsApp + Airtable</td><td>O</td><td>15-jun</td><td>22-jun</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
-  <tr><td>1.2</td><td>Protocolo concierge + plantillas</td><td>O</td><td>22-jun</td><td>06-jul</td><td>█</td><td>█</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
-  <tr><td>1.3</td><td><strong>Piloto 20 emparejamientos</strong></td><td>O</td><td>06-jul</td><td>09-ago</td><td></td><td>████████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
-  <tr><td>1.4</td><td>Informe aprendizajes piloto</td><td>E</td><td>02-ago</td><td>16-ago</td><td></td><td></td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
+  <tr><td>1.1</td><td>Mis cargas / mis ofertas (owner_user_id)</td><td>E</td><td>01-jun</td><td>30-jun</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
+  <tr><td>1.2</td><td>Refino UX flujo tipo Uber</td><td>E</td><td>15-jun</td><td>31-jul</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
+  <tr><td>1.3</td><td><strong>Piloto 20 viajes en la app</strong></td><td>O/E</td><td>01-jul</td><td>31-ago</td><td></td><td>████████</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
+  <tr><td>1.4</td><td>Informe piloto (métricas + pitch add-on)</td><td>E</td><td>15-ago</td><td>15-sep</td><td></td><td></td><td>██</td><td>█</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
   <tr><td>2.1</td><td>Esquema BD Supabase (001–008)</td><td>E</td><td>01-ago</td><td>22-ago</td><td></td><td></td><td>███</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
   <tr><td>2.2</td><td>API Express offers / loads / matches</td><td>E</td><td>15-ago</td><td>19-sep</td><td></td><td></td><td>██</td><td>███</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
   <tr><td>2.3</td><td>Web carrier / shipper</td><td>E</td><td>01-sep</td><td>03-oct</td><td></td><td></td><td></td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
@@ -266,8 +295,8 @@
 <h2>Capa 08 — Frontend web (SPA ligera)</h2>
 <p><strong>Rol:</strong> <code>public/index.html</code>, <code>app.js</code>, <code>auth-ui.js</code>, <code>comms-ui.js</code>, <code>penalties-ui.js</code>, <code>theme.css</code>. Marca: naranja <code>#F26522</code>.</p>
 
-<h2>Capa 09 — Canal concierge (fase 1)</h2>
-<p><strong>Rol:</strong> WhatsApp Business + Airtable — match manual sin código; validación antes de escalar digital.</p>
+<h2>Capa 09 — Experiencia producto (paridad Uber)</h2>
+<p><strong>Rol:</strong> flujos, copy y pantallas en <code>public/</code> alineados a «pedir → match → viaje activo → historial»; roles embarcador/transportista como pasajero/conductor. Piloto y validación <strong>solo dentro de esta app</strong>, no canales externos.</p>
 
 <h2>Capa 10 — Railway</h2>
 <p><strong>Rol:</strong> hosting, variables de entorno, healthcheck <code>/health</code>, deploy desde GitHub <code>main</code>.</p>
@@ -331,6 +360,6 @@
   docs/            ← memoria HTML (este archivo)
   canvases/        ← estado de avance (Cursor)</code>
 
-<p class="meta"><em>Fin del documento — v3.0: estructura Chanchi (Parte I Gantt + próximos pasos integrados, Parte II stack por capas, logo).</em></p>
+<p class="meta"><em>Fin del documento — v3.1: MVP único tipo Uber; piloto en app; visión add-on futura; sin WhatsApp/Airtable.</em></p>
 </body>
 </html>

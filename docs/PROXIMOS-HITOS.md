@@ -1,41 +1,44 @@
 # Próximos hitos — Uber Truck
 
-Backlog operativo (mayo 2026). Prioridad: **P0** bloquea validación · **P1** siguiente entrega · **P2** planificado.
+**Estrategia:** un solo producto — **app tipo Uber** para carga por camión. Piloto y usuarios **dentro de la app** (no WhatsApp ni planillas externas). Objetivo futuro: tracción → posible **add-on** a plataformas grandes.
+
+Prioridad: **P0** bloquea · **P1** siguiente · **P2** después del piloto.
 
 ---
 
-## P0 — Esta semana
+## P0 — Ahora
 
 | # | Tarea | Estado |
 |---|-------|--------|
-| 1 | Ejecutar SQL **008** en Supabase prod (`docs/SQL-SUPABASE.md`) | Pendiente usuario |
-| 2 | Validar `/health` y login en Railway prod | Hecho |
-| 3 | Revisar hub documentación `/docs/` | Hecho |
+| 1 | SQL **008** en Supabase prod | Pendiente usuario |
+| 2 | **Mis cargas / mis ofertas** (`owner_user_id` + UI «Mis viajes») | Pendiente |
+| 3 | Prod `/health` + login JWT | Hecho |
 
-## P1 — Siguiente sprint
-
-| # | Tarea | Estado |
-|---|-------|--------|
-| 4 | Mis cargas / mis ofertas por `owner_user_id` | Pendiente |
-| 5 | Piloto concierge: 20 emparejamientos (M2) | Pendiente |
-| 6 | Capturas en `docs/img/` post-piloto | Pendiente |
-
-## P2 — Después del piloto
+## P1 — MVP final tipo Uber
 
 | # | Tarea | Estado |
 |---|-------|--------|
-| 7 | Botón generar cargo + pasarela | Diseño |
-| 8 | KYC manual + ratings (fase 3) | Planificado |
-| 9 | Match semi-automático por corredor (fase 4) | Planificado |
+| 4 | Refino UX: publicar → match → activos (copy/pasos estilo Uber) | En curso |
+| 5 | **Piloto 20 viajes** completados solo en la app (M2) | Pendiente |
+| 6 | Capturas `docs/img/` + métricas (tiempo match, NPS) | Pendiente |
+
+## P2 — Cierre MVP + escala
+
+| # | Tarea | Estado |
+|---|-------|--------|
+| 7 | Pasarela + generar cargo (2.10) | Diseño |
+| 8 | Mapa / seguimiento en ruta | Planificado |
+| 9 | Ratings + KYC (fase 3) | Planificado |
+| 10 | Paquete API para add-on (post 100 viajes) | Visión |
 
 ## No hacer aún
 
-- App móvil nativa
+- WhatsApp + Airtable como producto principal
+- App nativa (salvo PWA)
 - Open Finance
-- Pricing dinámico completo
+- Integración directa con Uber antes de tener usuarios propios
 
 ## Referencias
 
-- Bitácora MVP digital: [HITO-DIGITAL-MVP.md](./HITO-DIGITAL-MVP.md)
-- Memoria + Gantt: [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html)
-- Roadmap estratégico: [ROADMAP.md](./ROADMAP.md)
+- [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html) — visión, paridad Uber, Gantt
+- [ROADMAP.md](./ROADMAP.md)

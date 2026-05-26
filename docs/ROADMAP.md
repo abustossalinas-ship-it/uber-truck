@@ -1,65 +1,75 @@
 # Roadmap — Uber Truck
 
-## Fase 0 — Kickoff (ahora)
+## Visión
 
-- [x] Plantilla proyecto + Cursor
-- [ ] Completar `KICKOFF.md`
-- [ ] 3–5 entrevistas usuarios
-- [ ] Wireframe flujo principal (Figma / papel)
+**MVP final:** una app (web, luego PWA/móvil) que funcione **como Uber**, pero para emparejar **carga ↔ camión** con capacidad ociosa. Los usuarios ya saben el patrón: publicar, aceptar, viaje en curso, chat, cancelar, cuenta.
 
-## Fase 1 — MVP backend (4–6 semanas)
-
-| # | Entregable |
-|---|------------|
-| 1.1 | Esquema BD: users, loads, trips, statuses |
-| 1.2 | API: CRUD carga + listado por región |
-| 1.3 | API: asignar viaje + cambio de estado |
-| 1.4 | Auth mínimo (2 roles) |
-| 1.5 | Deploy Railway + `/health` |
-
-## Fase 2 — MVP web (3–4 semanas)
-
-| # | Entregable |
-|---|------------|
-| 2.1 | UI embarcador: publicar y ver mis cargas |
-| 2.2 | UI transportista: board de cargas + aceptar |
-| 2.3 | Notificaciones básicas |
-
-### Backlog — cuenta y “mis” publicaciones (post-login)
-
-Hoy el login guarda rol (`shipper` / `carrier`) pero **cargas y ofertas no tienen `owner_user_id`**; el tablero lista todo el marketplace.
-
-| # | Tarea |
-|---|--------|
-| 2.4 | Migración: `owner_user_id` (o `shipper_user_id` / `carrier_user_id`) en `load_requests` y `capacity_offers` |
-| 2.5 | Al crear carga/oferta: persistir `req.user.id` (JWT); rechazar o anonimizar si no hay sesión (definir política) |
-| 2.6 | API: `GET /api/load-requests/mine` y `GET /api/capacity-offers/mine` (filtro por usuario) |
-| 2.7 | UI embarcador: sección **Mis cargas** (solo las de la cuenta) + tablero “mercado” opcional |
-| 2.8 | UI transportista: **Mis ofertas** + cargas asociadas vía **emparejamientos activos** (match ↔ oferta) |
-| 2.9 | Prellenar `company_name` / `carrier_name` desde `users.company_name` al publicar |
-
-### Fase 2.10 — Multas, plazos y cobro (en curso)
-
-| # | Tarea | Estado |
-|---|--------|--------|
-| 2.10a | Recuadro **Cuenta y multas** (debes / te deben, plazo 7 días, días atraso) | MVP UI |
-| 2.10b | Bloque igual en **Notificaciones** | MVP UI |
-| 2.10c | Migración `008` — banco en `users`, tabla `penalty_charges` | SQL listo |
-| 2.10d | API `GET /api/account/summary`, `PATCH /api/account/bank` | MVP API |
-| 2.10e | Botón **Generar cargo** + pasarela de pago | Pendiente |
-| 2.10f | Bloquear publicar/emparejar si multa `overdue` sin banco | Pendiente |
-
-Ver `docs/PENALTIES-AND-ACCOUNTS.md`.
-
-## Fase 3 — Piloto
-
-- 5 embarcadores + 10 transportistas
-- Métricas: viajes cerrados, tiempo a match, NPS
-
-## Fase 4 — Escala (post-validación)
-
-- Pagos, GPS, app nativa, pricing dinámico
+**Después:** con viajes reales y métricas, explorar el producto como **add-on** integrable (API/widgets) en marketplaces o apps de movilidad — no sustituir a Uber desde el día uno.
 
 ---
 
-**Principio:** validar **match carga–camión** antes de invertir en pagos o app nativa.
+## Estado actual (v0.0.19)
+
+| Área | Estado |
+|------|--------|
+| Publicar carga / oferta | Hecho |
+| Match, estados, chat, notificaciones | Hecho |
+| Cancelación, acuerdo mutuo, multas UI | Hecho |
+| Mis cargas / mis ofertas por usuario | **Pendiente** |
+| Pago in-app | Pendiente |
+| Mapa en vivo | Pendiente |
+| Ratings | Pendiente |
+
+---
+
+## Fase A — MVP final tipo Uber (prioridad)
+
+| # | Entregable |
+|---|------------|
+| A.1 | `owner_user_id` + **Mis cargas** / **Mis ofertas** |
+| A.2 | Flujo UX unificado (misma app, sin herramientas externas) |
+| A.3 | Piloto **20 viajes** en producción |
+| A.4 | SQL 008 en prod + estabilidad Railway |
+
+## Fase B — Confianza y cobro
+
+| # | Entregable |
+|---|------------|
+| B.1 | Pasarela + botón generar cargo (2.10) |
+| B.2 | Mapas / geocoding en publicación |
+| B.3 | Ratings bidireccionales |
+| B.4 | KYC manual |
+
+## Fase C — Piloto escalado
+
+- 5 embarcadores + 10 transportistas activos en la app
+- Meta: **100 viajes** digitales
+- Métricas: tiempo a match, NPS, retención 7 días
+
+## Fase D — Escala y add-on
+
+- Match semi-automático por corredor
+- Dashboard embarcador frecuente
+- Documentación API para socios (integración tipo add-on)
+
+---
+
+## Backlog técnico (detalle)
+
+### Mis publicaciones (2.4–2.9)
+
+| # | Tarea |
+|---|--------|
+| 2.4 | Migración `owner_user_id` en `load_requests` y `capacity_offers` |
+| 2.5 | Persistir `req.user.id` al crear |
+| 2.6 | `GET .../mine` |
+| 2.7–2.8 | UI Mis cargas / Mis ofertas |
+| 2.9 | Prellenar nombre empresa desde `users` |
+
+### Multas y cobros (2.10)
+
+Ver `docs/PENALTIES-AND-ACCOUNTS.md`.
+
+---
+
+**Principio:** paridad Uber + usuarios en **esta** app antes que partnerships o app nativa compleja.

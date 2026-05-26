@@ -10,4 +10,4 @@ Carpeta para imágenes referenciadas desde la memoria técnica HTML (mismo patr�
 
 ## Pendiente
 
-Añadir capturas al cerrar piloto concierge (M2) y validación con usuarios reales (M4).
+Añadir capturas al cerrar piloto de 20 viajes en la app (M2) y validación con usuarios reales (M4).

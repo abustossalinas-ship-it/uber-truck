@@ -1,0 +1,14 @@
+# Dispara redeploy en Railway si configuraste RAILWAY_DEPLOY_HOOK (secret en GitHub).
+name: Railway deploy hook
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  trigger:
+    runs-on: ubuntu-latest
+    steps:
+      - name: POST deploy hook
+        if: ${{ secrets.RAILWAY_DEPLOY_HOOK != '' }}
+        run: curl -fsS -X POST "${{ secrets.RAILWAY_DEPLOY_HOOK }}"

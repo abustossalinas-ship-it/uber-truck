@@ -52,11 +52,28 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...
 
 6. Tras el deploy, abre la URL pública → debe responder `/health` y servir la web en `/`.
 
-### Comprobar
+### Si push a GitHub no actualiza producción (redeploy manual)
+
+Railway a veces deja de enlazar auto-deploy. En ese caso:
+
+1. [railway.app](https://railway.app) → proyecto **uber-truck** → servicio web.
+2. **Settings → Source**: repo `abustossalinas-ship-it/uber-truck`, rama **`main`**.
+3. Pestaña **Deployments** → **Redeploy** (o **Deploy** del último commit).
+4. Espera estado **Success** (1–3 min).
+
+**Comprobar que llegó el build nuevo:**
 
 ```bash
-curl https://TU_APP.up.railway.app/health
+curl https://uber-truck-production.up.railway.app/health
 ```
+
+Debe incluir `"version":"0.0.2"` y `"ui":"match-flow-v2"`. Si no aparecen, producción sigue en un deploy viejo.
+
+En el navegador: **Ctrl+F5** en `/`. El badge bajo el logo debe decir **v0.0.2 · emparejar mejorado** y en Tablero verás **Paso 1 / 2 / 3** y el botón **Crear match — emparejar ahora**.
+
+### Deploy hook (opcional, GitHub Actions)
+
+En Railway → Service → **Settings → Deploy** → copia **Deploy Hook URL**. En GitHub → repo → **Settings → Secrets** → `RAILWAY_DEPLOY_HOOK`. El workflow `.github/workflows/railway-deploy.yml` hace `POST` en cada push a `main`.
 
 ---
 

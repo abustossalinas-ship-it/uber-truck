@@ -20,6 +20,20 @@ router.get('/', async (req, res) => {
   }
 });
 
+router.get('/:id/match-suggestions', async (req, res) => {
+  try {
+    const load = await repo.getById('load_requests', req.params.id);
+    if (!load) return res.status(404).json({ ok: false, error: 'Carga no encontrada' });
+    const offers = await repo.list('capacity_offers', { status: 'published' });
+    const { rankOffersForLoad } = require('../lib/match-score');
+    const ranked = rankOffersForLoad(load, offers);
+    res.json({ ok: true, load_id: load.id, data: ranked });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al sugerir matches' });
+  }
+});
+
 router.get('/:id', async (req, res) => {
   try {
     const row = await repo.getById('load_requests', req.params.id);

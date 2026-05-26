@@ -41,6 +41,7 @@ body {
   display: flex;
   gap: 1.25rem;
   align-items: flex-start;
+  flex-wrap: wrap;
   padding: 1.25rem 1.5rem;
   border-bottom: 3px solid var(--brand-black);
   background: var(--surface);
@@ -69,6 +70,74 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: var(--accent);
+}
+
+.header-actions {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.35rem;
+}
+
+.tab-sm {
+  font-size: 0.8rem;
+  padding: 0.35rem 0.75rem;
+}
+
+.demo-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  padding: 0.65rem 1.5rem;
+  background: var(--brand-black);
+  color: var(--brand-white);
+  font-size: 0.85rem;
+}
+
+.demo-bar .tab-sm {
+  border-color: var(--brand-orange);
+  color: var(--brand-white);
+}
+
+.demo-bar a.tab-sm {
+  text-decoration: none;
+  display: inline-block;
+}
+
+.auth-panel {
+  margin: 0 1.5rem 1rem;
+  max-width: 420px;
+}
+
+.auth-user {
+  font-size: 0.75rem;
+}
+
+.suggestions-box {
+  margin: 0.5rem 0 1rem;
+  padding: 0.75rem;
+  background: var(--brand-gray-50);
+  border-radius: 8px;
+  border: 1px dashed var(--border);
+}
+
+.suggestion-item {
+  margin-top: 0.5rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.suggestion-item .use-suggestion {
+  margin-top: 0.35rem;
+  background: var(--accent);
+  color: #fff;
+  border: none;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.8rem;
 }
 
 .brand-copy .lead {

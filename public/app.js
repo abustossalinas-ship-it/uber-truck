@@ -1,21 +1,32 @@
+function apiHeaders() {
+  return typeof Auth !== 'undefined' ? Auth.headers() : { 'Content-Type': 'application/json' };
+}
+
 const API = {
-  loads: () => fetch('/api/load-requests?status=published').then((r) => r.json()),
-  offers: () => fetch('/api/capacity-offers?status=published').then((r) => r.json()),
-  allLoads: () => fetch('/api/load-requests').then((r) => r.json()),
-  allOffers: () => fetch('/api/capacity-offers').then((r) => r.json()),
-  matches: () => fetch('/api/matches').then((r) => r.json()),
+  loads: () => fetch('/api/load-requests?status=published', { headers: apiHeaders() }).then((r) => r.json()),
+  offers: () => fetch('/api/capacity-offers?status=published', { headers: apiHeaders() }).then((r) => r.json()),
+  allLoads: () => fetch('/api/load-requests', { headers: apiHeaders() }).then((r) => r.json()),
+  allOffers: () => fetch('/api/capacity-offers', { headers: apiHeaders() }).then((r) => r.json()),
+  matches: () => fetch('/api/matches', { headers: apiHeaders() }).then((r) => r.json()),
+  suggestions: (loadId) =>
+    fetch(`/api/load-requests/${loadId}/match-suggestions`, { headers: apiHeaders() }).then((r) => r.json()),
   postLoad: (body) =>
-    fetch('/api/load-requests', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
+    fetch('/api/load-requests', { method: 'POST', headers: apiHeaders(), body: JSON.stringify(body) }),
   postOffer: (body) =>
-    fetch('/api/capacity-offers', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
+    fetch('/api/capacity-offers', { method: 'POST', headers: apiHeaders(), body: JSON.stringify(body) }),
   postMatch: (body) =>
-    fetch('/api/matches', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) }),
+    fetch('/api/matches', { method: 'POST', headers: apiHeaders(), body: JSON.stringify(body) }),
   patchMatch: (id, status) =>
     fetch(`/api/matches/${id}/status`, {
       method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
+      headers: apiHeaders(),
       body: JSON.stringify({ status }),
     }),
+  seedDemo: (key) =>
+    fetch('/api/demo/seed', {
+      method: 'POST',
+      headers: { ...apiHeaders(), 'X-Demo-Seed-Key': key || '' },
+    }).then((r) => r.json()),
 };
 
 const STATUS_LABEL = {
@@ -143,6 +154,41 @@ async function refreshBoard() {
     if (hint) hint.hidden = true;
     if (matchBtn) matchBtn.disabled = false;
   }
+  loadSuggestionsFor(loadSel.value);
+}
+
+async function loadSuggestionsFor(loadId) {
+  const box = $('match-suggestions');
+  if (!box) return;
+  if (!loadId) {
+    box.hidden = true;
+    return;
+  }
+  box.hidden = false;
+  box.innerHTML = 'Buscando sugerencias…';
+  try {
+    const json = await API.suggestions(loadId);
+    if (!json.ok || !json.data?.length) {
+      box.innerHTML = '<p class="muted">Sin sugerencias automáticas para esta carga.</p>';
+      return;
+    }
+    box.innerHTML =
+      '<p><strong>Sugerencias automáticas</strong></p>' +
+      json.data
+        .slice(0, 3)
+        .map(
+          (s) => `
+      <div class="suggestion-item">
+        <span class="pill">${s.score}% match</span>
+        <strong>${s.offer.carrier_name}</strong>
+        <p class="muted">${s.reasons.join(' · ')}</p>
+        <button type="button" class="use-suggestion" data-offer-id="${s.offer.id}">Usar esta oferta</button>
+      </div>`
+        )
+        .join('');
+  } catch {
+    box.innerHTML = '<p class="muted">No se pudieron cargar sugerencias.</p>';
+  }
 }
 
 function cleanFormBody(fd) {
@@ -245,5 +291,25 @@ fetch('/health')
     }
   })
   .catch(() => {});
+
+$('match-load')?.addEventListener('change', (e) => loadSuggestionsFor(e.target.value));
+
+document.getElementById('match-suggestions')?.addEventListener('click', (e) => {
+  const btn = e.target.closest('.use-suggestion');
+  if (!btn) return;
+  $('match-offer').value = btn.dataset.offerId;
+  $('match-offer').disabled = false;
+});
+
+document.getElementById('btn-seed-demo')?.addEventListener('click', async () => {
+  const key = prompt('Clave demo (DEMO_SEED_KEY en Railway). Dejar vacío si solo local:') || '';
+  const json = await API.seedDemo(key);
+  if (!json.ok) {
+    alert(json.error || 'No se pudo cargar demo');
+    return;
+  }
+  alert(`Demo listo: ${json.loads} cargas, ${json.offers} ofertas`);
+  showTab('board');
+});
 
 showTab('shipper');

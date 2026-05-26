@@ -20,7 +20,38 @@
       </p>
       <span class="hero-tag" id="storage-badge">MVP demo</span>
     </div>
+    <div class="header-actions">
+      <span id="auth-user" class="auth-user muted" hidden></span>
+      <button type="button" class="tab tab-sm" id="btn-auth">Ingresar</button>
+    </div>
   </header>
+
+  <div class="demo-bar">
+    <span>Demo en vivo · <strong id="demo-url">uber-truck-production.up.railway.app</strong></span>
+    <button type="button" class="tab tab-sm" id="btn-seed-demo">Cargar datos demo</button>
+    <a class="tab tab-sm" href="/docs/DEMO-GUION.md" target="_blank" rel="noopener">Guion 3 min</a>
+  </div>
+
+  <div id="auth-panel" class="auth-panel card" hidden>
+    <h2 id="auth-title">Iniciar sesión</h2>
+    <form id="form-auth">
+      <label>Email</label>
+      <input name="email" type="email" required />
+      <label>Contraseña</label>
+      <input name="password" type="password" minlength="6" required />
+      <label id="auth-name-label" hidden>Nombre</label>
+      <input name="full_name" id="auth-full-name" hidden />
+      <label id="auth-role-label" hidden>Rol</label>
+      <select name="role" id="auth-role" hidden>
+        <option value="shipper">Embarcador</option>
+        <option value="carrier">Transportista</option>
+      </select>
+      <button type="submit" id="auth-submit">Entrar</button>
+    </form>
+    <p class="muted">
+      <button type="button" class="link-btn" id="auth-toggle-mode">Crear cuenta</button>
+    </p>
+  </div>
 
   <nav>
     <button type="button" class="tab active" data-tab="shipper">Necesito mover carga</button>
@@ -229,6 +260,7 @@
           <div>
             <label>Carga</label>
             <select id="match-load"></select>
+            <div id="match-suggestions" class="suggestions-box muted" hidden></div>
             <label>Oferta de capacidad</label>
             <select id="match-offer"></select>
           </div>
@@ -257,6 +289,7 @@
   <footer class="site-footer">Uber Truck · Maps + cubicación · docs/MAPS.md</footer>
 
   <script src="/maps-ui.js"></script>
+  <script src="/auth-ui.js"></script>
   <script src="/app.js"></script>
 </body>
 </html>

@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#F26522" />
   <title>Uber Truck — Inteligencia en movimiento</title>
   <link rel="icon" href="/brand/logo.png" type="image/png" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.6" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.7" />
 </head>
 <body>
   <header class="site-header">
@@ -292,8 +292,12 @@
           <div id="list-offers"></div>
         </div>
       </div>
-      <h2 style="margin-top:1.5rem">Emparejamientos</h2>
+      <h2 style="margin-top:1.5rem">Emparejamientos activos</h2>
       <div id="list-matches"></div>
+      <details id="matches-history-wrap" class="matches-history">
+        <summary>Historial cancelados / retirados</summary>
+        <div id="list-matches-history"></div>
+      </details>
     </section>
   </main>
 
@@ -322,8 +326,8 @@
     </div>
   </div>
 
-  <script src="/maps-ui.js?v=0.0.6"></script>
-  <script src="/auth-ui.js?v=0.0.6"></script>
-  <script src="/app.js?v=0.0.6"></script>
+  <script src="/maps-ui.js?v=0.0.7"></script>
+  <script src="/auth-ui.js?v=0.0.7"></script>
+  <script src="/app.js?v=0.0.7"></script>
 </body>
 </html>

@@ -214,14 +214,17 @@ async function submitCancelModal(e) {
   }
   const afterSuccess = cancelModalCtx?.afterSuccess;
   closeCancelModal();
+  stickyMatchOfferId = null;
+  await refreshBoard();
+  if (afterSuccess) await afterSuccess();
   let msg = json.message || 'Listo';
   if (json.penalty?.amount_clp) {
     msg += `\nMulta sugerida: $${Number(json.penalty.amount_clp).toLocaleString('es-CL')} CLP (acuerdo entre partes).`;
   }
   alert(msg);
-  stickyMatchOfferId = null;
-  await refreshBoard();
-  if (afterSuccess) await afterSuccess();
+  if (json.data?.status === 'cancelled') {
+    $('matches-history-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
 }
 
 function runMatchCancel(matchId, action, phase) {
@@ -355,27 +358,39 @@ async function refreshBoard() {
     if (offer) m._offerName = offer.carrier_name;
   });
 
-  $('list-matches').innerHTML =
-    matchRows.length === 0
-      ? '<p class="muted">Sin emparejamientos aún.</p>'
-      : matchRows
-          .map((m) => {
-            const load = loadById[m.load_request_id];
-            const offer = offerById[m.capacity_offer_id];
-            const title =
-              load && offer
-                ? `${load.company_name} ↔ ${offer.carrier_name}`
-                : `Carga · Oferta`;
-            const actions = buildMatchActions(m);
-            return `
+  const activeMatches = matchRows.filter((m) => m.status !== 'cancelled');
+  const cancelledMatches = matchRows.filter((m) => m.status === 'cancelled');
+
+  function renderMatchCards(rows, emptyMsg) {
+    if (rows.length === 0) return `<p class="muted">${emptyMsg}</p>`;
+    return rows
+      .map((m) => {
+        const load = loadById[m.load_request_id];
+        const offer = offerById[m.capacity_offer_id];
+        const title =
+          load && offer ? `${load.company_name} ↔ ${offer.carrier_name}` : `Carga · Oferta`;
+        const actions = buildMatchActions(m);
+        return `
       <article class="item match-item" data-match-id="${m.id}">
         <strong>${title}</strong>
         <span class="pill">${STATUS_LABEL[m.status] || m.status}</span>
         ${m.agreed_price_clp ? `<p>$${Number(m.agreed_price_clp).toLocaleString('es-CL')} CLP</p>` : ''}
         <div class="actions match-actions">${actions}</div>
       </article>`;
-          })
-          .join('');
+      })
+      .join('');
+  }
+
+  $('list-matches').innerHTML = renderMatchCards(
+    activeMatches,
+    'Sin emparejamientos activos. Crea uno arriba o revisa el historial.'
+  );
+  const histEl = $('list-matches-history');
+  const histWrap = $('matches-history-wrap');
+  if (histEl) {
+    histEl.innerHTML = renderMatchCards(cancelledMatches, 'Sin cancelaciones recientes.');
+    if (histWrap) histWrap.open = cancelledMatches.length > 0;
+  }
 
   const publishedLoads = (loads.data || []).filter((l) => l.status === 'published');
   const publishedOffers = (offers.data || []).filter((o) => o.status === 'published');

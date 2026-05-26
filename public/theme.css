@@ -511,6 +511,22 @@ select.offer-picked {
   font-size: 0.8rem;
 }
 
+.matches-history {
+  margin-top: 1rem;
+  font-size: 0.9rem;
+}
+
+.matches-history summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.matches-history .item {
+  opacity: 0.92;
+}
+
 .cancel-modal {
   position: fixed;
   inset: 0;

@@ -23,6 +23,7 @@ const {
 } = require('../lib/mutual-cancel');
 const comms = require('../services/comms');
 const { otherRole } = require('../lib/match-comms');
+const { getMatchParties } = require('../lib/match-parties');
 
 const router = express.Router();
 
@@ -180,14 +181,16 @@ router.post('/:id/mutual-cancel', optionalAuth, async (req, res) => {
         : 'Transportista confirmó. Falta confirmación del embarcador.';
 
     const target = otherRole(role);
-    const whoConfirmed = role === 'shipper' ? 'Embarcador' : 'Transportista';
+    const parties = await getMatchParties(repo, match);
+    const pairLine = parties?.labeled || 'Embarcador y transportista';
+    const whoConfirmedLabel = role === 'shipper' ? parties?.shipper_name || 'Embarcador' : parties?.carrier_name || 'Transportista';
     const whoMustAct = target === 'shipper' ? 'embarcador' : 'transportista';
     await comms.addNotification({
       match_id: match.id,
       for_role: target,
       type: 'mutual_cancel',
-      title: `Acuerdo mutuo — falta el ${whoMustAct}`,
-      body: `El ${whoConfirmed.toLowerCase()} confirmó cancelar sin multa. Pulsa «Confirmar acuerdo mutuo» en la notificación o en el emparejamiento.`,
+      title: parties?.short ? `Acuerdo mutuo — ${parties.short}` : `Acuerdo mutuo — falta el ${whoMustAct}`,
+      body: `${pairLine}. ${whoConfirmedLabel} confirmó cancelar sin multa. Confirma tu parte en el emparejamiento activo.`,
     });
 
     res.json({ ok: true, data: updated, mutual_cancel: status, message });

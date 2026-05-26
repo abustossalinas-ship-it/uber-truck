@@ -6,6 +6,7 @@ const comms = require('../services/comms');
 const { CHAT_PRESETS, otherRole, presetByCode } = require('../lib/match-comms');
 const { optionalAuth } = require('../lib/optional-auth');
 const { normalizeRole } = require('../lib/match-cancel');
+const { getMatchParties } = require('../lib/match-parties');
 
 const router = express.Router();
 
@@ -48,12 +49,16 @@ router.post('/:matchId/messages', optionalAuth, async (req, res) => {
     });
 
     const target = otherRole(role);
+    const parties = await getMatchParties(repo, match);
+    const senderName =
+      role === 'shipper' ? parties?.shipper_name || 'Embarcador' : parties?.carrier_name || 'Transportista';
+    const pairLine = parties?.labeled ? `${parties.labeled}. ` : '';
     await comms.addNotification({
       match_id: match.id,
       for_role: target,
       type: 'chat',
-      title: 'Nuevo mensaje en el emparejamiento',
-      body: body.slice(0, 120),
+      title: parties?.short ? `Mensaje — ${parties.short}` : 'Nuevo mensaje en el emparejamiento',
+      body: `${pairLine}${senderName}: ${body.slice(0, 100)}`,
     });
 
     res.status(201).json({ ok: true, data: msg });

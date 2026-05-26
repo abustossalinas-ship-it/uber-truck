@@ -452,13 +452,25 @@ async function openCancelModalForMatch(matchId) {
   runMatchCancel(matchId, 'cancel', phase, m.agreed_price_clp || null);
 }
 
-function scrollToMatchCard(matchId) {
-  const card = document.querySelector(`[data-match-id="${matchId}"]`);
-  if (card) {
+async function scrollToActiveMatch(matchId) {
+  if (typeof showTab === 'function') showTab('board');
+  if (typeof refreshBoard === 'function') await refreshBoard();
+  const heading = document.getElementById('matches-active-heading');
+  if (heading) heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  const card = document.querySelector(`#list-matches [data-match-id="${matchId}"]`);
+  if (!card) {
+    alert('No se encontró en Emparejamientos activos. Puede estar cancelado o en historial.');
+    return;
+  }
+  setTimeout(() => {
     card.scrollIntoView({ behavior: 'smooth', block: 'center' });
     card.classList.add('match-highlight');
-    setTimeout(() => card.classList.remove('match-highlight'), 2400);
-  }
+    setTimeout(() => card.classList.remove('match-highlight'), 2800);
+  }, 350);
+}
+
+function scrollToMatchCard(matchId) {
+  scrollToActiveMatch(matchId);
 }
 
 function runMatchCancel(matchId, action, phase, agreedPriceClp) {
@@ -954,6 +966,7 @@ window.renderBoardActor = renderBoardActor;
 window.refreshBoard = refreshBoard;
 window.openCancelModalForMatch = openCancelModalForMatch;
 window.scrollToMatchCard = scrollToMatchCard;
+window.scrollToActiveMatch = scrollToActiveMatch;
 
 $('cancel-reason-code')?.addEventListener('change', updateCancelReasonForm);
 $('form-cancel-reason')?.addEventListener('submit', submitCancelModal);

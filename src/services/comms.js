@@ -93,6 +93,16 @@ async function listNotifications(forRole) {
 }
 
 async function addNotification({ match_id, for_role, type, title, body }) {
+  const existing = await listNotifications(for_role);
+  const dup = existing.find(
+    (n) =>
+      !n.read_at &&
+      n.match_id === match_id &&
+      n.type === type &&
+      n.title === title
+  );
+  if (dup) return dup;
+
   const row = {
     match_id,
     for_role,

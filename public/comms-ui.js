@@ -47,9 +47,9 @@ const Comms = {
               const actions = mutual
                 ? `<div class="notif-actions">
           <button type="button" class="tab tab-sm notif-cta" data-open-cancel="${n.match_id}">Confirmar acuerdo mutuo</button>
-          <button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en tablero</button>
+          <button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en emparejamientos activos</button>
         </div>`
-                : `<button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en tablero</button>`;
+                : `<button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en emparejamientos activos</button>`;
               return `
         <article class="notif-item ${n.read_at ? '' : 'unread'}" data-id="${n.id}" data-match="${n.match_id}">
           <strong>${n.title}</strong>
@@ -172,8 +172,8 @@ document.getElementById('notif-list')?.addEventListener('click', async (e) => {
     const item = e.target.closest('.notif-item');
     if (item?.dataset.id) await Comms.markRead(item.dataset.id);
     document.getElementById('notif-panel').hidden = true;
-    if (typeof showTab === 'function') showTab('board');
-    if (typeof scrollToMatchCard === 'function') scrollToMatchCard(id);
+    if (typeof scrollToActiveMatch === 'function') await scrollToActiveMatch(id);
+    else if (typeof scrollToMatchCard === 'function') scrollToMatchCard(id);
     return;
   }
   const item = e.target.closest('.notif-item');

@@ -10,6 +10,25 @@ const Comms = {
     return typeof getActorRole === 'function' ? getActorRole() : 'shipper';
   },
 
+  isSessionActive() {
+    return typeof Auth !== 'undefined' && Boolean(Auth.user && Auth.token);
+  },
+
+  resetUi() {
+    const panel = document.getElementById('notif-panel');
+    const list = document.getElementById('notif-list');
+    const bell = document.getElementById('btn-notifications');
+    const countEl = document.getElementById('notif-count');
+    if (panel) panel.hidden = true;
+    if (list) list.innerHTML = '';
+    if (countEl) {
+      countEl.textContent = '0';
+      countEl.hidden = true;
+    }
+    if (bell) bell.hidden = true;
+    this.closeChat();
+  },
+
   async loadPresets() {
     if (this.presets.length) return this.presets;
     const json = await fetch('/api/comms/presets').then((r) => r.json());
@@ -18,23 +37,36 @@ const Comms = {
   },
 
   async refreshBell() {
-    const role = this.actorRole();
-    const json = await fetch(`/api/comms/notifications/list?actor_role=${encodeURIComponent(role)}`, {
+    const bell = document.getElementById('btn-notifications');
+    const countEl = document.getElementById('notif-count');
+    if (!this.isSessionActive()) {
+      this.resetUi();
+      return;
+    }
+    if (bell) bell.hidden = false;
+    const json = await fetch('/api/comms/notifications/list', {
       headers: this.headers(),
     }).then((r) => r.json());
-    const countEl = document.getElementById('notif-count');
     if (!countEl) return;
+    if (!json.ok) {
+      countEl.hidden = true;
+      return;
+    }
     const n = json.unread || 0;
     countEl.textContent = String(n);
     countEl.hidden = n === 0;
   },
 
   async openNotifPanel() {
+    if (!this.isSessionActive()) {
+      this.resetUi();
+      alert('Inicia sesión para ver notificaciones.');
+      return;
+    }
     const panel = document.getElementById('notif-panel');
     const list = document.getElementById('notif-list');
     if (!panel || !list) return;
-    const role = this.actorRole();
-    const json = await fetch(`/api/comms/notifications/list?actor_role=${encodeURIComponent(role)}`, {
+    const json = await fetch('/api/comms/notifications/list', {
       headers: this.headers(),
     }).then((r) => r.json());
     const rows = json.data || [];
@@ -156,7 +188,14 @@ const Comms = {
   },
 };
 
-document.getElementById('btn-notifications')?.addEventListener('click', () => Comms.openNotifPanel());
+document.getElementById('btn-notifications')?.addEventListener('click', () => {
+  if (!Comms.isSessionActive()) {
+    Comms.resetUi();
+    alert('Inicia sesión para ver notificaciones.');
+    return;
+  }
+  Comms.openNotifPanel();
+});
 document.getElementById('notif-close')?.addEventListener('click', () => {
   document.getElementById('notif-panel').hidden = true;
 });

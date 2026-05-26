@@ -70,9 +70,12 @@ router.post('/:matchId/messages', optionalAuth, async (req, res) => {
 
 const STALE_MATCH_STATUSES = new Set(['cancelled', 'completed']);
 
-router.get('/notifications/list', async (req, res) => {
+router.get('/notifications/list', optionalAuth, async (req, res) => {
   try {
-    const role = resolveActorRole(req);
+    if (!req.user?.role) {
+      return res.json({ ok: true, data: [], unread: 0, requires_login: true });
+    }
+    const role = normalizeRole(req.user.role);
     if (!['shipper', 'carrier'].includes(role)) {
       return res.status(400).json({ ok: false, error: 'Rol shipper o carrier requerido' });
     }
@@ -95,9 +98,12 @@ router.get('/notifications/list', async (req, res) => {
   }
 });
 
-router.patch('/notifications/match/:matchId/read', async (req, res) => {
+router.patch('/notifications/match/:matchId/read', optionalAuth, async (req, res) => {
   try {
-    const role = resolveActorRole(req);
+    if (!req.user?.role) {
+      return res.status(401).json({ ok: false, error: 'Inicia sesión' });
+    }
+    const role = normalizeRole(req.user.role);
     if (!['shipper', 'carrier'].includes(role)) {
       return res.status(400).json({ ok: false, error: 'Rol shipper o carrier requerido' });
     }
@@ -109,8 +115,11 @@ router.patch('/notifications/match/:matchId/read', async (req, res) => {
   }
 });
 
-router.patch('/notifications/:id/read', async (req, res) => {
+router.patch('/notifications/:id/read', optionalAuth, async (req, res) => {
   try {
+    if (!req.user?.role) {
+      return res.status(401).json({ ok: false, error: 'Inicia sesión' });
+    }
     const data = await comms.markNotificationRead(req.params.id);
     if (!data) return res.status(404).json({ ok: false, error: 'No encontrada' });
     res.json({ ok: true, data });

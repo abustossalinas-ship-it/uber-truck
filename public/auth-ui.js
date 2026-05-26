@@ -21,6 +21,7 @@ const Auth = {
     this.user = null;
     localStorage.removeItem('ut_token');
     localStorage.removeItem('ut_user');
+    if (typeof Comms !== 'undefined') Comms.resetUi();
     this.render();
   },
 
@@ -43,6 +44,10 @@ const Auth = {
     }
     if (typeof renderBoardActor === 'function') renderBoardActor();
     if (typeof refreshBoard === 'function') refreshBoard();
+    if (typeof Comms !== 'undefined') {
+      if (this.user) Comms.refreshBell();
+      else Comms.resetUi();
+    }
   },
 };
 

@@ -1007,4 +1007,7 @@ document.querySelectorAll('[data-close-cancel]').forEach((el) => {
 
 renderBoardActor();
 showTab('shipper');
-if (typeof Comms !== 'undefined') Comms.refreshBell();
+if (typeof Comms !== 'undefined') {
+  if (typeof Auth !== 'undefined' && Auth.user) Comms.refreshBell();
+  else Comms.resetUi();
+}

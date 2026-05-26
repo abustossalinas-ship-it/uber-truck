@@ -204,6 +204,17 @@ function updateCancelReasonForm() {
 
 let cancelModalMode = 'mutual';
 
+function normalizeMutualCancel(m) {
+  if (!m) return { shipper_confirmed: false, carrier_confirmed: false, ready: false };
+  const shipper = Boolean(m.shipper_confirmed ?? m.mutual_cancel_shipper_at);
+  const carrier = Boolean(m.carrier_confirmed ?? m.mutual_cancel_carrier_at);
+  return {
+    shipper_confirmed: shipper,
+    carrier_confirmed: carrier,
+    ready: Boolean(m.ready ?? (shipper && carrier)),
+  };
+}
+
 function otherCancelReasonOptions() {
   return (cancelReasonOptions || []).filter((o) => o.code !== 'mutual_agreement');
 }
@@ -314,7 +325,7 @@ function renderCancelMutualPanel(ctx, mutual) {
     return;
   }
   panel.hidden = false;
-  const m = mutual || {};
+  const m = normalizeMutualCancel(mutual);
   const role = getActorRole() === 'carrier' ? 'carrier' : 'shipper';
   const myOk = role === 'carrier' ? m.carrier_confirmed : m.shipper_confirmed;
   const statusEl = $('cancel-mutual-status');
@@ -340,9 +351,12 @@ function renderCancelMutualPanel(ctx, mutual) {
     btnConfirm.hidden = Boolean(myOk);
     btnConfirm.classList.toggle('mutual-cta-highlight', !myOk && (m.shipper_confirmed || m.carrier_confirmed));
   }
-  if (btnNow) btnNow.hidden = !m.ready;
+  if (btnNow) {
+    btnNow.hidden = !m.ready;
+    btnNow.classList.toggle('btn-mutual-banner', m.ready);
+  }
   lastMutualCancelForLayout = m;
-  applyCancelModalLayout(cancelModalMode, m);
+  applyCancelModalLayout(m.ready ? 'mutual' : cancelModalMode, m);
 }
 
 async function refreshCancelModalState() {
@@ -520,15 +534,17 @@ async function confirmMutualInModal() {
     alert(json.error || 'No se pudo confirmar');
     return;
   }
+  const mutualFromPost = normalizeMutualCancel(json.mutual_cancel);
+  renderCancelMutualPanel(cancelModalCtx, mutualFromPost);
   await refreshCancelModalState();
-  refreshBoard();
-  if (json.mutual_cancel?.ready) {
-    alert(
-      'Listo: embarcador y transportista confirmaron. Ahora puedes pulsar «Cancelar con acuerdo mutuo» en este mismo cuadro.'
-    );
+  if (mutualFromPost.ready) {
+    renderCancelMutualPanel(cancelModalCtx, mutualFromPost);
+    applyCancelModalLayout('mutual', mutualFromPost);
+    $('btn-mutual-cancel-now')?.focus();
   } else {
-    alert(json.message || 'Confirmación registrada.');
+    alert(json.message || 'Confirmación registrada. Falta la otra parte.');
   }
+  refreshBoard();
 }
 
 async function cancelWithMutualNow() {

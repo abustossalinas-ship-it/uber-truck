@@ -10,11 +10,23 @@ Proyecto **Uber Truck**: marketplace de transporte por camión (carga ↔ transp
 2. Modo **Agent** para implementar; **Ask** solo para consultas.
 3. Reglas en `.cursor/rules/` — leer `project-core.mdc` siempre.
 
+## Documentación en producción (`/docs/`)
+
+| Documento | URL (Railway) |
+|-----------|----------------|
+| Hub | https://uber-truck-production.up.railway.app/docs/ |
+| Memoria técnica | https://uber-truck-production.up.railway.app/docs/Memoria-tecnica-Uber-Truck.html |
+| Próximos hitos | https://uber-truck-production.up.railway.app/docs/PROXIMOS-HITOS.md |
+| SQL Supabase | https://uber-truck-production.up.railway.app/docs/SQL-SUPABASE.md |
+
+Word local (como Chanchi): `npm run export:all-docs` → pack completo; `npm run export:memoria-docx` → solo memoria. Salida: `docs/*.docx` y `Downloads/Proyecto Uber Truck/`.
+
 ## Tareas típicas → dónde mirar
 
 | Tarea | Archivos (cuando existan) |
 |-------|---------------------------|
-| **Índice / memoria / Gantt / avance** | `docs/00-INDICE-DOCUMENTACION.md`, `docs/01-MEMORIA-TECNICA.md`, `canvases/estado-avance.canvas.tsx` |
+| **Índice / memoria / Gantt / avance** | `docs/index.html`, `docs/00-INDICE-DOCUMENTACION.md`, `docs/01-MEMORIA-TECNICA.md`, `docs/HITO-DIGITAL-MVP.md`, `canvases/estado-avance.canvas.tsx` |
+| **Comparar con Chanchi** | `docs/COMPARACION-ESTRUCTURA-CHANCHI.md` |
 | **SQL Supabase** | `docs/SQL-SUPABASE.md`, `supabase/migrations/RUN_PENDING.sql` |
 | Plan / prioridades | `docs/KICKOFF.md`, `docs/ROADMAP.md` |
 | API HTTP | `src/app.js`, `src/routes/` |

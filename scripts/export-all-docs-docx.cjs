@@ -2,59 +2,44 @@
 
 const fs = require('fs');
 const path = require('path');
-const HTMLtoDOCX = require('html-to-docx');
+const { exportOne } = require('./export-html-docx.cjs');
 
-const root = path.join(__dirname, '..');
-const docsDir = path.join(root, 'docs');
-
-const DOCS = [
-  { html: 'Indice-Documentacion-Uber-Truck.html', docx: 'Indice-Documentacion-Uber-Truck.docx', title: 'Índice documentación' },
-  { html: 'Kickoff-Uber-Truck.html', docx: 'Kickoff-Uber-Truck.docx', title: 'Kickoff Uber Truck' },
-  { html: 'Journey-Usuario-Uber-Truck.html', docx: 'Journey-Usuario-Uber-Truck.docx', title: 'Journey de usuario' },
-  { html: 'Memoria-tecnica-Uber-Truck.html', docx: 'Memoria-tecnica-Uber-Truck.docx', title: 'Memoria técnica' },
-  { html: 'Gantt-Uber-Truck.html', docx: 'Gantt-Uber-Truck.docx', title: 'Plan Gantt' },
-  { html: 'Modelo-Negocio-Uber-Truck.html', docx: 'Modelo-Negocio-Uber-Truck.docx', title: 'Modelo de negocio' },
-];
-
-const downloadsDocs = path.join(
+const downloadsDir = path.join(
   process.env.USERPROFILE || '',
   'Downloads',
-  'Proyecto Fintech IA'
+  'Proyecto Uber Truck'
 );
 
-async function exportOne(htmlName, docxName, title) {
-  const htmlPath = path.join(docsDir, htmlName);
-  const outRepo = path.join(docsDir, docxName);
-  let html = fs.readFileSync(htmlPath, 'utf8');
-  html = html.replace(/<style>[\s\S]*?<\/style>/gi, '');
-  const buf = await HTMLtoDOCX(html, null, {
-    title,
-    lang: 'es-CL',
-    font: 'Calibri',
-    table: { row: { cantSplit: false } },
-  });
-  fs.writeFileSync(outRepo, buf);
-  console.log('OK:', outRepo);
-  if (fs.existsSync(downloadsDocs)) {
-    try {
-      fs.writeFileSync(path.join(downloadsDocs, docxName), buf);
-    } catch (_) {
-      /* optional mirror */
-    }
-  }
-}
+/** Mismo patrón que wa-fintech-mvp: HTML en docs/ → .docx en repo + copia en Downloads */
+const PACK = [
+  { html: 'docs/Indice-Documentacion-Uber-Truck.html', out: 'docs/Indice-Documentacion-Uber-Truck.docx', copy: 'Indice-Documentacion-Uber-Truck.docx', title: 'Índice documentación' },
+  { html: 'docs/Memoria-tecnica-Uber-Truck.html', out: 'docs/Memoria-tecnica-Uber-Truck.docx', copy: 'Memoria-tecnica-Uber-Truck.docx', title: 'Memoria técnica Uber Truck' },
+  { html: 'docs/Gantt-Uber-Truck.html', out: 'docs/Gantt-Uber-Truck.docx', copy: 'Gantt-Uber-Truck.docx', title: 'Plan Gantt' },
+  { html: 'docs/Canvas-Resumen-Uber-Truck.html', out: 'docs/Canvas-Resumen-Uber-Truck.docx', copy: 'Canvas-Resumen-Uber-Truck.docx', title: 'Resumen canvas' },
+  { html: 'docs/Modelo-Negocio-Uber-Truck.html', out: 'docs/Modelo-Negocio-Uber-Truck.docx', copy: 'Modelo-Negocio-Uber-Truck.docx', title: 'Modelo de negocio' },
+  { html: 'docs/Journey-Usuario-Uber-Truck.html', out: 'docs/Journey-Usuario-Uber-Truck.docx', copy: 'Journey-Usuario-Uber-Truck.docx', title: 'Journey de usuario' },
+  { html: 'docs/Kickoff-Uber-Truck.html', out: 'docs/Kickoff-Uber-Truck.docx', copy: 'Kickoff-Uber-Truck.docx', title: 'Kickoff Uber Truck' },
+  { html: 'docs/Proximos-Hitos-Uber-Truck.html', out: 'docs/Proximos-Hitos-Uber-Truck.docx', copy: 'Proximos-Hitos-Uber-Truck.docx', title: 'Próximos hitos' },
+  { html: 'docs/Hito-Digital-MVP-Uber-Truck.html', out: 'docs/Hito-Digital-MVP-Uber-Truck.docx', copy: 'Hito-Digital-MVP-Uber-Truck.docx', title: 'Hito MVP digital' },
+  { html: 'docs/Roadmap-Uber-Truck.html', out: 'docs/Roadmap-Uber-Truck.docx', copy: 'Roadmap-Uber-Truck.docx', title: 'Roadmap' },
+  { html: 'docs/Politica-Cancelacion-Uber-Truck.html', out: 'docs/Politica-Cancelacion-Uber-Truck.docx', copy: 'Politica-Cancelacion-Uber-Truck.docx', title: 'Política cancelación' },
+  { html: 'docs/Multas-Cuenta-Uber-Truck.html', out: 'docs/Multas-Cuenta-Uber-Truck.docx', copy: 'Multas-Cuenta-Uber-Truck.docx', title: 'Multas y cuenta' },
+  { html: 'docs/Sql-Supabase-Uber-Truck.html', out: 'docs/Sql-Supabase-Uber-Truck.docx', copy: 'Sql-Supabase-Uber-Truck.docx', title: 'SQL Supabase' },
+];
 
 async function main() {
-  for (const d of DOCS) {
-    await exportOne(d.html, d.docx, d.title);
+  fs.mkdirSync(downloadsDir, { recursive: true });
+  for (const item of PACK) {
+    const outPath = await exportOne(item.html, item.out, {
+      title: item.title,
+      description: item.title,
+    });
+    const dest = path.join(downloadsDir, item.copy);
+    fs.copyFileSync(outPath, dest);
+    console.log('OK repo:', outPath);
+    console.log('OK copy:', dest);
   }
-  const informeSrc = path.join(process.env.USERPROFILE || '', 'Downloads', 'Informe_Evaluacion_Estrategica_Uber_Truck.docx');
-  const informeDst = path.join(docsDir, 'Informe_Evaluacion_Estrategica_Uber_Truck.docx');
-  if (fs.existsSync(informeSrc) && !fs.existsSync(informeDst)) {
-    fs.copyFileSync(informeSrc, informeDst);
-    console.log('Copiado informe origen →', informeDst);
-  }
-  console.log('\nListo. Carpeta:', docsDir);
+  console.log('\nListo. Carpeta:', downloadsDir);
 }
 
 main().catch((e) => {

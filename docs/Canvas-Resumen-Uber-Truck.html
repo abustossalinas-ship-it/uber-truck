@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Resumen Canvas — Uber Truck (mayo 2026)</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.35; max-width: 900px; margin: 2cm auto; color: #111; }
+    h1 { font-size: 18pt; border-bottom: 1px solid #333; }
+    h2 { font-size: 14pt; margin-top: 1.2em; }
+    table { border-collapse: collapse; width: 100%; margin: 0.6em 0; font-size: 10pt; }
+    th, td { border: 1px solid #444; padding: 6px 8px; vertical-align: top; }
+    th { background: #e8e8e8; }
+    .meta { font-size: 10pt; color: #444; }
+    ul { margin: 0.4em 0 0.6em 1.2em; }
+  </style>
+</head>
+<body>
+
+<p class="meta"><strong>Versión:</strong> 1.0 · mayo 2026 · Canvas: <code>canvases/estado-avance.canvas.tsx</code></p>
+
+<h1>Resumen Canvas — Uber Truck</h1>
+<p>Documento para Word (<code>npm run export:all-docs</code>). Equivalente al canvas de estado de avance en Cursor.</p>
+
+<h2>1. Avance global (mayo 2026)</h2>
+<table>
+  <tr><th>Área</th><th>%</th><th>Nota</th></tr>
+  <tr><td>MVP digital núcleo (fase 2)</td><td>~75%</td><td>Adelantado vs Gantt oct 2026</td></tr>
+  <tr><td>Multas y cobros (2.10)</td><td>~25%</td><td>UI + API; sin pasarela</td></tr>
+  <tr><td>Proyecto hasta M5</td><td>~35%</td><td>Concierge y piloto 100 viajes pendientes</td></tr>
+</table>
+
+<h2>2. Flujo producto (MVP digital)</h2>
+<ol>
+  <li>Registro / login (JWT)</li>
+  <li>Transportista publica capacidad · Embarcador publica carga</li>
+  <li>Sugerencias de match + aceptación</li>
+  <li>Estados de viaje + chat in-app</li>
+  <li>Cancelación: acuerdo mutuo o motivo con multa (ledger)</li>
+  <li>Notificaciones → emparejamientos activos</li>
+  <li>Cuenta: multas pendientes + datos bancarios (cobro futuro)</li>
+</ol>
+
+<h2>3. Hitos vs plan</h2>
+<table>
+  <tr><th>Hito</th><th>Plan</th><th>Real</th></tr>
+  <tr><td>M3 MVP en producción</td><td>25-oct-2026</td><td><strong>Hecho (adelantado)</strong></td></tr>
+  <tr><td>M2 20 emparejamientos concierge</td><td>09-ago-2026</td><td>Pendiente</td></tr>
+  <tr><td>M4 100 viajes digitales</td><td>31-ene-2027</td><td>Pendiente</td></tr>
+</table>
+
+<h2>4. Prioridades P0 / P1</h2>
+<ul>
+  <li><strong>P0:</strong> Ejecutar SQL 008 en Supabase producción</li>
+  <li><strong>P1:</strong> Filtrar ofertas/cargas por usuario (`owner_user_id`)</li>
+  <li><strong>P2:</strong> Integración pasarela de pago (post-validación piloto)</li>
+</ul>
+
+<p class="meta">Detalle técnico: <code>docs/Memoria-tecnica-Uber-Truck.html</code> · Bitácora: <code>docs/HITO-DIGITAL-MVP.md</code></p>
+
+</body>
+</html>

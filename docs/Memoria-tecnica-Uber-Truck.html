@@ -2,18 +2,38 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Memoria técnica — Uber Truck</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.35; max-width: 900px; margin: 2cm auto; color: #111; }
+    h1 { font-size: 18pt; border-bottom: 1px solid #333; padding-bottom: 6px; }
+    h2 { font-size: 14pt; margin-top: 1.4em; }
+    h3 { font-size: 12pt; margin-top: 1em; }
+    table { border-collapse: collapse; width: 100%; margin: 0.8em 0; font-size: 10pt; }
+    th, td { border: 1px solid #444; padding: 6px 8px; vertical-align: top; }
+    th { background: #e8e8e8; }
+    .meta { font-size: 10pt; color: #444; }
+    .g-done { background: #c6e0b4; text-align: center; }
+    .g-doing { background: #ffe599; text-align: center; }
+    .g-todo { background: #e8e8e8; text-align: center; }
+    .g-na { background: #fafafa; text-align: center; color: #999; }
+    table.gantt th { font-size: 9pt; text-align: center; }
+    .hito-head { font-weight: bold; background: #f0f0f0; }
+  </style>
 </head>
 <body>
+  <p class="meta"><a href="/docs/">← Índice documentación</a> · <a href="/">Inicio app</a></p>
   <h1>Memoria técnica — Uber Truck</h1>
   <p><strong>Producto:</strong> Plataforma de optimización dinámica de capacidad logística ociosa (backhaul)</p>
-  <p><strong>Versión documento:</strong> 2.0 · mayo 2026</p>
+  <p><strong>Versión documento:</strong> 2.1 · mayo 2026 (estructura alineada a Chanchi: Parte I + Parte II)</p>
   <p><strong>Versión software:</strong> 0.0.19</p>
   <p><strong>Estado implementación:</strong> MVP digital en producción (Railway) — adelanto vs Gantt oct 2026</p>
   <p><strong>Producción:</strong> <a href="https://uber-truck-production.up.railway.app">uber-truck-production.up.railway.app</a></p>
-  <p><strong>Markdown vivo:</strong> <code>docs/01-MEMORIA-TECNICA.md</code> · <strong>Índice:</strong> <code>docs/00-INDICE-DOCUMENTACION.md</code></p>
+  <p><strong>Markdown vivo:</strong> <code>docs/01-MEMORIA-TECNICA.md</code> · <strong>Hub:</strong> <a href="/docs/">docs/index.html</a> · <strong>Bitácora hito:</strong> <code>docs/HITO-DIGITAL-MVP.md</code></p>
   <p><strong>Canvas (Cursor):</strong> <code>canvases/estado-avance.canvas.tsx</code></p>
   <p><strong>SQL Supabase:</strong> <code>docs/SQL-SUPABASE.md</code> · <code>supabase/migrations/RUN_PENDING.sql</code></p>
+
+  <h1>Parte II — Arquitectura y stack</h1>
 
   <h2>1. Resumen ejecutivo técnico</h2>
   <p>Uber Truck conecta <strong>oferta de cubicación disponible</strong> (camionero en ruta) con <strong>demanda incidental de carga</strong> (PYME). El MVP valida adopción sin sobreingeniería: primero <strong>concierge</strong> (WhatsApp + Airtable), luego producto digital (Node.js, Supabase, web).</p>
@@ -129,8 +149,66 @@ uber-truck/
     <tr><td>Multas y cuenta bancaria</td><td>docs/PENALTIES-AND-ACCOUNTS.md</td></tr>
   </table>
 
-  <h2>12. Cronograma Gantt y estado de avance (integrado)</h2>
-  <p>El Gantt planificado (jun 2026 – mar 2027) se mantiene en <a href="Gantt-Uber-Truck.html">Gantt-Uber-Truck.html</a> para export Word. Esta sección resume el <strong>avance real</strong> a mayo 2026.</p>
+  <h1>Parte I — Hitos, Gantt y avance</h1>
+  <p>Patrón equivalente a <code>wa-fintech-mvp/docs/Memoria-tecnica-MVP-Fintech-IA.html</code> (Chanchi). Tabla detallada por mes: <a href="Gantt-Uber-Truck.html">Gantt-Uber-Truck.html</a>. Backlog: <code>docs/PROXIMOS-HITOS.md</code>.</p>
+
+  <h3>Leyenda Gantt</h3>
+  <table>
+    <tr><th>Estilo</th><th>Significado</th></tr>
+    <tr><td class="g-done">Hecho</td><td>Entregado en repo / prod</td></tr>
+    <tr><td class="g-doing">En curso</td><td>Trabajo activo</td></tr>
+    <tr><td class="g-todo">Planificado</td><td>No iniciado</td></tr>
+    <tr><td class="g-na">—</td><td>Fuera del trimestre</td></tr>
+  </table>
+
+  <h3>Gantt por fase (trimestres 2026–2027)</h3>
+  <table class="gantt">
+    <tr>
+      <th>Fase</th>
+      <th>2026 T2<br /><span style="font-weight:normal">abr–jun</span></th>
+      <th>2026 T3<br /><span style="font-weight:normal">jul–sep</span></th>
+      <th>2026 T4<br /><span style="font-weight:normal">oct–dic</span></th>
+      <th>2027 T1<br /><span style="font-weight:normal">ene–mar</span></th>
+    </tr>
+    <tr>
+      <td class="hito-head">0 · Descubrimiento</td>
+      <td class="g-doing">En curso</td>
+      <td class="g-todo">Planificado</td>
+      <td class="g-na">—</td>
+      <td class="g-na">—</td>
+    </tr>
+    <tr>
+      <td class="hito-head">1 · Concierge (20 match)</td>
+      <td class="g-todo">Planificado</td>
+      <td class="g-doing">En curso</td>
+      <td class="g-todo">Planificado</td>
+      <td class="g-na">—</td>
+    </tr>
+    <tr>
+      <td class="hito-head">2 · MVP digital</td>
+      <td class="g-done">Hecho</td>
+      <td class="g-done">Hecho</td>
+      <td class="g-doing">Refino</td>
+      <td class="g-todo">2.10 cobros</td>
+    </tr>
+    <tr>
+      <td class="hito-head">3 · Piloto confianza</td>
+      <td class="g-na">—</td>
+      <td class="g-na">—</td>
+      <td class="g-todo">Planificado</td>
+      <td class="g-doing">En curso</td>
+    </tr>
+    <tr>
+      <td class="hito-head">4 · SaaS / match auto</td>
+      <td class="g-na">—</td>
+      <td class="g-na">—</td>
+      <td class="g-na">—</td>
+      <td class="g-todo">Planificado</td>
+    </tr>
+  </table>
+  <p><strong>Interpretación mayo 2026:</strong> fase 2 adelantada (M3 producción antes de oct 2026). Prioridad inmediata: SQL 008 prod, piloto concierge M2, luego mis cargas por usuario.</p>
+
+  <h2>12. Cronograma — hitos y tareas</h2>
 
   <h3>12.1 Hitos</h3>
   <table border="1" cellpadding="6" cellspacing="0">
@@ -160,7 +238,10 @@ uber-truck/
     <li>Fase 2.10 multas/cobros: ~25%</li>
     <li>Proyecto total (hasta M5): ~35%</li>
   </ul>
-  <p>Visualización interactiva: abrir canvas <code>estado-avance.canvas.tsx</code> en Cursor.</p>
+  <p>Visualización: <a href="Canvas-Resumen-Uber-Truck.html">Canvas-Resumen-Uber-Truck.html</a> · canvas <code>estado-avance.canvas.tsx</code> en Cursor.</p>
+
+  <h3>12.4 Próximos pasos (backlog)</h3>
+  <p>Tabla operativa completa: <code>docs/PROXIMOS-HITOS.md</code>. Comparación con estructura Chanchi: <code>docs/COMPARACION-ESTRUCTURA-CHANCHI.md</code>.</p>
 
   <h2>13. API ampliada (v0.0.19)</h2>
   <table border="1" cellpadding="6" cellspacing="0">
@@ -171,5 +252,7 @@ uber-truck/
     <tr><td>GET</td><td>/api/account/summary</td><td>Multas pendientes, plazos</td></tr>
     <tr><td>PATCH</td><td>/api/account/bank</td><td>Cuenta bancaria</td></tr>
   </table>
+
+  <p class="meta"><em>Fin del documento — v2.1: Parte I Gantt coloreado, hub /docs/, alineación Chanchi.</em></p>
 </body>
 </html>

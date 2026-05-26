@@ -4,57 +4,51 @@
   <meta charset="utf-8" />
   <title>Índice documentación — Uber Truck</title>
   <style>
-    body { font-family: Segoe UI, sans-serif; max-width: 900px; margin: 2rem auto; line-height: 1.5; }
-    table { border-collapse: collapse; width: 100%; margin: 1rem 0; }
-    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-    th { background: #f3f4f6; }
+    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.35; max-width: 900px; margin: 2cm auto; color: #111; }
+    h1 { font-size: 18pt; border-bottom: 1px solid #333; }
+    h2 { font-size: 14pt; margin-top: 1.2em; }
+    table { border-collapse: collapse; width: 100%; margin: 0.6em 0; font-size: 10pt; }
+    th, td { border: 1px solid #444; padding: 6px 8px; }
+    th { background: #e8e8e8; }
     a { color: #d95418; }
     .central { background: #fff3e0; }
+    .meta { font-size: 10pt; color: #444; }
   </style>
 </head>
 <body>
+  <p class="meta"><a href="/docs/">← Hub documentación</a></p>
   <h1>Índice maestro — Uber Truck</h1>
-  <p><strong>Producto:</strong> Optimización dinámica de capacidad logística ociosa</p>
-  <p><strong>Actualizado:</strong> mayo 2026 · <strong>App:</strong> v0.0.19</p>
-  <p><strong>Producción:</strong> <a href="https://uber-truck-production.up.railway.app">uber-truck-production.up.railway.app</a></p>
+  <p><strong>App:</strong> v0.0.19 · <strong>Producción:</strong> uber-truck-production.up.railway.app</p>
 
-  <h2>Documento central (estilo fintech / memoria única)</h2>
+  <h2>Exportar a Word (como Chanchi)</h2>
+  <p><code>npm run export:all-docs</code> → genera todos los <code>.docx</code> en <code>docs/</code> y en <code>Downloads/Proyecto Uber Truck/</code>.</p>
+  <p><code>npm run export:memoria-docx</code> → solo memoria técnica.</p>
+
+  <h2>Documentos HTML (lectura + Word)</h2>
   <table>
-    <tr class="central"><th>Documento</th><th>Ubicación</th><th>Notas</th></tr>
-    <tr class="central"><td><strong>Memoria técnica + Gantt + avance</strong></td><td><a href="01-MEMORIA-TECNICA.md">01-MEMORIA-TECNICA.md</a></td><td>Incluye §12 cronograma y estado real</td></tr>
-    <tr class="central"><td>Memoria técnica HTML</td><td><a href="Memoria-tecnica-Uber-Truck.html">Memoria-tecnica-Uber-Truck.html</a></td><td>Export Word</td></tr>
-    <tr class="central"><td>Canvas estado avance</td><td><code>canvases/estado-avance.canvas.tsx</code></td><td>Abrir en Cursor → panel Canvas</td></tr>
-    <tr class="central"><td>SQL Supabase</td><td><a href="SQL-SUPABASE.md">SQL-SUPABASE.md</a></td><td>Script 004–008 listo para pegar</td></tr>
+    <tr class="central"><th>Documento</th><th>HTML</th><th>Word (.docx)</th></tr>
+    <tr class="central"><td><strong>Memoria técnica + Gantt</strong></td><td><a href="Memoria-tecnica-Uber-Truck.html">Memoria-tecnica-Uber-Truck.html</a></td><td>Memoria-tecnica-Uber-Truck.docx</td></tr>
+    <tr><td>Gantt detallado</td><td><a href="Gantt-Uber-Truck.html">Gantt-Uber-Truck.html</a></td><td>Gantt-Uber-Truck.docx</td></tr>
+    <tr><td>Resumen canvas</td><td><a href="Canvas-Resumen-Uber-Truck.html">Canvas-Resumen-Uber-Truck.html</a></td><td>Canvas-Resumen-Uber-Truck.docx</td></tr>
+    <tr><td>Modelo de negocio</td><td><a href="Modelo-Negocio-Uber-Truck.html">Modelo-Negocio-Uber-Truck.html</a></td><td>Modelo-Negocio-Uber-Truck.docx</td></tr>
+    <tr><td>Journey usuario</td><td><a href="Journey-Usuario-Uber-Truck.html">Journey-Usuario-Uber-Truck.html</a></td><td>Journey-Usuario-Uber-Truck.docx</td></tr>
+    <tr><td>Kickoff</td><td><a href="Kickoff-Uber-Truck.html">Kickoff-Uber-Truck.html</a></td><td>Kickoff-Uber-Truck.docx</td></tr>
+    <tr><td>Próximos hitos</td><td><a href="Proximos-Hitos-Uber-Truck.html">Proximos-Hitos-Uber-Truck.html</a></td><td>Proximos-Hitos-Uber-Truck.docx</td></tr>
+    <tr><td>Hito MVP digital</td><td><a href="Hito-Digital-MVP-Uber-Truck.html">Hito-Digital-MVP-Uber-Truck.html</a></td><td>Hito-Digital-MVP-Uber-Truck.docx</td></tr>
+    <tr><td>Roadmap</td><td><a href="Roadmap-Uber-Truck.html">Roadmap-Uber-Truck.html</a></td><td>Roadmap-Uber-Truck.docx</td></tr>
+    <tr><td>Política cancelación</td><td><a href="Politica-Cancelacion-Uber-Truck.html">Politica-Cancelacion-Uber-Truck.html</a></td><td>Politica-Cancelacion-Uber-Truck.docx</td></tr>
+    <tr><td>Multas y cuenta</td><td><a href="Multas-Cuenta-Uber-Truck.html">Multas-Cuenta-Uber-Truck.html</a></td><td>Multas-Cuenta-Uber-Truck.docx</td></tr>
+    <tr><td>SQL Supabase</td><td><a href="Sql-Supabase-Uber-Truck.html">Sql-Supabase-Uber-Truck.html</a></td><td>Sql-Supabase-Uber-Truck.docx</td></tr>
   </table>
-
-  <h2>Estrategia y negocio</h2>
-  <table>
-    <tr><th>Documento</th><th>Archivo</th></tr>
-    <tr><td>Modelo de negocio</td><td><a href="Modelo-Negocio-Uber-Truck.html">Modelo-Negocio-Uber-Truck.html</a></td></tr>
-    <tr><td>Journey usuario</td><td><a href="Journey-Usuario-Uber-Truck.html">Journey-Usuario-Uber-Truck.html</a></td></tr>
-    <tr><td>Kickoff</td><td><a href="Kickoff-Uber-Truck.html">Kickoff-Uber-Truck.html</a> · KICKOFF.md</td></tr>
-    <tr><td>Gantt detallado</td><td><a href="Gantt-Uber-Truck.html">Gantt-Uber-Truck.html</a> (también en memoria §12)</td></tr>
-  </table>
-
-  <h2>Markdown operativo (repo)</h2>
-  <ul>
-    <li><a href="00-INDICE-DOCUMENTACION.md">00-INDICE-DOCUMENTACION.md</a></li>
-    <li><a href="ROADMAP.md">ROADMAP.md</a></li>
-    <li><a href="MATCH-CANCEL-POLICY.md">MATCH-CANCEL-POLICY.md</a></li>
-    <li><a href="PENALTIES-AND-ACCOUNTS.md">PENALTIES-AND-ACCOUNTS.md</a></li>
-    <li><a href="DEPLOY.md">DEPLOY.md</a></li>
-  </ul>
-
-  <h2>Exportar todo a Word</h2>
-  <p><code>npm run export:all-docs</code></p>
 
   <h2>Orden de lectura</h2>
   <ol>
-    <li>Índice (este archivo o 00-INDICE-DOCUMENTACION.md)</li>
-    <li><strong>Memoria técnica</strong> (Gantt + avance + arquitectura)</li>
-    <li>Canvas estado de avance (opcional, visual)</li>
+    <li>Memoria técnica</li>
     <li>Modelo de negocio → Journey</li>
-    <li>SQL / deploy / políticas según tarea</li>
+    <li>Próximos hitos / Roadmap</li>
+    <li>Políticas y SQL según tarea</li>
   </ol>
+
+  <p class="meta">Markdown vivo: 01-MEMORIA-TECNICA.md · Canvas: canvases/estado-avance.canvas.tsx</p>
 </body>
 </html>

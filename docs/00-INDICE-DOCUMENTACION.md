@@ -8,12 +8,24 @@
 
 ---
 
+## 0. Hub HTML + Word (patrón Chanchi)
+
+| Enlace | Uso |
+|--------|-----|
+| **[/docs/ (index.html)](https://uber-truck-production.up.railway.app/docs/)** | Índice HTML navegable |
+| [Indice-Documentacion-Uber-Truck.html](./Indice-Documentacion-Uber-Truck.html) | Índice con tabla HTML → Word |
+
+**Exportar Word (local):** `npm run export:all-docs` → `docs/*.docx` + `Downloads/Proyecto Uber Truck/`  
+**Solo memoria:** `npm run export:memoria-docx`
+
 ## 1. Documento central (leer primero)
 
 | Documento | Formato | Contenido |
 |-----------|---------|-----------|
 | **[01-MEMORIA-TECNICA.md](./01-MEMORIA-TECNICA.md)** | Markdown | Arquitectura, API, datos, **Gantt integrado**, **estado de avance**, enlaces |
-| [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html) | HTML / Word | Export Word vía `npm run export:all-docs` |
+| [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html) | HTML / Word | **Parte I** (Gantt coloreado) + **Parte II** (stack); v2.1+ |
+| [HITO-DIGITAL-MVP.md](./HITO-DIGITAL-MVP.md) | Markdown | Bitácora entrega digital adelantada |
+| [Canvas-Resumen-Uber-Truck.html](./Canvas-Resumen-Uber-Truck.html) | HTML / Word | Resumen del canvas de avance |
 | **Canvas estado de avance** | Cursor IDE | `canvases/estado-avance.canvas.tsx` — abrir desde panel Canvas |
 
 ---
@@ -41,13 +53,15 @@ El cronograma planificado **no va en un archivo suelto** para consulta diaria: e
 
 ---
 
-## 4. Anexos técnicos (operación)
+## 4. Anexos técnicos (HTML + Word)
 
-| Tema | Documento |
-|------|-----------|
-| **SQL Supabase (todo)** | [SQL-SUPABASE.md](./SQL-SUPABASE.md) · `supabase/migrations/RUN_PENDING.sql` |
-| Cancelación y multas | [MATCH-CANCEL-POLICY.md](./MATCH-CANCEL-POLICY.md) |
-| Cuenta bancaria y cobros | [PENALTIES-AND-ACCOUNTS.md](./PENALTIES-AND-ACCOUNTS.md) |
+| Tema | HTML | Markdown (repo) |
+|------|------|-----------------|
+| SQL Supabase | [Sql-Supabase-Uber-Truck.html](./Sql-Supabase-Uber-Truck.html) | [SQL-SUPABASE.md](./SQL-SUPABASE.md) |
+| Cancelación | [Politica-Cancelacion-Uber-Truck.html](./Politica-Cancelacion-Uber-Truck.html) | [MATCH-CANCEL-POLICY.md](./MATCH-CANCEL-POLICY.md) |
+| Multas y cuenta | [Multas-Cuenta-Uber-Truck.html](./Multas-Cuenta-Uber-Truck.html) | [PENALTIES-AND-ACCOUNTS.md](./PENALTIES-AND-ACCOUNTS.md) |
+| Próximos hitos | [Proximos-Hitos-Uber-Truck.html](./Proximos-Hitos-Uber-Truck.html) | [PROXIMOS-HITOS.md](./PROXIMOS-HITOS.md) |
+| Roadmap | [Roadmap-Uber-Truck.html](./Roadmap-Uber-Truck.html) | [ROADMAP.md](./ROADMAP.md) |
 | Deploy Railway | [DEPLOY.md](./DEPLOY.md) · [RAILWAY-DEPLOY-FIX.md](./RAILWAY-DEPLOY-FIX.md) |
 | Maps | [MAPS.md](./MAPS.md) |
 | Demo | [DEMO-GUION.md](./DEMO-GUION.md) |

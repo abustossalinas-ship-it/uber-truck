@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Política de cancelación — Uber Truck</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.35; max-width: 900px; margin: 2cm auto; color: #111; }
+    h1 { font-size: 18pt; border-bottom: 1px solid #333; }
+    h2 { font-size: 14pt; margin-top: 1.2em; }
+    table { border-collapse: collapse; width: 100%; margin: 0.6em 0; font-size: 10pt; }
+    th, td { border: 1px solid #444; padding: 6px 8px; }
+    th { background: #e8e8e8; }
+    .meta { font-size: 10pt; color: #444; }
+    ul { margin: 0.4em 0 0.6em 1.2em; }
+  </style>
+</head>
+<body>
+  <p class="meta"><a href="/docs/">← Documentación</a></p>
+  <h1>Política de cancelación de emparejamientos (MVP)</h1>
+  <p>Las multas son <strong>sugeridas</strong> y quedan registradas para acuerdo entre partes. No hay cobro automático en esta fase.</p>
+
+  <h2>Fase 1 — Retirar propuesta (Propuesto, embarcador)</h2>
+  <table>
+    <tr><th>Motivo</th><th>Multa sugerida</th></tr>
+    <tr><td>Me equivoqué de oferta</td><td>Ninguna</td></tr>
+    <tr><td>Apareció oferta mejor</td><td>Ninguna</td></tr>
+    <tr><td>Cambió fecha/urgencia</td><td>Ninguna</td></tr>
+    <tr><td>Propuesta duplicada</td><td>Ninguna</td></tr>
+    <tr><td>Otro (detalle)</td><td>Revisión manual</td></tr>
+  </table>
+  <p><strong>Límite:</strong> hasta 8 retiros por la misma carga en 24 h.</p>
+
+  <h2>Fase 2 — Rechazar (Propuesto, transportista)</h2>
+  <table>
+    <tr><th>Motivo</th><th>Multa sugerida</th></tr>
+    <tr><td>Ruta no calza</td><td>Ninguna</td></tr>
+    <tr><td>Espacio ya asignado</td><td>Ninguna</td></tr>
+    <tr><td>Precio bajo piso</td><td>Ninguna</td></tr>
+    <tr><td>Otro (detalle)</td><td>Revisión manual</td></tr>
+  </table>
+
+  <h2>Fase 3 — Cancelar emparejamiento (Aceptado / En ejecución)</h2>
+  <table>
+    <tr><th>Motivo</th><th>Quién</th><th>Multa sugerida</th></tr>
+    <tr><td>Acuerdo mutuo</td><td>Ambos</td><td>Ninguna — ambos confirman en UI</td></tr>
+    <tr><td>Embarcador cambia planes</td><td>Embarcador</td><td>15 % (mín. $30.000)</td></tr>
+    <tr><td>Transportista no puede cumplir</td><td>Transportista</td><td>10 % (mín. $20.000)</td></tr>
+    <tr><td>No show / falla grave</td><td>Transportista</td><td>20 % (mín. $40.000)</td></tr>
+    <tr><td>Embarcador cancela en ruta</td><td>Embarcador</td><td>25 % (mín. $50.000)</td></tr>
+    <tr><td>Desacuerdo de precio</td><td>Ambos</td><td>Mediación</td></tr>
+    <tr><td>Fuerza mayor</td><td>Ambos</td><td>Ninguna (detalle obligatorio)</td></tr>
+    <tr><td>Otro</td><td>Ambos</td><td>Revisión manual</td></tr>
+  </table>
+
+  <h2>Próximos hitos (no MVP)</h2>
+  <ul>
+    <li>Ventana de tiempo (cancelar gratis antes de X horas)</li>
+    <li>Cobro / garantía integrada</li>
+    <li>Reputación y strikes automáticos</li>
+  </ul>
+</body>
+</html>

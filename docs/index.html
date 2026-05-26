@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Documentación — Uber Truck</title>
+  <style>
+    body { font-family: system-ui, Calibri, Arial, sans-serif; max-width: 44rem; margin: 2rem auto; padding: 0 1rem; line-height: 1.5; color: #1a1a1a; }
+    h1 { font-size: 1.4rem; }
+    h2 { font-size: 1.1rem; margin-top: 1.5em; }
+    a { color: #d95418; }
+    table { border-collapse: collapse; width: 100%; font-size: 0.95rem; margin: 0.5em 0; }
+    th, td { border: 1px solid #ccc; padding: 6px 8px; text-align: left; }
+    th { background: #f3f4f6; }
+    .meta { font-size: 0.9rem; color: #555; }
+    code { font-size: 0.9em; }
+  </style>
+</head>
+<body>
+  <p class="meta"><a href="/">← Inicio Uber Truck</a></p>
+  <h1>Documentación (HTML)</h1>
+  <p>Toda la documentación principal está en <strong>HTML</strong> para leer en el navegador y exportar a <strong>Word</strong> como en el proyecto Chanchi.</p>
+  <p><strong>Producción:</strong> <a href="https://uber-truck-production.up.railway.app">uber-truck-production.up.railway.app</a></p>
+
+  <h2>Exportar a Word (local)</h2>
+  <p>Desde la raíz del repo:</p>
+  <ul>
+    <li><code>npm run export:memoria-docx</code> — solo memoria técnica</li>
+    <li><code>npm run export:all-docs</code> — pack completo (todos los HTML abajo)</li>
+  </ul>
+  <p class="meta">Genera <code>.docx</code> en <code>docs/</code> y copia a <code>Downloads/Proyecto Uber Truck/</code></p>
+
+  <h2>Documentos HTML</h2>
+  <table>
+    <tr><th>Documento</th><th>HTML</th></tr>
+    <tr><td><strong>Memoria técnica</strong> (Gantt + stack)</td><td><a href="Memoria-tecnica-Uber-Truck.html">Memoria-tecnica-Uber-Truck.html</a></td></tr>
+    <tr><td>Índice maestro</td><td><a href="Indice-Documentacion-Uber-Truck.html">Indice-Documentacion-Uber-Truck.html</a></td></tr>
+    <tr><td>Modelo de negocio</td><td><a href="Modelo-Negocio-Uber-Truck.html">Modelo-Negocio-Uber-Truck.html</a></td></tr>
+    <tr><td>Journey usuario</td><td><a href="Journey-Usuario-Uber-Truck.html">Journey-Usuario-Uber-Truck.html</a></td></tr>
+    <tr><td>Kickoff</td><td><a href="Kickoff-Uber-Truck.html">Kickoff-Uber-Truck.html</a></td></tr>
+    <tr><td>Gantt detallado</td><td><a href="Gantt-Uber-Truck.html">Gantt-Uber-Truck.html</a></td></tr>
+    <tr><td>Resumen canvas</td><td><a href="Canvas-Resumen-Uber-Truck.html">Canvas-Resumen-Uber-Truck.html</a></td></tr>
+    <tr><td>Próximos hitos</td><td><a href="Proximos-Hitos-Uber-Truck.html">Proximos-Hitos-Uber-Truck.html</a></td></tr>
+    <tr><td>Hito MVP digital</td><td><a href="Hito-Digital-MVP-Uber-Truck.html">Hito-Digital-MVP-Uber-Truck.html</a></td></tr>
+    <tr><td>Roadmap</td><td><a href="Roadmap-Uber-Truck.html">Roadmap-Uber-Truck.html</a></td></tr>
+    <tr><td>Política cancelación</td><td><a href="Politica-Cancelacion-Uber-Truck.html">Politica-Cancelacion-Uber-Truck.html</a></td></tr>
+    <tr><td>Multas y cuenta</td><td><a href="Multas-Cuenta-Uber-Truck.html">Multas-Cuenta-Uber-Truck.html</a></td></tr>
+    <tr><td>SQL Supabase</td><td><a href="Sql-Supabase-Uber-Truck.html">Sql-Supabase-Uber-Truck.html</a></td></tr>
+  </table>
+
+  <h2>Markdown (repo / edición)</h2>
+  <p class="meta"><a href="00-INDICE-DOCUMENTACION.md">00-INDICE-DOCUMENTACION.md</a> · <a href="01-MEMORIA-TECNICA.md">01-MEMORIA-TECNICA.md</a> · Canvas en <code>canvases/</code></p>
+</body>
+</html>

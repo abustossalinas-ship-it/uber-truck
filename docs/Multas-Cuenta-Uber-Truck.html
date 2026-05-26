@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <title>Multas y cuenta bancaria — Uber Truck</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.35; max-width: 900px; margin: 2cm auto; color: #111; }
+    h1 { font-size: 18pt; border-bottom: 1px solid #333; }
+    h2 { font-size: 14pt; margin-top: 1.2em; }
+    table { border-collapse: collapse; width: 100%; margin: 0.6em 0; font-size: 10pt; }
+    th, td { border: 1px solid #444; padding: 6px 8px; }
+    th { background: #e8e8e8; }
+    .meta { font-size: 10pt; color: #444; }
+  </style>
+</head>
+<body>
+  <p class="meta"><a href="/docs/">← Documentación</a></p>
+  <h1>Multas sugeridas, cuentas pendientes y cobro</h1>
+  <p>Hoy las multas son sugeridas (<code>penalty_amount_clp</code>, <code>reason_code</code>). <strong>No hay cobro automático</strong> en MVP.</p>
+
+  <h2>Objetivo</h2>
+  <ol>
+    <li>Recuadro «Cuenta y multas» con sesión</li>
+    <li>Resumen en notificaciones</li>
+    <li>Cuenta bancaria obligatoria antes de generar cargo formal</li>
+  </ol>
+
+  <h2>Quién debe a quién</h2>
+  <table>
+    <tr><th>reason_code</th><th>Deudor</th></tr>
+    <tr><td>shipper_change_plans</td><td>Embarcador</td></tr>
+    <tr><td>shipper_cancel_in_transit</td><td>Embarcador</td></tr>
+    <tr><td>carrier_unavailable</td><td>Transportista</td></tr>
+    <tr><td>carrier_no_show</td><td>Transportista</td></tr>
+    <tr><td>mutual_agreement</td><td>Nadie</td></tr>
+  </table>
+
+  <h2>Plazo</h2>
+  <p>7 días desde cancelación. Estados: <code>pending</code>, <code>overdue</code>.</p>
+
+  <h2>Cuenta bancaria (Chile)</h2>
+  <p>Campos en <code>users</code> (migración 008). Sin banco completo: <code>can_generate_charge = false</code>.</p>
+
+  <h2>Fases</h2>
+  <table>
+    <tr><th>Fase</th><th>Qué</th></tr>
+    <tr><td>A (ahora)</td><td>Resumen matches + UI cuenta + notificaciones</td></tr>
+    <tr><td>B</td><td>Tabla penalty_charges</td></tr>
+    <tr><td>C</td><td>Pasarela Webpay / transferencia</td></tr>
+  </table>
+
+  <h2>API</h2>
+  <ul>
+    <li><code>GET /api/account/summary</code></li>
+    <li><code>PATCH /api/account/bank</code></li>
+  </ul>
+</body>
+</html>

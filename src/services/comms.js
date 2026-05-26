@@ -144,6 +144,32 @@ async function markNotificationRead(id) {
   return rowToApi(data);
 }
 
+async function markAllReadForMatch(forRole, matchId) {
+  const now = new Date().toISOString();
+  if (useJson()) {
+    const store = readJsonComms();
+    let marked = 0;
+    for (const n of store.match_notifications) {
+      if (n.for_role === forRole && n.match_id === matchId && !n.read_at) {
+        n.read_at = now;
+        marked += 1;
+      }
+    }
+    if (marked) writeJsonComms(store);
+    return marked;
+  }
+  const sb = supabase.getClient();
+  const { data, error } = await sb
+    .from('match_notifications')
+    .update({ read_at: now })
+    .eq('for_role', forRole)
+    .eq('match_id', matchId)
+    .is('read_at', null)
+    .select('id');
+  if (error) throw error;
+  return (data || []).length;
+}
+
 async function unreadCount(forRole) {
   const rows = await listNotifications(forRole);
   return rows.filter((n) => !n.read_at).length;
@@ -155,5 +181,6 @@ module.exports = {
   listNotifications,
   addNotification,
   markNotificationRead,
+  markAllReadForMatch,
   unreadCount,
 };

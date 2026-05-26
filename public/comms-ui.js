@@ -70,6 +70,15 @@ const Comms = {
     await this.refreshBell();
   },
 
+  async dismissMatchNotifications(matchId) {
+    if (!matchId) return;
+    await fetch(`/api/comms/notifications/match/${encodeURIComponent(matchId)}/read`, {
+      method: 'PATCH',
+      headers: this.headers(),
+    });
+    await this.refreshBell();
+  },
+
   async openChat(matchId, title) {
     this.activeMatchId = matchId;
     const drawer = document.getElementById('chat-drawer');
@@ -155,8 +164,6 @@ document.getElementById('notif-list')?.addEventListener('click', async (e) => {
   const cancelBtn = e.target.closest('[data-open-cancel]');
   if (cancelBtn) {
     const id = cancelBtn.dataset.openCancel;
-    const item = e.target.closest('.notif-item');
-    if (item?.dataset.id) await Comms.markRead(item.dataset.id);
     document.getElementById('notif-panel').hidden = true;
     if (typeof showTab === 'function') showTab('board');
     if (typeof openCancelModalForMatch === 'function') {
@@ -169,8 +176,6 @@ document.getElementById('notif-list')?.addEventListener('click', async (e) => {
   const scrollBtn = e.target.closest('[data-scroll-match]');
   if (scrollBtn) {
     const id = scrollBtn.dataset.scrollMatch;
-    const item = e.target.closest('.notif-item');
-    if (item?.dataset.id) await Comms.markRead(item.dataset.id);
     document.getElementById('notif-panel').hidden = true;
     if (typeof scrollToActiveMatch === 'function') await scrollToActiveMatch(id);
     else if (typeof scrollToMatchCard === 'function') scrollToMatchCard(id);

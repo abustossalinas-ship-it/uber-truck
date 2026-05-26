@@ -68,18 +68,44 @@ router.post('/:matchId/messages', optionalAuth, async (req, res) => {
   }
 });
 
+const STALE_MATCH_STATUSES = new Set(['cancelled', 'completed']);
+
 router.get('/notifications/list', async (req, res) => {
   try {
     const role = resolveActorRole(req);
     if (!['shipper', 'carrier'].includes(role)) {
       return res.status(400).json({ ok: false, error: 'Rol shipper o carrier requerido' });
     }
-    const data = await comms.listNotifications(role);
-    const unread = data.filter((n) => !n.read_at).length;
-    res.json({ ok: true, data, unread });
+    const raw = await comms.listNotifications(role);
+    const visible = [];
+    for (const n of raw) {
+      const match = await repo.getById('matches', n.match_id);
+      const stale = !match || STALE_MATCH_STATUSES.has(match.status);
+      if (stale) {
+        if (!n.read_at) await comms.markNotificationRead(n.id);
+        continue;
+      }
+      visible.push(n);
+    }
+    const unread = visible.filter((n) => !n.read_at).length;
+    res.json({ ok: true, data: visible, unread });
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al leer notificaciones' });
+  }
+});
+
+router.patch('/notifications/match/:matchId/read', async (req, res) => {
+  try {
+    const role = resolveActorRole(req);
+    if (!['shipper', 'carrier'].includes(role)) {
+      return res.status(400).json({ ok: false, error: 'Rol shipper o carrier requerido' });
+    }
+    const marked = await comms.markAllReadForMatch(role, req.params.matchId);
+    res.json({ ok: true, marked });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al marcar notificaciones' });
   }
 });
 

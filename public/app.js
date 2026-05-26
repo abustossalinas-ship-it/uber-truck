@@ -441,10 +441,12 @@ async function openCancelModalForMatch(matchId) {
   const json = await API.matches();
   const m = (json.data || []).find((x) => x.id === matchId);
   if (!m) {
+    if (typeof Comms !== 'undefined') await Comms.dismissMatchNotifications(matchId);
     alert('No se encontró el emparejamiento. Actualiza el tablero.');
     return;
   }
   if (!['accepted', 'in_progress'].includes(m.status)) {
+    if (typeof Comms !== 'undefined') await Comms.dismissMatchNotifications(matchId);
     alert('Este emparejamiento ya no admite acuerdo mutuo en esta etapa.');
     return;
   }
@@ -456,17 +458,34 @@ async function scrollToActiveMatch(matchId) {
   if (typeof showTab === 'function') showTab('board');
   if (typeof refreshBoard === 'function') await refreshBoard();
   const heading = document.getElementById('matches-active-heading');
-  if (heading) heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
   const card = document.querySelector(`#list-matches [data-match-id="${matchId}"]`);
-  if (!card) {
-    alert('No se encontró en Emparejamientos activos. Puede estar cancelado o en historial.');
-    return;
+  if (card) {
+    if (heading) heading.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => {
+      card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      card.classList.add('match-highlight');
+      setTimeout(() => card.classList.remove('match-highlight'), 2800);
+    }, 350);
+    return { found: true, where: 'active' };
   }
-  setTimeout(() => {
-    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    card.classList.add('match-highlight');
-    setTimeout(() => card.classList.remove('match-highlight'), 2800);
-  }, 350);
+
+  const histWrap = $('matches-history-wrap');
+  const histCard = document.querySelector(`#list-matches-history [data-match-id="${matchId}"]`);
+  if (histCard) {
+    if (histWrap) histWrap.open = true;
+    histCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    histCard.classList.add('match-highlight');
+    setTimeout(() => histCard.classList.remove('match-highlight'), 2800);
+    if (typeof Comms !== 'undefined') await Comms.dismissMatchNotifications(matchId);
+    alert('Este emparejamiento ya está en el historial (cancelado o cerrado).');
+    return { found: true, where: 'history' };
+  }
+
+  if (typeof Comms !== 'undefined') await Comms.dismissMatchNotifications(matchId);
+  alert(
+    'Este emparejamiento ya no está activo. Se archivaron las notificaciones relacionadas.'
+  );
+  return { found: false };
 }
 
 function scrollToMatchCard(matchId) {

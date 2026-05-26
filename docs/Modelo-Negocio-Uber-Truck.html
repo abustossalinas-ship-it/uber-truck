@@ -1,56 +1,93 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Modelo de negocio — Uber Truck</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.35; max-width: 900px; margin: 2cm auto; color: #111; }
+    h1 { font-size: 18pt; border-bottom: 1px solid #333; padding-bottom: 6px; }
+    h2 { font-size: 14pt; margin-top: 1.4em; }
+    h3 { font-size: 12pt; margin-top: 1em; }
+    p { margin: 0.5em 0; text-align: justify; }
+    ul { margin: 0.4em 0 0.6em 1.2em; }
+    table { border-collapse: collapse; width: 100%; margin: 0.8em 0; font-size: 10pt; }
+    th, td { border: 1px solid #444; padding: 6px 8px; vertical-align: top; }
+    th { background: #e8e8e8; text-align: left; }
+    .meta { font-size: 10pt; color: #444; margin-bottom: 1em; }
+    .doc-header { display: flex; align-items: flex-start; gap: 18px; margin-bottom: 1em; }
+    .doc-header img { width: 72px; height: 72px; flex-shrink: 0; border-radius: 12px; background: #fff; border: 1px solid #e5e7eb; }
+    .doc-title-wrap { flex: 1; min-width: 0; }
+    .doc-title-wrap h1 { margin-top: 0; }
+  </style>
 </head>
 <body>
-  <h1>Modelo de negocio — Uber Truck</h1>
-  <p><strong>Fuente:</strong> Informe Evaluación Estratégica · mayo 2026</p>
 
-  <h2>1. Tesis</h2>
-  <p>Monetizar capacidad logística <strong>ociosa en rutas ya planificadas</strong> (backhaul), reduciendo retornos vacíos y ofreciendo a PYMEs carga incidental ágil sin contratos marco.</p>
+<div class="doc-header">
+  <img src="/brand/logo.png" width="72" height="72" alt="Uber Truck — marca" />
+  <div class="doc-title-wrap">
+    <h1>Modelo de negocio — Uber Truck</h1>
+    <p class="meta"><strong>Producto:</strong> Marketplace de capacidad logística ociosa (backhaul), Chile.<br />
+    <strong>Versión:</strong> 2.0 · mayo 2026 · Complementa <a href="Memoria-tecnica-Uber-Truck.html">memoria técnica</a></p>
+  </div>
+</div>
 
-  <h2>2. Propuesta de valor</h2>
-  <table border="1" cellpadding="6" cellspacing="0">
-    <tr><th>Cliente</th><th>Valor</th></tr>
-    <tr><td>Transportista</td><td>Ingreso incremental sobre trayecto que ya asumía costo fijo</td></tr>
-    <tr><td>Embarcador PYME</td><td>Velocidad, precio competitivo, sin fricción de corretaje tradicional</td></tr>
-    <tr><td>Ecosistema</td><td>Menos km vacíos → menor huella y congestión</td></tr>
-  </table>
+<p class="meta"><a href="/docs/">← Documentación</a> · <a href="/">Inicio app</a></p>
 
-  <h2>3. Monetización evolutiva</h2>
-  <h3>Fase 1 — Take rate transaccional</h3>
-  <p><strong>12–15%</strong> sobre valor acordado del flete incidental. Tolerancia alta del transportista porque el ingreso es marginal puro.</p>
-  <h3>Fase 2 — Híbrido SaaS + transaccional</h3>
-  <p>Suscripción para embarcadores frecuentes: dashboard, reportes huella de carbono mitigada, prioridad de asignación.</p>
-  <h3>Fase 3 — Activos de datos</h3>
-  <p>Red de capacidad abierta predictiva; datos agregados anonimizados de flujos logísticos (B2B data product).</p>
+<h2>1. Tesis</h2>
+<p>Monetizar cubicación <strong>ociosa en rutas ya planificadas</strong> (backhaul). El producto se entrega como <strong>una app tipo Uber</strong> para carga por camión: el usuario entiende el flujo sin capacitación larga.</p>
 
-  <h2>4. Ventaja competitiva</h2>
-  <ul>
-    <li>Enfoque en <strong>cubicación y compatibilidad técnica</strong>, no solo listing de fletes.</li>
-    <li>Consolidación LTL y dynamic pricing (mediano plazo).</li>
-    <li>Escalabilidad B2B superior vs apps consumer genéricas.</li>
-  </ul>
+<h2>2. Estrategia en dos tiempos</h2>
+<table>
+  <tr><th>Horizonte</th><th>Qué</th><th>Por qué</th></tr>
+  <tr><td><strong>Ahora (MVP)</strong></td><td>App propia Uber Truck en web → usuarios y viajes reales</td><td>Validar demanda, take rate y retención</td></tr>
+  <tr><td><strong>Después (con tracción)</strong></td><td>Add-on / API integrable en plataformas grandes (movilidad, logística)</td><td>No competir de entrada; demostrar valor con datos y GMV</td></tr>
+</table>
+<p>Todo el piloto (20 viajes, métricas, confianza) ocurre <strong>dentro de la app</strong>, no en WhatsApp ni planillas externas.</p>
 
-  <h2>5. Mitigación riesgos LATAM</h2>
-  <ul>
-    <li>Microseguros por trayecto (InsurTech).</li>
-    <li>KYC + validación licencia y revisión técnica.</li>
-    <li>Reputación bidireccional (incluye tiempos de espera en planta).</li>
-  </ul>
+<h2>3. Propuesta de valor</h2>
+<table>
+  <tr><th>Cliente</th><th>Valor</th><th>Analogía Uber</th></tr>
+  <tr><td>Transportista</td><td>Ingreso marginal en trayecto que ya pagaba fijo</td><td>Conductor aprovecha viaje planificado</td></tr>
+  <tr><td>Embarcador PYME</td><td>Carga incidental rápida, sin corredor lento</td><td>Pasajero pide viaje al instante</td></tr>
+  <tr><td>Ecosistema</td><td>Menos km vacíos, menor huella</td><td>Eficiencia de red</td></tr>
+</table>
 
-  <h2>6. Comparativa portafolio</h2>
-  <p>Vs. Chanchi (copiloto financiero): Uber Truck presenta mayor potencial de <strong>escala B2B inmediata</strong> y dolor económico regional explícito (miles de millones USD en ineficiencia de retorno).</p>
+<h2>4. Monetización</h2>
+<h3>Fase A — Take rate (MVP)</h3>
+<p><strong>12–15%</strong> sobre el flete acordado en la app. Ingreso incremental para el transportista; la comisión se justifica por match, estados, chat y reglas de cancelación.</p>
+<h3>Fase B — Híbrido SaaS + transaccional</h3>
+<p>Suscripción para embarcadores frecuentes: historial, prioridad de match, reportes.</p>
+<h3>Fase C — Datos y add-on B2B</h3>
+<p>Red de capacidad predictiva; módulo integrable para socios (API/widgets) con métricas agregadas anonimizadas.</p>
 
-  <h2>7. KPIs negocio piloto</h2>
-  <table border="1" cellpadding="6" cellspacing="0">
-    <tr><th>KPI</th><th>Meta</th></tr>
-    <tr><td>GMV fletes piloto</td><td>Definir post entrevistas</td></tr>
-    <tr><td>Take rate efectivo</td><td>12–15%</td></tr>
-    <tr><td>Viajes / mes activos</td><td>20 (M2) → 100 (M4)</td></tr>
-    <tr><td>CAC payback</td><td>&lt; 3 viajes por lado</td></tr>
-  </table>
+<h2>5. Ventaja competitiva</h2>
+<ul>
+  <li>UX familiar (patrón Uber) → menor fricción de adopción.</li>
+  <li>Match por <strong>cubicación, corredor y tipo de carga</strong>, no solo listado de fletes.</li>
+  <li>Enfoque B2B Chile (nodo industrial, PYME) vs apps consumer genéricas.</li>
+</ul>
+
+<h2>6. Confianza (LATAM)</h2>
+<ul>
+  <li>KYC y datos de vehículo (fase piloto: revisión manual).</li>
+  <li>Microseguro por trayecto (InsurTech, fase 3).</li>
+  <li>Reputación bidireccional y multas sugeridas con plazo (ya en app v0.0.19).</li>
+</ul>
+
+<h2>7. KPIs piloto (en la app)</h2>
+<table>
+  <tr><th>KPI</th><th>Meta</th></tr>
+  <tr><td>Viajes completados en app</td><td>20 (M2) → 100 (M4)</td></tr>
+  <tr><td>Take rate efectivo</td><td>12–15%</td></tr>
+  <tr><td>Tiempo publicación → match</td><td>&lt; 1 h (digital)</td></tr>
+  <tr><td>Retención 7 días (vuelve a publicar)</td><td>Definir post piloto</td></tr>
+  <tr><td>NPS transportista / embarcador</td><td>≥ 7 (M2) → ≥ 8 (M4)</td></tr>
+</table>
+
+<h2>8. Relación con otros documentos</h2>
+<p>Journey detallado: <a href="Journey-Usuario-Uber-Truck.html">Journey-Usuario-Uber-Truck.html</a>. Arquitectura, Gantt y roadmap: <a href="Memoria-tecnica-Uber-Truck.html">Memoria-tecnica-Uber-Truck.html</a>.</p>
+
+<p class="meta"><em>Fin del documento — v2.0 · app única tipo Uber · visión add-on futura.</em></p>
 </body>
 </html>

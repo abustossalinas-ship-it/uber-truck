@@ -38,6 +38,19 @@ Hoy el login guarda rol (`shipper` / `carrier`) pero **cargas y ofertas no tiene
 | 2.8 | UI transportista: **Mis ofertas** + cargas asociadas vía **emparejamientos activos** (match ↔ oferta) |
 | 2.9 | Prellenar `company_name` / `carrier_name` desde `users.company_name` al publicar |
 
+### Fase 2.10 — Multas, plazos y cobro (en curso)
+
+| # | Tarea | Estado |
+|---|--------|--------|
+| 2.10a | Recuadro **Cuenta y multas** (debes / te deben, plazo 7 días, días atraso) | MVP UI |
+| 2.10b | Bloque igual en **Notificaciones** | MVP UI |
+| 2.10c | Migración `008` — banco en `users`, tabla `penalty_charges` | SQL listo |
+| 2.10d | API `GET /api/account/summary`, `PATCH /api/account/bank` | MVP API |
+| 2.10e | Botón **Generar cargo** + pasarela de pago | Pendiente |
+| 2.10f | Bloquear publicar/emparejar si multa `overdue` sin banco | Pendiente |
+
+Ver `docs/PENALTIES-AND-ACCOUNTS.md`.
+
 ## Fase 3 — Piloto
 
 - 5 embarcadores + 10 transportistas

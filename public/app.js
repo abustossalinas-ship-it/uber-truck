@@ -1027,3 +1027,7 @@ if (typeof Comms !== 'undefined') {
   if (typeof Auth !== 'undefined' && Auth.user) Comms.refreshBell();
   else Comms.resetUi();
 }
+if (typeof Penalties !== 'undefined') {
+  if (typeof Auth !== 'undefined' && Auth.user) Penalties.refresh();
+  else Penalties.resetUi();
+}

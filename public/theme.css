@@ -546,6 +546,78 @@ select.offer-picked {
   margin-left: 0.2rem;
 }
 
+.account-penalties-panel {
+  margin: 0 1rem 1rem;
+  max-width: 960px;
+}
+
+.account-penalties-panel h2 {
+  margin: 0 0 0.35rem;
+}
+
+.penalty-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin: 0.75rem 0;
+}
+
+@media (max-width: 640px) {
+  .penalty-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.penalty-grid h3 {
+  font-size: 0.9rem;
+  margin: 0 0 0.35rem;
+}
+
+.penalty-total {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--accent-hover);
+  margin: 0 0 0.5rem;
+}
+
+.penalty-total.receivable {
+  color: #2e7d32;
+}
+
+.penalty-line {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.88rem;
+}
+
+.penalty-bank-warn {
+  background: #fff3e0;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 0.5rem 0.65rem;
+  font-size: 0.88rem;
+  margin: 0.5rem 0;
+}
+
+.pill-warn {
+  background: #ffebee;
+  color: #b71c1c;
+  font-size: 0.72rem;
+}
+
+.notif-penalty-summary {
+  padding: 0.65rem;
+  margin-bottom: 0.75rem;
+  background: var(--brand-gray-50);
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.notif-penalty-summary h4 {
+  margin: 0 0 0.35rem;
+  font-size: 0.9rem;
+}
+
 .notif-panel {
   position: fixed;
   top: 4.5rem;

@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#F26522" />
   <title>Uber Truck — Inteligencia en movimiento</title>
   <link rel="icon" href="/brand/logo.png" type="image/png" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.18" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.19" />
 </head>
 <body>
   <header class="site-header">
@@ -29,6 +29,8 @@
       <button type="button" class="tab tab-sm tab-outline" id="btn-register">Crear cuenta</button>
     </div>
   </header>
+
+  <section id="account-penalties-panel" class="account-penalties-panel card" hidden></section>
 
   <div class="demo-bar">
     <span>Demo en vivo · <strong id="demo-url">uber-truck-production.up.railway.app</strong></span>
@@ -308,6 +310,7 @@
 
   <div id="notif-panel" class="notif-panel" hidden>
     <h3>Notificaciones</h3>
+    <div id="notif-penalties-summary" hidden></div>
     <div id="notif-list"></div>
     <button type="button" class="link-btn" id="notif-close">Cerrar</button>
   </div>
@@ -324,6 +327,34 @@
       <input id="chat-input" type="text" placeholder="Escribe un mensaje…" maxlength="500" />
       <button type="submit">Enviar</button>
     </form>
+  </div>
+
+  <div id="bank-modal" class="cancel-modal" hidden aria-hidden="true">
+    <div class="cancel-modal-backdrop" data-close-bank></div>
+    <div class="cancel-modal-card" role="dialog">
+      <h3>Cuenta bancaria</h3>
+      <p class="muted">Obligatoria para generar cargos por multas (cuando el cobro esté activo).</p>
+      <form id="form-bank">
+        <label>Titular</label>
+        <input id="bank-holder-name" required />
+        <label>RUT titular</label>
+        <input id="bank-rut" required placeholder="12.345.678-9" />
+        <label>Banco</label>
+        <input id="bank-name" required placeholder="Ej. BancoEstado" />
+        <label>Tipo de cuenta</label>
+        <select id="bank-account-type">
+          <option value="corriente">Cuenta corriente</option>
+          <option value="vista">Cuenta vista / RUT</option>
+          <option value="ahorro">Cuenta de ahorro</option>
+        </select>
+        <label>Número de cuenta</label>
+        <input id="bank-account-number" required />
+        <div class="cancel-modal-actions">
+          <button type="button" class="btn-secondary" data-close-bank>Cerrar</button>
+          <button type="submit" class="btn-danger">Guardar cuenta</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <div id="cancel-modal" class="cancel-modal" hidden aria-hidden="true">
@@ -372,10 +403,11 @@
     </div>
   </div>
 
-  <script src="/roles-ui.js?v=0.0.18"></script>
-  <script src="/maps-ui.js?v=0.0.18"></script>
-  <script src="/auth-ui.js?v=0.0.18"></script>
-  <script src="/comms-ui.js?v=0.0.18"></script>
-  <script src="/app.js?v=0.0.18"></script>
+  <script src="/roles-ui.js?v=0.0.19"></script>
+  <script src="/maps-ui.js?v=0.0.19"></script>
+  <script src="/auth-ui.js?v=0.0.19"></script>
+  <script src="/penalties-ui.js?v=0.0.19"></script>
+  <script src="/comms-ui.js?v=0.0.19"></script>
+  <script src="/app.js?v=0.0.19"></script>
 </body>
 </html>

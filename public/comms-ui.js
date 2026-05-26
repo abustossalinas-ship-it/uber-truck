@@ -27,6 +27,7 @@ const Comms = {
     }
     if (bell) bell.hidden = true;
     this.closeChat();
+    if (typeof Penalties !== 'undefined') Penalties.resetUi();
   },
 
   async loadPresets() {
@@ -90,6 +91,10 @@ const Comms = {
         </article>`;
             })
             .join('');
+    if (typeof Penalties !== 'undefined') {
+      await Penalties.fetchSummary();
+      Penalties.renderNotifSummary();
+    }
     panel.hidden = false;
     await this.refreshBell();
   },

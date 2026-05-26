@@ -22,6 +22,7 @@ const Auth = {
     localStorage.removeItem('ut_token');
     localStorage.removeItem('ut_user');
     if (typeof Comms !== 'undefined') Comms.resetUi();
+    if (typeof Penalties !== 'undefined') Penalties.resetUi();
     this.render();
   },
 
@@ -47,6 +48,10 @@ const Auth = {
     if (typeof Comms !== 'undefined') {
       if (this.user) Comms.refreshBell();
       else Comms.resetUi();
+    }
+    if (typeof Penalties !== 'undefined') {
+      if (this.user) Penalties.refresh();
+      else Penalties.resetUi();
     }
   },
 };
@@ -117,6 +122,7 @@ document.getElementById('form-auth')?.addEventListener('submit', async (e) => {
   }
   Auth.save(json.token, { ...json.user, name: json.user.full_name });
   document.getElementById('auth-panel').hidden = true;
+  if (typeof Penalties !== 'undefined') Penalties.refresh();
   alert(authRegisterMode ? 'Cuenta creada' : 'Sesión iniciada');
 });
 

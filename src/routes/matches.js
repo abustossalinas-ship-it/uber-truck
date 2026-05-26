@@ -15,7 +15,7 @@ const {
   computePenalty,
   getReasonByCode,
 } = require('../lib/match-cancel');
-const { listReasonOptions } = require('../lib/match-cancel-reasons');
+const { listReasonOptions, phaseLabel } = require('../lib/match-cancel-reasons');
 
 const router = express.Router();
 
@@ -40,8 +40,15 @@ router.get('/cancel-options', optionalAuth, (req, res) => {
   if (!action || !phase) {
     return res.status(400).json({ ok: false, error: 'Query: action y phase (estado del match)' });
   }
-  const options = listReasonOptions(action, phase, role);
-  res.json({ ok: true, data: options, limits: { note: 'Multas sugeridas; acuerdo entre partes.' } });
+  const agreed = req.query.agreed_price_clp ? Number(req.query.agreed_price_clp) : null;
+  const options = listReasonOptions(action, phase, role, agreed);
+  res.json({
+    ok: true,
+    phase,
+    phase_label: phaseLabel(phase),
+    data: options,
+    limits: { note: 'Multas sugeridas; acuerdo entre partes. Sin cobro automático en MVP.' },
+  });
 });
 
 router.get('/', async (_req, res) => {

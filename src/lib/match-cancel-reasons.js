@@ -192,20 +192,41 @@ function normalizeRole(role) {
   return 'shipper';
 }
 
-function listReasonOptions(action, matchStatus, role) {
+function listReasonOptions(action, matchStatus, role, agreedPriceClp = null) {
   const r = normalizeRole(role);
   return REASONS.filter(
     (x) =>
       x.actions.includes(action) &&
       x.phases.includes(matchStatus) &&
       x.roles.includes(r)
-  ).map((x) => ({
-    code: x.code,
-    label: x.label,
-    requiresDetail: x.requiresDetail,
-    requiresAgreement: x.requiresAgreement,
-    penalty: x.penalty,
-  }));
+  ).map((x) => {
+    const penaltyPreview = computePenalty(x, agreedPriceClp);
+    const feeLabel =
+      penaltyPreview.type === 'fee_suggested' && penaltyPreview.amount_clp
+        ? ` — multa sugerida $${penaltyPreview.amount_clp.toLocaleString('es-CL')}`
+        : penaltyPreview.type === 'none'
+          ? ' — sin multa'
+          : '';
+    return {
+      code: x.code,
+      label: x.label,
+      label_short: x.label + feeLabel,
+      requiresDetail: x.requiresDetail,
+      requiresAgreement: x.requiresAgreement,
+      penalty: x.penalty,
+      penalty_preview: penaltyPreview,
+    };
+  });
+}
+
+const PHASE_LABELS = {
+  proposed: 'Propuesta (sin compromiso de ruta)',
+  accepted: 'Aceptado — camión aún no marcado en ruta',
+  in_progress: 'En ejecución — camión en ruta',
+};
+
+function phaseLabel(matchStatus) {
+  return PHASE_LABELS[matchStatus] || matchStatus;
 }
 
 function getReasonByCode(code) {
@@ -275,6 +296,8 @@ async function checkWithdrawLimit(repo, loadRequestId) {
 module.exports = {
   REASONS,
   LIMITS,
+  PHASE_LABELS,
+  phaseLabel,
   listReasonOptions,
   getReasonByCode,
   computePenalty,

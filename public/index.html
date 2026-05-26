@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#F26522" />
   <title>Uber Truck — Inteligencia en movimiento</title>
   <link rel="icon" href="/brand/logo.png" type="image/png" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.7" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.8" />
 </head>
 <body>
   <header class="site-header">
@@ -308,8 +308,9 @@
     <div class="cancel-modal-card" role="dialog" aria-labelledby="cancel-modal-title">
       <h3 id="cancel-modal-title">Motivo de cancelación</h3>
       <p id="cancel-modal-lead" class="muted"></p>
+      <p id="cancel-stage-badge" class="cancel-stage-badge" hidden></p>
       <form id="form-cancel-reason">
-        <label for="cancel-reason-code">Motivo</label>
+        <label for="cancel-reason-code">Motivo (lista según etapa del camión)</label>
         <select id="cancel-reason-code" name="reason_code" required></select>
         <label id="cancel-detail-label" for="cancel-reason-detail" hidden>Detalle</label>
         <textarea id="cancel-reason-detail" name="reason_detail" rows="2" hidden></textarea>
@@ -326,8 +327,8 @@
     </div>
   </div>
 
-  <script src="/maps-ui.js?v=0.0.7"></script>
-  <script src="/auth-ui.js?v=0.0.7"></script>
-  <script src="/app.js?v=0.0.7"></script>
+  <script src="/maps-ui.js?v=0.0.8"></script>
+  <script src="/auth-ui.js?v=0.0.8"></script>
+  <script src="/app.js?v=0.0.8"></script>
 </body>
 </html>

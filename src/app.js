@@ -41,6 +41,7 @@ app.get('/health', async (_req, res) => {
     version: pkg.version,
     build: process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) || process.env.GIT_COMMIT || 'local',
     ui: 'match-cancel-v2',
+    features: ['cancel-reasons-modal', 'penalty-by-phase'],
     storage: repo.backend(),
     supabase: {
       project_ref: projectRef || 'ljinhegtywixtbzjgjfn',

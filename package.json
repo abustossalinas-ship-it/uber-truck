@@ -1,6 +1,6 @@
 {
   "name": "uber-truck",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "private": true,
   "description": "Uber Truck — marketplace transporte por camión",
   "main": "src/server.js",

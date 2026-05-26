@@ -8,11 +8,11 @@ const API = {
   allLoads: () => fetch('/api/load-requests', { headers: apiHeaders() }).then((r) => r.json()),
   allOffers: () => fetch('/api/capacity-offers', { headers: apiHeaders() }).then((r) => r.json()),
   matches: () => fetch('/api/matches', { headers: apiHeaders() }).then((r) => r.json()),
-  cancelOptions: (action, phase) =>
-    fetch(
-      `/api/matches/cancel-options?action=${encodeURIComponent(action)}&phase=${encodeURIComponent(phase)}&actor_role=${encodeURIComponent(getActorRole())}`,
-      { headers: apiHeaders() }
-    ).then((r) => r.json()),
+  cancelOptions: (action, phase, agreedPriceClp) => {
+    let url = `/api/matches/cancel-options?action=${encodeURIComponent(action)}&phase=${encodeURIComponent(phase)}&actor_role=${encodeURIComponent(getActorRole())}`;
+    if (agreedPriceClp) url += `&agreed_price_clp=${encodeURIComponent(agreedPriceClp)}`;
+    return fetch(url, { headers: apiHeaders() }).then((r) => r.json());
+  },
   suggestions: (loadId) =>
     fetch(`/api/load-requests/${loadId}/match-suggestions`, { headers: apiHeaders() }).then((r) => r.json()),
   postLoad: (body) =>
@@ -86,20 +86,20 @@ function buildMatchActions(m) {
   if (m.status === 'proposed') {
     html += `<button type="button" data-action="accept" data-id="${m.id}">Aceptar</button>`;
     if (role === 'shipper') {
-      html += `<button type="button" class="btn-secondary" data-action="withdraw" data-id="${m.id}">Retirar propuesta</button>`;
-      html += `<button type="button" class="btn-secondary" data-action="change_offer" data-load-id="${m.load_request_id}" data-offer-id="${m.capacity_offer_id}" data-id="${m.id}">Cambiar oferta</button>`;
+      html += `<button type="button" class="btn-secondary" data-action="withdraw" data-id="${m.id}" data-phase="proposed" data-price="${m.agreed_price_clp || ''}">Retirar propuesta</button>`;
+      html += `<button type="button" class="btn-secondary" data-action="change_offer" data-load-id="${m.load_request_id}" data-offer-id="${m.capacity_offer_id}" data-id="${m.id}" data-price="${m.agreed_price_clp || ''}">Cambiar oferta</button>`;
     }
     if (role === 'carrier') {
-      html += `<button type="button" class="btn-secondary" data-action="reject" data-id="${m.id}">Rechazar</button>`;
+      html += `<button type="button" class="btn-secondary" data-action="reject" data-id="${m.id}" data-phase="proposed" data-price="${m.agreed_price_clp || ''}">Rechazar</button>`;
     }
   }
   if (m.status === 'accepted') {
     html += `<button type="button" data-action="progress" data-id="${m.id}">En ruta</button>`;
-    html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="accepted">Cancelar emparejamiento</button>`;
+    html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="accepted" data-price="${m.agreed_price_clp || ''}">Cancelar emparejamiento</button>`;
   }
   if (m.status === 'in_progress') {
     html += `<button type="button" data-action="complete" data-id="${m.id}">Cerrar</button>`;
-    html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="in_progress">Cancelar en ejecución</button>`;
+    html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="in_progress" data-price="${m.agreed_price_clp || ''}">Cancelar en ejecución</button>`;
   }
   return html;
 }
@@ -119,7 +119,12 @@ function updateActiveProposalBanner(matches, loadId) {
   banner.innerHTML = `<strong>Propuesta activa</strong> (${active.length}). Puedes comparar más ofertas, <em>retirar</em> o <em>cambiar oferta</em> en Emparejamientos. ${names ? `Actual: ${names}.` : ''}`;
 }
 
-function formatPenaltyLine(penalty) {
+function formatPenaltyLine(opt) {
+  const preview = opt?.penalty_preview;
+  const penalty = opt?.penalty;
+  if (preview?.type === 'fee_suggested' && preview.amount_clp) {
+    return `Multa sugerida: $${Number(preview.amount_clp).toLocaleString('es-CL')} CLP. ${preview.note || penalty?.note || ''}`.trim();
+  }
   if (!penalty) return 'Sin multa sugerida.';
   if (penalty.type === 'fee_suggested' && penalty.percentOfAgreed) {
     const pct = penalty.percentOfAgreed;
@@ -128,6 +133,7 @@ function formatPenaltyLine(penalty) {
   }
   if (penalty.type === 'mediation') return penalty.note || 'Se recomienda mediación.';
   if (penalty.type === 'review') return penalty.note || 'Quedará sujeto a revisión.';
+  if (penalty.type === 'none') return penalty.note || 'Sin multa sugerida.';
   return penalty.note || 'Sin multa sugerida.';
 }
 
@@ -145,7 +151,7 @@ function updateCancelReasonForm() {
   detailEl.hidden = !showDetail;
   detailEl.required = showDetail;
   penaltyBox.hidden = false;
-  penaltyBox.textContent = formatPenaltyLine(opt.penalty);
+  penaltyBox.textContent = formatPenaltyLine(opt);
   if (opt.requiresAgreement) {
     agreeLabel.hidden = false;
     agreeText.textContent =
@@ -169,8 +175,8 @@ function closeCancelModal() {
 }
 
 async function openCancelModal(ctx) {
-  const { matchId, action, phase, title, lead } = ctx;
-  const json = await API.cancelOptions(action, phase);
+  const { matchId, action, phase, title, lead, agreedPriceClp } = ctx;
+  const json = await API.cancelOptions(action, phase, agreedPriceClp);
   if (!json.ok || !json.data?.length) {
     alert(json.error || 'No hay motivos disponibles para esta acción.');
     return;
@@ -178,9 +184,17 @@ async function openCancelModal(ctx) {
   cancelModalCtx = ctx;
   cancelReasonOptions = json.data;
   $('cancel-modal-title').textContent = title;
-  $('cancel-modal-lead').textContent = lead;
+  const stageLine = json.phase_label ? `Etapa: ${json.phase_label}. ` : '';
+  $('cancel-modal-lead').textContent = lead || '';
+  const badge = $('cancel-stage-badge');
+  if (badge && json.phase_label) {
+    badge.hidden = false;
+    badge.textContent = `Etapa actual: ${json.phase_label}`;
+  } else if (badge) badge.hidden = true;
   const sel = $('cancel-reason-code');
-  sel.innerHTML = json.data.map((o) => `<option value="${o.code}">${o.label}</option>`).join('');
+  sel.innerHTML = json.data
+    .map((o) => `<option value="${o.code}">${o.label_short || o.label}</option>`)
+    .join('');
   $('cancel-reason-detail').value = '';
   $('cancel-agreement').checked = false;
   updateCancelReasonForm();
@@ -227,21 +241,22 @@ async function submitCancelModal(e) {
   }
 }
 
-function runMatchCancel(matchId, action, phase) {
+function runMatchCancel(matchId, action, phase, agreedPriceClp) {
   const titles = {
     withdraw: 'Retirar propuesta',
     reject: 'Rechazar propuesta',
     cancel: 'Cancelar emparejamiento',
   };
   const leads = {
-    withdraw: 'La carga seguirá publicada. Elige un motivo (sin cobro automático).',
-    reject: 'La oferta seguirá publicada para otras cargas.',
-    cancel: 'Se liberan carga y oferta. Algunos motivos incluyen multa sugerida por acuerdo.',
+    withdraw: 'Elige un motivo de la lista.',
+    reject: 'Elige un motivo de la lista.',
+    cancel: 'Elige un motivo. La multa depende de la etapa y del motivo.',
   };
   openCancelModal({
     matchId,
     action,
     phase,
+    agreedPriceClp,
     title: titles[action] || 'Cancelar',
     lead: leads[action] || '',
   });
@@ -573,12 +588,13 @@ $('list-matches').addEventListener('click', async (e) => {
     runChangeOffer(id, btn.dataset.loadId);
     return;
   }
+  const price = btn.dataset.price ? Number(btn.dataset.price) : null;
   if (action === 'withdraw' || action === 'reject') {
-    runMatchCancel(id, action, 'proposed');
+    runMatchCancel(id, action, btn.dataset.phase || 'proposed', price);
     return;
   }
   if (action === 'cancel') {
-    runMatchCancel(id, 'cancel', btn.dataset.phase);
+    runMatchCancel(id, 'cancel', btn.dataset.phase, price);
     return;
   }
   const map = { accept: 'accepted', progress: 'in_progress', complete: 'completed' };

@@ -563,6 +563,16 @@ select.offer-picked {
   margin: 0 0 0.5rem;
 }
 
+.cancel-stage-badge {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-hover);
+  margin: 0 0 0.75rem;
+  padding: 0.35rem 0.5rem;
+  background: var(--accent-soft);
+  border-radius: 6px;
+}
+
 .cancel-modal-card select,
 .cancel-modal-card textarea {
   width: 100%;

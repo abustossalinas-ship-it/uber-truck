@@ -39,6 +39,8 @@ const Auth = {
       btn.textContent = 'Ingresar';
       if (btnReg) btnReg.hidden = false;
     }
+    if (typeof renderBoardActor === 'function') renderBoardActor();
+    if (typeof refreshBoard === 'function') refreshBoard();
   },
 };
 

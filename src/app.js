@@ -40,7 +40,7 @@ app.get('/health', async (_req, res) => {
     service: 'uber-truck',
     version: pkg.version,
     build: process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) || process.env.GIT_COMMIT || 'local',
-    ui: 'match-flow-v3',
+    ui: 'match-cancel-v1',
     storage: repo.backend(),
     supabase: {
       project_ref: projectRef || 'ljinhegtywixtbzjgjfn',

@@ -6,7 +6,7 @@
   <meta name="theme-color" content="#F26522" />
   <title>Uber Truck — Inteligencia en movimiento</title>
   <link rel="icon" href="/brand/logo.png" type="image/png" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.4" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.5" />
 </head>
 <body>
   <header class="site-header">
@@ -257,6 +257,14 @@
       <div class="card" style="margin-bottom:1.25rem">
         <h2>Proponer emparejamiento</h2>
         <p id="board-hint" class="muted" hidden></p>
+        <div id="board-actor" class="board-actor" hidden>
+          <label for="demo-actor-role">Actuar como (demo sin login)</label>
+          <select id="demo-actor-role">
+            <option value="shipper">Embarcador — publica carga</option>
+            <option value="carrier">Transportista — oferta capacidad</option>
+          </select>
+        </div>
+        <p id="active-proposal-banner" class="active-proposal-banner" hidden></p>
         <form id="form-match" class="match-form" novalidate>
           <p class="step-label">Paso 1 — Elige la carga</p>
           <label>Carga</label>
@@ -291,8 +299,8 @@
 
   <footer class="site-footer">Uber Truck · Maps + cubicación · docs/MAPS.md</footer>
 
-  <script src="/maps-ui.js?v=0.0.4"></script>
-  <script src="/auth-ui.js?v=0.0.4"></script>
-  <script src="/app.js?v=0.0.4"></script>
+  <script src="/maps-ui.js?v=0.0.5"></script>
+  <script src="/auth-ui.js?v=0.0.5"></script>
+  <script src="/app.js?v=0.0.5"></script>
 </body>
 </html>

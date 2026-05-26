@@ -16,11 +16,11 @@ const API = {
     fetch('/api/capacity-offers', { method: 'POST', headers: apiHeaders(), body: JSON.stringify(body) }),
   postMatch: (body) =>
     fetch('/api/matches', { method: 'POST', headers: apiHeaders(), body: JSON.stringify(body) }),
-  patchMatch: (id, status) =>
+  patchMatch: (id, body) =>
     fetch(`/api/matches/${id}/status`, {
       method: 'PATCH',
       headers: apiHeaders(),
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ actor_role: getActorRole(), ...body }),
     }),
   seedDemo: (key) =>
     fetch('/api/demo/seed', {
@@ -42,8 +42,124 @@ const STATUS_LABEL = {
   cancelled: 'Cancelado',
 };
 
+const CANCEL_ACTION_LABEL = {
+  withdraw: 'Retirada',
+  reject: 'Rechazada',
+  cancel: 'Cancelada',
+};
+
 function $(id) {
   return document.getElementById(id);
+}
+
+function getActorRole() {
+  if (typeof Auth !== 'undefined' && Auth.user?.role) return Auth.user.role;
+  return $('demo-actor-role')?.value || 'shipper';
+}
+
+function renderBoardActor() {
+  const box = $('board-actor');
+  if (!box) return;
+  box.hidden = Boolean(typeof Auth !== 'undefined' && Auth.user);
+}
+
+function buildMatchActions(m) {
+  const role = getActorRole() === 'carrier' ? 'carrier' : 'shipper';
+  if (m.status === 'cancelled') {
+    const parts = [];
+    if (m.cancel_action) parts.push(CANCEL_ACTION_LABEL[m.cancel_action] || m.cancel_action);
+    if (m.cancel_reason) parts.push(m.cancel_reason);
+    if (m.cancelled_by) parts.push(`rol ${m.cancelled_by}`);
+    return parts.length
+      ? `<p class="muted match-cancel-meta">${parts.join(' · ')}</p>`
+      : '';
+  }
+  let html = '';
+  if (m.status === 'proposed') {
+    html += `<button type="button" data-action="accept" data-id="${m.id}">Aceptar</button>`;
+    if (role === 'shipper') {
+      html += `<button type="button" class="btn-secondary" data-action="withdraw" data-id="${m.id}">Retirar propuesta</button>`;
+      html += `<button type="button" class="btn-secondary" data-action="change_offer" data-load-id="${m.load_request_id}" data-offer-id="${m.capacity_offer_id}" data-id="${m.id}">Cambiar oferta</button>`;
+    }
+    if (role === 'carrier') {
+      html += `<button type="button" class="btn-secondary" data-action="reject" data-id="${m.id}">Rechazar</button>`;
+    }
+  }
+  if (m.status === 'accepted') {
+    html += `<button type="button" data-action="progress" data-id="${m.id}">En ruta</button>`;
+    html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="accepted">Cancelar emparejamiento</button>`;
+  }
+  if (m.status === 'in_progress') {
+    html += `<button type="button" data-action="complete" data-id="${m.id}">Cerrar</button>`;
+    html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="in_progress">Cancelar en ejecución</button>`;
+  }
+  return html;
+}
+
+function updateActiveProposalBanner(matches, loadId) {
+  const banner = $('active-proposal-banner');
+  if (!banner) return;
+  const active = (matches || []).filter((m) => m.status === 'proposed' && m.load_request_id === loadId);
+  if (!loadId || active.length === 0) {
+    banner.hidden = true;
+    return;
+  }
+  banner.hidden = false;
+  const names = active
+    .map((m) => m._offerName || 'una oferta')
+    .join(', ');
+  banner.innerHTML = `<strong>Propuesta activa</strong> (${active.length}). Puedes comparar más ofertas, <em>retirar</em> o <em>cambiar oferta</em> en Emparejamientos. ${names ? `Actual: ${names}.` : ''}`;
+}
+
+async function runMatchCancel(matchId, action, phase) {
+  let reason = null;
+  if (action === 'cancel') {
+    const hint =
+      phase === 'in_progress'
+        ? 'Motivo obligatorio (mín. 10 caracteres). El viaje ya estaba en ejecución:'
+        : 'Motivo de cancelación (mín. 5 caracteres):';
+    reason = prompt(hint);
+    if (reason === null) return;
+    if (phase === 'in_progress') {
+      const ok = confirm(
+        '¿Confirmas cancelar un emparejamiento en ejecución? La carga y la oferta volverán a publicarse.'
+      );
+      if (!ok) return;
+    }
+  }
+  const res = await API.patchMatch(matchId, { status: 'cancelled', action, reason });
+  const json = await res.json();
+  if (!res.ok) {
+    alert(json.error || 'No se pudo completar la acción');
+    return;
+  }
+  alert(json.message || 'Listo');
+  stickyMatchOfferId = null;
+  refreshBoard();
+}
+
+async function runChangeOffer(matchId, loadId, offerId) {
+  const ok = confirm(
+    '¿Retirar la propuesta actual y elegir otra oferta? La carga seguirá publicada para comparar el abanico.'
+  );
+  if (!ok) return;
+  const res = await API.patchMatch(matchId, { status: 'cancelled', action: 'withdraw' });
+  const json = await res.json();
+  if (!res.ok) {
+    alert(json.error || 'Error');
+    return;
+  }
+  stickyMatchLoadId = loadId;
+  stickyMatchOfferId = null;
+  await refreshBoard();
+  if (loadId) {
+    $('match-load').value = loadId;
+    loadSuggestionsFor(loadId);
+    $('match-offer').value = '';
+    $('match-offer')?.focus();
+    $('form-match')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    alert('Propuesta retirada. Elige otra oferta en el Paso 2 o usa una sugerencia.');
+  }
 }
 
 let boardRefreshGen = 0;
@@ -129,10 +245,16 @@ async function refreshBoard() {
   const loadById = Object.fromEntries((loads.data || []).map((l) => [l.id, l]));
   const offerById = Object.fromEntries((offers.data || []).map((o) => [o.id, o]));
 
+  const matchRows = matches.data || [];
+  matchRows.forEach((m) => {
+    const offer = offerById[m.capacity_offer_id];
+    if (offer) m._offerName = offer.carrier_name;
+  });
+
   $('list-matches').innerHTML =
-    matches.data?.length === 0
+    matchRows.length === 0
       ? '<p class="muted">Sin emparejamientos aún.</p>'
-      : matches.data
+      : matchRows
           .map((m) => {
             const load = loadById[m.load_request_id];
             const offer = offerById[m.capacity_offer_id];
@@ -140,20 +262,13 @@ async function refreshBoard() {
               load && offer
                 ? `${load.company_name} ↔ ${offer.carrier_name}`
                 : `Carga · Oferta`;
-            const actions =
-              m.status === 'proposed'
-                ? `<button type="button" data-action="accept" data-id="${m.id}">Aceptar</button>`
-                : m.status === 'accepted'
-                  ? `<button type="button" data-action="progress" data-id="${m.id}">En ruta</button>`
-                  : m.status === 'in_progress'
-                    ? `<button type="button" data-action="complete" data-id="${m.id}">Cerrar</button>`
-                    : '';
+            const actions = buildMatchActions(m);
             return `
-      <article class="item match-item">
+      <article class="item match-item" data-match-id="${m.id}">
         <strong>${title}</strong>
         <span class="pill">${STATUS_LABEL[m.status] || m.status}</span>
         ${m.agreed_price_clp ? `<p>$${Number(m.agreed_price_clp).toLocaleString('es-CL')} CLP</p>` : ''}
-        <div class="actions">${actions}</div>
+        <div class="actions match-actions">${actions}</div>
       </article>`;
           })
           .join('');
@@ -201,8 +316,10 @@ async function refreshBoard() {
       );
     }
   }
+  updateActiveProposalBanner(matchRows, loadSel.value);
   loadSuggestionsFor(loadSel.value);
   showMatchReady();
+  renderBoardActor();
 }
 
 async function loadSuggestionsFor(loadId) {
@@ -331,20 +448,36 @@ $('form-match').addEventListener('submit', async (e) => {
 $('list-matches').addEventListener('click', async (e) => {
   const btn = e.target.closest('button[data-action]');
   if (!btn) return;
+  const id = btn.dataset.id;
+  const action = btn.dataset.action;
+  if (action === 'change_offer') {
+    await runChangeOffer(id, btn.dataset.loadId, btn.dataset.offerId);
+    return;
+  }
+  if (action === 'withdraw' || action === 'reject') {
+    await runMatchCancel(id, action, null);
+    return;
+  }
+  if (action === 'cancel') {
+    await runMatchCancel(id, 'cancel', btn.dataset.phase);
+    return;
+  }
   const map = { accept: 'accepted', progress: 'in_progress', complete: 'completed' };
-  const res = await API.patchMatch(btn.dataset.id, map[btn.dataset.action]);
+  const res = await API.patchMatch(id, { status: map[action] });
   const json = await res.json();
   if (!res.ok) alert(json.error || 'Error');
-  refreshBoard();
+  else refreshBoard();
 });
+
+$('demo-actor-role')?.addEventListener('change', () => refreshBoard());
 
 fetch('/health')
   .then((r) => r.json())
   .then((h) => {
     const el = document.getElementById('storage-badge');
     if (!el) return;
-    if (h.ui === 'match-flow-v3' || h.ui === 'match-flow-v2') {
-      el.textContent = `v${h.version || '?'} · emparejar mejorado`;
+    if (h.ui === 'match-cancel-v1' || h.ui === 'match-flow-v3' || h.ui === 'match-flow-v2') {
+      el.textContent = `v${h.version || '?'} · emparejar + cancelar`;
     } else if (h.storage === 'supabase' && h.supabase?.connected) {
       el.textContent = 'Conectado a Supabase (actualiza deploy)';
     } else if (h.storage === 'supabase') {
@@ -407,4 +540,8 @@ document.getElementById('btn-seed-demo')?.addEventListener('click', async () => 
   showTab('board');
 });
 
+window.renderBoardActor = renderBoardActor;
+window.refreshBoard = refreshBoard;
+
+renderBoardActor();
 showTab('shipper');

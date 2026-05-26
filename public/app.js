@@ -285,8 +285,10 @@ fetch('/health')
   .then((h) => {
     const el = document.getElementById('storage-badge');
     if (!el) return;
-    if (h.storage === 'supabase' && h.supabase?.connected) {
-      el.textContent = 'Conectado a Supabase';
+    if (h.ui === 'match-flow-v2') {
+      el.textContent = `v${h.version || '?'} · emparejar mejorado`;
+    } else if (h.storage === 'supabase' && h.supabase?.connected) {
+      el.textContent = 'Conectado a Supabase (actualiza deploy)';
     } else if (h.storage === 'supabase') {
       el.textContent = 'Supabase configurado (revisar conexión)';
     }

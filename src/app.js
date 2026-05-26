@@ -1,10 +1,17 @@
 const path = require('path');
 const express = require('express');
+const pkg = require('../package.json');
 
 const app = express();
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, '..', 'public')));
+
+const publicDir = path.join(__dirname, '..', 'public');
+app.get('/', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.sendFile(path.join(publicDir, 'index.html'));
+});
+app.use(express.static(publicDir));
 app.use('/docs', express.static(path.join(__dirname, '..', 'docs')));
 
 const supabaseService = require('./services/supabase');
@@ -31,6 +38,9 @@ app.get('/health', async (_req, res) => {
   res.json({
     ok: true,
     service: 'uber-truck',
+    version: pkg.version,
+    build: process.env.RAILWAY_GIT_COMMIT_SHA?.slice(0, 7) || process.env.GIT_COMMIT || 'local',
+    ui: 'match-flow-v2',
     storage: repo.backend(),
     supabase: {
       project_ref: projectRef || 'ljinhegtywixtbzjgjfn',

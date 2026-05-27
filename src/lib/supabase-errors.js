@@ -6,11 +6,15 @@ function mapDbError(e, context) {
   const msg = e?.message || String(e);
   const ctx = context || 'operación';
 
-  if (code === '42P01' || /relation ["']?match_ratings["']? does not exist/i.test(msg)) {
+  if (
+    code === '42P01' ||
+    /relation ["']?match_ratings["']? does not exist/i.test(msg) ||
+    /column ["']?tags["']?/i.test(msg)
+  ) {
     return {
       status: 503,
       error:
-        'La tabla match_ratings no está visible para la API. En Supabase: confirma migración 012 en el mismo proyecto que Railway (ref en /health), luego Settings → API → Reload schema (o espera 1–2 min).',
+        'Calificaciones no disponibles en la API. En Supabase ejecuta migraciones 012 y 013, luego Settings → API → Reload schema (o espera 1–2 min).',
     };
   }
   if (code === '23505' && /match_ratings/i.test(msg)) {

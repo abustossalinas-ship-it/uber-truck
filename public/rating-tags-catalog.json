@@ -1,0 +1,41 @@
+{
+  "shipper": {
+    "negative": [
+      { "id": "late", "label": "Llegó muy tarde / fuera de ventana" },
+      { "id": "poor_comm", "label": "Comunicación deficiente" },
+      { "id": "cargo_care", "label": "Cuidado deficiente de la carga" },
+      { "id": "breach", "label": "Incumplió lo acordado (ruta, cubicación, docs)" },
+      { "id": "docs", "label": "Problemas con guía o documentación" },
+      { "id": "cancel_change", "label": "Canceló o cambió condiciones sin aviso" },
+      { "id": "pricing", "label": "Precio o cobros poco transparentes" }
+    ],
+    "positive": [
+      { "id": "on_time", "label": "Puntual y confiable" },
+      { "id": "good_comm", "label": "Buena comunicación" },
+      { "id": "cargo_ok", "label": "Cuidó bien la mercadería" },
+      { "id": "route_ok", "label": "Cumplió ruta y tiempos" },
+      { "id": "docs_ok", "label": "Documentación en orden" },
+      { "id": "fair_price", "label": "Precio justo según lo acordado" },
+      { "id": "repeat", "label": "Volvería a contratar" }
+    ]
+  },
+  "carrier": {
+    "negative": [
+      { "id": "not_ready", "label": "Carga no lista a tiempo en origen" },
+      { "id": "wrong_data", "label": "Datos de carga incorrectos" },
+      { "id": "long_wait", "label": "Esperas largas en carga o descarga" },
+      { "id": "poor_comm", "label": "Comunicación deficiente" },
+      { "id": "last_minute", "label": "Cambios de último minuto" },
+      { "id": "payment", "label": "Problemas de pago o acuerdos" },
+      { "id": "unfair_cancel", "label": "Cancelación injusta o sin aviso" }
+    ],
+    "positive": [
+      { "id": "ready_load", "label": "Carga lista y bien descrita" },
+      { "id": "on_time_site", "label": "Puntual en carga y descarga" },
+      { "id": "good_comm", "label": "Buena comunicación" },
+      { "id": "respect_time", "label": "Respetó tiempos acordados" },
+      { "id": "clear_pay", "label": "Pago y acuerdo claros" },
+      { "id": "repeat", "label": "Volvería a tomar su flete" }
+    ]
+  }
+}

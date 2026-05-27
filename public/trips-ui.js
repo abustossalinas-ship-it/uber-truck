@@ -48,9 +48,22 @@ function formatReputation(rep) {
   return `${avg} ★ · ${n} viaje${n === 1 ? '' : 's'}`;
 }
 
-function ratingLine(label, rating, pendingText) {
+function formatRatingTags(role, rating) {
+  if (!rating?.tags?.length || typeof RatingTags === 'undefined' || !RatingTags.catalog) {
+    return '';
+  }
+  const labels = rating.tags
+    .slice(0, 4)
+    .map((id) => RatingTags.labelFor(role, id))
+    .join(' · ');
+  const more = rating.tags.length > 4 ? ` (+${rating.tags.length - 4})` : '';
+  return `<span class="trip-rating-tags">${labels}${more}</span>`;
+}
+
+function ratingLine(label, rating, pendingText, roleForTags) {
   if (rating?.stars) {
-    return `<p class="trip-rating-line"><span class="trip-rating-label">${label}</span> ${renderStars(rating.stars)} <span class="muted">(${rating.stars}/5)</span></p>`;
+    const tagsHtml = roleForTags ? formatRatingTags(roleForTags, rating) : '';
+    return `<p class="trip-rating-line"><span class="trip-rating-label">${label}</span> ${renderStars(rating.stars)} <span class="muted">(${rating.stars}/5)</span>${tagsHtml ? `<br>${tagsHtml}` : ''}</p>`;
   }
   return `<p class="trip-rating-line muted"><span class="trip-rating-label">${label}</span> ${pendingText}</p>`;
 }
@@ -75,8 +88,8 @@ function buildTripRatingsBlock(m, role, counterpartyName) {
   return `
     <div class="trip-ratings-box">
       <p class="trip-ratings-heading">Calificaciones del viaje</p>
-      ${ratingLine(myLabel, myR, 'Pendiente — aún no calificas')}
-      ${ratingLine(theirLabel, theirR, 'La otra parte aún no califica')}
+      ${ratingLine(myLabel, myR, 'Pendiente — aún no calificas', role)}
+      ${ratingLine(theirLabel, theirR, 'La otra parte aún no califica', role === 'shipper' ? 'carrier' : 'shipper')}
       <p class="trip-rating-line trip-reputation-line"><span class="trip-rating-label">${repLabel}</span> <strong>${formatReputation(m.counterparty_reputation)}</strong></p>
     </div>`;
 }
@@ -120,6 +133,10 @@ function updateActiveTripBanner(matches, loadById, offerById) {
 function renderTripsList(matches, loadById, offerById) {
   const el = document.getElementById('list-trips');
   if (!el) return;
+  if (typeof RatingTags !== 'undefined' && !RatingTags.catalog) {
+    RatingTags.loadCatalog().then(() => renderTripsList(matches, loadById, offerById));
+    return;
+  }
   const role =
     typeof getActorRole === 'function' && getActorRole() === 'carrier' ? 'carrier' : 'shipper';
   const sorted = [...(matches || [])].sort(
@@ -210,6 +227,81 @@ function renderTripsList(matches, loadById, offerById) {
 }
 
 let rateModalMatchId = null;
+let rateModalRole = 'shipper';
+
+function getRateStars() {
+  return Number(document.getElementById('rate-stars')?.value || 5);
+}
+
+function setRateStars(n) {
+  const stars = Math.max(1, Math.min(5, Number(n) || 5));
+  const hidden = document.getElementById('rate-stars');
+  if (hidden) hidden.value = String(stars);
+  document.querySelectorAll('.rate-star-btn').forEach((btn) => {
+    const v = Number(btn.dataset.star);
+    btn.classList.toggle('active', v <= stars);
+  });
+  return stars;
+}
+
+function renderRateTags() {
+  const wrap = document.getElementById('rate-tags');
+  if (!wrap || typeof RatingTags === 'undefined') return;
+  const stars = getRateStars();
+  const list = RatingTags.tagsForRole(rateModalRole, stars);
+  wrap.innerHTML = list
+    .map(
+      (t) =>
+        `<button type="button" class="rate-tag-chip${RatingTags.selected.has(t.id) ? ' selected' : ''}" data-tag-id="${t.id}">${t.label}</button>`
+    )
+    .join('');
+}
+
+function updateRateFormState() {
+  const stars = getRateStars();
+  const hint = document.getElementById('rate-tags-hint');
+  const badge = document.getElementById('rate-tags-badge');
+  const commentLabel = document.getElementById('rate-comment-label');
+  const comment = document.getElementById('rate-comment');
+  const submit = document.getElementById('rate-submit-btn');
+
+  if (stars <= 3) {
+    if (hint) hint.textContent = 'Selecciona al menos una opción';
+    if (badge) badge.hidden = stars > 2;
+  } else if (hint) {
+    hint.textContent = 'Opcional: destaca lo que salió bien';
+  }
+  if (badge) badge.hidden = stars >= 4;
+
+  if (commentLabel) {
+    commentLabel.textContent =
+      stars <= 2 ? 'Comentario (obligatorio)' : 'Comentario (opcional)';
+  }
+  if (comment) {
+    comment.placeholder =
+      stars <= 2
+        ? 'Cuéntanos qué podría haber salido mejor…'
+        : stars === 3
+          ? '¿Qué fue regular? (opcional)'
+          : 'Comparte detalles para ayudar a otros en la red…';
+    comment.required = stars <= 2;
+  }
+
+  if (submit) {
+    const errs =
+      typeof RatingTags !== 'undefined'
+        ? RatingTags.validate(rateModalRole, stars, comment?.value || '')
+        : [];
+    submit.disabled = errs.length > 0;
+  }
+}
+
+function onRateStarsChange(stars) {
+  if (typeof RatingTags !== 'undefined') RatingTags.clearSelected();
+  setRateStars(stars);
+  renderRateTags();
+  updateRateFormState();
+}
 
 function showRateError(message) {
   const el = document.getElementById('rate-error');
@@ -246,11 +338,18 @@ function openRateModal(matchId, rateTarget) {
         : 'Tu nota (1 a 5) queda en la reputación pública del embarcador. Ellos también pueden calificarte en este viaje.';
   }
   clearRateError();
-  document.getElementById('rate-stars').value = '5';
+  rateModalRole = role;
+  if (typeof RatingTags !== 'undefined') {
+    RatingTags.clearSelected();
+    RatingTags.loadCatalog().then(() => {
+      onRateStarsChange(5);
+    });
+  } else {
+    onRateStarsChange(5);
+  }
   document.getElementById('rate-comment').value = '';
-  const submit = document.querySelector('#form-rate button[type="submit"]');
+  const submit = document.getElementById('rate-submit-btn');
   if (submit) {
-    submit.disabled = false;
     submit.textContent = 'Enviar calificación';
   }
   modal.hidden = false;
@@ -277,14 +376,27 @@ async function submitRateModal(e) {
     submitBtn.disabled = true;
     submitBtn.textContent = 'Enviando…';
   }
-  const stars = document.getElementById('rate-stars').value;
+  const stars = getRateStars();
   const comment = document.getElementById('rate-comment').value;
   const matchId = rateModalMatchId;
+  const clientErrors =
+    typeof RatingTags !== 'undefined'
+      ? RatingTags.validate(rateModalRole, stars, comment)
+      : [];
+  if (clientErrors.length) {
+    showRateError(clientErrors.join(' '));
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = prevLabel || 'Enviar calificación';
+    }
+    return;
+  }
+  const tags = typeof RatingTags !== 'undefined' ? RatingTags.selectedIds() : [];
   try {
     const res = await fetch(`/api/matches/${matchId}/rate`, {
       method: 'POST',
       headers: typeof Auth !== 'undefined' ? Auth.headers() : { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ stars: Number(stars), comment }),
+      body: JSON.stringify({ stars, comment, tags }),
     });
     let json = {};
     try {
@@ -303,6 +415,7 @@ async function submitRateModal(e) {
         return;
       }
       showRateError(msg);
+      updateRateFormState();
       return;
     }
     markRatedMatchId(matchId);
@@ -325,9 +438,27 @@ window.updateActiveTripBanner = updateActiveTripBanner;
 window.renderTripsList = renderTripsList;
 window.openRateModal = openRateModal;
 
-document.addEventListener('DOMContentLoaded', () => {
+function initRateModalUi() {
+  document.getElementById('rate-stars-picker')?.addEventListener('click', (e) => {
+    const btn = e.target.closest('.rate-star-btn');
+    if (!btn) return;
+    onRateStarsChange(Number(btn.dataset.star));
+  });
+  document.getElementById('rate-tags')?.addEventListener('click', (e) => {
+    const chip = e.target.closest('.rate-tag-chip');
+    if (!chip || typeof RatingTags === 'undefined') return;
+    const id = chip.dataset.tagId;
+    if (RatingTags.selected.has(id)) RatingTags.selected.delete(id);
+    else RatingTags.selected.add(id);
+    chip.classList.toggle('selected');
+    updateRateFormState();
+  });
+  document.getElementById('rate-comment')?.addEventListener('input', updateRateFormState);
   document.getElementById('form-rate')?.addEventListener('submit', submitRateModal);
   document.querySelectorAll('[data-close-rate]').forEach((el) => {
     el.addEventListener('click', closeRateModal);
   });
-});
+  if (typeof RatingTags !== 'undefined') RatingTags.loadCatalog();
+}
+
+document.addEventListener('DOMContentLoaded', initRateModalUi);

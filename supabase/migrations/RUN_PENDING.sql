@@ -44,3 +44,8 @@ CREATE TABLE IF NOT EXISTS match_ratings (
 );
 
 CREATE INDEX IF NOT EXISTS idx_match_ratings_match ON match_ratings (match_id);
+
+-- 013 — Chips de calificación (tags estilo Uber)
+ALTER TABLE match_ratings
+  ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}',
+  ADD COLUMN IF NOT EXISTS tag_band TEXT CHECK (tag_band IN ('low', 'mid', 'high'));

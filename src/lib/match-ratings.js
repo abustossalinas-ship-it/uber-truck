@@ -2,14 +2,10 @@
 
 const { normalizeRole } = require('./match-cancel');
 
-function validateRating(body) {
-  const stars = Number(body?.stars);
-  if (!Number.isInteger(stars) || stars < 1 || stars > 5) {
-    return ['stars: indica una calificación de 1 a 5'];
-  }
-  const comment = body?.comment?.trim?.() || '';
-  if (comment.length > 500) return ['comment: máximo 500 caracteres'];
-  return [];
+const { validateRatingPayload } = require('./rating-tags');
+
+function validateRating(raterRole, body) {
+  return validateRatingPayload(raterRole, body || {});
 }
 
 function pushScore(bucket, userId, stars) {
@@ -60,7 +56,12 @@ function pickRep(repIndex, role, userId) {
 
 function ratingRow(r) {
   if (!r) return null;
-  return { stars: r.stars, comment: r.comment || null };
+  return {
+    stars: r.stars,
+    comment: r.comment || null,
+    tags: Array.isArray(r.tags) ? r.tags : [],
+    tag_band: r.tag_band || null,
+  };
 }
 
 async function enrichMatchesWithRatings(repo, matches, user) {

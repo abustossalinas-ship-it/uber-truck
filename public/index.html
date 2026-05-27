@@ -518,17 +518,25 @@
       <p id="rate-modal-lead" class="muted">Calificas a la otra parte en este viaje (1 a 5). La reputación pública se calcula con el promedio de todos los viajes.</p>
       <form id="form-rate">
         <p id="rate-error" class="auth-error" role="alert" hidden></p>
-        <label for="rate-stars">Estrellas</label>
-        <select id="rate-stars" required>
-          <option value="5">★★★★★ Excelente</option>
-          <option value="4">★★★★☆ Muy bien</option>
-          <option value="3">★★★☆☆ Bien</option>
-          <option value="2">★★☆☆☆ Regular</option>
-          <option value="1">★☆☆☆☆ Malo</option>
-        </select>
-        <label for="rate-comment">Comentario (opcional)</label>
-        <textarea id="rate-comment" rows="2" maxlength="500" placeholder="Puntualidad, comunicación, cuidado de la carga…"></textarea>
-        <button type="submit">Enviar calificación</button>
+        <label>Estrellas</label>
+        <div id="rate-stars-picker" class="rate-stars-picker" role="group" aria-label="Calificación de 1 a 5 estrellas">
+          <button type="button" class="rate-star-btn" data-star="1" aria-label="1 estrella">★</button>
+          <button type="button" class="rate-star-btn" data-star="2" aria-label="2 estrellas">★</button>
+          <button type="button" class="rate-star-btn" data-star="3" aria-label="3 estrellas">★</button>
+          <button type="button" class="rate-star-btn" data-star="4" aria-label="4 estrellas">★</button>
+          <button type="button" class="rate-star-btn active" data-star="5" aria-label="5 estrellas">★</button>
+        </div>
+        <input type="hidden" id="rate-stars" name="stars" value="5" />
+        <div id="rate-tags-section" class="rate-tags-section">
+          <div class="rate-tags-head">
+            <p id="rate-tags-hint" class="rate-tags-hint">Selecciona al menos una opción</p>
+            <span id="rate-tags-badge" class="rate-required-badge" hidden>Obligatorio</span>
+          </div>
+          <div id="rate-tags" class="rate-tags"></div>
+        </div>
+        <label for="rate-comment" id="rate-comment-label">Comentario (opcional)</label>
+        <textarea id="rate-comment" rows="3" maxlength="500" placeholder="Comparte detalles para ayudar a otros en la red…"></textarea>
+        <button type="submit" id="rate-submit-btn">Enviar calificación</button>
         <button type="button" class="btn-secondary" data-close-rate>Después</button>
       </form>
     </div>
@@ -542,7 +550,8 @@
   <script src="/auth-ui.js?v=0.0.20"></script>
   <script src="/penalties-ui.js?v=0.0.19"></script>
   <script src="/comms-ui.js?v=0.0.19"></script>
-  <script src="/trips-ui.js?v=0.0.30"></script>
+  <script src="/rating-tags.js?v=0.0.31"></script>
+  <script src="/trips-ui.js?v=0.0.31"></script>
   <script src="/app.js?v=0.0.27"></script>
 </body>
 </html>

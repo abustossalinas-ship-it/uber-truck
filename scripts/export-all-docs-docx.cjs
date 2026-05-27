@@ -21,6 +21,8 @@ const PACK = [
   { html: 'docs/Multas-Cuenta-Uber-Truck.html', out: 'docs/Multas-Cuenta-Uber-Truck.docx', copy: 'Multas-Cuenta-Uber-Truck.docx', title: 'Multas y cuenta' },
   { html: 'docs/Sql-Supabase-Uber-Truck.html', out: 'docs/Sql-Supabase-Uber-Truck.docx', copy: 'Sql-Supabase-Uber-Truck.docx', title: 'SQL Supabase' },
   { html: 'docs/Probar-Uber-Truck.html', out: 'docs/Probar-Uber-Truck.docx', copy: 'Probar-Uber-Truck.docx', title: 'Cómo probar Uber Truck' },
+  { html: 'docs/Piloto-M2-Corredor-KPIs-Riesgos.html', out: 'docs/Piloto-M2-Corredor-KPIs-Riesgos.docx', copy: 'Piloto-M2-Corredor-KPIs-Riesgos.docx', title: 'Piloto M2 — corredor, KPIs y riesgos' },
+  { html: 'docs/Terminos-Confianza-Carga-Uber-Truck.html', out: 'docs/Terminos-Confianza-Carga-Uber-Truck.docx', copy: 'Terminos-Confianza-Carga-Uber-Truck.docx', title: 'Términos de confianza y carga' },
 ];
 
 async function main() {

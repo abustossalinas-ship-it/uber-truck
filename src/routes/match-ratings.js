@@ -60,18 +60,33 @@ router.post('/:id/rate', optionalAuth, requireAuthIfDb, async (req, res) => {
       stars: rating.stars,
       comment: rating.comment,
     };
-    let row = await repo.insert('match_ratings', baseRow);
+    const baseSelect =
+      'id, match_id, rater_role, rater_user_id, stars, comment, created_at';
+    const { data: inserted, error: insErr } = await sb
+      .from('match_ratings')
+      .insert(baseRow)
+      .select(baseSelect)
+      .single();
+    if (insErr) throw insErr;
+
+    let row = inserted;
     let tagsSaved = !(rating.tags && rating.tags.length);
     if (rating.tags?.length) {
-      try {
-        row = await repo.update('match_ratings', row.id, {
+      const { data: updated, error: upErr } = await sb
+        .from('match_ratings')
+        .update({
           tags: rating.tags,
           tag_band: rating.tag_band,
-        });
-        tagsSaved = true;
-      } catch (tagErr) {
-        console.error('match_ratings tags update:', tagErr.message || tagErr);
+        })
+        .eq('id', row.id)
+        .select(`${baseSelect}, tags, tag_band`)
+        .single();
+      if (upErr) {
+        console.error('match_ratings tags update:', upErr.message || upErr);
         tagsSaved = false;
+      } else {
+        row = updated;
+        tagsSaved = true;
       }
     } else {
       tagsSaved = true;

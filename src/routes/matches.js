@@ -439,4 +439,6 @@ function cancelMessage(action) {
   return 'Emparejamiento cancelado. Carga y oferta liberadas. Revisa multa sugerida si aplica.';
 }
 
+router.use(require('./match-incidents'));
+
 module.exports = router;

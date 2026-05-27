@@ -95,8 +95,19 @@ WHERE table_schema = 'public' AND table_name IN ('match_messages', 'match_notifi
 
 ---
 
+## 011 — Confianza y carga
+
+Ejecutar `supabase/migrations/011_cargo_trust.sql` (o el bloque homónimo en `RUN_PENDING.sql`).
+
+Campos en `load_requests`: declaración de mercadería, valor referencial CLP, guía de despacho (folio), términos aceptados. Tabla `match_incidents` para reportes en viaje.
+
+Ver [CARGO-TRUST.md](./CARGO-TRUST.md) y [Terminos-Confianza-Carga-Uber-Truck.html](./Terminos-Confianza-Carga-Uber-Truck.html).
+
+---
+
 ## Referencias
 
 - [01-MEMORIA-TECNICA.md](./01-MEMORIA-TECNICA.md)
 - [PENALTIES-AND-ACCOUNTS.md](./PENALTIES-AND-ACCOUNTS.md)
 - [MATCH-CANCEL-POLICY.md](./MATCH-CANCEL-POLICY.md)
+- [CARGO-TRUST.md](./CARGO-TRUST.md)

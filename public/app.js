@@ -52,6 +52,12 @@ const API = {
       headers: apiHeaders(),
       body: JSON.stringify({ budget_min_clp, budget_max_clp }),
     }).then((r) => r.json()),
+  postIncident: (matchId, body) =>
+    fetch(`/api/matches/${matchId}/incidents`, {
+      method: 'POST',
+      headers: apiHeaders(),
+      body: JSON.stringify(body),
+    }).then((r) => r.json()),
   seedDemo: (key) =>
     fetch('/api/demo/seed', {
       method: 'POST',
@@ -90,6 +96,23 @@ function getActorRole() {
 function getActorRoleLabel() {
   const role = getActorRole();
   return typeof roleLabel === 'function' ? roleLabel(role) : role;
+}
+
+function formatCargoTrustLine(l) {
+  if (!l) return '';
+  const desc = l.cargo_description || l.cargo_type;
+  const val =
+    l.declared_cargo_value_clp != null
+      ? `$${Number(l.declared_cargo_value_clp).toLocaleString('es-CL')}`
+      : '';
+  if (!desc && !val) return '';
+  const guide = l.has_dispatch_guide
+    ? l.dispatch_guide_folio
+      ? `Guía/ref. ${l.dispatch_guide_folio}`
+      : 'Con guía declarada'
+    : 'Sin guía declarada';
+  const ins = l.requires_cargo_insurance ? ' · Seguro solicitado' : '';
+  return `<p class="cargo-trust-line">Mercadería: ${desc || '—'}${val ? ` · Valor ref. ${val}` : ''} · ${guide}${ins}</p>`;
 }
 
 function formatBudgetRange(min, max) {
@@ -226,6 +249,7 @@ function buildMatchActions(m) {
   }
   if (m.status === 'accepted' || m.status === 'in_progress') {
     const title = m._matchTitle || 'Emparejamiento';
+    html += `<button type="button" class="btn-secondary" data-action="report_incident" data-id="${m.id}">Reportar incidente</button>`;
     html += `<button type="button" class="btn-secondary" data-action="chat" data-id="${m.id}" data-title="${title.replace(/"/g, '')}">Chat</button>`;
     if (m.status === 'accepted') {
       html += `<button type="button" data-action="progress" data-id="${m.id}">En ruta</button>`;
@@ -750,7 +774,8 @@ async function refreshBoard() {
         <span class="pill">${STATUS_LABEL[l.status] || l.status}</span>
         <p>${routeLine(l)}</p>
         <p class="muted">${l.pallets ? l.pallets + ' pallets · ' : ''}${l.volume_m3 ? l.volume_m3 + ' m³ · ' : ''}${l.cargo_type || ''}${l.distance_duration_min ? ' · ~' + l.distance_duration_min + ' min' : ''}</p>
-        ${l.budget_min_clp || l.budget_max_clp ? `<p class="muted">Presupuesto: ${formatBudgetRange(l.budget_min_clp, l.budget_max_clp)}</p>` : ''}
+        ${l.budget_min_clp || l.budget_max_clp ? `<p class="muted">Presupuesto flete: ${formatBudgetRange(l.budget_min_clp, l.budget_max_clp)}</p>` : ''}
+        ${formatCargoTrustLine(l)}
       </article>`
           )
           .join('');
@@ -795,11 +820,13 @@ async function refreshBoard() {
             m._matchTitle = title;
             const actions = buildMatchActions(m);
             const mutualBanner = matchMutualBanner(m);
+            const cargoLine = formatCargoTrustLine(load);
         return `
       <article class="item match-item" data-match-id="${m.id}">
         <strong>${title}</strong>
         <span class="pill">${STATUS_LABEL[m.status] || m.status}</span>
         ${mutualBanner}
+        ${cargoLine}
         ${buildMatchPriceBox(m)}
         <div class="actions match-actions">${actions}</div>
       </article>`;
@@ -944,8 +971,15 @@ $('form-load').addEventListener('submit', async (e) => {
     alert(mapsErr);
     return;
   }
-  const body = cleanFormBody(new FormData(e.target));
+  const fd = new FormData(e.target);
+  if (!fd.get('terms_cargo_accepted')) {
+    alert('Debes aceptar los términos de confianza y carga para publicar.');
+    return;
+  }
+  const body = cleanFormBody(fd);
   delete body.cargo_density;
+  body.terms_cargo_accepted = true;
+  if (body.has_dispatch_guide === 'yes') body.has_dispatch_guide = 'yes';
   const res = await API.postLoad(body);
   const json = await res.json();
   if (!res.ok) {
@@ -1054,6 +1088,31 @@ $('list-matches').addEventListener('click', async (e) => {
   if (action === 'chat') {
     const title = btn.dataset.title || '';
     if (typeof Comms !== 'undefined') Comms.openChat(id, title);
+    return;
+  }
+  if (action === 'report_incident') {
+    const type = prompt(
+      'Tipo de incidente:\n1 theft (robo/extravío)\n2 damage (daño)\n3 shortage (faltante)\n4 delay (atraso grave)\n5 other\n\nEscribe el código:',
+      'theft'
+    );
+    if (!type) return;
+    const normalized = type.trim().toLowerCase();
+    const allowed = ['theft', 'damage', 'shortage', 'delay', 'other'];
+    if (!allowed.includes(normalized)) {
+      alert('Tipo no válido. Usa: theft, damage, shortage, delay, other');
+      return;
+    }
+    const description = prompt('Describe qué ocurrió (mín. 10 caracteres):');
+    if (!description || description.trim().length < 10) {
+      alert('Descripción demasiado corta.');
+      return;
+    }
+    const json = await API.postIncident(id, {
+      incident_type: normalized,
+      description: description.trim(),
+    });
+    if (!json.ok) alert(json.error || json.errors?.join('\n') || 'No se pudo registrar');
+    else alert(json.message || 'Incidente registrado');
     return;
   }
   if (action === 'accept_offer') {

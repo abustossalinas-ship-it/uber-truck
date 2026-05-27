@@ -53,7 +53,15 @@ app.get('/health', async (_req, res) => {
     version: pkg.version,
     build: railwaySha.slice(0, 7) || process.env.GIT_COMMIT || 'local',
     ui: 'match-cancel-v2',
-    features: ['cancel-reasons-modal', 'penalty-by-phase', 'mutual-in-cancel-modal', 'chat', 'notifications'],
+    features: [
+      'cancel-reasons-modal',
+      'penalty-by-phase',
+      'mutual-in-cancel-modal',
+      'chat',
+      'notifications',
+      'cargo-trust-declaration',
+      'match-incidents',
+    ],
     deploy_manifest: manifest,
     railway: {
       git_commit_sha: railwaySha || null,

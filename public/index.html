@@ -188,8 +188,34 @@
             <option value="heavy">Pesada — bebidas, construcción (~1200 kg/pallet)</option>
           </select>
           <p class="maps-weight-hint muted">El volumen (m³) y los pallets miden espacio; el peso depende del tipo de mercancía.</p>
-          <label>Tipo de mercancía</label>
+          <label>Tipo de mercancía (categoría)</label>
           <input name="cargo_type" placeholder="Alimentos, retail…" />
+          <h3 class="form-section">Declaración de mercadería</h3>
+          <p class="muted">
+            Uber Truck conecta empresas; <strong>no transporta ni custodia</strong> la carga. Declaras veracidad para
+            seguro y reclamos entre embarcador y transportista.
+          </p>
+          <label>Descripción detallada de la mercadería</label>
+          <textarea name="cargo_description" rows="2" required minlength="8" placeholder="Ej. 12 pallets harina 25 kg/saco, no perecible"></textarea>
+          <label>Valor referencial de la mercadería (CLP)</label>
+          <input name="declared_cargo_value_clp" type="number" min="1000" step="1000" required placeholder="5000000" />
+          <p class="muted">Referencia para seguro y límites entre partes. No es el precio del flete.</p>
+          <label>¿Llevas guía de despacho o factura?</label>
+          <select name="has_dispatch_guide" required>
+            <option value="yes">Sí</option>
+            <option value="no">No / aún sin documento</option>
+          </select>
+          <label>Folio guía o referencia DTE (opcional)</label>
+          <input name="dispatch_guide_folio" maxlength="120" placeholder="Ej. 12345" />
+          <label class="legal-check">
+            <input type="checkbox" name="requires_cargo_insurance" value="1" />
+            Indico interés en seguro de carga (piloto: coordinación manual)
+          </label>
+          <label class="legal-check">
+            <input type="checkbox" name="terms_cargo_accepted" value="1" required />
+            Declaro información veraz y acepto los
+            <a href="/docs/Terminos-Confianza-Carga-Uber-Truck.html" target="_blank" rel="noopener">términos de confianza y carga</a>.
+          </label>
           <label>Urgencia</label>
           <select name="urgency">
             <option value="normal">Normal</option>
@@ -481,6 +507,6 @@
   <script src="/auth-ui.js?v=0.0.19"></script>
   <script src="/penalties-ui.js?v=0.0.19"></script>
   <script src="/comms-ui.js?v=0.0.19"></script>
-  <script src="/app.js?v=0.0.25"></script>
+  <script src="/app.js?v=0.0.26"></script>
 </body>
 </html>

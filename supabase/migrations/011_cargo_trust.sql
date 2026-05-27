@@ -1,7 +1,5 @@
--- Uber Truck — migraciones pendientes (ejecutar en Supabase SQL Editor)
--- Orden: 001_init, 003_auth_password si instalación nueva; luego 004–010 si aplica; luego 011.
+-- 011 — Declaración de mercadería, términos y incidentes en ruta
 
--- 011 — Declaración de mercadería, términos y incidentes
 ALTER TABLE load_requests
   ADD COLUMN IF NOT EXISTS cargo_description TEXT,
   ADD COLUMN IF NOT EXISTS declared_cargo_value_clp BIGINT,

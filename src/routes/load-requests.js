@@ -20,6 +20,7 @@ const {
   outsideRangeMessages,
   suggestReferenceBudget,
 } = require('../lib/match-price');
+const { validateCargoDeclaration, cargoTrustPayload } = require('../lib/cargo-trust');
 
 const router = express.Router();
 
@@ -140,6 +141,8 @@ router.post('/', optionalAuth, requireAuthIfDb, async (req, res) => {
   if (budgetErrors.length) return res.status(400).json({ ok: false, errors: budgetErrors });
   const geoErrors = requireMapsAddresses(body);
   if (geoErrors.length) return res.status(400).json({ ok: false, errors: geoErrors });
+  const cargoErrors = validateCargoDeclaration(body);
+  if (cargoErrors.length) return res.status(400).json({ ok: false, errors: cargoErrors });
   if (errors.length) return res.status(400).json({ ok: false, errors });
 
   const companyName =
@@ -166,6 +169,7 @@ router.post('/', optionalAuth, requireAuthIfDb, async (req, res) => {
       budget_min_clp: body.budget_min_clp != null ? Number(body.budget_min_clp) : null,
       budget_max_clp: body.budget_max_clp != null ? Number(body.budget_max_clp) : null,
       ...addressPayload(body),
+      ...cargoTrustPayload(body),
     });
     res.status(201).json({ ok: true, data: row });
   } catch (e) {

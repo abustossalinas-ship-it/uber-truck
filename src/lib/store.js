@@ -13,6 +13,7 @@ const EMPTY = {
   matches: [],
   match_messages: [],
   match_notifications: [],
+  match_incidents: [],
 };
 
 const SEED = {
@@ -77,6 +78,7 @@ function readStore() {
       matches: data.matches || [],
       match_messages: data.match_messages || [],
       match_notifications: data.match_notifications || [],
+      match_incidents: data.match_incidents || [],
     };
   } catch {
     return structuredClone(EMPTY);
@@ -112,6 +114,9 @@ function list(collection, filters = {}) {
   if (filters.carrier_user_id) {
     rows = rows.filter((row) => row.carrier_user_id === filters.carrier_user_id);
   }
+  if (filters.match_id) {
+    rows = rows.filter((row) => row.match_id === filters.match_id);
+  }
   return rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 }
 
@@ -124,7 +129,17 @@ function insert(collection, row) {
   const store = readStore();
   const item = {
     ...row,
-    id: row.id || newId(collection === 'load_requests' ? 'lr' : collection === 'capacity_offers' ? 'co' : 'mt'),
+    id:
+      row.id ||
+      newId(
+        collection === 'load_requests'
+          ? 'lr'
+          : collection === 'capacity_offers'
+            ? 'co'
+            : collection === 'match_incidents'
+              ? 'inc'
+              : 'mt'
+      ),
     created_at: row.created_at || new Date().toISOString(),
   };
   store[collection].push(item);

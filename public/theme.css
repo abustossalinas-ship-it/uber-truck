@@ -776,6 +776,38 @@ select.offer-picked {
   border-radius: 8px;
 }
 
+.trip-ratings-box {
+  margin: 0.5rem 0 0.65rem;
+  padding: 0.55rem 0.65rem;
+  background: #fffaf5;
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.trip-ratings-heading {
+  margin: 0 0 0.35rem;
+  font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--accent-hover);
+}
+
+.trip-rating-line {
+  margin: 0.2rem 0;
+}
+
+.trip-rating-label {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.trip-reputation-line strong {
+  color: var(--accent-hover);
+}
+
 .btn-secondary {
   background: var(--surface);
   color: var(--accent-hover);

@@ -41,6 +41,46 @@ function renderStars(n) {
   return '★'.repeat(full) + '☆'.repeat(5 - full);
 }
 
+function formatReputation(rep) {
+  if (!rep || !rep.rating_count) return 'Sin calificaciones aún';
+  const avg = rep.avg_stars != null ? Number(rep.avg_stars).toFixed(1) : '—';
+  const n = rep.rating_count;
+  return `${avg} ★ · ${n} viaje${n === 1 ? '' : 's'}`;
+}
+
+function ratingLine(label, rating, pendingText) {
+  if (rating?.stars) {
+    return `<p class="trip-rating-line"><span class="trip-rating-label">${label}</span> ${renderStars(rating.stars)} <span class="muted">(${rating.stars}/5)</span></p>`;
+  }
+  return `<p class="trip-rating-line muted"><span class="trip-rating-label">${label}</span> ${pendingText}</p>`;
+}
+
+function buildTripRatingsBlock(m, role, counterpartyName) {
+  if (m.status !== 'completed') return '';
+  const cp = counterpartyName || (role === 'shipper' ? 'Transportista' : 'Embarcador');
+  const myLabel =
+    role === 'shipper' ? 'Tu nota al transportista' : 'Tu nota al embarcador';
+  const theirLabel =
+    role === 'shipper' ? 'Nota del transportista hacia ti' : 'Nota del embarcador hacia ti';
+  const repLabel =
+    role === 'shipper'
+      ? `Reputación del transportista (${cp})`
+      : `Reputación del embarcador (${cp})`;
+
+  const shipperRate = m.rating_by_shipper;
+  const carrierRate = m.rating_by_carrier;
+  const myR = role === 'shipper' ? shipperRate : carrierRate;
+  const theirR = role === 'shipper' ? carrierRate : shipperRate;
+
+  return `
+    <div class="trip-ratings-box">
+      <p class="trip-ratings-heading">Calificaciones del viaje</p>
+      ${ratingLine(myLabel, myR, 'Pendiente — aún no calificas')}
+      ${ratingLine(theirLabel, theirR, 'La otra parte aún no califica')}
+      <p class="trip-rating-line trip-reputation-line"><span class="trip-rating-label">${repLabel}</span> <strong>${formatReputation(m.counterparty_reputation)}</strong></p>
+    </div>`;
+}
+
 function updateActiveTripBanner(matches, loadById, offerById) {
   const banner = document.getElementById('active-trip-banner');
   if (!banner) return;
@@ -105,13 +145,18 @@ function renderTripsList(matches, loadById, offerById) {
             : m.carrier_offer_clp
               ? `Oferta $${Number(m.carrier_offer_clp).toLocaleString('es-CL')}`
               : '';
+        const rateTarget = role === 'shipper' ? 'transportista' : 'embarcador';
+        const ratingsBlock =
+          m.status === 'completed' ? buildTripRatingsBlock(m, role, title) : '';
         let actions = `<button type="button" class="btn-secondary" data-trip-view="${m.id}">Abrir</button>`;
         const alreadyRated = hasRatedMatchId(m.id, m);
         if (m.can_rate && !alreadyRated) {
-          actions += `<button type="button" class="btn-trip-rate" data-trip-rate="${m.id}">Calificar ★</button>`;
+          actions += `<button type="button" class="btn-trip-rate" data-trip-rate="${m.id}" data-rate-target="${rateTarget}">Calificar ${rateTarget} ★</button>`;
         } else if (m.my_rating || alreadyRated) {
-          const stars = m.my_rating?.stars || 5;
-          actions += `<span class="trip-rated-badge" title="Ya calificaste este viaje">${renderStars(stars)} · Calificado</span>`;
+          const stars = m.my_rating?.stars;
+          if (stars) {
+            actions += `<span class="trip-rated-badge" title="Ya calificaste este viaje">${renderStars(stars)} · Calificado</span>`;
+          }
         } else if (m.ratings_unavailable) {
           actions += `<span class="muted">Calificaciones no disponibles (revisa /health)</span>`;
         }
@@ -125,6 +170,7 @@ function renderTripsList(matches, loadById, offerById) {
           <p>${route}</p>
           ${price ? `<p class="muted">${price}</p>` : ''}
           ${m.delivery_note ? `<p class="muted">Entrega: ${m.delivery_note}</p>` : ''}
+          ${ratingsBlock}
           <div class="actions">${actions}</div>
         </article>`;
       })
@@ -150,7 +196,9 @@ function renderTripsList(matches, loadById, offerById) {
     });
   });
   el.querySelectorAll('[data-trip-rate]').forEach((btn) => {
-    btn.addEventListener('click', () => openRateModal(btn.dataset.tripRate));
+    btn.addEventListener('click', () =>
+      openRateModal(btn.dataset.tripRate, btn.dataset.rateTarget)
+    );
   });
   el.querySelectorAll('[data-trip-chat]').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -177,7 +225,7 @@ function clearRateError() {
   el.hidden = true;
 }
 
-function openRateModal(matchId) {
+function openRateModal(matchId, rateTarget) {
   if (hasRatedMatchId(matchId, null)) {
     alert('Ya calificaste este viaje. No puedes enviar otra calificación.');
     return;
@@ -185,6 +233,18 @@ function openRateModal(matchId) {
   rateModalMatchId = matchId;
   const modal = document.getElementById('rate-modal');
   if (!modal) return;
+  const role =
+    typeof getActorRole === 'function' && getActorRole() === 'carrier' ? 'carrier' : 'shipper';
+  const target = rateTarget || (role === 'shipper' ? 'transportista' : 'embarcador');
+  const titleEl = document.getElementById('rate-modal-title');
+  const leadEl = document.getElementById('rate-modal-lead');
+  if (titleEl) titleEl.textContent = `Calificar ${target}`;
+  if (leadEl) {
+    leadEl.textContent =
+      role === 'shipper'
+        ? 'Tu nota (1 a 5) queda en la reputación pública del transportista. Ellos también pueden calificarte en este viaje.'
+        : 'Tu nota (1 a 5) queda en la reputación pública del embarcador. Ellos también pueden calificarte en este viaje.';
+  }
   clearRateError();
   document.getElementById('rate-stars').value = '5';
   document.getElementById('rate-comment').value = '';

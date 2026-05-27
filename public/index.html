@@ -357,7 +357,7 @@
     <section id="panel-trips" class="panel">
       <div class="card">
         <h2>Mis viajes</h2>
-        <p class="muted">Como en Uber: tu viaje activo, propuestas y historial. Califica cuando el flete termine.</p>
+        <p class="muted">Embarcador y transportista se califican mutuamente (1–5). La nota pública es el promedio de todos los viajes de esa empresa.</p>
         <div id="list-trips"></div>
       </div>
     </section>
@@ -514,8 +514,8 @@
   <div id="rate-modal" class="cancel-modal" hidden aria-hidden="true">
     <div class="cancel-modal-backdrop" data-close-rate></div>
     <div class="cancel-modal-card" role="dialog">
-      <h3>Calificar viaje</h3>
-      <p class="muted">Tu opinión mejora la confianza en la red (como Uber).</p>
+      <h3 id="rate-modal-title">Calificar viaje</h3>
+      <p id="rate-modal-lead" class="muted">Calificas a la otra parte en este viaje (1 a 5). La reputación pública se calcula con el promedio de todos los viajes.</p>
       <form id="form-rate">
         <p id="rate-error" class="auth-error" role="alert" hidden></p>
         <label for="rate-stars">Estrellas</label>
@@ -542,7 +542,7 @@
   <script src="/auth-ui.js?v=0.0.20"></script>
   <script src="/penalties-ui.js?v=0.0.19"></script>
   <script src="/comms-ui.js?v=0.0.19"></script>
-  <script src="/trips-ui.js?v=0.0.29"></script>
+  <script src="/trips-ui.js?v=0.0.30"></script>
   <script src="/app.js?v=0.0.27"></script>
 </body>
 </html>

@@ -18,6 +18,7 @@ const Auth = {
     };
     localStorage.setItem('ut_token', token);
     localStorage.setItem('ut_user', JSON.stringify(this.user));
+    clearAuthError();
     this.render();
   },
 
@@ -28,6 +29,8 @@ const Auth = {
     localStorage.removeItem('ut_user');
     if (typeof Comms !== 'undefined') Comms.resetUi();
     if (typeof Penalties !== 'undefined') Penalties.resetUi();
+    setAuthMode(false);
+    clearAuthError();
     this.render();
   },
 
@@ -65,6 +68,34 @@ const Auth = {
 
 let authRegisterMode = false;
 
+function showAuthError(message) {
+  const el = document.getElementById('auth-error');
+  if (!el) return;
+  el.textContent = message;
+  el.hidden = false;
+  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function clearAuthError() {
+  const el = document.getElementById('auth-error');
+  if (!el) return;
+  el.textContent = '';
+  el.hidden = true;
+}
+
+function authErrorMessage(res, json, register) {
+  let msg = json?.error || 'Error de autenticación';
+  if (res.status === 409 && register) {
+    msg =
+      'Ese email ya tiene cuenta. Pulsa «Ya tengo cuenta — iniciar sesión» e ingresa tu contraseña.';
+  } else if (res.status === 401 && !register) {
+    msg = 'Email o contraseña incorrectos. Revisa mayúsculas y que sean al menos 6 caracteres.';
+  } else if (res.status === 503) {
+    msg = 'El servidor no puede conectar con la base de datos. Intenta en unos minutos.';
+  }
+  return msg;
+}
+
 function updateRegisterLabels() {
   const role = document.getElementById('auth-role')?.value || 'shipper';
   const companyLabel = document.getElementById('auth-company-label');
@@ -76,6 +107,13 @@ function updateRegisterLabels() {
   }
 }
 
+function setRegisterFieldsRequired(register) {
+  ['auth-company', 'auth-full-name'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.required = register;
+  });
+}
+
 function setAuthMode(register) {
   authRegisterMode = register;
   const panel = document.getElementById('auth-panel');
@@ -84,6 +122,8 @@ function setAuthMode(register) {
   const toggle = document.getElementById('auth-toggle-mode');
   if (!panel) return;
   panel.classList.toggle('is-register', register);
+  setRegisterFieldsRequired(register);
+  clearAuthError();
   title.textContent = register ? 'Crear cuenta empresa' : 'Iniciar sesión';
   submit.textContent = register ? 'Registrarse' : 'Entrar';
   if (toggle) toggle.textContent = register ? 'Ya tengo cuenta — iniciar sesión' : '¿No tienes cuenta? Crear cuenta';
@@ -123,39 +163,84 @@ document.getElementById('auth-toggle-mode')?.addEventListener('click', () => {
   openAuthPanel(!authRegisterMode);
 });
 
-document.getElementById('form-auth')?.addEventListener('submit', async (e) => {
+const formAuth = document.getElementById('form-auth');
+formAuth?.addEventListener(
+  'invalid',
+  (e) => {
+    e.preventDefault();
+    const field = e.target;
+    if (field?.name === 'email') {
+      showAuthError('Ingresa un email válido.');
+    } else if (field?.name === 'password') {
+      showAuthError('La contraseña debe tener al menos 6 caracteres.');
+    } else if (authRegisterMode) {
+      showAuthError('Completa los datos de registro marcados en el formulario.');
+    } else {
+      showAuthError('Revisa email y contraseña.');
+    }
+  },
+  true
+);
+
+formAuth?.addEventListener('input', () => clearAuthError());
+
+formAuth?.addEventListener('submit', async (e) => {
   e.preventDefault();
+  clearAuthError();
+  const submitBtn = document.getElementById('auth-submit');
+  const prevLabel = submitBtn?.textContent;
   const body = Object.fromEntries(new FormData(e.target).entries());
   if (authRegisterMode) {
     if (!body.full_name?.trim()) {
-      alert('Ingresa el nombre de contacto');
+      showAuthError('Ingresa el nombre de contacto');
       return;
     }
     if (!body.company_name?.trim()) {
-      alert('Ingresa el nombre de la empresa');
+      showAuthError('Ingresa el nombre de la empresa');
       return;
     }
+  } else {
+    delete body.role;
+    delete body.company_name;
+    delete body.full_name;
+    delete body.phone;
+    delete body.admin_key;
+  }
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = authRegisterMode ? 'Registrando…' : 'Entrando…';
   }
   const url = authRegisterMode ? '/api/auth/register' : '/api/auth/login';
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body),
-  });
-  const json = await res.json();
-  if (!res.ok) {
-    alert(json.error || 'Error de autenticación');
-    return;
+  try {
+    const res = await fetch(url, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
+    let json = {};
+    try {
+      json = await res.json();
+    } catch {
+      json = {};
+    }
+    if (!res.ok) {
+      const msg = authErrorMessage(res, json, authRegisterMode);
+      showAuthError(msg);
+      return;
+    }
+    Auth.save(json.token, json.user);
+    document.getElementById('auth-panel').hidden = true;
+    if (typeof Penalties !== 'undefined') Penalties.refresh();
+  } catch (err) {
+    console.error(err);
+    showAuthError('No se pudo conectar con el servidor. Revisa tu internet e intenta de nuevo.');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = prevLabel || (authRegisterMode ? 'Registrarse' : 'Entrar');
+    }
   }
-  Auth.save(json.token, json.user);
-  document.getElementById('auth-panel').hidden = true;
-  if (typeof Penalties !== 'undefined') Penalties.refresh();
-  const rol = typeof roleLabel === 'function' ? roleLabel(json.user.role) : json.user.role;
-  alert(
-    authRegisterMode
-      ? `Cuenta ${rol} creada. Ya puedes publicar según tu rol.`
-      : 'Sesión iniciada'
-  );
 });
 
+setAuthMode(false);
 Auth.render();

@@ -14,6 +14,7 @@ const EMPTY = {
   match_messages: [],
   match_notifications: [],
   match_incidents: [],
+  match_ratings: [],
 };
 
 const SEED = {
@@ -79,6 +80,7 @@ function readStore() {
       match_messages: data.match_messages || [],
       match_notifications: data.match_notifications || [],
       match_incidents: data.match_incidents || [],
+      match_ratings: data.match_ratings || [],
     };
   } catch {
     return structuredClone(EMPTY);
@@ -138,7 +140,9 @@ function insert(collection, row) {
             ? 'co'
             : collection === 'match_incidents'
               ? 'inc'
-              : 'mt'
+              : collection === 'match_ratings'
+                ? 'rtg'
+                : 'mt'
       ),
     created_at: row.created_at || new Date().toISOString(),
   };

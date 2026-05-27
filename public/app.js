@@ -58,6 +58,12 @@ const API = {
       headers: apiHeaders(),
       body: JSON.stringify(body),
     }).then((r) => r.json()),
+  rateMatch: (matchId, body) =>
+    fetch(`/api/matches/${matchId}/rate`, {
+      method: 'POST',
+      headers: apiHeaders(),
+      body: JSON.stringify(body),
+    }).then((r) => r.json()),
   seedDemo: (key) =>
     fetch('/api/demo/seed', {
       method: 'POST',
@@ -255,7 +261,7 @@ function buildMatchActions(m) {
       html += `<button type="button" data-action="progress" data-id="${m.id}">En ruta</button>`;
       html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="accepted" data-price="${m.agreed_price_clp || ''}">Cancelar emparejamiento</button>`;
     } else {
-      html += `<button type="button" data-action="complete" data-id="${m.id}">Cerrar</button>`;
+      html += `<button type="button" data-action="complete" data-id="${m.id}">Finalizar viaje</button>`;
       html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="in_progress" data-price="${m.agreed_price_clp || ''}">Cancelar en ejecución</button>`;
     }
   }
@@ -722,7 +728,7 @@ function showTab(name) {
   document.querySelectorAll('#main-nav .tab').forEach((t) => t.classList.remove('active'));
   panel.classList.add('active');
   tab.classList.add('active');
-  if (name === 'board') refreshBoard();
+  if (name === 'board' || name === 'trips') refreshBoard();
 }
 
 function routeLine(row) {
@@ -899,6 +905,12 @@ async function refreshBoard() {
   showMatchReady();
   renderBoardActor();
   if (typeof Comms !== 'undefined') Comms.refreshBell();
+  if (typeof updateActiveTripBanner === 'function') {
+    updateActiveTripBanner(matchRows, loadById, offerById);
+  }
+  if (typeof renderTripsList === 'function') {
+    renderTripsList(matchRows, loadById, offerById);
+  }
 }
 
 async function loadSuggestionsFor(loadId) {
@@ -909,11 +921,15 @@ async function loadSuggestionsFor(loadId) {
     return;
   }
   box.hidden = false;
-  box.innerHTML = 'Buscando sugerencias…';
+  box.classList.add('is-searching');
+  box.innerHTML =
+    '<p class="searching-trucks"><span class="searching-dot"></span> Buscando camiones en tu corredor…</p>';
   try {
     const json = await API.suggestions(loadId);
+    box.classList.remove('is-searching');
     if (!json.ok || !json.data?.length) {
-      box.innerHTML = '<p class="muted">Sin sugerencias automáticas para esta carga.</p>';
+      box.innerHTML =
+        '<p class="muted">Seguimos buscando. Publica o espera ofertas en el tablero; también puedes crear propuesta manual.</p>';
       return;
     }
     box.innerHTML =
@@ -932,6 +948,7 @@ async function loadSuggestionsFor(loadId) {
         )
         .join('');
   } catch {
+    box.classList.remove('is-searching');
     box.innerHTML = '<p class="muted">No se pudieron cargar sugerencias.</p>';
   }
 }
@@ -987,8 +1004,17 @@ $('form-load').addEventListener('submit', async (e) => {
     return;
   }
   e.target.reset();
-  alert('Carga publicada. Visible en el tablero.');
-  showTab('board');
+  const loadId = json.data?.id;
+  if (loadId) {
+    stickyMatchLoadId = loadId;
+    alert(
+      'Carga publicada. Buscando camiones compatibles en el tablero…'
+    );
+    showTab('board');
+  } else {
+    alert('Carga publicada. Visible en el tablero.');
+    showTab('board');
+  }
 });
 
 $('form-offer').addEventListener('submit', async (e) => {
@@ -1192,7 +1218,27 @@ $('list-matches').addEventListener('click', async (e) => {
     alert('Primero el transportista debe ofertar precio; luego usa «Aceptar precio y confirmar match».');
     return;
   }
-  const map = { progress: 'in_progress', complete: 'completed' };
+  if (action === 'complete') {
+    const note =
+      prompt('Nota de entrega (opcional):', 'Mercadería recibida conforme') || '';
+    const res = await API.patchMatch(id, {
+      status: 'completed',
+      delivery_note: note.trim() || undefined,
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      alert(json.error || 'Error');
+      return;
+    }
+    await refreshBoard();
+    if (json.prompt_rating && typeof openRateModal === 'function') {
+      openRateModal(id);
+    } else {
+      alert(json.message || 'Viaje cerrado');
+    }
+    return;
+  }
+  const map = { progress: 'in_progress' };
   const res = await API.patchMatch(id, { status: map[action] });
   const json = await res.json();
   if (!res.ok) alert(json.error || 'Error');

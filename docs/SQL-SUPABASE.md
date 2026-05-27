@@ -95,6 +95,10 @@ WHERE table_schema = 'public' AND table_name IN ('match_messages', 'match_notifi
 
 ---
 
+## 012 — Paridad Uber (mis viajes, calificaciones)
+
+Ejecutar `supabase/migrations/012_uber_parity.sql` — columnas `delivery_note`, `completed_at` en `matches`; tabla `match_ratings`.
+
 ## 011 — Confianza y carga
 
 Ejecutar `supabase/migrations/011_cargo_trust.sql` (o el bloque homónimo en `RUN_PENDING.sql`).

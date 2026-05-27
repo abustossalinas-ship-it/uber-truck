@@ -4,26 +4,34 @@ const BOARD_COPY = {
   shipper: {
     loads: 'Mis cargas',
     offers: 'Ofertas de transportistas (mercado)',
-    tabShipper: 'Publicar carga',
+    tabShipper: 'Pedir flete',
     tabCarrier: null,
+    tabTrips: 'Mis viajes',
+    tabBoard: 'Emparejar',
   },
   carrier: {
     loads: 'Cargas disponibles (mercado)',
     offers: 'Mis ofertas',
     tabShipper: null,
-    tabCarrier: 'Publicar oferta',
+    tabCarrier: 'Ofertar ruta',
+    tabTrips: 'Mis viajes',
+    tabBoard: 'Emparejar',
+  },
+  guest: {
+    loads: 'Cargas publicadas',
+    offers: 'Ofertas publicadas',
+    tabShipper: 'Pedir flete',
+    tabCarrier: 'Ofertar ruta',
+    tabTrips: 'Mis viajes',
+    tabBoard: 'Emparejar',
   },
   admin: {
     loads: 'Todas las cargas',
     offers: 'Todas las ofertas',
     tabShipper: 'Cargas (admin)',
     tabCarrier: 'Ofertas (admin)',
-  },
-  guest: {
-    loads: 'Cargas publicadas',
-    offers: 'Ofertas publicadas',
-    tabShipper: 'Necesito mover carga',
-    tabCarrier: 'Tengo espacio en ruta',
+    tabTrips: 'Viajes',
+    tabBoard: 'Tablero',
   },
 };
 
@@ -34,6 +42,8 @@ function applyRoleUi() {
 
   const tabShipper = document.getElementById('tab-shipper');
   const tabCarrier = document.getElementById('tab-carrier');
+  const tabTrips = document.getElementById('tab-trips');
+  const tabBoard = document.getElementById('tab-board');
   if (tabShipper) {
     tabShipper.hidden = role === 'carrier';
     if (copy.tabShipper) tabShipper.textContent = copy.tabShipper;
@@ -42,6 +52,11 @@ function applyRoleUi() {
     tabCarrier.hidden = role === 'shipper';
     if (copy.tabCarrier) tabCarrier.textContent = copy.tabCarrier;
   }
+  if (tabTrips) {
+    tabTrips.hidden = !user;
+    if (copy.tabTrips) tabTrips.textContent = copy.tabTrips;
+  }
+  if (tabBoard && copy.tabBoard) tabBoard.textContent = copy.tabBoard;
 
   const loadsTitle = document.getElementById('board-loads-title');
   const offersTitle = document.getElementById('board-offers-title');

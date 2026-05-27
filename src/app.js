@@ -61,6 +61,9 @@ app.get('/health', async (_req, res) => {
       'notifications',
       'cargo-trust-declaration',
       'match-incidents',
+      'mis-viajes',
+      'trip-ratings',
+      'buscando-camiones',
     ],
     deploy_manifest: manifest,
     railway: {

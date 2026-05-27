@@ -30,6 +30,7 @@ const {
   assertCanMatchOffer,
 } = require('../lib/access-scope');
 const { copyBudgetFromLoad, outsideRangeMessages } = require('../lib/match-price');
+const { enrichMatchesWithRatings } = require('../lib/match-ratings');
 
 const router = express.Router();
 
@@ -78,6 +79,7 @@ router.get('/', optionalAuth, async (req, res) => {
   try {
     let rows = await repo.list('matches', {});
     rows = await filterMatchesForUser(rows, req.user);
+    rows = await enrichMatchesWithRatings(repo, rows, req.user);
     res.json({ ok: true, data: rows });
   } catch (e) {
     console.error(e);
@@ -418,8 +420,22 @@ router.patch('/:id/status', optionalAuth, async (req, res) => {
       await repo.update('load_requests', match.load_request_id, { status: 'in_transit' });
     }
     if (next === 'completed') {
+      const patch = {
+        status: 'completed',
+        completed_at: new Date().toISOString(),
+      };
+      if (req.body?.delivery_note?.trim()) {
+        patch.delivery_note = req.body.delivery_note.trim().slice(0, 500);
+      }
+      const completed = await repo.update('matches', match.id, patch);
       await repo.update('load_requests', match.load_request_id, { status: 'delivered' });
       await repo.update('capacity_offers', match.capacity_offer_id, { status: 'reserved' });
+      return res.json({
+        ok: true,
+        data: completed,
+        message: 'Viaje cerrado. Puedes calificar a la otra parte en Mis viajes.',
+        prompt_rating: true,
+      });
     }
 
     res.json({ ok: true, data: updated });
@@ -439,6 +455,7 @@ function cancelMessage(action) {
   return 'Emparejamiento cancelado. Carga y oferta liberadas. Revisa multa sugerida si aplica.';
 }
 
+router.use(require('./match-ratings'));
 router.use(require('./match-incidents'));
 
 module.exports = router;

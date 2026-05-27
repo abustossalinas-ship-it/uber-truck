@@ -17,8 +17,14 @@ async function enrichMatchesWithRatings(repo, matches, user) {
   let ratings = [];
   try {
     ratings = await repo.list('match_ratings', {});
-  } catch {
-    return matches.map((m) => ({ ...m, my_rating: null, can_rate: false }));
+  } catch (e) {
+    console.error('match_ratings list:', e.message || e);
+    return matches.map((m) => ({
+      ...m,
+      my_rating: null,
+      can_rate: false,
+      ratings_unavailable: true,
+    }));
   }
   const byMatch = {};
   for (const r of ratings) {

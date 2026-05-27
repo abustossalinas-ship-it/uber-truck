@@ -1317,7 +1317,11 @@ fetch('/health')
     const el = document.getElementById('storage-badge');
     if (!el) return;
     if (h.ui?.startsWith('match-cancel') || h.ui === 'match-flow-v3') {
-      el.textContent = `v${h.version || '?'} · motivos y multas sugeridas`;
+      let label = `v${h.version || '?'} · motivos y multas sugeridas`;
+      if (h.supabase?.match_ratings_table === false) {
+        label += ' · ⚠ calificaciones: recarga schema Supabase';
+      }
+      el.textContent = label;
     } else if (h.storage === 'supabase' && h.supabase?.connected) {
       el.textContent = 'Conectado a Supabase (actualiza deploy)';
     } else if (h.storage === 'supabase') {

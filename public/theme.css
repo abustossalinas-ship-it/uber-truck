@@ -755,6 +755,27 @@ select.offer-picked {
   cursor: wait;
 }
 
+.btn-trip-rate {
+  font-size: 0.95rem;
+  font-weight: 800;
+  padding: 0.5rem 0.9rem;
+  background: var(--accent);
+  color: var(--brand-white);
+  border: 2px solid var(--brand-black);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.trip-rated-badge {
+  display: inline-block;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--accent-hover);
+  padding: 0.35rem 0.55rem;
+  background: var(--accent-soft);
+  border-radius: 8px;
+}
+
 .btn-secondary {
   background: var(--surface);
   color: var(--accent-hover);

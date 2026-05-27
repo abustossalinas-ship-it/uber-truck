@@ -1,5 +1,26 @@
 /** Mis viajes — paridad Uber: viaje activo, historial, calificación */
 
+const RATED_MATCHES_KEY = 'ut_rated_matches';
+
+function loadRatedMatchIds() {
+  try {
+    return new Set(JSON.parse(sessionStorage.getItem(RATED_MATCHES_KEY) || '[]'));
+  } catch {
+    return new Set();
+  }
+}
+
+function markRatedMatchId(matchId) {
+  const set = loadRatedMatchIds();
+  set.add(matchId);
+  sessionStorage.setItem(RATED_MATCHES_KEY, JSON.stringify([...set]));
+}
+
+function hasRatedMatchId(matchId, match) {
+  if (match?.my_rating) return true;
+  return loadRatedMatchIds().has(matchId);
+}
+
 const TRIP_STATUS_LABEL = {
   proposed: 'Esperando precio',
   accepted: 'Camión asignado',
@@ -85,10 +106,14 @@ function renderTripsList(matches, loadById, offerById) {
               ? `Oferta $${Number(m.carrier_offer_clp).toLocaleString('es-CL')}`
               : '';
         let actions = `<button type="button" class="btn-secondary" data-trip-view="${m.id}">Abrir</button>`;
-        if (m.can_rate) {
-          actions += `<button type="button" data-trip-rate="${m.id}">Calificar ★</button>`;
-        } else if (m.my_rating) {
-          actions += `<span class="muted">${renderStars(m.my_rating.stars)}</span>`;
+        const alreadyRated = hasRatedMatchId(m.id, m);
+        if (m.can_rate && !alreadyRated) {
+          actions += `<button type="button" class="btn-trip-rate" data-trip-rate="${m.id}">Calificar ★</button>`;
+        } else if (m.my_rating || alreadyRated) {
+          const stars = m.my_rating?.stars || 5;
+          actions += `<span class="trip-rated-badge" title="Ya calificaste este viaje">${renderStars(stars)} · Calificado</span>`;
+        } else if (m.ratings_unavailable) {
+          actions += `<span class="muted">Calificaciones no disponibles (revisa /health)</span>`;
         }
         if (['accepted', 'in_progress'].includes(m.status)) {
           actions += `<button type="button" class="btn-secondary" data-trip-chat="${m.id}" data-trip-title="${title.replace(/"/g, '')}">Chat</button>`;
@@ -153,6 +178,10 @@ function clearRateError() {
 }
 
 function openRateModal(matchId) {
+  if (hasRatedMatchId(matchId, null)) {
+    alert('Ya calificaste este viaje. No puedes enviar otra calificación.');
+    return;
+  }
   rateModalMatchId = matchId;
   const modal = document.getElementById('rate-modal');
   if (!modal) return;
@@ -206,11 +235,17 @@ async function submitRateModal(e) {
     if (!res.ok) {
       const msg =
         json.error || json.errors?.join('\n') || 'No se pudo guardar la calificación';
-      closeRateModal();
-      alert(msg);
-      if (typeof refreshBoard === 'function') refreshBoard();
+      if (res.status === 409) {
+        markRatedMatchId(matchId);
+        closeRateModal();
+        if (typeof refreshBoard === 'function') await refreshBoard();
+        alert(msg);
+        return;
+      }
+      showRateError(msg);
       return;
     }
+    markRatedMatchId(matchId);
     closeRateModal();
     if (typeof refreshBoard === 'function') await refreshBoard();
     alert(json.message || 'Calificación guardada. ¡Gracias!');

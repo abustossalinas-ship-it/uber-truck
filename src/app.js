@@ -34,15 +34,22 @@ app.get('/health', async (_req, res) => {
   let supabaseError = null;
   const supabaseUrl = process.env.SUPABASE_URL || '';
   const projectRef = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] || null;
+  let ratingsTableOk = null;
+  let ratingsTableError = null;
   if (supabaseReady) {
     try {
       const sb = supabaseService.getClient();
       const { error } = await sb.from('load_requests').select('id').limit(1);
       supabaseOk = !error;
       if (error) supabaseError = error.message;
+      const { error: rErr } = await sb.from('match_ratings').select('id').limit(1);
+      ratingsTableOk = !rErr;
+      if (rErr) ratingsTableError = rErr.message;
     } catch (e) {
       supabaseOk = false;
       supabaseError = e.message;
+      ratingsTableOk = false;
+      ratingsTableError = e.message;
     }
   }
   const manifest = readDeployManifest();
@@ -81,7 +88,11 @@ app.get('/health', async (_req, res) => {
       url_set: Boolean(supabaseUrl),
       configured: supabaseReady,
       connected: supabaseOk,
+      match_ratings_table: ratingsTableOk,
       ...(supabaseError && !supabaseOk ? { error: supabaseError } : {}),
+      ...(ratingsTableError && ratingsTableOk === false
+        ? { match_ratings_error: ratingsTableError }
+        : {}),
     },
     maps: { configured: googleMaps.isConfigured() },
   });

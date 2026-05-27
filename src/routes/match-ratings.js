@@ -6,6 +6,7 @@ const { optionalAuth } = require('../lib/optional-auth');
 const { requireAuthIfDb } = require('../lib/require-auth');
 const { validateRating, normalizeRole } = require('../lib/match-ratings');
 const { filterMatchesForUser } = require('../lib/access-scope');
+const { mapDbError } = require('../lib/supabase-errors');
 
 const router = express.Router({ mergeParams: true });
 
@@ -38,10 +39,11 @@ router.post('/:id/rate', optionalAuth, requireAuthIfDb, async (req, res) => {
       return res.status(409).json({ ok: false, error: 'Ya calificaste este viaje' });
     }
 
+    const userId = req.user.sub || req.user.id;
     const row = await repo.insert('match_ratings', {
       match_id: match.id,
       rater_role: role,
-      rater_user_id: req.user.sub,
+      rater_user_id: userId || null,
       stars: Number(req.body.stars),
       comment: req.body.comment?.trim() || null,
     });
@@ -52,10 +54,8 @@ router.post('/:id/rate', optionalAuth, requireAuthIfDb, async (req, res) => {
     });
   } catch (e) {
     console.error(e);
-    const msg = e.message?.includes('match_ratings')
-      ? 'Tabla de calificaciones no disponible. Aplica migración 012 en Supabase.'
-      : 'Error al guardar calificación';
-    res.status(500).json({ ok: false, error: msg });
+    const mapped = mapDbError(e, 'guardar calificación');
+    res.status(mapped.status).json({ ok: false, error: mapped.error });
   }
 });
 

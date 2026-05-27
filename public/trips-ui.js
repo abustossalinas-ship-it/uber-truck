@@ -138,18 +138,39 @@ function renderTripsList(matches, loadById, offerById) {
 
 let rateModalMatchId = null;
 
+function showRateError(message) {
+  const el = document.getElementById('rate-error');
+  if (!el) return;
+  el.textContent = message;
+  el.hidden = false;
+}
+
+function clearRateError() {
+  const el = document.getElementById('rate-error');
+  if (!el) return;
+  el.textContent = '';
+  el.hidden = true;
+}
+
 function openRateModal(matchId) {
   rateModalMatchId = matchId;
   const modal = document.getElementById('rate-modal');
   if (!modal) return;
+  clearRateError();
   document.getElementById('rate-stars').value = '5';
   document.getElementById('rate-comment').value = '';
+  const submit = document.querySelector('#form-rate button[type="submit"]');
+  if (submit) {
+    submit.disabled = false;
+    submit.textContent = 'Enviar calificación';
+  }
   modal.hidden = false;
   modal.setAttribute('aria-hidden', 'false');
 }
 
 function closeRateModal() {
   rateModalMatchId = null;
+  clearRateError();
   const modal = document.getElementById('rate-modal');
   if (modal) {
     modal.hidden = true;
@@ -160,16 +181,49 @@ function closeRateModal() {
 async function submitRateModal(e) {
   e.preventDefault();
   if (!rateModalMatchId || typeof API === 'undefined') return;
+  clearRateError();
+  const submitBtn = e.target.querySelector('button[type="submit"]');
+  const prevLabel = submitBtn?.textContent;
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.textContent = 'Enviando…';
+  }
   const stars = document.getElementById('rate-stars').value;
   const comment = document.getElementById('rate-comment').value;
-  const json = await API.rateMatch(rateModalMatchId, { stars: Number(stars), comment });
-  if (!json.ok) {
-    alert(json.error || json.errors?.join('\n') || 'No se pudo calificar');
-    return;
+  const matchId = rateModalMatchId;
+  try {
+    const res = await fetch(`/api/matches/${matchId}/rate`, {
+      method: 'POST',
+      headers: typeof Auth !== 'undefined' ? Auth.headers() : { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ stars: Number(stars), comment }),
+    });
+    let json = {};
+    try {
+      json = await res.json();
+    } catch {
+      json = {};
+    }
+    if (!res.ok) {
+      const msg =
+        json.error || json.errors?.join('\n') || 'No se pudo guardar la calificación';
+      closeRateModal();
+      alert(msg);
+      if (typeof refreshBoard === 'function') refreshBoard();
+      return;
+    }
+    closeRateModal();
+    if (typeof refreshBoard === 'function') await refreshBoard();
+    alert(json.message || 'Calificación guardada. ¡Gracias!');
+  } catch (err) {
+    console.error(err);
+    closeRateModal();
+    alert('No se pudo conectar con el servidor. Intenta de nuevo.');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.textContent = prevLabel || 'Enviar calificación';
+    }
   }
-  closeRateModal();
-  alert(json.message || 'Calificación guardada');
-  if (typeof refreshBoard === 'function') refreshBoard();
 }
 
 window.updateActiveTripBanner = updateActiveTripBanner;

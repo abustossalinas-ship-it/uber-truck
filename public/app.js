@@ -90,6 +90,45 @@ const CANCEL_ACTION_LABEL = {
   cancel: 'Cancelada',
 };
 
+const MATCH_ACTION_CONFIRM = {
+  progress:
+    '¿Marcar este emparejamiento como «En ruta»?\n\nConfirma que el transporte ya salió o está en camino. Si te equivocas, aún puedes cancelar con motivo.',
+  complete:
+    '¿Finalizar y cerrar este viaje?\n\nSolo confirma cuando la mercadería fue entregada. Después podrás calificar; no podrás volver a «camión asignado» desde aquí.',
+  accept_offer:
+    '¿Aceptar el precio del transportista y confirmar el emparejamiento?\n\nLa carga y la oferta quedarán reservadas para este viaje.',
+};
+
+let matchActionBusy = false;
+
+function confirmMatchAction(action) {
+  const msg = MATCH_ACTION_CONFIRM[action];
+  if (!msg) return true;
+  return confirm(msg);
+}
+
+function beginMatchAction(btn) {
+  if (matchActionBusy) return false;
+  matchActionBusy = true;
+  if (btn) {
+    btn.disabled = true;
+    btn.dataset.busyLabel = btn.textContent;
+    btn.textContent = 'Procesando…';
+  }
+  return true;
+}
+
+function endMatchAction(btn) {
+  matchActionBusy = false;
+  if (btn) {
+    btn.disabled = false;
+    if (btn.dataset.busyLabel) {
+      btn.textContent = btn.dataset.busyLabel;
+      delete btn.dataset.busyLabel;
+    }
+  }
+}
+
 function $(id) {
   return document.getElementById(id);
 }
@@ -160,7 +199,7 @@ function buildMatchPriceBox(m) {
           : `<p class="match-price-outside">Fuera del rango del embarcador (referencia). Tu oferta sigue válida por peso, urgencia o ruta.</p>`;
     }
     if (role === 'shipper') {
-      html += `<button type="button" data-action="accept_offer" data-id="${m.id}">Aceptar precio y confirmar match</button>`;
+      html += `<div class="match-price-cta"><button type="button" class="btn-accept-match" data-action="accept_offer" data-id="${m.id}">Aceptar precio y confirmar match</button></div>`;
       if (outside) {
         html += `<button type="button" class="btn-secondary" data-action="adjust_budget" data-load-id="${m.load_request_id}" data-id="${m.id}">Ampliar mi rango presupuesto</button>`;
       }
@@ -258,10 +297,10 @@ function buildMatchActions(m) {
     html += `<button type="button" class="btn-secondary" data-action="report_incident" data-id="${m.id}">Reportar incidente</button>`;
     html += `<button type="button" class="btn-secondary" data-action="chat" data-id="${m.id}" data-title="${title.replace(/"/g, '')}">Chat</button>`;
     if (m.status === 'accepted') {
-      html += `<button type="button" data-action="progress" data-id="${m.id}">En ruta</button>`;
+      html += `<button type="button" class="btn-match-progress" data-action="progress" data-id="${m.id}">Marcar en ruta</button>`;
       html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="accepted" data-price="${m.agreed_price_clp || ''}">Cancelar emparejamiento</button>`;
     } else {
-      html += `<button type="button" data-action="complete" data-id="${m.id}">Finalizar viaje</button>`;
+      html += `<button type="button" class="btn-match-complete" data-action="complete" data-id="${m.id}">Finalizar viaje (entregado)</button>`;
       html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="in_progress" data-price="${m.agreed_price_clp || ''}">Cancelar en ejecución</button>`;
     }
   }
@@ -1108,7 +1147,7 @@ $('form-match').addEventListener('submit', async (e) => {
 
 $('list-matches').addEventListener('click', async (e) => {
   const btn = e.target.closest('button[data-action]');
-  if (!btn) return;
+  if (!btn || btn.disabled) return;
   const id = btn.dataset.id;
   const action = btn.dataset.action;
   if (action === 'chat') {
@@ -1142,11 +1181,17 @@ $('list-matches').addEventListener('click', async (e) => {
     return;
   }
   if (action === 'accept_offer') {
-    const json = await API.patchAcceptOffer(id);
-    if (!json.ok) alert(json.error || 'Error');
-    else {
-      alert(json.message || 'Precio aceptado');
-      refreshBoard();
+    if (!confirmMatchAction('accept_offer')) return;
+    if (!beginMatchAction(btn)) return;
+    try {
+      const json = await API.patchAcceptOffer(id);
+      if (!json.ok) alert(json.error || 'Error');
+      else {
+        alert(json.message || 'Precio aceptado');
+        await refreshBoard();
+      }
+    } finally {
+      endMatchAction(btn);
     }
     return;
   }
@@ -1219,30 +1264,50 @@ $('list-matches').addEventListener('click', async (e) => {
     return;
   }
   if (action === 'complete') {
-    const note =
-      prompt('Nota de entrega (opcional):', 'Mercadería recibida conforme') || '';
-    const res = await API.patchMatch(id, {
-      status: 'completed',
-      delivery_note: note.trim() || undefined,
-    });
-    const json = await res.json();
-    if (!res.ok) {
-      alert(json.error || 'Error');
-      return;
-    }
-    await refreshBoard();
-    if (json.prompt_rating && typeof openRateModal === 'function') {
-      openRateModal(id);
-    } else {
-      alert(json.message || 'Viaje cerrado');
+    if (!confirmMatchAction('complete')) return;
+    const note = prompt(
+      'Nota de entrega (opcional). Cancelar aquí no cierra el viaje:',
+      'Mercadería recibida conforme'
+    );
+    if (note === null) return;
+    if (!beginMatchAction(btn)) return;
+    try {
+      const res = await API.patchMatch(id, {
+        status: 'completed',
+        delivery_note: note.trim() || undefined,
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        alert(json.error || 'Error');
+        return;
+      }
+      await refreshBoard();
+      if (json.prompt_rating && typeof openRateModal === 'function') {
+        openRateModal(id);
+      } else {
+        alert(json.message || 'Viaje cerrado');
+      }
+    } finally {
+      endMatchAction(btn);
     }
     return;
   }
-  const map = { progress: 'in_progress' };
-  const res = await API.patchMatch(id, { status: map[action] });
-  const json = await res.json();
-  if (!res.ok) alert(json.error || 'Error');
-  else refreshBoard();
+  if (action === 'progress') {
+    if (!confirmMatchAction('progress')) return;
+    if (!beginMatchAction(btn)) return;
+    try {
+      const res = await API.patchMatch(id, { status: 'in_progress' });
+      const json = await res.json();
+      if (!res.ok) alert(json.error || 'Error');
+      else {
+        alert('Viaje marcado como en ruta. Cuando entregues, usa «Finalizar viaje (entregado)».');
+        await refreshBoard();
+      }
+    } finally {
+      endMatchAction(btn);
+    }
+    return;
+  }
 });
 
 

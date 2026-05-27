@@ -1,5 +1,8 @@
 # Confianza y declaración de carga
 
+**Versión:** cargo-trust-v1 · mayo 2026  
+**Docs relacionados:** [Memoria técnica](./Memoria-tecnica-Uber-Truck.html) v3.3 · [Journey](./Journey-Usuario-Uber-Truck.html) v2.2 · [Probar testers](./Probar-Uber-Truck.html) v3
+
 Uber Truck actúa como **intermediario** (marketplace). No es transportista ni asegurador salvo contrato futuro explícito.
 
 ## Campos al publicar carga

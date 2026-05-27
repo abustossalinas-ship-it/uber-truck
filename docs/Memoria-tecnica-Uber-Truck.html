@@ -39,7 +39,7 @@
     <h1>Memoria técnica del proyecto</h1>
     <p class="meta"><strong>Producto:</strong> Uber Truck — marketplace de capacidad logística ociosa (backhaul), Chile.<br />
     <strong>Documento:</strong> memoria técnica viva del repositorio y del despliegue Railway.<br />
-    <strong>Versión documento:</strong> 3.2 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.19+ &nbsp;|&nbsp; <strong>Fecha:</strong> mayo 2026</p>
+    <strong>Versión documento:</strong> 3.4 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.19+ (cargo-trust v011) &nbsp;|&nbsp; <strong>Fecha:</strong> mayo 2026</p>
   </div>
 </div>
 
@@ -71,7 +71,9 @@
   <tr><td>Notificaciones</td><td>Campana in-app (JWT)</td><td class="g-done">Hecho</td></tr>
   <tr><td>Mis viajes</td><td><strong>Mis cargas</strong> / <strong>Mis ofertas</strong> por rol (scopes JWT)</td><td class="g-done">Hecho</td></tr>
   <tr><td>Precio oferta/demanda</td><td>Rango embarcador + oferta transportista + aceptación</td><td class="g-done">Hecho (v010)</td></tr>
-  <tr><td>Mapa / seguimiento</td><td>Origen–destino + mapas (fase siguiente)</td><td class="g-todo">Plan</td></tr>
+  <tr><td>Declaración de carga y confianza</td><td>Valor ref. CLP, guía, términos, incidentes</td><td class="g-done">Hecho (v011)</td></tr>
+  <tr><td>Mapa / dirección</td><td>Google Maps origen–destino + distancia</td><td class="g-done">Hecho</td></tr>
+  <tr><td>Mapa en vivo / seguimiento GPS</td><td>Tracking en ruta</td><td class="g-todo">Fase 4</td></tr>
   <tr><td>Pago en app</td><td>Pasarela + generar cargo</td><td class="g-doing">Parcial (2.10)</td></tr>
   <tr><td>Calificación ★</td><td>Ratings post-viaje</td><td class="g-todo">Fase 3</td></tr>
   <tr><td>Perfil y cuenta</td><td>Login, empresa, banco, multas</td><td class="g-doing">Parcial</td></tr>
@@ -100,7 +102,7 @@
 <h2>Fase 2 — Núcleo digital (ya en producción)</h2>
 <h3>Lo realizado (adelantado vs Gantt oct 2026)</h3>
 <ul>
-  <li>Migraciones Supabase 001–008 (auth, matches, chat, notificaciones, banco, <code>penalty_charges</code>).</li>
+  <li>Migraciones Supabase 001–011 (auth, matches, chat, notificaciones, banco, precios 010, <strong>confianza/carga 011</strong>).</li>
   <li>API: <code>capacity-offers</code>, <code>load-requests</code>, <code>matches</code>, sugerencias automáticas, comms, cuenta.</li>
   <li>UI embarcador / transportista, emparejamientos activos, modal cancelar, acuerdo mutuo bilateral.</li>
   <li>Notificaciones in-app (JWT); recuadro cuenta y multas (sin pasarela).</li>
@@ -210,7 +212,46 @@
   <tr><td>NPS transportista</td><td>≥ 7</td><td>≥ 8</td></tr>
 </table>
 
-<p><strong>Interpretación mayo 2026:</strong> núcleo digital (~75%) en prod; <strong>foco actual = MVP final tipo Uber</strong> (mis viajes + piloto 20 en app); cobros 2.10 ~25%. Add-on a terceros solo tras M2/M4. Actualizar Gantt y backlog cuando cambie prioridad.</p>
+<p><strong>Interpretación mayo 2026:</strong> núcleo digital (~75%) en prod; <strong>foco actual = liquidez en un corredor + piloto 20 viajes</strong>; cobros 2.10 ~25%. Add-on a terceros solo tras M2/M4.</p>
+
+<h2>Piloto M2 — corredor único (liquidez)</h2>
+<p>El cuello de botella del marketplace no es el código sino la <strong>oferta y demanda simultánea</strong>. El piloto M2 se concentra en un corredor para lograr densidad operacional.</p>
+<table>
+  <tr><th>Elemento</th><th>Definición</th></tr>
+  <tr><td><strong>Corredor principal</strong></td><td>RM (origen, ej. San Bernardo / nodo industrial) ↔ Valparaíso / San Antonio (destino)</td></tr>
+  <tr><td><strong>Meta semanal liquidez</strong></td><td>≥ 3 cargas publicadas y ≥ 2 ofertas activas en el mismo corredor</td></tr>
+  <tr><td><strong>Meta M2</strong></td><td>20 matches <code>completed</code> en ese corredor (jul–ago 2026)</td></tr>
+  <tr><td><strong>Ancla</strong></td><td>1 transportista ruta fija + 2–3 embarcadores PYME del nodo</td></tr>
+</table>
+<p>Detalle operativo: <a href="Piloto-M2-Corredor-KPIs-Riesgos.html">Piloto M2 — corredor, KPIs y riesgos</a>.</p>
+
+<h2>KPIs marketplace — piloto M2</h2>
+<table>
+  <tr><th>KPI</th><th>Cálculo (resumen)</th><th>Meta M2</th></tr>
+  <tr><td>Match rate</td><td>Cargas con match aceptado / cargas con ≥1 propuesta</td><td>≥ 60%</td></tr>
+  <tr><td>Tiempo a match</td><td>Mediana publicación → <code>accepted</code></td><td>&lt; 4 h</td></tr>
+  <tr><td>Cancelación post-asignación</td><td>Cancelados tras <code>accepted</code> / total aceptados</td><td>&lt; 10%</td></tr>
+  <tr><td>Viajes completados</td><td><code>matches.completed</code> en corredor piloto</td><td>20</td></tr>
+  <tr><td>Take rate efectivo</td><td>12–15% sobre <code>agreed_price_clp</code></td><td>Registrar en piloto</td></tr>
+  <tr><td>Tiempo respuesta carrier</td><td>Propuesta → oferta CLP</td><td>&lt; 2 h laboral</td></tr>
+  <tr><td>NPS ambos roles</td><td>Encuesta manual post-viaje</td><td>≥ 7</td></tr>
+  <tr><td>Repetición embarcador 60 d</td><td>≥ 2 cargas mismo embarcador</td><td>≥ 30%</td></tr>
+</table>
+
+<h2>Matriz de riesgos operacionales</h2>
+<table>
+  <tr><th>Riesgo</th><th>Mitigación piloto</th><th>Responsable</th></tr>
+  <tr><td>Robo / extravío</td><td>011 declaración, incidentes, términos, seguro manual</td><td>Transportista + seguro</td></tr>
+  <tr><td>Carrier fantasma</td><td>Registro empresa, KYC manual</td><td>Plataforma + embarcador</td></tr>
+  <tr><td>Declaración falsa carga</td><td>Valor ref. + guía/folio; sin SII auto aún</td><td>Embarcador</td></tr>
+  <tr><td>No-show / retraso</td><td>Estados, multas, chat</td><td>Transportista</td></tr>
+  <tr><td>Daño mercadería</td><td>Incidente <code>damage</code>; foto entrega (roadmap)</td><td>Partes</td></tr>
+  <tr><td>Disputa «app paga»</td><td>Intermediación explícita; tabla cobertura en anexo piloto</td><td>Plataforma aclara</td></tr>
+</table>
+
+<h2>Cobertura — quién responde (resumen)</h2>
+<p>La plataforma <strong>no transporta</strong> ni <strong>reembolsa</strong> el valor declarado de la mercadería por defecto. Transportista ejecuta el flete; embarcador declara con veracidad; Uber Truck facilita match, registro, chat, incidentes y reglas de cancelación.</p>
+<p>Tabla completa: <a href="Piloto-M2-Corredor-KPIs-Riesgos.html#">anexo piloto §4</a> · <a href="Terminos-Confianza-Carga-Uber-Truck.html">términos cargo-trust-v1</a>.</p>
 
 <h2>Próximos pasos — backlog de actividades (mayo 2026)</h2>
 <p>Prioridad: <strong>P0</strong> bloquea validación; <strong>P1</strong> siguiente entrega; <strong>P2</strong> planificado.</p>
@@ -221,14 +262,18 @@
   <tr><td>U3</td><td>P0</td><td>Memoria + /docs/ en prod</td><td>Gantt y próximos pasos en un solo HTML</td><td>May 2026</td><td class="g-done">Código listo</td></tr>
   <tr><td>U4</td><td>P0</td><td>Scopes por rol + registro empresa</td><td>shipper/carrier/admin + tablero filtrado</td><td>May 2026</td><td class="g-done">Hecho</td></tr>
   <tr><td>U4b</td><td>P1</td><td>Precio oferta/demanda + rango sugerido</td><td>010 SQL, carrier-offer, accept-offer, budget-estimate</td><td>May 2026</td><td class="g-done">Hecho</td></tr>
+  <tr><td>U4c</td><td>P1</td><td>Confianza y declaración de carga</td><td>011 SQL, términos, valor ref., incidentes</td><td>May 2026</td><td class="g-done">Hecho</td></tr>
+  <tr><td>U4d</td><td>P2</td><td>Subida PDF guía + validación SII/DTE</td><td>Storage + facturador autorizado</td><td>Post-piloto</td><td class="g-todo">Plan</td></tr>
   <tr><td>U5</td><td>P1</td><td>UX paridad Uber (copy y pasos)</td><td>Flujo publicar → match → activos unificado</td><td>Jun–Jul 2026</td><td class="g-doing">En curso</td></tr>
-  <tr><td>U6</td><td>P1</td><td>Piloto 20 viajes <strong>solo en la app</strong></td><td>M2 — embarcadores + transportistas reales</td><td>Jul–Ago 2026</td><td class="g-todo">Plan</td></tr>
-  <tr><td>U6b</td><td>P1</td><td>Capturas y métricas piloto</td><td><code>docs/img/</code> + tiempo match, NPS</td><td>Ago 2026</td><td class="g-todo">Plan</td></tr>
+  <tr><td>U6</td><td>P0</td><td>Piloto 20 viajes <strong>corredor RM ↔ V/San Antonio</strong></td><td>M2 — liquidez + densidad</td><td>Jul–Ago 2026</td><td class="g-todo">Plan</td></tr>
+  <tr><td>U6b</td><td>P1</td><td>KPIs marketplace M2 (semanal)</td><td>Match rate, tiempo match, NPS — ver anexo piloto</td><td>Jul–Ago 2026</td><td class="g-doing">Doc listo</td></tr>
+  <tr><td>U6c</td><td>P1</td><td>Reputación v0</td><td>Historial cancelaciones + incidentes por cuenta</td><td>Post 5 viajes</td><td class="g-todo">Plan</td></tr>
+  <tr><td>U6d</td><td>P1</td><td>Evidencia entrega</td><td>Foto + timestamp (antes GPS vivo)</td><td>Post-piloto corto</td><td class="g-todo">Plan</td></tr>
   <tr><td>U7</td><td>P2</td><td>Generar cargo + pasarela</td><td>Webpay / transferencia</td><td>Post-piloto</td><td class="g-todo">Diseño</td></tr>
   <tr><td>U8</td><td>P2</td><td>KYC + ratings</td><td>Fase 3 operativa</td><td>Oct 2026+</td><td class="g-todo">Plan</td></tr>
   <tr><td>U9</td><td>P2</td><td>Match semi-auto corredor</td><td>Algoritmo v1</td><td>Feb 2027</td><td class="g-todo">Plan</td></tr>
 </table>
-<p><strong>No hacer aún:</strong> app móvil nativa, Open Finance, pricing dinámico completo.</p>
+<p><strong>No hacer aún:</strong> app móvil nativa, Open Finance, pricing dinámico completo, expansión multi-corredor, IA innecesaria. Priorizar <strong>rapidez operacional</strong> sobre más pantallas.</p>
 
 <h3>Gantt detallado por tarea (2026–2027)</h3>
 <p>Responsable: <strong>E</strong>=Equipo, <strong>O</strong>=Operaciones/piloto en app, <strong>L</strong>=Legal. Barras ████ = ventana planificada.</p>
@@ -240,7 +285,8 @@
   </tr>
   <tr><td>0.1</td><td>Entrevistas transportistas + PYME</td><td>O</td><td>01-jun</td><td>28-jun</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
   <tr><td>0.2</td><td>Validación precio / comisión 12–15%</td><td>O</td><td>15-jun</td><td>15-jul</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
-  <tr><td>0.3</td><td>Términos legales + seguro piloto</td><td>L</td><td>01-jun</td><td>30-jun</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
+  <tr><td>0.3</td><td>Términos legales + seguro piloto</td><td>L</td><td>01-jun</td><td>30-jun</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Borrador v011 en app</td></tr>
+  <tr><td>2.11</td><td>Confianza carga + incidentes (011)</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
   <tr><td>1.1</td><td>Mis cargas / mis ofertas (owner_user_id)</td><td>E</td><td>01-jun</td><td>30-jun</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
   <tr><td>1.2</td><td>Refino UX flujo tipo Uber</td><td>E</td><td>15-jun</td><td>31-jul</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
   <tr><td>1.3</td><td><strong>Piloto 20 viajes en la app</strong></td><td>O/E</td><td>01-jul</td><td>31-ago</td><td></td><td>████████</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
@@ -289,13 +335,13 @@
 <p><strong>Rol:</strong> registro/login; tabla <code>users</code>; roles <code>shipper</code> / <code>carrier</code>. Sin sesión → sin notificaciones ni cuenta personalizada.</p>
 
 <h2>Capa 06 — Lógica de dominio</h2>
-<p><strong>Rol:</strong> <code>src/lib/</code> — match, cancelación (<code>match-cancel-reasons.js</code>), ledger multas (<code>penalty-ledger.js</code>), repositorio.</p>
+<p><strong>Rol:</strong> <code>src/lib/</code> — match, cancelación (<code>match-cancel-reasons.js</code>), precio (<code>match-price.js</code>), <strong>confianza/carga</strong> (<code>cargo-trust.js</code>), ledger multas, repositorio.</p>
 
 <h2>Capa 07 — Servicios</h2>
 <p><strong>Rol:</strong> <code>src/services/</code> — Supabase client, comms, integraciones futuras (mapas, pagos).</p>
 
 <h2>Capa 08 — Frontend web (SPA ligera)</h2>
-<p><strong>Rol:</strong> <code>public/index.html</code>, <code>app.js</code>, <code>auth-ui.js</code>, <code>comms-ui.js</code>, <code>penalties-ui.js</code>, <code>theme.css</code>. Marca: naranja <code>#F26522</code>.</p>
+<p><strong>Rol:</strong> <code>public/index.html</code>, <code>app.js</code>, <code>maps-ui.js</code>, <code>load-budget-ui.js</code>, <code>auth-ui.js</code>, <code>comms-ui.js</code>, <code>penalties-ui.js</code>, <code>theme.css</code>. Marca: naranja <code>#F26522</code>.</p>
 
 <h2>Capa 09 — Experiencia producto (paridad Uber)</h2>
 <p><strong>Rol:</strong> flujos, copy y pantallas en <code>public/</code> alineados a «pedir → match → viaje activo → historial»; roles embarcador/transportista como pasajero/conductor. Piloto y validación <strong>solo dentro de esta app</strong>, no canales externos.</p>
@@ -320,8 +366,9 @@
 <div class="rule"></div>
 
 <h2>Modelo de datos (resumen)</h2>
-<p><strong>Entidades:</strong> users, vehicles, capacity_offers, load_requests, matches, match_messages, match_notifications, penalty_charges, trip_events (roadmap), ratings (roadmap).</p>
+<p><strong>Entidades:</strong> users, vehicles, capacity_offers, load_requests, matches, match_messages, match_notifications, penalty_charges, <strong>match_incidents</strong>, trip_events (roadmap), ratings (roadmap).</p>
 <p><strong>Precio:</strong> <code>load_requests.budget_min_clp</code>, <code>budget_max_clp</code>; en <code>matches</code>: copia del rango, <code>carrier_offer_clp</code>, <code>agreed_price_clp</code>, <code>price_status</code> (migración <code>010</code>).</p>
+<p><strong>Confianza / carga (011):</strong> en <code>load_requests</code>: <code>cargo_description</code>, <code>declared_cargo_value_clp</code>, <code>has_dispatch_guide</code>, <code>dispatch_guide_folio</code>, <code>requires_cargo_insurance</code>, <code>legal_terms_version</code>, <code>terms_accepted_at</code>. Tabla <code>match_incidents</code> (robo, daño, faltante, atraso, otro). Ver <a href="CARGO-TRUST.md">CARGO-TRUST.md</a> y <a href="Terminos-Confianza-Carga-Uber-Truck.html">términos HTML</a>.</p>
 <p><strong>Estados matches:</strong> proposed → (oferta transportista) → accepted (precio aceptado) → in_progress → completed | cancelled.</p>
 
 <h2>API REST — contrato MVP (mayo 2026)</h2>
@@ -331,7 +378,7 @@
   <tr><td>POST</td><td>/api/auth/register</td><td>Alta empresa (shipper/carrier; admin con clave)</td></tr>
   <tr><td>POST</td><td>/api/auth/login</td><td>JWT</td></tr>
   <tr><td>POST/GET</td><td>/api/capacity-offers</td><td>Oferta (scope por rol)</td></tr>
-  <tr><td>POST/GET</td><td>/api/load-requests</td><td>Carga + <code>budget_*</code></td></tr>
+  <tr><td>POST/GET</td><td>/api/load-requests</td><td>Carga + <code>budget_*</code> + declaración mercadería (términos obligatorios)</td></tr>
   <tr><td>PATCH</td><td>/api/load-requests/:id/budget</td><td>Embarcador amplía rango</td></tr>
   <tr><td>POST</td><td>/api/maps/budget-estimate</td><td>Rango sugerido (km, peso, urgencia)</td></tr>
   <tr><td>POST/PATCH</td><td>/api/matches</td><td>Propuesta + estados viaje</td></tr>
@@ -342,6 +389,7 @@
   <tr><td>GET/POST</td><td>/api/comms/…</td><td>Chat y notificaciones</td></tr>
   <tr><td>GET</td><td>/api/account/summary</td><td>Multas y plazos</td></tr>
   <tr><td>PATCH</td><td>/api/account/bank</td><td>Cuenta bancaria Chile</td></tr>
+  <tr><td>POST/GET</td><td>/api/matches/:id/incidents</td><td>Reportar / listar incidentes (JWT, participantes)</td></tr>
 </table>
 
 <h2>Reglas de negocio MVP</h2>
@@ -353,13 +401,16 @@
   <li>Cancelación: motivos; multas sugeridas; acuerdo mutuo bilateral.</li>
   <li>Roles: shipper ve sus cargas + mercado de ofertas; carrier ve mercado de cargas + sus ofertas; admin ve todo.</li>
   <li>Comisión: take rate 12–15% sobre flete acordado.</li>
+  <li><strong>Confianza:</strong> plataforma como intermediario; embarcador declara mercadería y valor referencial; aceptación <code>cargo-trust-v1</code>; folio guía opcional (sin validación SII automática en MVP).</li>
+  <li><strong>Incidentes:</strong> registro en <code>match_incidents</code>; resolución entre partes y aseguradoras; la app no reembolsa valor declarado por defecto.</li>
 </ul>
 
 <h2>Seguridad y cumplimiento</h2>
 <ul>
   <li>Secretos en <code>.env</code>; RLS Supabase por usuario cuando aplique.</li>
   <li>Ley 19.628 (Chile): minimizar PII en logs.</li>
-  <li>Términos y seguro de carga antes de piloto con cobro real.</li>
+  <li><strong>Términos de confianza y carga</strong> en app + HTML (<a href="Terminos-Confianza-Carga-Uber-Truck.html">borrador operativo</a>); revisión abogado Chile antes de escala comercial.</li>
+  <li>Microseguro y KYC: fase 3; hoy flag <code>requires_cargo_insurance</code> + revisión manual de incidentes <code>open</code>.</li>
 </ul>
 
 <h2>Estructura del repositorio</h2>
@@ -370,6 +421,6 @@
   docs/            ← memoria HTML (este archivo)
   canvases/        ← estado de avance (Cursor)</code>
 
-<p class="meta"><em>Fin del documento — v3.2: precio oferta/demanda, scopes por rol, rango sugerido; piloto en app.</em></p>
+<p class="meta"><em>Fin del documento — v3.4: corredor piloto M2, KPIs marketplace, matriz riesgos, cobertura; confianza 011; precio oferta/demanda.</em></p>
 </body>
 </html>

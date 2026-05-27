@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Piloto M2 — Corredor, KPIs y riesgos — Uber Truck</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.35; max-width: 900px; margin: 2cm auto; color: #111; }
+    h1 { font-size: 17pt; }
+    h2 { font-size: 13pt; margin-top: 1.2em; }
+    table { border-collapse: collapse; width: 100%; margin: 0.8em 0; font-size: 10pt; }
+    th, td { border: 1px solid #444; padding: 6px 8px; vertical-align: top; }
+    th { background: #e8e8e8; }
+    .meta { font-size: 10pt; color: #555; }
+    .warn { background: #fff4e6; border-left: 4px solid #f26522; padding: 0.75rem 1rem; margin: 1em 0; }
+  </style>
+</head>
+<body>
+  <p class="meta"><a href="/docs/">← Documentación</a> · <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica</a> · <a href="Journey-Usuario-Uber-Truck.html">Journey</a></p>
+  <h1>Piloto M2 — Corredor, KPIs marketplace y riesgos</h1>
+  <p class="meta"><strong>Versión:</strong> 1.0 · mayo 2026 · Complementa memoria v3.4 y journey v2.3</p>
+
+  <div class="warn">
+    <strong>Principio del piloto:</strong> validar <strong>liquidez</strong> (cargas y camiones activos al mismo tiempo) en <strong>un solo corredor</strong>, no ampliar features hasta tener 20 viajes completados en la app.
+  </div>
+
+  <h2>1. Corredor único del piloto</h2>
+  <table>
+    <tr><th>Parámetro</th><th>Definición piloto M2</th></tr>
+    <tr><td><strong>Corredor principal</strong></td><td><strong>Región Metropolitana (origen)</strong> ↔ <strong>Valparaíso / San Antonio (destino)</strong> — corredor industrial Puerto / V región</td></tr>
+    <tr><td><strong>Corredor secundario (opcional)</strong></td><td>RM ↔ Rancagua — solo si hay demanda real de un transportista ancla</td></tr>
+    <tr><td><strong>Fuera de corredor</strong></td><td>Se acepta publicación en app (MVP abierto), pero <strong>operación y captación</strong> se enfocan en el corredor principal; no medir KPI M2 con viajes dispersos</td></tr>
+    <tr><td><strong>Meta liquidez semanal</strong></td><td>≥ 3 cargas publicadas <strong>y</strong> ≥ 2 ofertas de capacidad activas en el mismo corredor, simultáneamente</td></tr>
+    <tr><td><strong>Ancla operacional</strong></td><td>1 transportista con ruta fija semanal + 2–3 embarcadores PYME del nodo (San Bernardo / RM sur)</td></tr>
+  </table>
+  <p>Objetivo: <strong>densidad operacional</strong> (menos km vacíos en trayectos ya planificados), no cobertura nacional.</p>
+
+  <h2>2. KPIs marketplace — piloto M2 (20 viajes)</h2>
+  <table>
+    <tr><th>KPI</th><th>Cómo se calcula</th><th>Fuente datos</th><th>Meta M2</th></tr>
+    <tr><td><strong>Match rate</strong></td><td>Matches <code>accepted</code> o posteriores / cargas <code>published</code> que recibieron ≥1 propuesta</td><td><code>load_requests</code>, <code>matches</code></td><td>≥ 60%</td></tr>
+    <tr><td><strong>Tiempo medio a match</strong></td><td>Mediana minutos desde <code>load_requests.created_at</code> hasta primer match <code>accepted</code></td><td>Supabase</td><td>&lt; 4 h (mediana); aspiracional &lt; 1 h</td></tr>
+    <tr><td><strong>% cancelación post-asignación</strong></td><td>Matches cancelados después de <code>accepted</code> / matches que llegaron a <code>accepted</code></td><td><code>matches</code></td><td>&lt; 10%</td></tr>
+    <tr><td><strong>Viajes completados</strong></td><td>Matches <code>completed</code> en corredor piloto</td><td><code>matches</code> + filtro región/ciudad</td><td>20</td></tr>
+    <tr><td><strong>Revenue plataforma (take rate)</strong></td><td>12–15% × <code>agreed_price_clp</code> por viaje completado</td><td>Matches + acuerdo comercial</td><td>Registrar CLP real cobrado manual en piloto</td></tr>
+    <tr><td><strong>Tiempo respuesta transportista</strong></td><td>Mediana desde propuesta <code>proposed</code> hasta <code>carrier_offer_clp</code> o aceptación</td><td><code>matches</code>, chat</td><td>&lt; 2 h en horario laboral</td></tr>
+    <tr><td><strong>Km vacíos recuperados (estimado)</strong></td><td><code>distance_km</code> del match × factor utilización declarado por transportista (encuesta)</td><td>Maps + encuesta piloto</td><td>Documentar en informe M2 (no bloqueante app)</td></tr>
+    <tr><td><strong>NPS embarcador / transportista</strong></td><td>Encuesta 0–10 post viaje (manual)</td><td>Planilla / formulario</td><td>≥ 7</td></tr>
+    <tr><td><strong>Repetición 60 días</strong></td><td>% embarcadores con ≥2 cargas publicadas en 60 días</td><td><code>load_requests</code></td><td>≥ 30%</td></tr>
+  </table>
+  <p class="meta">Revisión semanal en piloto: exportar desde Supabase o tablero admin (futuro).</p>
+
+  <h2>3. Matriz de riesgos operacionales (LATAM)</h2>
+  <table>
+    <tr><th>Riesgo</th><th>Impacto</th><th>Mitigación en piloto</th><th>Responsable principal</th></tr>
+    <tr><td>Robo / extravío de carga</td><td>Alto</td><td>Declaración + valor ref. + incidentes; términos; seguro manual si aplica</td><td>Transportista + aseguradora · plataforma registra</td></tr>
+    <tr><td>Carrier fantasma / cuenta falsa</td><td>Alto</td><td>Registro empresa + JWT; KYC manual antes de alto volumen</td><td>Plataforma (onboarding) + embarcador (due diligence)</td></tr>
+    <tr><td>Embarcador declara mal peso/valor</td><td>Medio</td><td>Descripción obligatoria; folio guía; sin validación SII automática aún</td><td>Embarcador (términos)</td></tr>
+    <tr><td>Retraso / no-show</td><td>Medio</td><td>Estados viaje; multas sugeridas; chat; reputación (fase 3)</td><td>Transportista · multa entre partes</td></tr>
+    <tr><td>Daño parcial mercadería</td><td>Medio</td><td>Incidente <code>damage</code>; evidencia foto (roadmap)</td><td>Partes + seguro</td></tr>
+    <tr><td>Fraude en precio / no pago</td><td>Medio</td><td>Oferta/aceptación en app; cobro pasarela post-piloto</td><td>Partes hasta pasarela</td></tr>
+    <tr><td>Cancelación oportunista</td><td>Medio</td><td>Política cancelación + acuerdo mutuo + multas</td><td>Parte que cancela según motivo</td></tr>
+    <tr><td>Disputa «la app debe pagar»</td><td>Alto reputación</td><td>Copy intermediación; <a href="Terminos-Confianza-Carga-Uber-Truck.html">términos</a>; tabla «quién responde» abajo</td><td>Plataforma aclara rol · no indemniza por defecto</td></tr>
+  </table>
+
+  <h2>4. Quién responde — cobertura (piloto)</h2>
+  <table>
+    <tr><th>Situación</th><th>Transportista</th><th>Embarcador</th><th>Uber Truck (plataforma)</th></tr>
+    <tr><td>Ejecución del flete</td><td>Sí — prestador del servicio</td><td>Contrata vía match</td><td>No — intermediario</td></tr>
+    <tr><td>Integridad de la carga en ruta</td><td>Sí — contractual / seguro propio</td><td>Declaración veraz</td><td>No garantiza · registra incidentes</td></tr>
+    <tr><td>Robo / pérdida total</td><td>Primario (+ seguro si tiene)</td><td>Reclamo a transportista/aseguradora</td><td>Cooperación con datos · sin reembolso automático</td></tr>
+    <tr><td>Cancelación según política</td><td>Según motivo y etapa</td><td>Según motivo y etapa</td><td>Multa sugerida · no cobro automático en MVP</td></tr>
+    <tr><td>Disponibilidad de la app</td><td>—</td><td>—</td><td>Sí — funcionamiento razonable del servicio digital</td></tr>
+    <tr><td>Microseguro por viaje</td><td>Beneficiario vía póliza</td><td>Contratante interés</td><td>Fase 3 — facilitador, no asegurador</td></tr>
+  </table>
+
+  <h2>5. Roadmap inmediato (post-documentación)</h2>
+  <ol>
+    <li>Operar 20 viajes en corredor RM ↔ Valparaíso/San Antonio.</li>
+    <li>Medir KPIs tabla §2 cada semana.</li>
+    <li>Reputación v0 (historial cancelaciones + incidentes) antes de GPS en vivo.</li>
+    <li>Evidencia entrega (foto + timestamp) antes de mapa tracking completo.</li>
+  </ol>
+
+  <p class="meta"><em>Fin — anexo piloto M2 · derivado de revisión documentación operacional.</em></p>
+</body>
+</html>

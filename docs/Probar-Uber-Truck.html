@@ -25,7 +25,7 @@
   <img src="/brand/logo.png" width="72" height="72" alt="Uber Truck" />
   <div class="doc-title-wrap">
     <h1>Cómo probar Uber Truck</h1>
-    <p class="meta">Para testers · mayo 2026 (v2) · Sin instalar programas ni acceder a la base de datos</p>
+    <p class="meta">Para testers · mayo 2026 (v3) · Sin instalar programas ni acceder a la base de datos</p>
   </div>
 </div>
 
@@ -64,12 +64,17 @@
   <tr><td>Dos personas</td><td>Una crea cuenta embarcador, otra transportista, y hacen match en el tablero</td></tr>
 </table>
 
-<h2>4. Flujo de prueba (10 minutos)</h2>
+<h2>4. Piloto M2 — corredor recomendado</h2>
+<p>Para pruebas que cuenten para el piloto de 20 viajes, usa rutas en el corredor <strong>RM → Valparaíso o San Antonio</strong> (origen y destino desde Maps). Detalle: <a href="Piloto-M2-Corredor-KPIs-Riesgos.html">Piloto M2 — corredor y KPIs</a>.</p>
+
+<h2>5. Flujo de prueba (10 minutos)</h2>
 <ol>
   <li><strong>Embarcador</strong> — pestaña <strong>Mis cargas</strong>:
     <ul>
       <li>Origen y destino desde la <strong>lista de Google Maps</strong> (obligatorio elegir sugerencia).</li>
-      <li>Cubicación, peso y <strong>rango de presupuesto</strong> (mín–máx CLP). Opcional: <strong>Ver rango sugerido</strong> (usa distancia, peso y urgencia).</li>
+      <li>Cubicación, peso y <strong>rango de presupuesto del flete</strong> (mín–máx CLP). Opcional: <strong>Ver rango sugerido</strong>.</li>
+      <li><strong>Declaración de mercadería:</strong> descripción, <strong>valor referencial CLP</strong> (valor de la carga, no del flete), guía de despacho (sí/no), folio opcional.</li>
+      <li>Marca la casilla de <strong>términos de confianza y carga</strong> (enlace al documento legal en borrador).</li>
     </ul>
   </li>
   <li><strong>Transportista</strong> — pestaña <strong>Mis ofertas</strong>: publicar capacidad en ruta compatible (también con dirección validada en Maps).</li>
@@ -81,9 +86,20 @@
     </ul>
   </li>
   <li><strong>Chat</strong> y <strong>notificaciones</strong> (campana) con sesión iniciada.</li>
+  <li>Con viaje <strong>aceptado o en ruta</strong>: prueba <strong>Reportar incidente</strong> (robo, daño, etc.) — queda registrado; la app no paga automáticamente.</li>
 </ol>
 
-<h2>5. Precios (oferta / demanda)</h2>
+<h2>6. Confianza y carga</h2>
+<table>
+  <tr><th>Concepto</th><th>Qué probar</th></tr>
+  <tr><td>Valor referencial</td><td>Distinto del presupuesto de flete; aparece en tablero en línea azul.</td></tr>
+  <tr><td>Términos</td><td>Sin marcar la casilla no deja publicar.</td></tr>
+  <tr><td>Guía SII</td><td>Solo folio manual en piloto; no hay validación automática aún.</td></tr>
+  <tr><td>Incidente</td><td>Botón en emparejamiento activo; tipos: theft, damage, shortage, delay, other.</td></tr>
+</table>
+<p><a href="Terminos-Confianza-Carga-Uber-Truck.html">Términos de confianza y carga</a></p>
+
+<h2>7. Precios (oferta / demanda)</h2>
 <table>
   <tr><th>Situación</th><th>Qué esperar</th></tr>
   <tr><td>Rango del embarcador</td><td>Orientativo; no impide que el transportista oferte otro monto.</td></tr>
@@ -91,16 +107,18 @@
   <tr><td>Ampliar rango</td><td>Solo embarcador; no si ya hay otro match con precio acordado.</td></tr>
 </table>
 
-<h2>6. Si algo falla</h2>
+<h2>8. Si algo falla</h2>
 <table>
   <tr><th>Error</th><th>Qué hacer</th></tr>
   <tr><td>«Registro no disponible» o «base de datos no configurada»</td><td>El servidor aún no está listo; avisa al dueño del proyecto (no es culpa tuya).</td></tr>
   <tr><td>«Email ya registrado»</td><td>Usa <strong>Ingresar</strong> con esa cuenta o otro email.</td></tr>
   <tr><td>No ves notificaciones</td><td>Debes estar con <strong>Ingresar</strong>, no solo modo demo sin login.</td></tr>
+  <tr><td>Error al publicar carga (columna desconocida)</td><td>Dueño del proyecto: aplicar migración <code>011</code> en Supabase.</td></tr>
+  <tr><td>Error al reportar incidente</td><td>Misma migración <code>011</code> (tabla <code>match_incidents</code>).</td></tr>
 </table>
 
-<h2>7. Para el dueño del proyecto (solo Ariel)</h2>
-<p class="meta">Los testers no hacen esto. Base de datos conectada, variables Railway y migraciones <code>003</code>–<code>010</code> (incluye presupuesto y precios en matches).</p>
+<h2>9. Para el dueño del proyecto (solo Ariel)</h2>
+<p class="meta">Los testers no hacen esto. Base de datos conectada, variables Railway y migraciones <code>003</code>–<code>011</code> (precios 010, confianza/carga e incidentes 011).</p>
 
 <p class="meta">
   <a href="Journey-Usuario-Uber-Truck.html">Journey del usuario</a> ·

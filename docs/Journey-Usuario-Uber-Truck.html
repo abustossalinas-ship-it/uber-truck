@@ -28,7 +28,7 @@
   <div class="doc-title-wrap">
     <h1>Journey de usuario — Uber Truck</h1>
     <p class="meta"><strong>Producto:</strong> App tipo Uber para carga por camión (backhaul).<br />
-    <strong>Versión:</strong> 2.1 · mayo 2026 · Canal MVP: <strong>solo la app</strong> (web / PWA)</p>
+    <strong>Versión:</strong> 2.3 · mayo 2026 · Canal MVP: <strong>solo la app</strong> (web / PWA)</p>
   </div>
 </div>
 
@@ -36,13 +36,14 @@
 
 <h2>1. Propósito</h2>
 <p>Recorridos end-to-end de <strong>transportista</strong> y <strong>embarcador</strong> usando la misma lógica mental que Uber: publicar → emparejar → viaje activo → cerrar. Incluye emociones, fricciones y métricas por etapa.</p>
+<p><strong>Piloto M2:</strong> validar liquidez en <strong>un corredor</strong> (RM ↔ Valparaíso / San Antonio). Ver <a href="Piloto-M2-Corredor-KPIs-Riesgos.html">corredor, KPIs y riesgos</a>.</p>
 
 <h2>2. Actores</h2>
 <table>
   <tr><th>Actor</th><th>Rol en la app</th><th>Analogía Uber</th></tr>
   <tr><td><strong>Transportista</strong></td><td>Publica capacidad, acepta match, ejecuta viaje</td><td>Conductor</td></tr>
   <tr><td><strong>Embarcador</strong></td><td>Publica carga, elige/acepta transportista</td><td>Pasajero / quien pide</td></tr>
-  <tr><td><strong>Plataforma</strong></td><td>Match, estados, chat, notificaciones, multas</td><td>App Uber</td></tr>
+  <tr><td><strong>Plataforma</strong></td><td>Match, estados, chat, notificaciones, multas, registro de incidentes</td><td>App Uber</td></tr>
 </table>
 <p>No hay operador externo ni WhatsApp como producto principal en el MVP.</p>
 
@@ -54,7 +55,8 @@
   <tr><td>3. Publicar capacidad</td><td>Origen, destino, m³, tipo carga, ventana</td><td>Formulario transportista</td><td>«Que sea rápido»</td><td>Oferta publicada (&lt; 3 min)</td></tr>
   <tr><td>4. Propuesta + precio</td><td>Elige carga, envía <strong>oferta en CLP</strong> (puede estar fuera del rango del embarcador)</td><td>Tablero paso 3</td><td>«¿Me pagan bien el desvío?»</td><td>Oferta visible al embarcador</td></tr>
   <tr><td>5. Match</td><td>Embarcador <strong>acepta precio</strong> → match confirmado</td><td>Emparejamientos</td><td>«¿Cierra el trato?»</td><td>Aceptado en &lt; 30 min</td></tr>
-  <tr><td>6. Viaje activo</td><td>Estados: aceptado → en ejecución</td><td>Emparejamientos activos</td><td>Espera en planta</td><td>Estado actualizado</td></tr>
+  <tr><td>6. Viaje activo</td><td>Estados: aceptado → en ejecución; ve valor ref. mercadería declarado por embarcador</td><td>Emparejamientos activos</td><td>Espera en planta</td><td>Estado actualizado</td></tr>
+  <tr><td>6b. Incidente (si aplica)</td><td>Reportar robo, daño, faltante, atraso</td><td>«Reportar incidente»</td><td>«¿Quién responde?»</td><td>Registro en plataforma</td></tr>
   <tr><td>7. Chat</td><td>Coordina retiro/entrega con embarcador</td><td>Chat in-app</td><td>«¿Me responden?»</td><td>Mensaje &lt; 15 min</td></tr>
   <tr><td>8. Cierre</td><td>Completado; cobro acordado; calificación (fase 3)</td><td>Estado completado + cuenta</td><td>«¿Vuelvo a usar?»</td><td>Pago acordado · vuelve a publicar</td></tr>
 </table>
@@ -64,10 +66,11 @@
   <tr><th>Etapa</th><th>Acción</th><th>En la app</th><th>Emoción</th><th>Éxito</th></tr>
   <tr><td>1. Necesidad</td><td>Carga urgente (ej. 2 pallets mañana)</td><td>—</td><td>«No hay camión»</td><td>Entra a la app</td></tr>
   <tr><td>2. Registro</td><td>Login, rol embarcador</td><td>Registro / JWT</td><td>«¿Es confiable?»</td><td>Cuenta activa</td></tr>
-  <tr><td>3. Publicar carga</td><td>Origen, destino, peso/volumen, urgencia, <strong>rango CLP</strong> (botón «Ver rango sugerido»)</td><td>Formulario embarcador</td><td>«Rápido y barato»</td><td>Carga publicada</td></tr>
+  <tr><td>3. Publicar carga</td><td>Maps, peso/volumen, <strong>declaración mercadería</strong> (descripción + valor ref. CLP), guía/folio, <strong>términos</strong>, rango flete («Ver rango sugerido»)</td><td>Formulario embarcador</td><td>«¿Me cubren si pasa algo?»</td><td>Carga publicada con términos aceptados</td></tr>
   <tr><td>4. Propuesta</td><td>Ve ofertas; transportista envía precio</td><td>Tablero + sugerencias</td><td>«¿Es justo?»</td><td>Compara ofertas</td></tr>
   <tr><td>5. Aceptar precio</td><td><strong>Aceptar precio y confirmar match</strong> (o ampliar rango si la oferta venía fuera)</td><td>Emparejamientos</td><td>«¿Cierro?»</td><td>Match aceptado</td></tr>
-  <tr><td>6. Viaje activo</td><td>Sigue estados y chat</td><td>Activos + notificaciones</td><td>Ansiedad SLA</td><td>Visibilidad sin llamar</td></tr>
+  <tr><td>6. Viaje activo</td><td>Sigue estados, chat y datos de carga declarados</td><td>Activos + notificaciones</td><td>Ansiedad SLA</td><td>Visibilidad sin llamar</td></tr>
+  <tr><td>6b. Incidente</td><td>Robo, daño, faltante → reporte en app</td><td>«Reportar incidente»</td><td>«¿La plataforma paga?»</td><td>Antecedente registrado (resolución entre partes)</td></tr>
   <tr><td>7. Cancelar (si aplica)</td><td>Motivo, acuerdo mutuo o multa sugerida</td><td>Modal cancelación</td><td>«¿Cuánto me cobran?»</td><td>Regla clara</td></tr>
   <tr><td>8. Cierre</td><td>Entregado; califica (fase 3)</td><td>Completado</td><td>«¿Lo uso otra vez?»</td><td>NPS ≥ 8</td></tr>
 </table>
@@ -83,9 +86,19 @@
   <tr><td>Mis viajes</td><td>Mis cargas / mis ofertas (pendiente)</td></tr>
   <tr><td>Pago en app</td><td>Pasarela (pendiente)</td></tr>
   <tr><td>Tarifa / oferta</td><td>Rango embarcador + oferta transportista + aceptación</td></tr>
+  <tr><td>Seguro / garantía de viaje</td><td>Valor ref. mercadería + términos (seguro integrado: fase 3)</td></tr>
 </table>
 
-<h2>6. Negociación de precio (oferta / demanda)</h2>
+<h2>6. Confianza y declaración de carga</h2>
+<ol>
+  <li><strong>Embarcador</strong> describe la mercadería y declara un <strong>valor referencial en CLP</strong> (no es el precio del flete).</li>
+  <li>Indica si lleva <strong>guía de despacho o factura</strong> y puede anotar el folio (validación SII automática: fase posterior).</li>
+  <li>Acepta los <a href="Terminos-Confianza-Carga-Uber-Truck.html">términos de confianza y carga</a>: la plataforma <strong>intermedia</strong>, no transporta ni garantiza la mercadería.</li>
+  <li>En viaje activo, cualquier parte puede <strong>reportar un incidente</strong> (robo, daño, faltante, atraso). La resolución económica es entre empresas y aseguradoras.</li>
+</ol>
+<p class="meta">Detalle técnico: <a href="CARGO-TRUST.md">CARGO-TRUST.md</a> · Memoria: <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica</a>.</p>
+
+<h2>7. Negociación de precio (oferta / demanda)</h2>
 <ol>
   <li><strong>Embarcador</strong> publica un <strong>rango orientativo</strong> (mín–máx CLP). Puede usar «Ver rango sugerido» (referencia por km, peso y urgencia).</li>
   <li><strong>Transportista</strong> crea propuesta de match y envía <strong>su monto en CLP</strong> (válido aunque esté fuera del rango).</li>
@@ -93,30 +106,47 @@
   <li>A futuro: fórmula/tarifario más fino; hoy el rango no bloquea ofertas del mercado.</li>
 </ol>
 
-<h2>7. Estados en la app</h2>
+<h2>8. Estados en la app</h2>
 <p><strong>Oferta capacidad:</strong> draft · published · reserved · expired · cancelled</p>
 <p><strong>Demanda carga:</strong> draft · published · matched · in_transit · delivered · cancelled</p>
 <p><strong>Match:</strong> proposed · accepted · in_progress · completed · disputed (+ cancelación y multas)</p>
 
-<h2>8. Fricciones y mitigación</h2>
+<h2>9. Fricciones y mitigación</h2>
 <ul>
+  <li><strong>Robo / pérdida:</strong> declaración + términos + incidentes en app; seguro integrado fase 3.</li>
+  <li><strong>«¿La app paga?»:</strong> copy claro: intermediación; valor ref. para seguro entre partes.</li>
   <li><strong>Confianza:</strong> KYC y vehículo (manual en piloto).</li>
-  <li><strong>Seguro:</strong> microseguro por trayecto (fase 3).</li>
   <li><strong>Cancelaciones:</strong> política en app + acuerdo mutuo.</li>
   <li><strong>Espera en planta:</strong> rating futuro por tiempos de bahía.</li>
 </ul>
 
-<h2>9. Métricas piloto (20 viajes en app)</h2>
+<h2>10. Corredor y liquidez (piloto M2)</h2>
+<ul>
+  <li><strong>Enfoque:</strong> RM (origen) ↔ Valparaíso / San Antonio — no dispersar el piloto en rutas sin densidad.</li>
+  <li><strong>Semanal:</strong> al menos 3 cargas y 2 ofertas activas en el mismo corredor.</li>
+  <li><strong>Éxito M2:</strong> 20 viajes <code>completed</code> medidos con KPIs de marketplace (match rate, tiempo, cancelación, NPS).</li>
+</ul>
+
+<h2>11. KPIs marketplace (20 viajes)</h2>
 <table>
-  <tr><th>Métrica</th><th>Meta</th></tr>
-  <tr><td>Publicación → match</td><td>&lt; 1 h</td></tr>
-  <tr><td>Viajes completados en app</td><td>20</td></tr>
+  <tr><th>KPI</th><th>Meta M2</th></tr>
+  <tr><td>Match rate</td><td>≥ 60%</td></tr>
+  <tr><td>Tiempo mediano a match</td><td>&lt; 4 h</td></tr>
+  <tr><td>Viajes completados (corredor piloto)</td><td>20</td></tr>
   <tr><td>Cancelación post-asignación</td><td>&lt; 10%</td></tr>
+  <tr><td>Take rate registrado</td><td>12–15% sobre precio acordado</td></tr>
+  <tr><td>Tiempo respuesta transportista</td><td>&lt; 2 h (horario laboral)</td></tr>
+  <tr><td>NPS embarcador / transportista</td><td>≥ 7</td></tr>
   <tr><td>Repetición embarcador 60 días</td><td>≥ 30%</td></tr>
 </table>
+<p>Definiciones y fuente de datos: <a href="Piloto-M2-Corredor-KPIs-Riesgos.html">anexo piloto M2</a>.</p>
 
-<p class="meta">Modelo de negocio: <a href="Modelo-Negocio-Uber-Truck.html">Modelo-Negocio-Uber-Truck.html</a> · Gantt y backlog: <a href="Memoria-tecnica-Uber-Truck.html">Memoria-tecnica-Uber-Truck.html</a></p>
+<h2>12. Riesgos y quién responde (resumen)</h2>
+<p>Robo, carrier fantasma, retrasos y daños se mitigan con registro, términos, incidentes y (futuro) reputación y seguro. La <strong>app no sustituye</strong> al transportista ni paga la mercadería por defecto.</p>
+<p>Matriz completa y tabla de cobertura: <a href="Piloto-M2-Corredor-KPIs-Riesgos.html">Piloto M2 — riesgos</a> · <a href="Terminos-Confianza-Carga-Uber-Truck.html">Términos</a>.</p>
 
-<p class="meta"><em>Fin del documento — v2.1 · precio oferta/demanda · patrón Uber.</em></p>
+<p class="meta">Modelo de negocio: <a href="Modelo-Negocio-Uber-Truck.html">Modelo-Negocio-Uber-Truck.html</a> · Gantt y backlog: <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica v3.4</a></p>
+
+<p class="meta"><em>Fin del documento — v2.3 · corredor M2 + KPIs marketplace + riesgos · confianza/carga · patrón Uber.</em></p>
 </body>
 </html>

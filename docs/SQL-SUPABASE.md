@@ -2,7 +2,7 @@
 
 Ejecutar en [SQL Editor](https://supabase.com/dashboard/project/ljinhegtywixtbzjgjfn/sql/new) del proyecto **ljinhegtywixtbzjgjfn**.
 
-**Orden:** si es instalación nueva, corre primero `001_init.sql` y `003_auth_password.sql` desde `supabase/migrations/`. Luego pega **todo** el bloque siguiente (004–008).
+**Orden:** instalación nueva → `001_init.sql`, `003_auth_password.sql`, luego 004–008 (bloque abajo), `010_price_negotiation.sql`, **`011_cargo_trust.sql`**.
 
 **Archivo en repo:** `supabase/migrations/RUN_PENDING.sql`
 

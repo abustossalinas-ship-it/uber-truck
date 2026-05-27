@@ -26,6 +26,8 @@ No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitáco
 | Resumen canvas | [Canvas-Resumen-Uber-Truck.html](./Canvas-Resumen-Uber-Truck.html) |
 | Cancelación / multas | [Politica-Cancelacion-Uber-Truck.html](./Politica-Cancelacion-Uber-Truck.html) · [Multas-Cuenta-Uber-Truck.html](./Multas-Cuenta-Uber-Truck.html) |
 | SQL Supabase | [Sql-Supabase-Uber-Truck.html](./Sql-Supabase-Uber-Truck.html) · [SQL-SUPABASE.md](./SQL-SUPABASE.md) |
+| Confianza y carga | [CARGO-TRUST.md](./CARGO-TRUST.md) · [Terminos-Confianza-Carga-Uber-Truck.html](./Terminos-Confianza-Carga-Uber-Truck.html) |
+| Piloto M2 (corredor, KPIs, riesgos) | [Piloto-M2-Corredor-KPIs-Riesgos.html](./Piloto-M2-Corredor-KPIs-Riesgos.html) |
 
 ---
 

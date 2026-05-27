@@ -51,22 +51,28 @@ router.post('/:id/rate', optionalAuth, requireAuthIfDb, async (req, res) => {
       return res.status(409).json({ ok: false, error: 'Ya calificaste este viaje' });
     }
 
-    const userId = req.user.sub || req.user.id;
     const rating = buildRatingInsert(role, req.body);
     const baseRow = {
       match_id: match.id,
       rater_role: role,
-      rater_user_id: userId || null,
       stars: rating.stars,
       comment: rating.comment,
     };
-    const baseSelect =
-      'id, match_id, rater_role, rater_user_id, stars, comment, created_at';
-    const { data: inserted, error: insErr } = await sb
+    const returnCols = 'id, match_id, rater_role, stars, comment, created_at';
+    let inserted;
+    let insErr;
+    ({ data: inserted, error: insErr } = await sb
       .from('match_ratings')
       .insert(baseRow)
-      .select(baseSelect)
-      .single();
+      .select(returnCols)
+      .single());
+    if (insErr && /rater_user_id|schema cache|PGRST204|PGRST205/i.test(insErr.message || '')) {
+      ({ data: inserted, error: insErr } = await sb
+        .from('match_ratings')
+        .insert(baseRow)
+        .select('id, stars, comment')
+        .single());
+    }
     if (insErr) throw insErr;
 
     let row = inserted;
@@ -79,7 +85,7 @@ router.post('/:id/rate', optionalAuth, requireAuthIfDb, async (req, res) => {
           tag_band: rating.tag_band,
         })
         .eq('id', row.id)
-        .select(`${baseSelect}, tags, tag_band`)
+        .select('id, stars, comment, tags, tag_band')
         .single();
       if (upErr) {
         console.error('match_ratings tags update:', upErr.message || upErr);

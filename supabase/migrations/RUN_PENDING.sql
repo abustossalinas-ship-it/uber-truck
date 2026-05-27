@@ -49,3 +49,7 @@ CREATE INDEX IF NOT EXISTS idx_match_ratings_match ON match_ratings (match_id);
 ALTER TABLE match_ratings
   ADD COLUMN IF NOT EXISTS tags TEXT[] NOT NULL DEFAULT '{}',
   ADD COLUMN IF NOT EXISTS tag_band TEXT CHECK (tag_band IN ('low', 'mid', 'high'));
+
+-- 014 — rater_user_id si falta
+ALTER TABLE match_ratings
+  ADD COLUMN IF NOT EXISTS rater_user_id UUID REFERENCES users (id);

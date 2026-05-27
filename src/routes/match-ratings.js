@@ -53,40 +53,36 @@ router.post('/:id/rate', optionalAuth, requireAuthIfDb, async (req, res) => {
 
     const userId = req.user.sub || req.user.id;
     const rating = buildRatingInsert(role, req.body);
-    const fullRow = {
+    const baseRow = {
       match_id: match.id,
       rater_role: role,
       rater_user_id: userId || null,
       stars: rating.stars,
-      tags: rating.tags,
-      tag_band: rating.tag_band,
       comment: rating.comment,
     };
-    let row;
-    let tagsDeferred = false;
-    try {
-      row = await repo.insert('match_ratings', fullRow);
-    } catch (insertErr) {
-      const msg = insertErr?.message || '';
-      const code = insertErr?.code;
-      const missingTags =
-        code === '42703' ||
-        code === 'PGRST204' ||
-        code === 'PGRST205' ||
-        /Could not find the .*column/i.test(msg) ||
-        /schema cache/i.test(msg);
-      if (!missingTags) throw insertErr;
-      const { tags: _t, tag_band: _b, ...legacyRow } = fullRow;
-      row = await repo.insert('match_ratings', legacyRow);
-      tagsDeferred = true;
+    let row = await repo.insert('match_ratings', baseRow);
+    let tagsSaved = !(rating.tags && rating.tags.length);
+    if (rating.tags?.length) {
+      try {
+        row = await repo.update('match_ratings', row.id, {
+          tags: rating.tags,
+          tag_band: rating.tag_band,
+        });
+        tagsSaved = true;
+      } catch (tagErr) {
+        console.error('match_ratings tags update:', tagErr.message || tagErr);
+        tagsSaved = false;
+      }
+    } else {
+      tagsSaved = true;
     }
     res.status(201).json({
       ok: true,
       data: row,
-      tags_saved: !tagsDeferred,
-      message: tagsDeferred
-        ? 'Calificación guardada (estrellas y comentario). Para guardar también los chips, aplica SQL 013 y Reload schema en Supabase.'
-        : 'Gracias. Tu calificación ayuda a la confianza en la red.',
+      tags_saved: tagsSaved,
+      message: tagsSaved
+        ? 'Gracias. Tu calificación ayuda a la confianza en la red.'
+        : 'Calificación guardada con estrellas y comentario. Los chips no se guardaron; recarga la página e intenta de nuevo o avisa soporte.',
     });
   } catch (e) {
     console.error(e);

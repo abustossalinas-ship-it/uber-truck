@@ -690,10 +690,14 @@ let cancelReasonOptions = [];
 let lastMutualCancelForLayout = null;
 
 function showTab(name) {
+  if (!name) return;
+  const panel = $(`panel-${name}`);
+  const tab = document.querySelector(`#main-nav [data-tab="${name}"]`);
+  if (!panel || !tab) return;
   document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach((t) => t.classList.remove('active'));
-  $(`panel-${name}`).classList.add('active');
-  document.querySelector(`[data-tab="${name}"]`).classList.add('active');
+  document.querySelectorAll('#main-nav .tab').forEach((t) => t.classList.remove('active'));
+  panel.classList.add('active');
+  tab.classList.add('active');
   if (name === 'board') refreshBoard();
 }
 
@@ -913,7 +917,7 @@ function cleanFormBody(fd) {
   return body;
 }
 
-document.querySelectorAll('.tab').forEach((btn) => {
+document.querySelectorAll('#main-nav .tab[data-tab]').forEach((btn) => {
   btn.addEventListener('click', () => showTab(btn.dataset.tab));
 });
 

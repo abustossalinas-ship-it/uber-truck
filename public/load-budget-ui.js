@@ -39,7 +39,8 @@ async function applyBudgetHintFromForm(form) {
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('form-load');
-  document.getElementById('btn-budget-hint')?.addEventListener('click', () => {
+  document.getElementById('btn-budget-hint')?.addEventListener('click', (e) => {
+    e.preventDefault();
     applyBudgetHintFromForm(form);
   });
 });

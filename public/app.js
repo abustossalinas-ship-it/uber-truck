@@ -1318,8 +1318,10 @@ fetch('/health')
     if (!el) return;
     if (h.ui?.startsWith('match-cancel') || h.ui === 'match-flow-v3') {
       let label = `v${h.version || '?'} · motivos y multas sugeridas`;
-      if (h.supabase?.match_ratings_table === false) {
-        label += ' · ⚠ calificaciones: recarga schema Supabase';
+      if (h.supabase?.match_ratings_tags_column === false) {
+        label += ' · ⚠ aplica SQL 013 + Reload schema';
+      } else if (h.supabase?.match_ratings_table === false) {
+        label += ' · ⚠ calificaciones: aplica SQL 012';
       }
       el.textContent = label;
     } else if (h.storage === 'supabase' && h.supabase?.connected) {

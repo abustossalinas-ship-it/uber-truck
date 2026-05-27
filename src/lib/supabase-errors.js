@@ -20,11 +20,16 @@ function mapDbError(e, context) {
   if (code === '23505' && /match_ratings/i.test(msg)) {
     return { status: 409, error: 'Ya calificaste este viaje.' };
   }
-  if (code === 'PGRST205' || /schema cache/i.test(msg)) {
+  if (
+    code === 'PGRST205' ||
+    code === 'PGRST204' ||
+    /schema cache/i.test(msg) ||
+    /Could not find the .* column/i.test(msg)
+  ) {
     return {
       status: 503,
       error:
-        'Supabase aún no actualizó el esquema tras el SQL 012. En el panel: Settings → API → Reload schema, espera un minuto y reintenta.',
+        'Supabase no ve las columnas nuevas (migración 013: tags). Ejecuta 013_rating_tags.sql, luego Supabase → Settings → API → Reload schema y espera 1 minuto.',
     };
   }
   if (/match_ratings/i.test(msg) && /permission|policy|RLS/i.test(msg)) {

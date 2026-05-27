@@ -36,6 +36,8 @@ app.get('/health', async (_req, res) => {
   const projectRef = supabaseUrl.match(/https:\/\/([^.]+)\.supabase\.co/)?.[1] || null;
   let ratingsTableOk = null;
   let ratingsTableError = null;
+  let ratingsTagsOk = null;
+  let ratingsTagsError = null;
   if (supabaseReady) {
     try {
       const sb = supabaseService.getClient();
@@ -45,11 +47,16 @@ app.get('/health', async (_req, res) => {
       const { error: rErr } = await sb.from('match_ratings').select('id').limit(1);
       ratingsTableOk = !rErr;
       if (rErr) ratingsTableError = rErr.message;
+      const { error: tErr } = await sb.from('match_ratings').select('id, tags, tag_band').limit(1);
+      ratingsTagsOk = !tErr;
+      if (tErr) ratingsTagsError = tErr.message;
     } catch (e) {
       supabaseOk = false;
       supabaseError = e.message;
       ratingsTableOk = false;
       ratingsTableError = e.message;
+      ratingsTagsOk = false;
+      ratingsTagsError = e.message;
     }
   }
   const manifest = readDeployManifest();
@@ -89,9 +96,19 @@ app.get('/health', async (_req, res) => {
       configured: supabaseReady,
       connected: supabaseOk,
       match_ratings_table: ratingsTableOk,
+      match_ratings_tags_column: ratingsTagsOk,
       ...(supabaseError && !supabaseOk ? { error: supabaseError } : {}),
       ...(ratingsTableError && ratingsTableOk === false
         ? { match_ratings_error: ratingsTableError }
+        : {}),
+      ...(ratingsTagsError && ratingsTagsOk === false
+        ? { match_ratings_tags_error: ratingsTagsError }
+        : {}),
+      ...(ratingsTableOk && ratingsTagsOk === false
+        ? {
+            fix:
+              'Ejecuta supabase/migrations/013_rating_tags.sql y Supabase → Settings → API → Reload schema.',
+          }
         : {}),
     },
     maps: { configured: googleMaps.isConfigured() },

@@ -47,7 +47,7 @@ router.post('/:id/rate', optionalAuth, requireAuthIfDb, async (req, res) => {
 
     const userId = req.user.sub || req.user.id;
     const rating = buildRatingInsert(role, req.body);
-    const row = await repo.insert('match_ratings', {
+    const fullRow = {
       match_id: match.id,
       rater_role: role,
       rater_user_id: userId || null,
@@ -55,11 +55,28 @@ router.post('/:id/rate', optionalAuth, requireAuthIfDb, async (req, res) => {
       tags: rating.tags,
       tag_band: rating.tag_band,
       comment: rating.comment,
-    });
+    };
+    let row;
+    let tagsDeferred = false;
+    try {
+      row = await repo.insert('match_ratings', fullRow);
+    } catch (insertErr) {
+      const msg = insertErr?.message || '';
+      const missingTags =
+        /tags|tag_band|PGRST204|PGRST205|schema cache/i.test(msg) ||
+        insertErr?.code === '42703';
+      if (!missingTags) throw insertErr;
+      const { tags: _t, tag_band: _b, ...legacyRow } = fullRow;
+      row = await repo.insert('match_ratings', legacyRow);
+      tagsDeferred = true;
+    }
     res.status(201).json({
       ok: true,
       data: row,
-      message: 'Gracias. Tu calificación ayuda a la confianza en la red.',
+      tags_saved: !tagsDeferred,
+      message: tagsDeferred
+        ? 'Calificación guardada (estrellas y comentario). Para guardar también los chips, aplica SQL 013 y Reload schema en Supabase.'
+        : 'Gracias. Tu calificación ayuda a la confianza en la red.',
     });
   } catch (e) {
     console.error(e);

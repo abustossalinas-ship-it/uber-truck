@@ -405,8 +405,11 @@ async function submitRateModal(e) {
       json = {};
     }
     if (!res.ok) {
-      const msg =
+      let msg =
         json.error || json.errors?.join('\n') || 'No se pudo guardar la calificación';
+      if (json.detail && !/schema cache|013|tags/i.test(msg)) {
+        msg += ` (${json.detail})`;
+      }
       if (res.status === 409) {
         markRatedMatchId(matchId);
         closeRateModal();
@@ -421,7 +424,12 @@ async function submitRateModal(e) {
     markRatedMatchId(matchId);
     closeRateModal();
     if (typeof refreshBoard === 'function') await refreshBoard();
-    alert(json.message || 'Calificación guardada. ¡Gracias!');
+    alert(
+      json.message ||
+        (json.tags_saved === false
+          ? 'Calificación guardada (sin chips). Recarga schema en Supabase si quieres guardar las frases.'
+          : 'Calificación guardada. ¡Gracias!')
+    );
   } catch (err) {
     console.error(err);
     closeRateModal();

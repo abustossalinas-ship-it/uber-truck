@@ -2,6 +2,7 @@
 
 const express = require('express');
 const repo = require('../lib/repository');
+const supabaseService = require('../services/supabase');
 const { optionalAuth } = require('../lib/optional-auth');
 const { requireAuthIfDb } = require('../lib/require-auth');
 const { validateRating, normalizeRole } = require('../lib/match-ratings');
@@ -38,9 +39,14 @@ router.post('/:id/rate', optionalAuth, requireAuthIfDb, async (req, res) => {
     const errors = validateRating(role, req.body || {});
     if (errors.length) return res.status(400).json({ ok: false, errors, error: errors[0] });
 
-    const existing = (await repo.list('match_ratings', { match_id: match.id })).find(
-      (r) => r.rater_role === role
-    );
+    const sb = supabaseService.getClient();
+    const { data: existing, error: existErr } = await sb
+      .from('match_ratings')
+      .select('id')
+      .eq('match_id', match.id)
+      .eq('rater_role', role)
+      .maybeSingle();
+    if (existErr) throw existErr;
     if (existing) {
       return res.status(409).json({ ok: false, error: 'Ya calificaste este viaje' });
     }
@@ -62,9 +68,13 @@ router.post('/:id/rate', optionalAuth, requireAuthIfDb, async (req, res) => {
       row = await repo.insert('match_ratings', fullRow);
     } catch (insertErr) {
       const msg = insertErr?.message || '';
+      const code = insertErr?.code;
       const missingTags =
-        /tags|tag_band|PGRST204|PGRST205|schema cache/i.test(msg) ||
-        insertErr?.code === '42703';
+        code === '42703' ||
+        code === 'PGRST204' ||
+        code === 'PGRST205' ||
+        /Could not find the .*column/i.test(msg) ||
+        /schema cache/i.test(msg);
       if (!missingTags) throw insertErr;
       const { tags: _t, tag_band: _b, ...legacyRow } = fullRow;
       row = await repo.insert('match_ratings', legacyRow);
@@ -81,7 +91,11 @@ router.post('/:id/rate', optionalAuth, requireAuthIfDb, async (req, res) => {
   } catch (e) {
     console.error(e);
     const mapped = mapDbError(e, 'guardar calificación');
-    res.status(mapped.status).json({ ok: false, error: mapped.error });
+    res.status(mapped.status).json({
+      ok: false,
+      error: mapped.error,
+      detail: (e?.message || '').slice(0, 180),
+    });
   }
 });
 

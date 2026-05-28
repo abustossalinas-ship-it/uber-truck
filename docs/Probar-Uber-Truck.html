@@ -25,7 +25,7 @@
   <img src="/brand/logo.png" width="72" height="72" alt="Uber Truck" />
   <div class="doc-title-wrap">
     <h1>Cómo probar Uber Truck</h1>
-    <p class="meta">Para testers · mayo 2026 (v3) · Sin instalar programas ni acceder a la base de datos</p>
+    <p class="meta">Para testers · 27 mayo 2026 (v3.1) · App 0.0.31 · Sin instalar programas ni acceder a la base de datos</p>
   </div>
 </div>
 
@@ -87,6 +87,7 @@
   </li>
   <li><strong>Chat</strong> y <strong>notificaciones</strong> (campana) con sesión iniciada.</li>
   <li>Con viaje <strong>aceptado o en ruta</strong>: prueba <strong>Reportar incidente</strong> (robo, daño, etc.) — queda registrado; la app no paga automáticamente.</li>
+  <li><strong>Calificaciones (dos cuentas):</strong> tras <strong>Finalizar viaje</strong>, cada rol entra a <strong>Mis viajes → Completados</strong> y pulsa <strong>Calificar … ★</strong>. El otro rol debe usar su propia cuenta (no la misma sesión). Ver detalle en el <a href="Journey-Usuario-Uber-Truck.html#">Journey §8</a>.</li>
 </ol>
 
 <h2>6. Confianza y carga</h2>
@@ -115,10 +116,12 @@
   <tr><td>No ves notificaciones</td><td>Debes estar con <strong>Ingresar</strong>, no solo modo demo sin login.</td></tr>
   <tr><td>Error al publicar carga (columna desconocida)</td><td>Dueño del proyecto: aplicar migración <code>011</code> en Supabase.</td></tr>
   <tr><td>Error al reportar incidente</td><td>Misma migración <code>011</code> (tabla <code>match_incidents</code>).</td></tr>
+  <tr><td>No aparece «Calificar» o falla al guardar nota</td><td>Dueño del proyecto: migraciones <code>012</code>–<code>013</code> y <code>NOTIFY pgrst, 'reload schema';</code> en Supabase.</td></tr>
+  <tr><td>Transportista no puede calificar tras embarcador</td><td>Cerrar sesión e ingresar con cuenta transportista; recargar con Ctrl+Shift+R.</td></tr>
 </table>
 
 <h2>9. Para el dueño del proyecto (solo Ariel)</h2>
-<p class="meta">Los testers no hacen esto. Base de datos conectada, variables Railway y migraciones <code>003</code>–<code>011</code> (precios 010, confianza/carga e incidentes 011).</p>
+<p class="meta">Los testers no hacen esto. Base de datos conectada, variables Railway y migraciones <code>003</code>–<code>013</code> (calificaciones 012–013).</p>
 
 <p class="meta">
   <a href="Journey-Usuario-Uber-Truck.html">Journey del usuario</a> ·

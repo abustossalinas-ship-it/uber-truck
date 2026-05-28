@@ -22,7 +22,7 @@ No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitáco
 | Tema | HTML |
 |------|------|
 | Modelo de negocio | [Modelo-Negocio-Uber-Truck.html](./Modelo-Negocio-Uber-Truck.html) |
-| Journey usuario | [Journey-Usuario-Uber-Truck.html](./Journey-Usuario-Uber-Truck.html) |
+| Journey usuario | [Journey-Usuario-Uber-Truck.html](./Journey-Usuario-Uber-Truck.html) (v2.4 · Mis viajes + calificaciones) |
 | Resumen canvas | [Canvas-Resumen-Uber-Truck.html](./Canvas-Resumen-Uber-Truck.html) |
 | Cancelación / multas | [Politica-Cancelacion-Uber-Truck.html](./Politica-Cancelacion-Uber-Truck.html) · [Multas-Cuenta-Uber-Truck.html](./Multas-Cuenta-Uber-Truck.html) |
 | SQL Supabase | [Sql-Supabase-Uber-Truck.html](./Sql-Supabase-Uber-Truck.html) · [SQL-SUPABASE.md](./SQL-SUPABASE.md) |

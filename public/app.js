@@ -160,6 +160,42 @@ function formatCargoTrustLine(l) {
   return `<p class="cargo-trust-line">Mercadería: ${desc || '—'}${val ? ` · Valor ref. ${val}` : ''} · ${guide}${ins}</p>`;
 }
 
+function formatReputationBadge(rep, roleLabel) {
+  const prefix = roleLabel ? `${roleLabel}: ` : '';
+  if (!rep?.rating_count) {
+    return `<p class="match-rep-line"><span class="match-rep-badge match-rep-new">${prefix}Sin calificaciones aún</span></p>`;
+  }
+  const avg = rep.avg_stars != null ? Number(rep.avg_stars).toFixed(1) : '—';
+  const n = rep.rating_count;
+  return `<p class="match-rep-line"><span class="match-rep-badge">${prefix}<strong>${avg} ★</strong> · ${n} viaje${n === 1 ? '' : 's'}</span></p>`;
+}
+
+function reputationBadgeInline(rep) {
+  if (!rep?.rating_count) return '';
+  const avg = Number(rep.avg_stars).toFixed(1);
+  return `<span class="match-rep-inline" title="Promedio histórico">${avg} ★ · ${rep.rating_count}</span>`;
+}
+
+function buildMatchReputationHtml(m, load, offer) {
+  const role = getActorRole();
+  if (role === 'shipper') {
+    return formatReputationBadge(
+      m.carrier_reputation || offer?.reputation,
+      'Reputación transportista'
+    );
+  }
+  if (role === 'carrier') {
+    return formatReputationBadge(
+      m.shipper_reputation || load?.reputation,
+      'Reputación embarcador'
+    );
+  }
+  return (
+    formatReputationBadge(m.carrier_reputation, 'Transportista') +
+    formatReputationBadge(m.shipper_reputation, 'Embarcador')
+  );
+}
+
 function formatBudgetRange(min, max) {
   const fmt = (n) => (n != null && n !== '' ? `$${Number(n).toLocaleString('es-CL')}` : null);
   const a = fmt(min);
@@ -815,7 +851,7 @@ async function refreshBoard() {
           .map(
             (l) => `
       <article class="item" data-id="${l.id}">
-        <strong>${l.company_name}</strong>
+        <strong>${l.company_name}${reputationBadgeInline(l.reputation)}</strong>
         <span class="pill">${STATUS_LABEL[l.status] || l.status}</span>
         <p>${routeLine(l)}</p>
         <p class="muted">${l.pallets ? l.pallets + ' pallets · ' : ''}${l.volume_m3 ? l.volume_m3 + ' m³ · ' : ''}${l.cargo_type || ''}${l.distance_duration_min ? ' · ~' + l.distance_duration_min + ' min' : ''}</p>
@@ -832,7 +868,7 @@ async function refreshBoard() {
           .map(
             (o) => `
       <article class="item" data-id="${o.id}">
-        <strong>${o.carrier_name}</strong>
+        <strong>${o.carrier_name}${reputationBadgeInline(o.reputation)}</strong>
         <span class="pill">${STATUS_LABEL[o.status] || o.status}</span>
         <p>${routeLine(o)}</p>
         <p class="muted">${o.free_volume_m3 ? o.free_volume_m3 + ' m³ libres' : ''}</p>
@@ -870,6 +906,7 @@ async function refreshBoard() {
       <article class="item match-item" data-match-id="${m.id}">
         <strong>${title}</strong>
         <span class="pill">${STATUS_LABEL[m.status] || m.status}</span>
+        ${buildMatchReputationHtml(m, load, offer)}
         ${mutualBanner}
         ${cargoLine}
         ${buildMatchPriceBox(m)}
@@ -927,7 +964,11 @@ async function refreshBoard() {
     offerSel.disabled = false;
     offerSel.innerHTML = '<option value="">Elegir oferta publicada…</option>';
     publishedOffers.forEach((o) => {
-      offerSel.innerHTML += `<option value="${o.id}">${o.carrier_name} — ${routeLine(o)}</option>`;
+      const repOpt =
+        o.reputation?.rating_count && o.reputation.avg_stars != null
+          ? ` · ${Number(o.reputation.avg_stars).toFixed(1)} ★`
+          : '';
+      offerSel.innerHTML += `<option value="${o.id}">${o.carrier_name}${repOpt} — ${routeLine(o)}</option>`;
     });
     if (hint) hint.hidden = true;
     if (matchBtn) matchBtn.disabled = false;
@@ -979,7 +1020,7 @@ async function loadSuggestionsFor(loadId) {
           (s) => `
       <div class="suggestion-item">
         <span class="pill">${s.score}% match</span>
-        <strong>${s.offer.carrier_name}</strong>
+        <strong>${s.offer.carrier_name}${reputationBadgeInline(s.reputation)}</strong>
         <p class="muted">${s.reasons.join(' · ')}</p>
         <button type="button" class="use-suggestion" data-offer-id="${s.offer.id}" data-carrier="${s.offer.carrier_name.replace(/"/g, '')}">Usar esta oferta</button>
         <button type="button" class="match-suggestion-now" data-offer-id="${s.offer.id}" data-carrier="${s.offer.carrier_name.replace(/"/g, '')}">Emparejar con esta oferta</button>

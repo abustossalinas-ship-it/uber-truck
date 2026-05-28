@@ -77,6 +77,7 @@ app.get('/health', async (_req, res) => {
       'match-incidents',
       'mis-viajes',
       'trip-ratings',
+      'board-reputation',
       'buscando-camiones',
     ],
     deploy_manifest: manifest,

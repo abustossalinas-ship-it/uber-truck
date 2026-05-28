@@ -27,7 +27,13 @@ const router = express.Router();
 router.get('/', optionalAuth, async (req, res) => {
   try {
     const filters = loadListFilters(req.user, req.query);
-    const rows = await repo.list('load_requests', filters);
+    let rows = await repo.list('load_requests', filters);
+    const { getReputationIndex, pickRep } = require('../lib/match-ratings');
+    const repIndex = await getReputationIndex(repo);
+    rows = rows.map((l) => ({
+      ...l,
+      reputation: pickRep(repIndex, 'shipper', l.shipper_user_id, l.company_name),
+    }));
     res.json({ ok: true, data: rows, scope: req.user?.role || 'public' });
   } catch (e) {
     console.error(e);
@@ -46,7 +52,17 @@ router.get('/:id/match-suggestions', optionalAuth, async (req, res) => {
       : { status: 'published' };
     const offers = await repo.list('capacity_offers', offerFilters);
     const { rankOffersForLoad } = require('../lib/match-score');
-    const ranked = rankOffersForLoad(load, offers);
+    const { getReputationIndex, pickRep } = require('../lib/match-ratings');
+    const repIndex = await getReputationIndex(repo);
+    const ranked = rankOffersForLoad(load, offers).map((row) => ({
+      ...row,
+      reputation: pickRep(
+        repIndex,
+        'carrier',
+        row.offer?.carrier_user_id,
+        row.offer?.carrier_name
+      ),
+    }));
     res.json({ ok: true, load_id: load.id, data: ranked });
   } catch (e) {
     console.error(e);

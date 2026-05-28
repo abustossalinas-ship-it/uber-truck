@@ -8,10 +8,16 @@ function validateRating(raterRole, body) {
   return validateRatingPayload(raterRole, body || {});
 }
 
-function pushScore(bucket, userId, stars) {
-  if (!userId) return;
-  if (!bucket[userId]) bucket[userId] = [];
-  bucket[userId].push(Number(stars));
+function entityKey(userId, nameRole, displayName) {
+  if (userId) return String(userId);
+  const name = (displayName || '').trim();
+  return name ? `${nameRole}:${name}` : null;
+}
+
+function pushScore(bucket, key, stars) {
+  if (!key) return;
+  if (!bucket[key]) bucket[key] = [];
+  bucket[key].push(Number(stars));
 }
 
 function avgScores(bucket) {
@@ -37,9 +43,17 @@ function buildReputationIndex(ratings, matches, loadById, offerById) {
     const load = loadById[m.load_request_id];
     const offer = offerById[m.capacity_offer_id];
     if (r.rater_role === 'shipper') {
-      pushScore(carrierFromShipper, offer?.carrier_user_id, r.stars);
+      pushScore(
+        carrierFromShipper,
+        entityKey(offer?.carrier_user_id, 'carrier', offer?.carrier_name),
+        r.stars
+      );
     } else if (r.rater_role === 'carrier') {
-      pushScore(shipperFromCarrier, load?.shipper_user_id, r.stars);
+      pushScore(
+        shipperFromCarrier,
+        entityKey(load?.shipper_user_id, 'shipper', load?.company_name),
+        r.stars
+      );
     }
   }
   return {
@@ -48,10 +62,28 @@ function buildReputationIndex(ratings, matches, loadById, offerById) {
   };
 }
 
-function pickRep(repIndex, role, userId) {
-  if (!userId) return null;
+function pickRep(repIndex, role, userId, displayName) {
+  const key = entityKey(userId, role === 'carrier' ? 'carrier' : 'shipper', displayName);
+  if (!key) return { avg_stars: null, rating_count: 0 };
   const bucket = role === 'carrier' ? repIndex.carrier : repIndex.shipper;
-  return bucket[userId] || { avg_stars: null, rating_count: 0 };
+  return bucket[key] || { avg_stars: null, rating_count: 0 };
+}
+
+async function getReputationIndex(repo) {
+  let ratings = [];
+  try {
+    ratings = await repo.list('match_ratings', {});
+  } catch {
+    return { carrier: {}, shipper: {} };
+  }
+  const [matches, loads, offers] = await Promise.all([
+    repo.list('matches', {}),
+    repo.list('load_requests', {}),
+    repo.list('capacity_offers', {}),
+  ]);
+  const loadById = Object.fromEntries(loads.map((l) => [l.id, l]));
+  const offerById = Object.fromEntries(offers.map((o) => [o.id, o]));
+  return buildReputationIndex(ratings, matches, loadById, offerById);
 }
 
 function ratingRow(r) {
@@ -86,7 +118,7 @@ async function enrichMatchesWithRatings(repo, matches, user) {
   const offers = await repo.list('capacity_offers', {});
   const loadById = Object.fromEntries(loads.map((l) => [l.id, l]));
   const offerById = Object.fromEntries(offers.map((o) => [o.id, o]));
-  const repIndex = buildReputationIndex(ratings, matches, loadById, offerById);
+  const repIndex = await getReputationIndex(repo);
 
   const byMatch = {};
   for (const r of ratings) {
@@ -108,11 +140,20 @@ async function enrichMatchesWithRatings(repo, matches, user) {
     const myRating = role ? list.find((r) => r.rater_role === role) : null;
     const theirRating = otherRole ? list.find((r) => r.rater_role === otherRole) : null;
 
-    const counterpartyUserId =
-      role === 'shipper' ? offer?.carrier_user_id : role === 'carrier' ? load?.shipper_user_id : null;
-    const counterpartyRep = role
-      ? pickRep(repIndex, role === 'shipper' ? 'carrier' : 'shipper', counterpartyUserId)
-      : null;
+    const carrierRep = pickRep(
+      repIndex,
+      'carrier',
+      offer?.carrier_user_id,
+      offer?.carrier_name
+    );
+    const shipperRep = pickRep(
+      repIndex,
+      'shipper',
+      load?.shipper_user_id,
+      load?.company_name
+    );
+    const counterpartyRep =
+      role === 'shipper' ? carrierRep : role === 'carrier' ? shipperRep : null;
 
     const canRate = Boolean(role && m.status === 'completed' && !myRating);
 
@@ -124,6 +165,8 @@ async function enrichMatchesWithRatings(repo, matches, user) {
       their_rating: ratingRow(theirRating),
       can_rate: canRate,
       counterparty_reputation: counterpartyRep,
+      carrier_reputation: carrierRep,
+      shipper_reputation: shipperRep,
       trip_rating_avg:
         list.length > 0
           ? Math.round((list.reduce((s, r) => s + r.stars, 0) / list.length) * 10) / 10
@@ -154,4 +197,7 @@ module.exports = {
   reputationFromStats,
   normalizeRole,
   buildReputationIndex,
+  getReputationIndex,
+  pickRep,
+  entityKey,
 };

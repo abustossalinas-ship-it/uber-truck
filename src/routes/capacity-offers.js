@@ -15,7 +15,13 @@ const router = express.Router();
 router.get('/', optionalAuth, async (req, res) => {
   try {
     const filters = offerListFilters(req.user, req.query);
-    const rows = await repo.list('capacity_offers', filters);
+    let rows = await repo.list('capacity_offers', filters);
+    const { getReputationIndex, pickRep } = require('../lib/match-ratings');
+    const repIndex = await getReputationIndex(repo);
+    rows = rows.map((o) => ({
+      ...o,
+      reputation: pickRep(repIndex, 'carrier', o.carrier_user_id, o.carrier_name),
+    }));
     res.json({ ok: true, data: rows, scope: req.user?.role || 'public' });
   } catch (e) {
     console.error(e);

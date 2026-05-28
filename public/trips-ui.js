@@ -180,7 +180,12 @@ function renderTripsList(matches, loadById, offerById) {
         const rateTarget = role === 'shipper' ? 'transportista' : 'embarcador';
         const ratingsBlock =
           m.status === 'completed' ? buildTripRatingsBlock(m, role, title) : '';
-        let actions = `<button type="button" class="btn-secondary" data-trip-view="${m.id}">Abrir</button>`;
+        let actions = '';
+        if (m.status !== 'completed') {
+          const openLabel =
+            m.status === 'proposed' ? 'Ver propuesta' : 'Gestionar viaje';
+          actions = `<button type="button" class="btn-secondary" data-trip-view="${m.id}">${openLabel}</button>`;
+        }
         const alreadyRated = hasRatedMatchId(m.id, m);
         if (m.can_rate && !alreadyRated) {
           actions += `<button type="button" class="btn-trip-rate" data-trip-rate="${m.id}" data-rate-target="${rateTarget}">Calificar ${rateTarget} ★</button>`;

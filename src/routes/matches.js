@@ -272,6 +272,12 @@ router.patch('/:id/carrier-offer', optionalAuth, async (req, res) => {
       carrier_offer_clp: amount,
       price_status: 'pending_acceptance',
     });
+    if (req.user?.sub) {
+      const offer = await repo.getById('capacity_offers', match.capacity_offer_id);
+      if (offer && !offer.carrier_user_id) {
+        await repo.update('capacity_offers', offer.id, { carrier_user_id: req.user.sub });
+      }
+    }
     const parties = await getMatchParties(repo, match);
     await comms.addNotification({
       match_id: match.id,

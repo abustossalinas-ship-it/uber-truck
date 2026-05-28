@@ -44,7 +44,12 @@ async function filterMatchesForUser(matches, user) {
       return loadById[m.load_request_id]?.shipper_user_id === user.sub;
     }
     if (user.role === 'carrier') {
-      return offerById[m.capacity_offer_id]?.carrier_user_id === user.sub;
+      const offer = offerById[m.capacity_offer_id];
+      if (!offer) return false;
+      if (offer.carrier_user_id) return offer.carrier_user_id === user.sub;
+      const company = (user.company_name || '').trim();
+      const offerName = (offer.carrier_name || '').trim();
+      return Boolean(company && offerName && company === offerName);
     }
     return true;
   });

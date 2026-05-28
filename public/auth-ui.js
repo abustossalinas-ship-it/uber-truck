@@ -9,6 +9,7 @@ const Auth = {
   },
 
   save(token, user) {
+    if (typeof clearRatedMatchIds === 'function') clearRatedMatchIds();
     this.token = token;
     this.user = {
       ...user,
@@ -23,6 +24,7 @@ const Auth = {
   },
 
   logout() {
+    if (typeof clearRatedMatchIds === 'function') clearRatedMatchIds();
     this.token = null;
     this.user = null;
     localStorage.removeItem('ut_token');

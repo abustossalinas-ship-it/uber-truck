@@ -2,9 +2,20 @@
 
 const RATED_MATCHES_KEY = 'ut_rated_matches';
 
+function ratedMatchStorageKey(matchId) {
+  const role =
+    typeof getActorRole === 'function' && getActorRole() === 'carrier' ? 'carrier' : 'shipper';
+  return `${matchId}:${role}`;
+}
+
 function loadRatedMatchIds() {
   try {
-    return new Set(JSON.parse(sessionStorage.getItem(RATED_MATCHES_KEY) || '[]'));
+    const raw = JSON.parse(sessionStorage.getItem(RATED_MATCHES_KEY) || '[]');
+    const set = new Set();
+    for (const entry of raw) {
+      if (typeof entry === 'string' && entry.includes(':')) set.add(entry);
+    }
+    return set;
   } catch {
     return new Set();
   }
@@ -12,13 +23,17 @@ function loadRatedMatchIds() {
 
 function markRatedMatchId(matchId) {
   const set = loadRatedMatchIds();
-  set.add(matchId);
+  set.add(ratedMatchStorageKey(matchId));
   sessionStorage.setItem(RATED_MATCHES_KEY, JSON.stringify([...set]));
 }
 
+function clearRatedMatchIds() {
+  sessionStorage.removeItem(RATED_MATCHES_KEY);
+}
+
 function hasRatedMatchId(matchId, match) {
-  if (match?.my_rating) return true;
-  return loadRatedMatchIds().has(matchId);
+  if (match?.my_rating?.stars) return true;
+  return loadRatedMatchIds().has(ratedMatchStorageKey(matchId));
 }
 
 const TRIP_STATUS_LABEL = {
@@ -169,7 +184,7 @@ function renderTripsList(matches, loadById, offerById) {
         const alreadyRated = hasRatedMatchId(m.id, m);
         if (m.can_rate && !alreadyRated) {
           actions += `<button type="button" class="btn-trip-rate" data-trip-rate="${m.id}" data-rate-target="${rateTarget}">Calificar ${rateTarget} ★</button>`;
-        } else if (m.my_rating || alreadyRated) {
+        } else if (m.my_rating?.stars || (alreadyRated && !m.can_rate)) {
           const stars = m.my_rating?.stars;
           if (stars) {
             actions += `<span class="trip-rated-badge" title="Ya calificaste este viaje">${renderStars(stars)} · Calificado</span>`;
@@ -319,7 +334,7 @@ function clearRateError() {
 
 function openRateModal(matchId, rateTarget) {
   if (hasRatedMatchId(matchId, null)) {
-    alert('Ya calificaste este viaje. No puedes enviar otra calificación.');
+    alert('Ya calificaste este viaje con esta cuenta. No puedes enviar otra calificación.');
     return;
   }
   rateModalMatchId = matchId;
@@ -438,6 +453,7 @@ async function submitRateModal(e) {
 window.updateActiveTripBanner = updateActiveTripBanner;
 window.renderTripsList = renderTripsList;
 window.openRateModal = openRateModal;
+window.clearRatedMatchIds = clearRatedMatchIds;
 
 function initRateModalUi() {
   document.getElementById('rate-stars-picker')?.addEventListener('click', (e) => {

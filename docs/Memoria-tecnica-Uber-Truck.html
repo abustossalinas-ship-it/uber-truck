@@ -39,7 +39,7 @@
     <h1>Memoria técnica del proyecto</h1>
     <p class="meta"><strong>Producto:</strong> Uber Truck — marketplace de capacidad logística ociosa (backhaul), Chile.<br />
     <strong>Documento:</strong> memoria técnica viva del repositorio y del despliegue Railway.<br />
-    <strong>Versión documento:</strong> 3.4 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.19+ (cargo-trust v011) &nbsp;|&nbsp; <strong>Fecha:</strong> mayo 2026</p>
+    <strong>Versión documento:</strong> 3.5 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.31 (ratings M1+M2) &nbsp;|&nbsp; <strong>Fecha:</strong> 27 mayo 2026</p>
   </div>
 </div>
 
@@ -77,8 +77,9 @@
   <tr><td>Mapa / dirección</td><td>Google Maps origen–destino + distancia</td><td class="g-done">Hecho</td></tr>
   <tr><td>Mapa en vivo / seguimiento GPS</td><td>Tracking en ruta</td><td class="g-todo">Fase 4</td></tr>
   <tr><td>Pago en app</td><td>Pasarela + generar cargo</td><td class="g-doing">Parcial (2.10)</td></tr>
-  <tr><td>Calificación ★</td><td>Post-viaje 1–5 estrellas (ambas partes)</td><td class="g-done">Hecho (v012)</td></tr>
+  <tr><td>Calificación ★</td><td>Mutua 1–5 + chips por rol (embarcador/transportista), reputación histórica en <strong>Mis viajes</strong></td><td class="g-done">Hecho (012–014, v0.0.28–0.0.31)</td></tr>
   <tr><td>Perfil y cuenta</td><td>Login, empresa, banco, multas</td><td class="g-doing">Parcial</td></tr>
+  <tr><td>Reputación en tablero</td><td>Promedio ★ en tarjetas Emparejar (M3)</td><td class="g-todo">Pendiente</td></tr>
 </table>
 
 <div class="rule"></div>
@@ -104,7 +105,8 @@
 <h2>Fase 2 — Núcleo digital (ya en producción)</h2>
 <h3>Lo realizado (adelantado vs Gantt oct 2026)</h3>
 <ul>
-  <li>Migraciones Supabase 001–011 (auth, matches, chat, notificaciones, banco, precios 010, <strong>confianza/carga 011</strong>).</li>
+  <li>Migraciones Supabase 001–011 (auth, matches, chat, notificaciones, banco, precios 010, <strong>confianza/carga 011</strong>); <strong>012–014</strong> (mis viajes, <code>match_ratings</code>, chips <code>tags</code>/<code>tag_band</code>).</li>
+  <li><strong>Calificaciones estilo Uber (may 2026):</strong> <code>POST /api/matches/:id/rate</code>, catálogo <code>/rating-tags-catalog.json</code>, UI <code>trips-ui.js</code> + <code>rating-tags.js</code>.</li>
   <li>API: <code>capacity-offers</code>, <code>load-requests</code>, <code>matches</code>, sugerencias automáticas, comms, cuenta.</li>
   <li>UI embarcador / transportista, emparejamientos activos, modal cancelar, acuerdo mutuo bilateral.</li>
   <li>Notificaciones in-app (JWT); recuadro cuenta y multas (sin pasarela).</li>
@@ -117,7 +119,7 @@
 </ul>
 
 <h2>Fase 3 — Piloto confianza</h2>
-<p>KYC manual, ratings bidireccionales, microseguro POC, <strong>100 viajes digitales</strong> (M4).</p>
+<p>KYC manual, <strong>ratings bidireccionales</strong> (adelantado — mayo 2026), microseguro POC, <strong>100 viajes digitales</strong> (M4). Pendiente: reputación visible en tablero Emparejar (M3).</p>
 
 <h2>Fase 4 — Escala producto</h2>
 <p>Match semi-automático por corredor, dashboard embarcador frecuente, informe red de capacidad (M5).</p>
@@ -214,7 +216,7 @@
   <tr><td>NPS transportista</td><td>≥ 7</td><td>≥ 8</td></tr>
 </table>
 
-<p><strong>Interpretación mayo 2026:</strong> núcleo digital (~75%) en prod; <strong>foco actual = liquidez en un corredor + piloto 20 viajes</strong>; cobros 2.10 ~25%. Add-on a terceros solo tras M2/M4.</p>
+<p><strong>Interpretación 27 mayo 2026:</strong> núcleo digital (~82%) en prod; <strong>calificaciones mutuas validadas en producción</strong> (embarcador y transportista); foco = <strong>liquidez corredor RM ↔ V/San Antonio + piloto 20 viajes</strong>; cobros 2.10 ~25%. Add-on a terceros solo tras M2/M4.</p>
 
 <h2>Piloto M2 — corredor único (liquidez)</h2>
 <p>El cuello de botella del marketplace no es el código sino la <strong>oferta y demanda simultánea</strong>. El piloto M2 se concentra en un corredor para lograr densidad operacional.</p>
@@ -272,7 +274,9 @@
   <tr><td>U6c</td><td>P1</td><td>Reputación v0</td><td>Historial cancelaciones + incidentes por cuenta</td><td>Post 5 viajes</td><td class="g-todo">Plan</td></tr>
   <tr><td>U6d</td><td>P1</td><td>Evidencia entrega</td><td>Foto + timestamp (antes GPS vivo)</td><td>Post-piloto corto</td><td class="g-todo">Plan</td></tr>
   <tr><td>U7</td><td>P2</td><td>Generar cargo + pasarela</td><td>Webpay / transferencia</td><td>Post-piloto</td><td class="g-todo">Diseño</td></tr>
-  <tr><td>U8</td><td>P2</td><td>KYC + ratings</td><td>Fase 3 operativa</td><td>Oct 2026+</td><td class="g-todo">Plan</td></tr>
+  <tr><td>U4e</td><td>P1</td><td>Calificaciones mutuas + chips (012–014)</td><td>Modal ★, Mis viajes, API rate, prod OK</td><td>May 2026</td><td class="g-done">Hecho</td></tr>
+  <tr><td>U4f</td><td>P2</td><td>Reputación en tablero (M3)</td><td>★ promedio en tarjetas Emparejar</td><td>Jun 2026</td><td class="g-todo">Plan</td></tr>
+  <tr><td>U8</td><td>P2</td><td>KYC manual</td><td>Fase 3 operativa</td><td>Oct 2026+</td><td class="g-todo">Plan</td></tr>
   <tr><td>U9</td><td>P2</td><td>Match semi-auto corredor</td><td>Algoritmo v1</td><td>Feb 2027</td><td class="g-todo">Plan</td></tr>
 </table>
 <p><strong>No hacer aún:</strong> app móvil nativa, Open Finance, pricing dinámico completo, expansión multi-corredor, IA innecesaria. Priorizar <strong>rapidez operacional</strong> sobre más pantallas.</p>
@@ -301,7 +305,7 @@
   <tr><td>2.x</td><td>Chat, acuerdo mutuo, notif, multas UI</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
   <tr><td>2.10</td><td>Cuenta bancaria + cobro pasarela</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Parcial</td></tr>
   <tr><td>3.1</td><td>KYC + checklist vehículo</td><td>O/E</td><td>01-oct</td><td>15-nov</td><td></td><td></td><td></td><td></td><td>██</td><td>█</td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
-  <tr><td>3.2</td><td>Ratings bidireccionales</td><td>E</td><td>15-oct</td><td>29-nov</td><td></td><td></td><td></td><td></td><td>██</td><td>█</td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
+  <tr><td>3.2</td><td>Ratings bidireccionales</td><td>E</td><td>15-oct</td><td>29-nov</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho (may 2026)</td></tr>
   <tr><td>3.3</td><td>Microseguro InsurTech POC</td><td>L/O</td><td>01-nov</td><td>31-dic</td><td></td><td></td><td></td><td></td><td></td><td>████</td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
   <tr><td>3.4</td><td>100 viajes digitales</td><td>O</td><td>01-nov</td><td>31-ene</td><td></td><td></td><td></td><td></td><td></td><td>██</td><td>████</td><td></td><td></td><td class="g-todo">Plan</td></tr>
   <tr><td>4.1</td><td>Match semi-auto corredor</td><td>E</td><td>01-feb</td><td>28-feb</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>██</td><td></td><td></td><td class="g-todo">Plan</td></tr>
@@ -311,10 +315,27 @@
 
 <h3>Avance fase 2 — resumen</h3>
 <ul>
-  <li>MVP digital núcleo: ~75%</li>
+  <li>MVP digital núcleo: ~82% (incl. calificaciones 012–014 y UX Mis viajes)</li>
   <li>Multas / cobros (2.10): ~25%</li>
-  <li>Proyecto total (hasta M5): ~35%</li>
+  <li>Fase 3 ratings: ~40% (mutuo en app; falta M3 tablero + KYC)</li>
+  <li>Proyecto total (hasta M5): ~38%</li>
 </ul>
+
+<h2>Bitácora de avance — 27 mayo 2026</h2>
+<table>
+  <tr><th>Área</th><th>Entregado</th><th>Notas</th></tr>
+  <tr><td>Auth / login</td><td>Errores visibles, anti doble envío, sesión tras «Salir»</td><td>Prod validado por usuario</td></tr>
+  <tr><td>UX emparejamientos</td><td>Botón aceptar match destacado; confirmación antes de en ruta / finalizar / aceptar precio</td><td>Anti doble clic</td></tr>
+  <tr><td>Calificaciones M1</td><td><code>match_ratings</code>, mutuo shipper↔carrier, modal estrellas, bloque en Completados</td><td>SQL 012; <code>POST …/rate</code></td></tr>
+  <tr><td>Calificaciones M2</td><td>Chips por banda (★1–3 negativos, ★4–5 positivos), comentario obligatorio ★1–2</td><td>SQL 013; <code>rating-tags-catalog.json</code></td></tr>
+  <tr><td>Operación Supabase</td><td>Tras migraciones: <code>NOTIFY pgrst, 'reload schema';</code></td><td>Evita PGRST204 en caché PostgREST</td></tr>
+  <tr><td>Fix servidor</td><td><code>listMatchRatings</code> sin <code>SELECT *</code>; insert/update columnas mínimas</td><td>Logs Railway sin ruido PGRST204</td></tr>
+  <tr><td>Fix cliente</td><td>sessionStorage por rol (<code>matchId:carrier</code>); limpieza al login/logout</td><td>Transportista puede calificar tras embarcador</td></tr>
+  <tr><td>Fix alcance</td><td>Ofertas sin <code>carrier_user_id</code>: match visible si empresa coincide</td><td>Backfill al ofertar precio</td></tr>
+  <tr><td>UX Mis viajes</td><td>Completados: listado vertical (más reciente arriba); sin botón «Abrir» → Emparejar</td><td>«Gestionar viaje» solo en curso/negociación</td></tr>
+</table>
+<p><strong>Deploy:</strong> Railway <code>uber-truck-production.up.railway.app</code> · rama <code>main</code> · versión app <strong>0.0.31</strong>.</p>
+<p><strong>Archivos clave:</strong> <code>src/routes/match-ratings.js</code>, <code>src/lib/match-ratings.js</code>, <code>src/services/supabase.js</code>, <code>public/trips-ui.js</code>, <code>public/rating-tags.js</code>.</p>
 
 <div class="rule"></div>
 
@@ -343,7 +364,7 @@
 <p><strong>Rol:</strong> <code>src/services/</code> — Supabase client, comms, integraciones futuras (mapas, pagos).</p>
 
 <h2>Capa 08 — Frontend web (SPA ligera)</h2>
-<p><strong>Rol:</strong> <code>public/index.html</code>, <code>app.js</code>, <code>maps-ui.js</code>, <code>load-budget-ui.js</code>, <code>auth-ui.js</code>, <code>comms-ui.js</code>, <code>penalties-ui.js</code>, <code>theme.css</code>. Marca: naranja <code>#F26522</code>.</p>
+<p><strong>Rol:</strong> <code>public/index.html</code>, <code>app.js</code>, <code>trips-ui.js</code> (Mis viajes + modal calificar), <code>rating-tags.js</code>, <code>maps-ui.js</code>, <code>load-budget-ui.js</code>, <code>auth-ui.js</code>, <code>comms-ui.js</code>, <code>penalties-ui.js</code>, <code>role-shell-ui.js</code>, <code>theme.css</code>. Marca: naranja <code>#F26522</code>.</p>
 
 <h2>Capa 09 — Experiencia producto (paridad Uber)</h2>
 <p><strong>Rol:</strong> flujos, copy y pantallas en <code>public/</code> alineados a «pedir → match → viaje activo → historial»; roles embarcador/transportista como pasajero/conductor. Piloto y validación <strong>solo dentro de esta app</strong>, no canales externos.</p>
@@ -368,7 +389,8 @@
 <div class="rule"></div>
 
 <h2>Modelo de datos (resumen)</h2>
-<p><strong>Entidades:</strong> users, vehicles, capacity_offers, load_requests, matches, match_messages, match_notifications, penalty_charges, <strong>match_incidents</strong>, trip_events (roadmap), ratings (roadmap).</p>
+<p><strong>Entidades:</strong> users, vehicles, capacity_offers, load_requests, matches, match_messages, match_notifications, penalty_charges, <strong>match_incidents</strong>, <strong>match_ratings</strong> (012–014), trip_events (roadmap).</p>
+<p><strong>Calificaciones (012–014):</strong> tabla <code>match_ratings</code> — <code>match_id</code>, <code>rater_role</code> (shipper|carrier), <code>stars</code>, <code>comment</code>, <code>tags</code> (TEXT[]), <code>tag_band</code> (low|mid|high), <code>rater_user_id</code> (opcional, 014). UNIQUE (<code>match_id</code>, <code>rater_role</code>). En <code>matches</code>: <code>delivery_note</code>, <code>completed_at</code>.</p>
 <p><strong>Precio:</strong> <code>load_requests.budget_min_clp</code>, <code>budget_max_clp</code>; en <code>matches</code>: copia del rango, <code>carrier_offer_clp</code>, <code>agreed_price_clp</code>, <code>price_status</code> (migración <code>010</code>).</p>
 <p><strong>Confianza / carga (011):</strong> en <code>load_requests</code>: <code>cargo_description</code>, <code>declared_cargo_value_clp</code>, <code>has_dispatch_guide</code>, <code>dispatch_guide_folio</code>, <code>requires_cargo_insurance</code>, <code>legal_terms_version</code>, <code>terms_accepted_at</code>. Tabla <code>match_incidents</code> (robo, daño, faltante, atraso, otro). Ver <a href="CARGO-TRUST.md">CARGO-TRUST.md</a> y <a href="Terminos-Confianza-Carga-Uber-Truck.html">términos HTML</a>.</p>
 <p><strong>Estados matches:</strong> proposed → (oferta transportista) → accepted (precio aceptado) → in_progress → completed | cancelled.</p>
@@ -392,6 +414,9 @@
   <tr><td>GET</td><td>/api/account/summary</td><td>Multas y plazos</td></tr>
   <tr><td>PATCH</td><td>/api/account/bank</td><td>Cuenta bancaria Chile</td></tr>
   <tr><td>POST/GET</td><td>/api/matches/:id/incidents</td><td>Reportar / listar incidentes (JWT, participantes)</td></tr>
+  <tr><td>GET</td><td>/api/matches/rating-tags/catalog</td><td>Catálogo chips por rol (JSON)</td></tr>
+  <tr><td>POST</td><td>/api/matches/:id/rate</td><td>Calificar viaje completado (stars, comment, tags); 409 si ya calificó</td></tr>
+  <tr><td>GET</td><td>/api/matches</td><td>Lista matches + <code>can_rate</code>, <code>my_rating</code>, reputación contraparte</td></tr>
 </table>
 
 <h2>Reglas de negocio MVP</h2>
@@ -405,6 +430,7 @@
   <li>Comisión: take rate 12–15% sobre flete acordado.</li>
   <li><strong>Confianza:</strong> plataforma como intermediario; embarcador declara mercadería y valor referencial; aceptación <code>cargo-trust-v1</code>; folio guía opcional (sin validación SII automática en MVP).</li>
   <li><strong>Incidentes:</strong> registro en <code>match_incidents</code>; resolución entre partes y aseguradoras; la app no reembolsa valor declarado por defecto.</li>
+  <li><strong>Calificaciones:</strong> solo en <code>completed</code>; una nota por rol por viaje; reputación pública = promedio histórico de estrellas recibidas; chips según catálogo por rol y banda de estrellas.</li>
 </ul>
 
 <h2>Seguridad y cumplimiento</h2>
@@ -423,6 +449,6 @@
   docs/            ← memoria HTML (este archivo)
   canvases/        ← estado de avance (Cursor)</code>
 
-<p class="meta"><em>Fin del documento — v3.4: corredor piloto M2, KPIs marketplace, matriz riesgos, cobertura; confianza 011; precio oferta/demanda.</em></p>
+<p class="meta"><em>Fin del documento — v3.5 (27 may 2026): calificaciones mutuas M1+M2 en prod; bitácora; fixes PGRST204 y UX Mis viajes; software 0.0.31.</em></p>
 </body>
 </html>

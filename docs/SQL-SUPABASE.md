@@ -2,7 +2,7 @@
 
 Ejecutar en [SQL Editor](https://supabase.com/dashboard/project/ljinhegtywixtbzjgjfn/sql/new) del proyecto **ljinhegtywixtbzjgjfn**.
 
-**Orden:** instalación nueva → `001_init.sql`, `003_auth_password.sql`, luego 004–008 (bloque abajo), `010_price_negotiation.sql`, **`011_cargo_trust.sql`**.
+**Orden:** instalación nueva → `001_init.sql`, `003_auth_password.sql`, luego 004–008 (bloque abajo), `010_price_negotiation.sql`, **`011_cargo_trust.sql`**, **`012_uber_parity.sql`**, **`013_rating_tags.sql`**, **`014_match_ratings_rater_user.sql`** (opcional si falta columna).
 
 **Archivo en repo:** `supabase/migrations/RUN_PENDING.sql`
 
@@ -97,7 +97,36 @@ WHERE table_schema = 'public' AND table_name IN ('match_messages', 'match_notifi
 
 ## 012 — Paridad Uber (mis viajes, calificaciones)
 
-Ejecutar `supabase/migrations/012_uber_parity.sql` — columnas `delivery_note`, `completed_at` en `matches`; tabla `match_ratings`.
+Ejecutar `supabase/migrations/012_uber_parity.sql` — columnas `delivery_note`, `completed_at` en `matches`; tabla `match_ratings` (`match_id`, `rater_role`, `stars`, `comment`, UNIQUE por rol).
+
+## 013 — Chips de calificación
+
+Ejecutar `supabase/migrations/013_rating_tags.sql` — columnas `tags` (TEXT[]), `tag_band` (low|mid|high) en `match_ratings`.
+
+## 014 — rater_user_id (opcional)
+
+Ejecutar `supabase/migrations/014_match_ratings_rater_user.sql` si la columna no existe.
+
+## Recargar caché PostgREST (producción)
+
+Tras aplicar 012–014, en SQL Editor:
+
+```sql
+NOTIFY pgrst, 'reload schema';
+```
+
+Esperar 1–2 minutos antes de probar calificaciones en la app.
+
+## Verificación match_ratings
+
+```sql
+SELECT column_name, data_type
+FROM information_schema.columns
+WHERE table_name = 'match_ratings'
+ORDER BY ordinal_position;
+```
+
+`/health` en Railway debe reportar `match_ratings_table: true` y `match_ratings_tags_column: true`.
 
 ## 011 — Confianza y carga
 

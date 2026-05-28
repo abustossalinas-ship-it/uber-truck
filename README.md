@@ -1,6 +1,6 @@
 # Uber Truck — Optimización de capacidad logística ociosa
 
-> **Tesis:** monetizar cubicación disponible en rutas activas (backhaul). MVP = **app tipo Uber** para carga por camión.
+> **Tesis:** monetizar cubicación disponible en rutas activas (backhaul). MVP = **app tipo Uber** para carga por camión. **Prod:** v0.0.31 — calificaciones mutuas embarcador/transportista en Mis viajes.
 
 ## Documentación
 

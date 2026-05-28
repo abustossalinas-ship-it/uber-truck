@@ -11,7 +11,7 @@
 |-----------|--------|
 | **Memoria técnica** | [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html) |
 
-Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX, hitos, **Gantt**, **próximos pasos**, stack por capas, API y avance.
+Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX, hitos, **Gantt**, **próximos pasos**, **bitácora de avance**, stack por capas, API y avance. **Última actualización:** 27 mayo 2026 · software **0.0.31**.
 
 No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitácora MVP digital (evita duplicados).
 

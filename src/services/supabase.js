@@ -29,7 +29,27 @@ function rowToApi(row) {
   };
 }
 
+const MATCH_RATINGS_COLS_FULL =
+  'id, match_id, rater_role, stars, comment, created_at, tags, tag_band';
+const MATCH_RATINGS_COLS_BASE = 'id, match_id, rater_role, stars, comment, created_at';
+
+async function listMatchRatings(filters = {}) {
+  const sb = getClient();
+  const run = (cols) => {
+    let q = sb.from('match_ratings').select(cols).order('created_at', { ascending: false });
+    if (filters.match_id) q = q.eq('match_id', filters.match_id);
+    return q;
+  };
+  let { data, error } = await run(MATCH_RATINGS_COLS_FULL);
+  if (error && /tags|tag_band|PGRST204|rater_user_id|schema cache/i.test(error.message || '')) {
+    ({ data, error } = await run(MATCH_RATINGS_COLS_BASE));
+  }
+  if (error) throw error;
+  return (data || []).map(rowToApi);
+}
+
 async function list(table, filters = {}) {
+  if (table === 'match_ratings') return listMatchRatings(filters);
   const sb = getClient();
   let q = sb.from(table).select('*').order('created_at', { ascending: false });
   if (filters.status) q = q.eq('status', filters.status);
@@ -82,6 +102,7 @@ module.exports = {
   isConfigured,
   getClient,
   list,
+  listMatchRatings,
   getById,
   findMatchPair,
   insert,

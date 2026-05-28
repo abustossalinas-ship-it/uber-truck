@@ -70,7 +70,9 @@ async function enrichMatchesWithRatings(repo, matches, user) {
   try {
     ratings = await repo.list('match_ratings', {});
   } catch (e) {
-    console.error('match_ratings list:', e.message || e);
+    if (!/PGRST204|rater_user_id|schema cache/i.test(e.message || '')) {
+      console.error('match_ratings list:', e.message || e);
+    }
     return matches.map((m) => ({
       ...m,
       my_rating: null,

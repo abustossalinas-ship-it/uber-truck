@@ -58,41 +58,29 @@ router.post('/:id/rate', optionalAuth, requireAuthIfDb, async (req, res) => {
       stars: rating.stars,
       comment: rating.comment,
     };
-    const returnCols = 'id, match_id, rater_role, stars, comment, created_at';
-    let inserted;
-    let insErr;
-    ({ data: inserted, error: insErr } = await sb
+    const { data: inserted, error: insErr } = await sb
       .from('match_ratings')
       .insert(baseRow)
-      .select(returnCols)
-      .single());
-    if (insErr && /rater_user_id|schema cache|PGRST204|PGRST205/i.test(insErr.message || '')) {
-      ({ data: inserted, error: insErr } = await sb
-        .from('match_ratings')
-        .insert(baseRow)
-        .select('id, stars, comment')
-        .single());
-    }
+      .select('id, match_id, rater_role, stars, comment')
+      .single();
     if (insErr) throw insErr;
 
     let row = inserted;
     let tagsSaved = !(rating.tags && rating.tags.length);
     if (rating.tags?.length) {
-      const { data: updated, error: upErr } = await sb
+      const { error: upErr } = await sb
         .from('match_ratings')
         .update({
           tags: rating.tags,
           tag_band: rating.tag_band,
         })
-        .eq('id', row.id)
-        .select('id, stars, comment, tags, tag_band')
-        .single();
+        .eq('id', row.id);
       if (upErr) {
         console.error('match_ratings tags update:', upErr.message || upErr);
         tagsSaved = false;
       } else {
-        row = updated;
         tagsSaved = true;
+        row = { ...row, tags: rating.tags, tag_band: rating.tag_band };
       }
     } else {
       tagsSaved = true;

@@ -6,8 +6,10 @@ const { optionalAuth } = require('../lib/optional-auth');
 const { requireAuthIfDb } = require('../lib/require-auth');
 const { normalizeRole } = require('../lib/match-cancel');
 const { validateIncident, INCIDENT_TYPES } = require('../lib/cargo-trust');
+const { requireApprovedOperator } = require('../lib/kyc-gate');
 
 const router = express.Router({ mergeParams: true });
+const operatorGate = [requireAuthIfDb, requireApprovedOperator];
 
 async function actorMayReport(user, match) {
   if (!user) return false;
@@ -19,7 +21,7 @@ async function actorMayReport(user, match) {
   return false;
 }
 
-router.post('/:id/incidents', optionalAuth, requireAuthIfDb, async (req, res) => {
+router.post('/:id/incidents', optionalAuth, ...operatorGate, async (req, res) => {
   try {
     const match = await repo.getById('matches', req.params.id);
     if (!match) return res.status(404).json({ ok: false, error: 'Emparejamiento no encontrado' });

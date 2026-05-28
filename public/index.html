@@ -32,6 +32,15 @@
 
   <section id="account-penalties-panel" class="account-penalties-panel card" hidden></section>
 
+  <section id="kyc-banner" class="kyc-banner card" hidden aria-live="polite"></section>
+
+  <section id="admin-kyc-panel" class="admin-kyc-panel card" hidden>
+    <h2>Aprobación de cuentas (admin)</h2>
+    <p class="muted">Marketplace semi-curado: solo cuentas <strong>aprobadas</strong> pueden publicar y emparejar.</p>
+    <button type="button" class="btn-secondary" id="admin-kyc-refresh">Actualizar pendientes</button>
+    <div id="admin-kyc-list" class="admin-kyc-list"></div>
+  </section>
+
   <section class="invite-tester card" id="invite-tester">
     <h2>Probar Uber Truck (sin instalar nada)</h2>
     <p class="muted">
@@ -542,6 +551,9 @@
     </div>
   </div>
 
+  <script src="/kyc-ui.js?v=0.0.33"></script>
+  <script src="/admin-ui.js?v=0.0.33"></script>
+  <script src="/realtime-ui.js?v=0.0.33"></script>
   <script src="/invite-ui.js?v=0.0.20"></script>
   <script src="/roles-ui.js?v=0.0.19"></script>
   <script src="/role-shell-ui.js?v=0.0.27"></script>

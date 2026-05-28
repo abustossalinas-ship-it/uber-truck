@@ -103,6 +103,27 @@ Ejecutar `supabase/migrations/012_uber_parity.sql` — columnas `delivery_note`,
 
 Ejecutar `supabase/migrations/013_rating_tags.sql` — columnas `tags` (TEXT[]), `tag_band` (low|mid|high) en `match_ratings`.
 
+## 015 — Eventos de viaje (historial + realtime)
+
+Ejecutar `supabase/migrations/015_trip_events.sql` — tabla `trip_events` (auditoría de estados).
+
+API: `GET /api/matches/:id/events` · SSE `GET /api/realtime/matches/:id/stream?access_token=JWT`
+
+## KYC semi-curado (piloto)
+
+En producción (`KYC_ENFORCE` activo por defecto) las cuentas nuevas quedan `kyc_status = pending` hasta aprobación admin.
+
+- `GET /api/admin/users?status=pending` (rol admin)
+- `PATCH /api/admin/users/:id/kyc` body `{ "kyc_status": "approved" }`
+
+Aprobar cuentas existentes:
+
+```sql
+UPDATE users SET kyc_status = 'approved' WHERE role IN ('shipper', 'carrier');
+```
+
+Desactivar en dev local: `KYC_ENFORCE=false` en `.env`
+
 ## 014 — rater_user_id (opcional)
 
 Ejecutar `supabase/migrations/014_match_ratings_rater_user.sql` si la columna no existe.

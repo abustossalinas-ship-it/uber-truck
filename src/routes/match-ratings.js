@@ -9,8 +9,10 @@ const { validateRating, normalizeRole } = require('../lib/match-ratings');
 const { buildRatingInsert } = require('../lib/rating-tags');
 const { filterMatchesForUser } = require('../lib/access-scope');
 const { mapDbError } = require('../lib/supabase-errors');
+const { requireApprovedOperator } = require('../lib/kyc-gate');
 
 const router = express.Router({ mergeParams: true });
+const operatorGate = [requireAuthIfDb, requireApprovedOperator];
 const { loadCatalog } = require('../lib/rating-tags');
 
 router.get('/rating-tags/catalog', (_req, res) => {
@@ -22,7 +24,7 @@ async function actorOwnsMatch(user, match) {
   return rows.length > 0;
 }
 
-router.post('/:id/rate', optionalAuth, requireAuthIfDb, async (req, res) => {
+router.post('/:id/rate', optionalAuth, ...operatorGate, async (req, res) => {
   try {
     const match = await repo.getById('matches', req.params.id);
     if (!match) return res.status(404).json({ ok: false, error: 'Viaje no encontrado' });

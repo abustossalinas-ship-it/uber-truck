@@ -15,6 +15,7 @@ function signToken(user) {
       role: user.role,
       name: user.full_name,
       company_name: user.company_name || null,
+      kyc_status: user.kyc_status || 'pending',
     },
     JWT_SECRET,
     { expiresIn: JWT_EXPIRES }
@@ -71,9 +72,9 @@ async function registerUser({ email, password, full_name, role, company_name, ph
       company_name: company_name.trim(),
       phone: phone?.trim() || null,
       password_hash: hash,
-      kyc_status: 'pending',
+      kyc_status: resolvedRole === 'admin' ? 'approved' : 'pending',
     })
-    .select('id, email, full_name, role, company_name, phone')
+    .select('id, email, full_name, role, company_name, phone, kyc_status')
     .single();
   if (error) {
     if (error.code === '23505') {
@@ -95,7 +96,7 @@ async function loginUser({ email, password }) {
   const sb = supabase.getClient();
   const { data, error } = await sb
     .from('users')
-    .select('id, email, full_name, role, company_name, phone, password_hash')
+    .select('id, email, full_name, role, company_name, phone, password_hash, kyc_status')
     .eq('email', email.trim().toLowerCase())
     .maybeSingle();
   if (error) throw error;
@@ -117,6 +118,7 @@ async function loginUser({ email, password }) {
     role: data.role,
     company_name: data.company_name,
     phone: data.phone,
+    kyc_status: data.kyc_status || 'pending',
   };
   return { user, token: signToken(user) };
 }

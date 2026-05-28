@@ -835,6 +835,33 @@ select.offer-picked {
   margin-left: 0.35rem;
 }
 
+.kyc-banner {
+  border-left: 4px solid #f59e0b;
+  background: #fffbeb;
+}
+
+.kyc-banner-inner p {
+  margin: 0.35rem 0;
+}
+
+body.kyc-pending #form-load button[type="submit"],
+body.kyc-pending #form-offer button[type="submit"],
+body.kyc-pending #btn-create-match {
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.admin-kyc-panel {
+  border-left: 4px solid var(--accent);
+}
+
+.admin-kyc-list {
+  margin-top: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
 .trip-rating-tags {
   display: inline-block;
   font-size: 0.78rem;

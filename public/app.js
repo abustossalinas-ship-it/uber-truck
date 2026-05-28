@@ -991,6 +991,9 @@ async function refreshBoard() {
   if (typeof renderTripsList === 'function') {
     renderTripsList(matchRows, loadById, offerById);
   }
+  if (typeof syncBoardRealtime === 'function') {
+    syncBoardRealtime(activeMatches);
+  }
 }
 
 async function loadSuggestionsFor(loadId) {
@@ -1051,6 +1054,7 @@ document.body.addEventListener('click', (e) => {
 
 $('form-load').addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (typeof assertCanOperate === 'function' && !assertCanOperate()) return;
   if (typeof Auth !== 'undefined' && Auth.user?.role === 'carrier') {
     alert('Tu cuenta es transportista. Publica en «Mis ofertas».');
     showTab('carrier');
@@ -1080,6 +1084,7 @@ $('form-load').addEventListener('submit', async (e) => {
   const res = await API.postLoad(body);
   const json = await res.json();
   if (!res.ok) {
+    if (typeof handleApiKycError === 'function' && handleApiKycError(res, json)) return;
     alert(json.errors?.join('\n') || json.error || 'Error');
     return;
   }
@@ -1099,6 +1104,7 @@ $('form-load').addEventListener('submit', async (e) => {
 
 $('form-offer').addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (typeof assertCanOperate === 'function' && !assertCanOperate()) return;
   if (typeof Auth !== 'undefined' && Auth.user?.role === 'shipper') {
     alert('Tu cuenta es embarcadora. Publica en «Mis cargas».');
     showTab('shipper');
@@ -1124,6 +1130,7 @@ $('form-offer').addEventListener('submit', async (e) => {
   const res = await API.postOffer(body);
   const json = await res.json();
   if (!res.ok) {
+    if (typeof handleApiKycError === 'function' && handleApiKycError(res, json)) return;
     alert(json.errors?.join('\n') || json.error || 'Error al publicar oferta');
     return;
   }
@@ -1136,6 +1143,7 @@ $('form-offer').addEventListener('submit', async (e) => {
 
 $('form-match').addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (typeof assertCanOperate === 'function' && !assertCanOperate()) return;
   const loadId = $('match-load').value;
   const offerId = $('match-offer').value;
   if (!loadId) {

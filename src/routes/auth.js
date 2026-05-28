@@ -2,6 +2,8 @@
 
 const express = require('express');
 const { registerUser, loginUser, authMiddleware } = require('../lib/auth');
+const { fetchKycStatus } = require('../lib/kyc-gate');
+const supabase = require('../services/supabase');
 
 const router = express.Router();
 
@@ -47,8 +49,17 @@ router.post('/login', async (req, res) => {
   }
 });
 
-router.get('/me', authMiddleware, (req, res) => {
-  res.json({ ok: true, user: req.user });
+router.get('/me', authMiddleware, async (req, res) => {
+  try {
+    let user = { ...req.user };
+    if (supabase.isConfigured() && req.user?.sub) {
+      user.kyc_status = await fetchKycStatus(req.user.sub);
+    }
+    res.json({ ok: true, user });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al leer perfil' });
+  }
 });
 
 module.exports = router;

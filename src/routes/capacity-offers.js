@@ -9,8 +9,10 @@ const { requireMapsAddresses } = require('../lib/geo-validate');
 const { optionalAuth } = require('../lib/optional-auth');
 const { requireAuthIfDb } = require('../lib/require-auth');
 const { offerListFilters, assertCanPublishOffer } = require('../lib/access-scope');
+const { requireApprovedOperator } = require('../lib/kyc-gate');
 
 const router = express.Router();
+const operatorGate = [requireAuthIfDb, requireApprovedOperator];
 
 router.get('/', optionalAuth, async (req, res) => {
   try {
@@ -40,7 +42,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
   }
 });
 
-router.post('/', optionalAuth, requireAuthIfDb, async (req, res) => {
+router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
   const body = req.body || {};
   if (supabaseService.isConfigured()) {
     const pubErr = assertCanPublishOffer(req.user);

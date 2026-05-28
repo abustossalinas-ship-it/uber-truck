@@ -16,6 +16,7 @@ const Auth = {
       name: user.full_name || user.name,
       company_name: user.company_name,
       phone: user.phone,
+      kyc_status: user.kyc_status || 'pending',
     };
     localStorage.setItem('ut_token', token);
     localStorage.setItem('ut_user', JSON.stringify(this.user));
@@ -54,6 +55,8 @@ const Auth = {
       btn.textContent = 'Ingresar';
       if (btnReg) btnReg.hidden = false;
     }
+    if (typeof renderKycBanner === 'function') renderKycBanner();
+    if (typeof refreshAdminKycPanel === 'function') refreshAdminKycPanel();
     if (typeof applyRoleUi === 'function') applyRoleUi();
     if (typeof renderBoardActor === 'function') renderBoardActor();
     if (typeof refreshBoard === 'function') refreshBoard();
@@ -231,7 +234,17 @@ formAuth?.addEventListener('submit', async (e) => {
       return;
     }
     Auth.save(json.token, json.user);
+    try {
+      const meRes = await fetch('/api/auth/me', { headers: Auth.headers() });
+      const meJson = await meRes.json();
+      if (meRes.ok && meJson.user) Auth.save(json.token, meJson.user);
+    } catch (_) {}
     document.getElementById('auth-panel').hidden = true;
+    if (authRegisterMode && Auth.user?.kyc_status === 'pending' && Auth.user?.role !== 'admin') {
+      alert(
+        'Cuenta creada. Quedó en revisión: un administrador debe aprobarla antes de publicar o emparejar.'
+      );
+    }
     if (typeof Penalties !== 'undefined') Penalties.refresh();
   } catch (err) {
     console.error(err);

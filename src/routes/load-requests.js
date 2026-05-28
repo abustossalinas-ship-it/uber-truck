@@ -21,8 +21,10 @@ const {
   suggestReferenceBudget,
 } = require('../lib/match-price');
 const { validateCargoDeclaration, cargoTrustPayload } = require('../lib/cargo-trust');
+const { requireApprovedOperator } = require('../lib/kyc-gate');
 
 const router = express.Router();
+const operatorGate = [requireAuthIfDb, requireApprovedOperator];
 
 router.get('/', optionalAuth, async (req, res) => {
   try {
@@ -82,7 +84,7 @@ router.get('/:id/budget-hint', optionalAuth, async (req, res) => {
   }
 });
 
-router.patch('/:id/budget', optionalAuth, requireAuthIfDb, async (req, res) => {
+router.patch('/:id/budget', optionalAuth, ...operatorGate, async (req, res) => {
   try {
     const load = await repo.getById('load_requests', req.params.id);
     if (!load) return res.status(404).json({ ok: false, error: 'Carga no encontrada' });
@@ -135,7 +137,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
   }
 });
 
-router.post('/', optionalAuth, requireAuthIfDb, async (req, res) => {
+router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
   const body = req.body || {};
   if (supabaseService.isConfigured()) {
     const pubErr = assertCanPublishLoad(req.user);

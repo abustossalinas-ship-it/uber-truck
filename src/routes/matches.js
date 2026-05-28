@@ -31,8 +31,13 @@ const {
 } = require('../lib/access-scope');
 const { copyBudgetFromLoad, outsideRangeMessages } = require('../lib/match-price');
 const { enrichMatchesWithRatings } = require('../lib/match-ratings');
+const { requireAuthIfDb } = require('../lib/require-auth');
+const { requireApprovedOperator } = require('../lib/kyc-gate');
+const { logMatchTrip } = require('../lib/match-trip-log');
+const { listTripEvents } = require('../lib/trip-events');
 
 const router = express.Router();
+const operatorGate = [requireAuthIfDb, requireApprovedOperator];
 
 const MATCH_TRANSITIONS = {
   proposed: ['accepted', 'cancelled'],
@@ -87,7 +92,23 @@ router.get('/', optionalAuth, async (req, res) => {
   }
 });
 
-router.post('/', optionalAuth, async (req, res) => {
+router.get('/:id/events', optionalAuth, requireAuthIfDb, async (req, res) => {
+  try {
+    const match = await repo.getById('matches', req.params.id);
+    if (!match) return res.status(404).json({ ok: false, error: 'No encontrado' });
+    const allowed = await filterMatchesForUser([match], req.user);
+    if (!allowed.length) {
+      return res.status(403).json({ ok: false, error: 'No participas en este viaje' });
+    }
+    const events = await listTripEvents(match.id);
+    res.json({ ok: true, data: events });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al leer historial del viaje' });
+  }
+});
+
+router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
   const body = req.body || {};
   try {
     const load = await repo.getById('load_requests', body.load_request_id);
@@ -143,6 +164,11 @@ router.post('/', optionalAuth, async (req, res) => {
           mutual_cancel_carrier_at: null,
           notes: body.notes?.trim() || existing.notes,
         });
+        await logMatchTrip(req, revived, {
+          event_type: 'match_revived',
+          from_status: existing.status,
+          to_status: 'proposed',
+        });
         return res.status(201).json({ ok: true, data: revived, revived: true });
       }
       return res.status(409).json({
@@ -162,6 +188,12 @@ router.post('/', optionalAuth, async (req, res) => {
       agreed_price_clp: null,
       status: 'proposed',
       notes: body.notes?.trim() || null,
+    });
+
+    await logMatchTrip(req, row, {
+      event_type: 'match_created',
+      to_status: 'proposed',
+      payload: { carrier_offer_clp: carrierOffer },
     });
 
     if (carrierOffer != null && role === 'carrier') {
@@ -200,7 +232,7 @@ router.post('/', optionalAuth, async (req, res) => {
   }
 });
 
-router.post('/:id/mutual-cancel', optionalAuth, async (req, res) => {
+router.post('/:id/mutual-cancel', optionalAuth, ...operatorGate, async (req, res) => {
   try {
     const match = await repo.getById('matches', req.params.id);
     if (!match) return res.status(404).json({ ok: false, error: 'No encontrado' });
@@ -253,7 +285,7 @@ router.post('/:id/mutual-cancel', optionalAuth, async (req, res) => {
   }
 });
 
-router.patch('/:id/carrier-offer', optionalAuth, async (req, res) => {
+router.patch('/:id/carrier-offer', optionalAuth, ...operatorGate, async (req, res) => {
   try {
     const match = await repo.getById('matches', req.params.id);
     if (!match) return res.status(404).json({ ok: false, error: 'No encontrado' });
@@ -271,6 +303,12 @@ router.patch('/:id/carrier-offer', optionalAuth, async (req, res) => {
     const updated = await repo.update('matches', match.id, {
       carrier_offer_clp: amount,
       price_status: 'pending_acceptance',
+    });
+    await logMatchTrip(req, updated, {
+      event_type: 'carrier_offer_updated',
+      from_status: match.status,
+      to_status: match.status,
+      payload: { carrier_offer_clp: amount },
     });
     if (req.user?.sub) {
       const offer = await repo.getById('capacity_offers', match.capacity_offer_id);
@@ -306,7 +344,7 @@ router.patch('/:id/carrier-offer', optionalAuth, async (req, res) => {
   }
 });
 
-router.patch('/:id/accept-offer', optionalAuth, async (req, res) => {
+router.patch('/:id/accept-offer', optionalAuth, ...operatorGate, async (req, res) => {
   try {
     const match = await repo.getById('matches', req.params.id);
     if (!match) return res.status(404).json({ ok: false, error: 'No encontrado' });
@@ -327,6 +365,12 @@ router.patch('/:id/accept-offer', optionalAuth, async (req, res) => {
       status: 'accepted',
       agreed_price_clp: Number(match.carrier_offer_clp),
       price_status: 'agreed',
+    });
+    await logMatchTrip(req, updated, {
+      event_type: 'price_accepted',
+      from_status: match.status,
+      to_status: 'accepted',
+      payload: { agreed_price_clp: updated.agreed_price_clp },
     });
     await repo.update('load_requests', match.load_request_id, { status: 'matched' });
     await repo.update('capacity_offers', match.capacity_offer_id, { status: 'reserved' });
@@ -349,7 +393,7 @@ router.patch('/:id/accept-offer', optionalAuth, async (req, res) => {
   }
 });
 
-router.patch('/:id/status', optionalAuth, async (req, res) => {
+router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
   try {
     const match = await repo.getById('matches', req.params.id);
     if (!match) return res.status(404).json({ ok: false, error: 'No encontrado' });
@@ -408,6 +452,12 @@ router.patch('/:id/status', optionalAuth, async (req, res) => {
       const penalty = computePenalty(reason, match.agreed_price_clp);
       const updated = await applyCancelPatch(match, action, role, req.body);
       await releaseLoadAndOffer(match);
+      await logMatchTrip(req, updated, {
+        event_type: 'match_cancelled',
+        from_status: match.status,
+        to_status: 'cancelled',
+        payload: { action, reason_code: req.body?.reason_code || null },
+      });
       return res.json({
         ok: true,
         data: updated,
@@ -416,15 +466,6 @@ router.patch('/:id/status', optionalAuth, async (req, res) => {
       });
     }
 
-    const updated = await repo.update('matches', match.id, { status: next });
-
-    if (next === 'accepted') {
-      await repo.update('load_requests', match.load_request_id, { status: 'matched' });
-      await repo.update('capacity_offers', match.capacity_offer_id, { status: 'reserved' });
-    }
-    if (next === 'in_progress') {
-      await repo.update('load_requests', match.load_request_id, { status: 'in_transit' });
-    }
     if (next === 'completed') {
       const patch = {
         status: 'completed',
@@ -434,6 +475,12 @@ router.patch('/:id/status', optionalAuth, async (req, res) => {
         patch.delivery_note = req.body.delivery_note.trim().slice(0, 500);
       }
       const completed = await repo.update('matches', match.id, patch);
+      await logMatchTrip(req, completed, {
+        event_type: 'trip_completed',
+        from_status: match.status,
+        to_status: 'completed',
+        payload: { delivery_note: patch.delivery_note || null },
+      });
       await repo.update('load_requests', match.load_request_id, { status: 'delivered' });
       await repo.update('capacity_offers', match.capacity_offer_id, { status: 'reserved' });
       return res.json({
@@ -442,6 +489,21 @@ router.patch('/:id/status', optionalAuth, async (req, res) => {
         message: 'Viaje cerrado. Puedes calificar a la otra parte en Mis viajes.',
         prompt_rating: true,
       });
+    }
+
+    const updated = await repo.update('matches', match.id, { status: next });
+    await logMatchTrip(req, updated, {
+      event_type: 'status_change',
+      from_status: match.status,
+      to_status: next,
+    });
+
+    if (next === 'accepted') {
+      await repo.update('load_requests', match.load_request_id, { status: 'matched' });
+      await repo.update('capacity_offers', match.capacity_offer_id, { status: 'reserved' });
+    }
+    if (next === 'in_progress') {
+      await repo.update('load_requests', match.load_request_id, { status: 'in_transit' });
     }
 
     res.json({ ok: true, data: updated });

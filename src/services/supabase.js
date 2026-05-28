@@ -51,7 +51,8 @@ async function listMatchRatings(filters = {}) {
 async function list(table, filters = {}) {
   if (table === 'match_ratings') return listMatchRatings(filters);
   const sb = getClient();
-  let q = sb.from(table).select('*').order('created_at', { ascending: false });
+  const asc = table === 'trip_events';
+  let q = sb.from(table).select('*').order('created_at', { ascending: asc });
   if (filters.status) q = q.eq('status', filters.status);
   if (filters.shipper_user_id) q = q.eq('shipper_user_id', filters.shipper_user_id);
   if (filters.carrier_user_id) q = q.eq('carrier_user_id', filters.carrier_user_id);

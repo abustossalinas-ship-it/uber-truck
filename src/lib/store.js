@@ -15,6 +15,7 @@ const EMPTY = {
   match_notifications: [],
   match_incidents: [],
   match_ratings: [],
+  trip_events: [],
 };
 
 const SEED = {
@@ -81,6 +82,7 @@ function readStore() {
       match_notifications: data.match_notifications || [],
       match_incidents: data.match_incidents || [],
       match_ratings: data.match_ratings || [],
+      trip_events: data.trip_events || [],
     };
   } catch {
     return structuredClone(EMPTY);

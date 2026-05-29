@@ -94,7 +94,7 @@ const MATCH_ACTION_CONFIRM = {
   progress:
     '¿Marcar este emparejamiento como «En ruta»?\n\nConfirma que el transporte ya salió o está en camino. Si te equivocas, aún puedes cancelar con motivo.',
   complete:
-    '¿Finalizar y cerrar este viaje?\n\nSolo confirma cuando la mercadería fue entregada. Después podrás calificar; no podrás volver a «camión asignado» desde aquí.',
+    '¿Está seguro de finalizar este viaje (entregado)?\n\nConfirme solo si la mercadería ya fue entregada. Después podrá calificar y el viaje quedará cerrado.',
   accept_offer:
     '¿Aceptar el precio del transportista y confirmar el emparejamiento?\n\nLa carga y la oferta quedarán reservadas para este viaje.',
 };
@@ -336,7 +336,7 @@ function buildMatchActions(m) {
       html += `<button type="button" class="btn-match-progress" data-action="progress" data-id="${m.id}">Marcar en ruta</button>`;
       html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="accepted" data-price="${m.agreed_price_clp || ''}">Cancelar emparejamiento</button>`;
     } else {
-      html += `<button type="button" class="btn-match-complete" data-action="complete" data-id="${m.id}">Finalizar viaje (entregado)</button>`;
+      html += `<button type="button" class="btn-secondary" data-action="complete" data-id="${m.id}">Finalizar viaje (entregado)</button>`;
       html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="in_progress" data-price="${m.agreed_price_clp || ''}">Cancelar en ejecución</button>`;
     }
   }
@@ -1320,7 +1320,7 @@ $('list-matches').addEventListener('click', async (e) => {
   if (action === 'complete') {
     if (!confirmMatchAction('complete')) return;
     const note = prompt(
-      'Nota de entrega (opcional). Cancelar aquí no cierra el viaje:',
+      'Nota de entrega (opcional). Pulsa Cancelar para volver sin cerrar el viaje:',
       'Mercadería recibida conforme'
     );
     if (note === null) return;

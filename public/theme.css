@@ -732,24 +732,6 @@ select.offer-picked {
   border: 2px solid var(--brand-black);
 }
 
-.match-actions .btn-match-complete {
-  display: block;
-  width: 100%;
-  margin: 0.35rem 0 0.25rem;
-  font-size: 1rem;
-  font-weight: 800;
-  padding: 0.75rem 1rem;
-  background: var(--brand-black);
-  color: var(--brand-white);
-  border: 3px solid var(--accent);
-  border-radius: 10px;
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.2);
-}
-
-.match-actions .btn-match-complete:hover {
-  background: #222;
-}
-
 .match-actions button:disabled {
   opacity: 0.65;
   cursor: wait;

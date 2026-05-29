@@ -5,7 +5,10 @@ const PENALTY_DUE_DAYS = Number(process.env.PENALTY_DUE_DAYS) || 7;
 const DEBTOR_BY_REASON = {
   shipper_change_plans: 'shipper',
   shipper_cancel_in_transit: 'shipper',
+  shipper_carrier_late: 'carrier',
+  shipper_carrier_failed: 'carrier',
   carrier_unavailable: 'carrier',
+  carrier_missed_deadline: 'carrier',
   carrier_no_show: 'carrier',
 };
 

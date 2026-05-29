@@ -92,9 +92,11 @@ const CANCEL_ACTION_LABEL = {
 
 const MATCH_ACTION_CONFIRM = {
   progress:
-    '¿Marcar este emparejamiento como «En ruta»?\n\nConfirma que el transporte ya salió o está en camino. Si te equivocas, aún puedes cancelar con motivo.',
-  complete:
-    '¿Está seguro de finalizar este viaje (entregado)?\n\nConfirme solo si la mercadería ya fue entregada. Después podrá calificar y el viaje quedará cerrado.',
+    '¿Marcar este emparejamiento como «En ruta»?\n\nConfirma que el transporte ya salió o está en camino.',
+  mark_delivered:
+    '¿Marcaste la entrega en destino?\n\nEl embarcador recibirá aviso y deberá confirmar que recibió la mercadería.',
+  confirm_receipt:
+    '¿Confirmas que recibiste la mercadería conforme?\n\nEl viaje se cerrará y ambos podrán calificar. Solo confirma si ya tienes la carga.',
   accept_offer:
     '¿Aceptar el precio del transportista y confirmar el emparejamiento?\n\nLa carga y la oferta quedarán reservadas para este viaje.',
 };
@@ -330,14 +332,33 @@ function buildMatchActions(m) {
   }
   if (m.status === 'accepted' || m.status === 'in_progress') {
     const title = m._matchTitle || 'Emparejamiento';
-    html += `<button type="button" class="btn-secondary" data-action="report_incident" data-id="${m.id}">Reportar incidente</button>`;
-    html += `<button type="button" class="btn-secondary" data-action="chat" data-id="${m.id}" data-title="${title.replace(/"/g, '')}">Chat</button>`;
+    const titleEsc = title.replace(/"/g, '');
+    html += `<button type="button" class="btn-secondary" data-action="chat" data-id="${m.id}" data-title="${titleEsc}">Chat</button>`;
     if (m.status === 'accepted') {
-      html += `<button type="button" class="btn-match-progress" data-action="progress" data-id="${m.id}">Marcar en ruta</button>`;
-      html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="accepted" data-price="${m.agreed_price_clp || ''}">Cancelar emparejamiento</button>`;
+      if (role === 'carrier') {
+        html += `<button type="button" class="btn-match-progress" data-action="progress" data-id="${m.id}">Marcar en ruta</button>`;
+        html += `<p class="muted match-role-hint">Solo cancela si aún <strong>no</strong> retiraste la carga. Al marcar en ruta ya no podrás cancelar el viaje.</p>`;
+        html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="accepted" data-price="${m.agreed_price_clp || ''}">No puedo cumplir antes del retiro</button>`;
+      } else {
+        html += `<p class="muted match-role-hint">Esperando que el transportista marque «En ruta» cuando retira la carga.</p>`;
+        html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="accepted" data-price="${m.agreed_price_clp || ''}">Cancelar emparejamiento</button>`;
+      }
+    } else if (role === 'carrier') {
+      html += `<button type="button" class="btn-secondary" data-action="report_incident" data-id="${m.id}">Reportar incidente</button>`;
+      if (!m.carrier_marked_delivered_at) {
+        html += `<button type="button" class="btn-secondary" data-action="mark_delivered" data-id="${m.id}">Marcar entregado en destino</button>`;
+      } else {
+        html += `<p class="muted match-role-hint">Entrega marcada. Falta confirmación del embarcador.</p>`;
+      }
+      html += `<p class="muted match-role-hint">Con carga en ruta no puedes cancelar el viaje. Usa incidente o acuerdo mutuo con el embarcador.</p>`;
     } else {
-      html += `<button type="button" class="btn-secondary" data-action="complete" data-id="${m.id}">Finalizar viaje (entregado)</button>`;
-      html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="in_progress" data-price="${m.agreed_price_clp || ''}">Cancelar en ejecución</button>`;
+      if (m.carrier_marked_delivered_at) {
+        html += `<button type="button" class="btn-secondary" data-action="confirm_receipt" data-id="${m.id}">Confirmar recepción de carga</button>`;
+      } else {
+        html += `<p class="muted match-role-hint">Cuando el transportista marque entrega en destino, confirma aquí la recepción.</p>`;
+      }
+      html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="in_progress" data-price="${m.agreed_price_clp || ''}">Cancelar (caso grave o acuerdo mutuo)</button>`;
+      html += `<p class="muted match-cancel-hint">Con mercadería en camión solo cancelación excepcional: acuerdo mutuo, fuerza mayor o falla grave del transportista (con detalle y multa sugerida).</p>`;
     }
   }
   return html;
@@ -376,6 +397,13 @@ function formatPenaltyLine(opt) {
   return penalty.note || 'Sin multa sugerida.';
 }
 
+function formatReputationLine(opt) {
+  if (opt?.reputation_impact === 'negative') {
+    return 'Puede afectar la reputación del responsable en calificaciones futuras.';
+  }
+  return '';
+}
+
 function updateCancelReasonForm() {
   const code = $('cancel-reason-code')?.value;
   const opt = cancelReasonOptions.find((o) => o.code === code);
@@ -390,7 +418,8 @@ function updateCancelReasonForm() {
   detailEl.hidden = !showDetail;
   detailEl.required = showDetail;
   penaltyBox.hidden = false;
-  penaltyBox.textContent = formatPenaltyLine(opt);
+  const repLine = formatReputationLine(opt);
+  penaltyBox.textContent = [formatPenaltyLine(opt), repLine].filter(Boolean).join(' ');
   if (opt.requiresAgreement) {
     agreeLabel.hidden = false;
     agreeText.textContent =
@@ -599,6 +628,10 @@ async function openCancelModal(ctx) {
   if (badge && json.phase_label) {
     badge.hidden = false;
     let badgeText = `Etapa actual: ${json.phase_label}`;
+    if (json.pickup_deadline_label) {
+      badgeText += ` · Plazo retiro: ${json.pickup_deadline_label}`;
+      if (json.deadline_past) badgeText += ' (vencido)';
+    }
     if (json.mutual_cancel?.ready) badgeText += ' · Acuerdo mutuo listo';
     badge.textContent = badgeText;
   } else if (badge) badge.hidden = true;
@@ -619,7 +652,13 @@ async function submitCancelModal(e) {
   const { matchId, action, phase } = cancelModalCtx;
   if (phase === 'in_progress' && action === 'cancel') {
     const ok = confirm(
-      '¿Confirmas cancelar un emparejamiento en ejecución? La carga y la oferta volverán a publicarse.'
+      '¿Confirmas cancelar con la carga ya en ruta?\n\nSolo usa esto en casos graves o con acuerdo mutuo. La carga y la oferta volverán a publicarse.'
+    );
+    if (!ok) return;
+  }
+  if (phase === 'accepted' && action === 'cancel' && getActorRole() === 'carrier') {
+    const ok = confirm(
+      '¿Confirmas que no podrás cumplir antes de retirar la carga?\n\nSi ya tienes la mercadería, primero no marques «En ruta» y contacta al embarcador por chat.'
     );
     if (!ok) return;
   }
@@ -644,6 +683,9 @@ async function submitCancelModal(e) {
   let msg = json.message || 'Listo';
   if (json.penalty?.amount_clp) {
     msg += `\nMulta sugerida: $${Number(json.penalty.amount_clp).toLocaleString('es-CL')} CLP (acuerdo entre partes).`;
+  }
+  if (json.reputation_note) {
+    msg += `\n\n${json.reputation_note}`;
   }
   alert(msg);
   if (typeof Comms !== 'undefined') Comms.refreshBell();
@@ -716,7 +758,12 @@ function runMatchCancel(matchId, action, phase, agreedPriceClp) {
   const leads = {
     withdraw: 'Elige un motivo de la lista.',
     reject: 'Elige un motivo de la lista.',
-    cancel: 'Elige un motivo. La multa depende de la etapa y del motivo.',
+    cancel:
+      phase === 'in_progress'
+        ? 'Carga en ruta: solo motivos graves o acuerdo mutuo. El transportista no puede cancelar desde aquí.'
+        : phase === 'accepted' && getActorRole() === 'carrier'
+          ? 'Solo antes de marcar «En ruta». Indica el motivo; puede haber multa sugerida y afectar reputación.'
+          : 'Elige un motivo. La multa y reputación dependen de la etapa y del motivo.',
   };
   openCancelModal({
     matchId,
@@ -1317,10 +1364,35 @@ $('list-matches').addEventListener('click', async (e) => {
     alert('Primero el transportista debe ofertar precio; luego usa «Aceptar precio y confirmar match».');
     return;
   }
-  if (action === 'complete') {
-    if (!confirmMatchAction('complete')) return;
+  if (action === 'mark_delivered') {
+    if (!confirmMatchAction('mark_delivered')) return;
     const note = prompt(
-      'Nota de entrega (opcional). Pulsa Cancelar para volver sin cerrar el viaje:',
+      'Nota de entrega (opcional). Ej. hora, receptor, observaciones:',
+      'Entregado en bodega destino'
+    );
+    if (note === null) return;
+    if (!beginMatchAction(btn)) return;
+    try {
+      const res = await API.patchMatch(id, {
+        action: 'mark_delivered',
+        delivery_note: note.trim() || undefined,
+      });
+      const json = await res.json();
+      if (!res.ok) {
+        alert(json.error || 'Error');
+        return;
+      }
+      alert(json.message || 'Entrega marcada');
+      await refreshBoard();
+    } finally {
+      endMatchAction(btn);
+    }
+    return;
+  }
+  if (action === 'confirm_receipt' || action === 'complete') {
+    if (!confirmMatchAction('confirm_receipt')) return;
+    const note = prompt(
+      'Observación de recepción (opcional). Cancelar para volver:',
       'Mercadería recibida conforme'
     );
     if (note === null) return;
@@ -1354,7 +1426,7 @@ $('list-matches').addEventListener('click', async (e) => {
       const json = await res.json();
       if (!res.ok) alert(json.error || 'Error');
       else {
-        alert('Viaje marcado como en ruta. Cuando entregues, usa «Finalizar viaje (entregado)».');
+        alert('Viaje marcado como en ruta. Cuando entregues en destino, usa «Marcar entregado en destino».');
         await refreshBoard();
       }
     } finally {

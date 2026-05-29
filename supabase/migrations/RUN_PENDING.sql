@@ -77,3 +77,8 @@ CREATE TABLE IF NOT EXISTS password_reset_tokens (
 );
 
 CREATE INDEX IF NOT EXISTS idx_password_reset_user ON password_reset_tokens (user_id, created_at DESC);
+
+-- 018 — Confirmación de entrega (transportista marca, embarcador confirma)
+ALTER TABLE matches
+  ADD COLUMN IF NOT EXISTS carrier_marked_delivered_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS shipper_confirmed_receipt_at TIMESTAMPTZ;

@@ -17,9 +17,11 @@ No perseguir la app perfecta en web: construir **operación tipo Uber** con mark
 | — | PWA instalable | Paralelo a móvil |
 | — | React Native + Expo + TestFlight | Tras GPS en web/API |
 | H | Piloto curado (5 carriers + 3 embarcadores) | Al final |
+| — | Recuperación de contraseña por email (Resend + SQL 017) | **Futuro** — código en repo v0.0.38, no activar aún |
 
 ## Qué NO hacer aún
 
+- Configurar Resend / `EMAIL_FROM` ni migración 017 (recuperación por correo)
 - Marketplace abierto sin aprobación
 - App Store / Play Store pública
 - IA, pricing dinámico, pasarela obligatoria

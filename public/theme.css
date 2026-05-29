@@ -732,6 +732,17 @@ select.offer-picked {
   border: 2px solid var(--brand-black);
 }
 
+.match-role-hint,
+.match-cancel-hint {
+  width: 100%;
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+}
+
+.match-cancel-hint {
+  margin-bottom: 0.35rem;
+}
+
 .match-actions button:disabled {
   opacity: 0.65;
   cursor: wait;

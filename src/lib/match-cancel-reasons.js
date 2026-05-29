@@ -78,7 +78,7 @@ const REASONS = [
     requiresDetail: false,
     requiresAgreement: false,
   },
-  // —— Fase 3: cancelar después de aceptar / en ruta ——
+  // —— Aceptado: antes de «Marcar en ruta» (sin mercadería en camión) ——
   {
     code: 'mutual_agreement',
     label: 'Acuerdo mutuo entre embarcador y transportista',
@@ -94,7 +94,7 @@ const REASONS = [
     code: 'shipper_change_plans',
     label: 'Embarcador cancela por cambio de planes',
     actions: ['cancel'],
-    phases: ['accepted', 'in_progress'],
+    phases: ['accepted'],
     roles: ['shipper', 'admin'],
     penalty: {
       type: 'fee_suggested',
@@ -104,10 +104,11 @@ const REASONS = [
     },
     requiresDetail: false,
     requiresAgreement: true,
+    reputationImpact: 'negative',
   },
   {
     code: 'carrier_unavailable',
-    label: 'Transportista no puede cumplir el servicio',
+    label: 'Transportista no puede cumplir antes del retiro',
     actions: ['cancel'],
     phases: ['accepted'],
     roles: ['carrier', 'admin'],
@@ -115,26 +116,62 @@ const REASONS = [
       type: 'fee_suggested',
       percentOfAgreed: 10,
       minClp: 20000,
-      note: 'Compensación sugerida al embarcador por incumplimiento del transportista.',
+      note: 'Compensación sugerida al embarcador. Afecta reputación si no hay fuerza mayor.',
     },
-    requiresDetail: false,
+    requiresDetail: true,
     requiresAgreement: true,
+    reputationImpact: 'negative',
+  },
+  {
+    code: 'carrier_missed_deadline',
+    label: 'Transportista no llegará al plazo acordado (antes del retiro)',
+    actions: ['cancel'],
+    phases: ['accepted'],
+    roles: ['carrier', 'admin'],
+    penalty: {
+      type: 'fee_suggested',
+      percentOfAgreed: 12,
+      minClp: 25000,
+      note: 'Incumplimiento de plazo antes de retirar la carga. Multa sugerida al embarcador.',
+    },
+    requiresDetail: true,
+    requiresAgreement: true,
+    reputationImpact: 'negative',
+  },
+  {
+    code: 'shipper_carrier_late',
+    label: 'Transportista no cumplió el plazo (aún no marcó en ruta)',
+    actions: ['cancel'],
+    phases: ['accepted'],
+    roles: ['shipper', 'admin'],
+    penalty: {
+      type: 'fee_suggested',
+      percentOfAgreed: 15,
+      minClp: 30000,
+      note: 'Plazo de retiro vencido. Compensación sugerida al embarcador.',
+    },
+    requiresDetail: true,
+    requiresAgreement: true,
+    requiresDeadlinePast: true,
+    reputationImpact: 'negative',
   },
   {
     code: 'carrier_no_show',
-    label: 'Transportista no se presentó / falla operativa grave',
+    label: 'Transportista no se presentó al retiro',
     actions: ['cancel'],
-    phases: ['in_progress'],
-    roles: ['carrier', 'admin'],
+    phases: ['accepted'],
+    roles: ['shipper', 'admin'],
     penalty: {
       type: 'fee_suggested',
       percentOfAgreed: 20,
       minClp: 40000,
-      note: 'Compensación sugerida al embarcador. Solo con evidencia o acuerdo.',
+      note: 'No show antes de salir. Compensación sugerida al embarcador.',
     },
     requiresDetail: true,
     requiresAgreement: true,
+    reputationImpact: 'negative',
   },
+  // —— En ejecución: solo embarcador (carga ya en ruta); transportista usa incidente ——
   {
     code: 'shipper_cancel_in_transit',
     label: 'Embarcador cancela con carga ya en ruta',
@@ -149,12 +186,29 @@ const REASONS = [
     },
     requiresDetail: true,
     requiresAgreement: true,
+    reputationImpact: 'negative',
+  },
+  {
+    code: 'shipper_carrier_failed',
+    label: 'Transportista no entregó / falla grave en ruta',
+    actions: ['cancel'],
+    phases: ['in_progress'],
+    roles: ['shipper', 'admin'],
+    penalty: {
+      type: 'fee_suggested',
+      percentOfAgreed: 20,
+      minClp: 40000,
+      note: 'Compensación sugerida al embarcador. Indica evidencia en el detalle.',
+    },
+    requiresDetail: true,
+    requiresAgreement: true,
+    reputationImpact: 'negative',
   },
   {
     code: 'price_dispute',
     label: 'Desacuerdo de precio o condiciones',
     actions: ['cancel'],
-    phases: ['accepted', 'in_progress'],
+    phases: ['accepted'],
     roles: ['shipper', 'carrier', 'admin'],
     penalty: { type: 'mediation', note: 'Se recomienda mediación antes de volver a publicar.' },
     requiresDetail: true,
@@ -164,8 +218,18 @@ const REASONS = [
     code: 'force_majeure',
     label: 'Fuerza mayor (accidente, clima, restricción vial)',
     actions: ['cancel'],
-    phases: ['accepted', 'in_progress'],
+    phases: ['accepted'],
     roles: ['shipper', 'carrier', 'admin'],
+    penalty: { type: 'none', note: 'Sin multa sugerida si el motivo es verificable.' },
+    requiresDetail: true,
+    requiresAgreement: false,
+  },
+  {
+    code: 'force_majeure_in_transit',
+    label: 'Fuerza mayor con carga en ruta',
+    actions: ['cancel'],
+    phases: ['in_progress'],
+    roles: ['shipper', 'admin'],
     penalty: { type: 'none', note: 'Sin multa sugerida si el motivo es verificable.' },
     requiresDetail: true,
     requiresAgreement: false,
@@ -174,18 +238,34 @@ const REASONS = [
     code: 'other',
     label: 'Otro motivo (especificar)',
     actions: ['withdraw', 'reject', 'cancel'],
-    phases: ['proposed', 'accepted', 'in_progress'],
+    phases: ['proposed', 'accepted'],
     roles: ['shipper', 'carrier', 'admin'],
     penalty: { type: 'review', note: 'El equipo puede revisar el caso.' },
     requiresDetail: true,
     requiresAgreement: false,
+  },
+  {
+    code: 'other_in_transit',
+    label: 'Otro motivo grave en ruta (especificar)',
+    actions: ['cancel'],
+    phases: ['in_progress'],
+    roles: ['shipper', 'admin'],
+    penalty: { type: 'review', note: 'Solo embarcador; revisión manual.' },
+    requiresDetail: true,
+    requiresAgreement: true,
   },
 ];
 
 /** Límites operativos (MVP) */
 const LIMITS = {
   withdrawPerLoadPerDay: 8,
-  minDetailLength: { default: 8, force_majeure: 15, other: 12 },
+  minDetailLength: {
+    default: 8,
+    force_majeure: 15,
+    force_majeure_in_transit: 15,
+    other: 12,
+    other_in_transit: 12,
+  },
 };
 
 function normalizeRole(role) {
@@ -196,13 +276,15 @@ function normalizeRole(role) {
 function listReasonOptions(action, matchStatus, role, agreedPriceClp = null, opts = {}) {
   const r = normalizeRole(role);
   const mutualReady = Boolean(opts.mutualReady);
-  return REASONS.filter(
-    (x) =>
-      x.actions.includes(action) &&
-      x.phases.includes(matchStatus) &&
-      x.roles.includes(r) &&
-      (!x.requiresMutualConfirm || mutualReady)
-  ).map((x) => {
+  const deadlinePast = Boolean(opts.deadlinePast);
+  return REASONS.filter((x) => {
+    if (!x.actions.includes(action) || !x.phases.includes(matchStatus) || !x.roles.includes(r)) {
+      return false;
+    }
+    if (x.requiresMutualConfirm && !mutualReady) return false;
+    if (x.requiresDeadlinePast && !deadlinePast) return false;
+    return true;
+  }).map((x) => {
     const penaltyPreview = computePenalty(x, agreedPriceClp);
     const feeLabel =
       penaltyPreview.type === 'fee_suggested' && penaltyPreview.amount_clp
@@ -210,22 +292,24 @@ function listReasonOptions(action, matchStatus, role, agreedPriceClp = null, opt
         : penaltyPreview.type === 'none'
           ? ' — sin multa'
           : '';
+    const repLabel = x.reputationImpact === 'negative' ? ' · afecta reputación' : '';
     return {
       code: x.code,
       label: x.label,
-      label_short: x.label + feeLabel,
+      label_short: x.label + feeLabel + repLabel,
       requiresDetail: x.requiresDetail,
       requiresAgreement: x.requiresAgreement,
       penalty: x.penalty,
       penalty_preview: penaltyPreview,
+      reputation_impact: x.reputationImpact || null,
     };
   });
 }
 
 const PHASE_LABELS = {
   proposed: 'Propuesta (sin compromiso de ruta)',
-  accepted: 'Aceptado — camión aún no marcado en ruta',
-  in_progress: 'En ejecución — camión en ruta',
+  accepted: 'Aceptado — aún no marcado en ruta (sin carga en camión)',
+  in_progress: 'En ejecución — carga en ruta (cancelación muy restringida)',
 };
 
 function phaseLabel(matchStatus) {
@@ -260,6 +344,7 @@ function validateReasonPayload({
   reason_detail,
   agreement_accepted,
   mutualReady,
+  deadlinePast,
 }) {
   const reason = getReasonByCode(reason_code);
   if (!reason) return 'Selecciona un motivo válido.';
@@ -267,17 +352,28 @@ function validateReasonPayload({
     return 'Este motivo no aplica a esta acción o estado.';
   }
   if (!reason.roles.includes(normalizeRole(role))) {
-    return 'Tu rol no puede usar este motivo.';
+    return 'Tu rol no puede usar este motivo en esta etapa.';
+  }
+  if (
+    matchStatus === 'in_progress' &&
+    normalizeRole(role) === 'carrier' &&
+    action === 'cancel' &&
+    !(reason.code === 'mutual_agreement' && mutualReady)
+  ) {
+    return 'Con la carga en ruta el transportista no cancela el viaje. Usa «Reportar incidente» o acuerdo mutuo con el embarcador.';
   }
   if (reason.requiresMutualConfirm && !mutualReady) {
     return 'Acuerdo mutuo: ambas partes deben confirmar primero en Emparejamientos (botones Confirmar acuerdo mutuo).';
   }
+  if (reason.requiresDeadlinePast && !deadlinePast) {
+    return 'Este motivo solo aplica cuando ya venció el plazo de retiro acordado.';
+  }
   const detail = (reason_detail || '').trim();
   if (reason.requiresDetail) {
     const min =
-      reason.code === 'force_majeure'
+      reason.code === 'force_majeure' || reason.code === 'force_majeure_in_transit'
         ? LIMITS.minDetailLength.force_majeure
-        : reason.code === 'other'
+        : reason.code === 'other' || reason.code === 'other_in_transit'
           ? LIMITS.minDetailLength.other
           : LIMITS.minDetailLength.default;
     if (detail.length < min) {
@@ -307,6 +403,11 @@ async function checkWithdrawLimit(repo, loadRequestId) {
   return null;
 }
 
+function reputationMessage(reason) {
+  if (reason?.reputationImpact !== 'negative') return null;
+  return 'Este motivo queda registrado y puede afectar la reputación en futuras calificaciones.';
+}
+
 module.exports = {
   REASONS,
   LIMITS,
@@ -318,4 +419,5 @@ module.exports = {
   buildReasonSummary,
   validateReasonPayload,
   checkWithdrawLimit,
+  reputationMessage,
 };

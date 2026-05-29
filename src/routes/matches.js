@@ -15,7 +15,15 @@ const {
   computePenalty,
   getReasonByCode,
 } = require('../lib/match-cancel');
-const { listReasonOptions, phaseLabel } = require('../lib/match-cancel-reasons');
+const {
+  listReasonOptions,
+  phaseLabel,
+  reputationMessage,
+} = require('../lib/match-cancel-reasons');
+const {
+  isPickupDeadlinePassed,
+  formatDeadlineLabel,
+} = require('../lib/match-deadline');
 const {
   isMutualCancelReady,
   mutualCancelStatus,
@@ -63,19 +71,31 @@ router.get('/cancel-options', optionalAuth, async (req, res) => {
   }
   const agreed = req.query.agreed_price_clp ? Number(req.query.agreed_price_clp) : null;
   let mutual = { ready: false, shipper_confirmed: false, carrier_confirmed: false };
+  let deadlinePast = false;
+  let pickup_deadline_label = null;
   const matchId = req.query.match_id;
   if (matchId) {
     const match = await repo.getById('matches', matchId);
-    if (match) mutual = mutualCancelStatus(match);
+    if (match) {
+      mutual = mutualCancelStatus(match);
+      const load = await repo.getById('load_requests', match.load_request_id);
+      if (load) {
+        deadlinePast = isPickupDeadlinePassed(load, match);
+        pickup_deadline_label = formatDeadlineLabel(load, match);
+      }
+    }
   }
   const options = listReasonOptions(action, phase, role, agreed, {
     mutualReady: mutual.ready,
+    deadlinePast,
   });
   res.json({
     ok: true,
     phase,
     phase_label: phaseLabel(phase),
     mutual_cancel: mutual,
+    pickup_deadline_label,
+    deadline_past: deadlinePast,
     data: options,
     limits: { note: 'Multas sugeridas; acuerdo entre partes. Sin cobro automático en MVP.' },
   });
@@ -425,6 +445,54 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
     const match = await repo.getById('matches', req.params.id);
     if (!match) return res.status(404).json({ ok: false, error: 'No encontrado' });
 
+    const role = resolveActorRole(req);
+
+    if (req.body?.action === 'mark_delivered') {
+      if (role !== 'carrier' && req.user?.role !== 'admin') {
+        return res.status(403).json({
+          ok: false,
+          error: 'Solo el transportista marca la entrega en destino',
+        });
+      }
+      if (match.status !== 'in_progress') {
+        return res.status(400).json({
+          ok: false,
+          error: 'Solo puedes marcar entrega cuando el viaje está en ruta',
+        });
+      }
+      if (match.carrier_marked_delivered_at) {
+        return res.status(409).json({
+          ok: false,
+          error: 'Ya marcaste entrega. Espera la confirmación del embarcador.',
+        });
+      }
+      const note = req.body?.delivery_note?.trim()?.slice(0, 500) || null;
+      const updated = await repo.update('matches', match.id, {
+        carrier_marked_delivered_at: new Date().toISOString(),
+        ...(note ? { delivery_note: note } : {}),
+      });
+      await logMatchTrip(req, updated, {
+        event_type: 'carrier_marked_delivered',
+        from_status: match.status,
+        to_status: match.status,
+        payload: { delivery_note: note },
+      });
+      const parties = await getMatchParties(repo, match);
+      await comms.addNotification({
+        match_id: match.id,
+        for_role: 'shipper',
+        type: 'delivery_pending_confirm',
+        title: 'Confirma recepción de carga',
+        body: `${parties?.carrier_name || 'Transportista'} marcó entrega. Revisa y confirma en el emparejamiento.`,
+      });
+      return res.json({
+        ok: true,
+        data: updated,
+        message:
+          'Entrega registrada. El embarcador debe confirmar recepción para cerrar el viaje.',
+      });
+    }
+
     const next = req.body?.status;
     if (next === 'accepted' && match.status === 'proposed') {
       return res.status(400).json({
@@ -443,7 +511,6 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
       });
     }
 
-    const role = resolveActorRole(req);
     const action = req.body?.action || (next === 'cancelled' ? 'cancel' : null);
 
     if (next === 'cancelled') {
@@ -459,6 +526,8 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
           error: `Tu rol (${role}) no puede ${ACTION_LABELS[action] || action} en estado ${match.status}`,
         });
       }
+      const load = await repo.getById('load_requests', match.load_request_id);
+      const deadlinePast = load ? isPickupDeadlinePassed(load, match) : false;
       const reasonErr = validateReasonPayload({
         action,
         matchStatus: match.status,
@@ -467,6 +536,7 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
         reason_detail: req.body?.reason_detail,
         agreement_accepted: req.body?.agreement_accepted,
         mutualReady: isMutualCancelReady(match),
+        deadlinePast,
       });
       if (reasonErr) return res.status(400).json({ ok: false, error: reasonErr });
 
@@ -485,18 +555,40 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
         to_status: 'cancelled',
         payload: { action, reason_code: req.body?.reason_code || null },
       });
+      const repNote = reputationMessage(reason);
       return res.json({
         ok: true,
         data: updated,
         message: cancelMessage(action),
         penalty,
+        reputation_note: repNote,
       });
     }
 
     if (next === 'completed') {
+      if (match.status !== 'in_progress') {
+        return res.status(400).json({
+          ok: false,
+          error: 'Solo se cierra un viaje que está en ejecución (en ruta)',
+        });
+      }
+      if (role === 'carrier') {
+        return res.status(403).json({
+          ok: false,
+          error:
+            'El transportista marca «Entregado en destino»; el embarcador confirma la recepción para cerrar.',
+        });
+      }
+      if (!match.carrier_marked_delivered_at) {
+        return res.status(400).json({
+          ok: false,
+          error: 'El transportista debe marcar entrega antes de confirmar recepción',
+        });
+      }
       const patch = {
         status: 'completed',
         completed_at: new Date().toISOString(),
+        shipper_confirmed_receipt_at: new Date().toISOString(),
       };
       if (req.body?.delivery_note?.trim()) {
         patch.delivery_note = req.body.delivery_note.trim().slice(0, 500);
@@ -530,6 +622,12 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
       await repo.update('capacity_offers', match.capacity_offer_id, { status: 'reserved' });
     }
     if (next === 'in_progress') {
+      if (role !== 'carrier' && req.user?.role !== 'admin') {
+        return res.status(403).json({
+          ok: false,
+          error: 'Solo el transportista marca que el camión salió / está en ruta',
+        });
+      }
       await repo.update('load_requests', match.load_request_id, { status: 'in_transit' });
     }
 

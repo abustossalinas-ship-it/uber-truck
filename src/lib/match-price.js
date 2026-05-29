@@ -49,6 +49,21 @@ function outsideRangeMessages(offer, min, max) {
   };
 }
 
+/** Múltiplo usado en formulario (step=1000) y ofertas. */
+const BUDGET_CLP_STEP = 1000;
+
+/**
+ * Redondea montos CLP a números “cerrados” (miles) para inputs type=number step=1000.
+ * @param {'nearest'|'down'|'up'} mode
+ */
+function roundBudgetClp(n, mode = 'nearest') {
+  const v = Number(n) || 0;
+  const step = BUDGET_CLP_STEP;
+  if (mode === 'down') return Math.floor(v / step) * step;
+  if (mode === 'up') return Math.ceil(v / step) * step;
+  return Math.round(v / step) * step;
+}
+
 /**
  * Referencia futura (no bloquea): peso, urgencia, distancia.
  * Sustituir por tarifario real cuando exista data de mercado.
@@ -60,10 +75,16 @@ function suggestReferenceBudget(load) {
   if (km > 0) base += km * 750;
   if (kg > 0) base += kg * 45;
   if (load.urgency === 'urgent') base = Math.round(base * 1.18);
+  let budget_min_clp = roundBudgetClp(base * 0.82, 'down');
+  let budget_max_clp = roundBudgetClp(base * 1.25, 'up');
+  if (budget_min_clp < BUDGET_CLP_STEP) budget_min_clp = BUDGET_CLP_STEP;
+  if (budget_max_clp <= budget_min_clp) {
+    budget_max_clp = budget_min_clp + roundBudgetClp(base * 0.15, 'up') || 10000;
+  }
   return {
-    budget_min_clp: Math.round(base * 0.82),
-    budget_max_clp: Math.round(base * 1.25),
-    note: 'Sugerencia referencial (peso, urgencia, km). Ajusta según tu experiencia.',
+    budget_min_clp,
+    budget_max_clp,
+    note: 'Sugerencia referencial (peso, urgencia, km), redondeada a miles de pesos.',
   };
 }
 
@@ -89,6 +110,8 @@ async function assertCanAdjustLoadBudget(repo, loadId) {
 }
 
 module.exports = {
+  BUDGET_CLP_STEP,
+  roundBudgetClp,
   copyBudgetFromLoad,
   validateLoadBudget,
   formatBudgetRange,

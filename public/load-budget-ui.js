@@ -1,7 +1,16 @@
 /** Rango de presupuesto sugerido al publicar carga (referencia km + peso + urgencia) */
 
+const BUDGET_STEP = 1000;
+
 function formatClp(n) {
   return `$${Number(n).toLocaleString('es-CL')}`;
+}
+
+function roundBudgetToStep(n, mode = 'nearest') {
+  const v = Number(n) || 0;
+  if (mode === 'down') return Math.floor(v / BUDGET_STEP) * BUDGET_STEP;
+  if (mode === 'up') return Math.ceil(v / BUDGET_STEP) * BUDGET_STEP;
+  return Math.round(v / BUDGET_STEP) * BUDGET_STEP;
 }
 
 async function applyBudgetHintFromForm(form) {
@@ -27,11 +36,14 @@ async function applyBudgetHintFromForm(form) {
       box.textContent = 'No se pudo calcular la sugerencia.';
       return;
     }
+    const minRounded = roundBudgetToStep(j.data.budget_min_clp, 'down');
+    let maxRounded = roundBudgetToStep(j.data.budget_max_clp, 'up');
+    if (maxRounded <= minRounded) maxRounded = minRounded + 10000;
     const minIn = form.querySelector('[name="budget_min_clp"]');
     const maxIn = form.querySelector('[name="budget_max_clp"]');
-    if (minIn) minIn.value = j.data.budget_min_clp;
-    if (maxIn) maxIn.value = j.data.budget_max_clp;
-    box.innerHTML = `<strong>Sugerencia:</strong> ${formatClp(j.data.budget_min_clp)} – ${formatClp(j.data.budget_max_clp)}. ${j.data.note || ''} ${j.disclaimer || ''}`;
+    if (minIn) minIn.value = minRounded;
+    if (maxIn) maxIn.value = maxRounded;
+    box.innerHTML = `<strong>Sugerencia aplicada:</strong> ${formatClp(minRounded)} – ${formatClp(maxRounded)} (miles de $). ${j.data.note || ''} ${j.disclaimer || ''}`;
   } catch {
     box.textContent = 'Error al obtener sugerencia.';
   }

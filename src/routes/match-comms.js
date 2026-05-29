@@ -83,6 +83,13 @@ router.get('/notifications/list', optionalAuth, async (req, res) => {
     const raw = await comms.listNotifications(role);
     const visible = [];
     const eventsByMatch = new Map();
+    const priceNotifsByMatch = new Map();
+    for (const n of raw) {
+      if (n.type === 'price_offer') {
+        if (!priceNotifsByMatch.has(n.match_id)) priceNotifsByMatch.set(n.match_id, []);
+        priceNotifsByMatch.get(n.match_id).push(n);
+      }
+    }
     for (const n of raw) {
       const match = await repo.getById('matches', n.match_id);
       const stale = !match || STALE_MATCH_STATUSES.has(match.status);
@@ -105,7 +112,8 @@ router.get('/notifications/list', optionalAuth, async (req, res) => {
           n,
           match,
           eventsByMatch.get(match.id),
-          name
+          name,
+          priceNotifsByMatch.get(match.id)
         );
       }
       visible.push(row);

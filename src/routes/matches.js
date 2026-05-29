@@ -359,6 +359,8 @@ router.patch('/:id/carrier-offer', optionalAuth, ...operatorGate, async (req, re
         payload: {
           carrier_offer_clp: amount,
           previous_offer_clp: previousOffer,
+          previous_offered_at:
+            previousOffer != null ? match.updated_at || match.created_at : null,
         },
       });
     if (req.user?.sub) {

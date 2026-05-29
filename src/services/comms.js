@@ -195,62 +195,122 @@ function formatOfferWhen(iso) {
   });
 }
 
-function resolvePriceOfferFromEvents(n, match, events) {
+function buildOfferHistory(events, priceNotifications) {
   const list = events || [];
   const created = list.find((e) => e.event_type === 'match_created');
-  const updates = list.filter((e) => e.event_type === 'carrier_offer_updated');
+  const updates = list
+    .filter((e) => e.event_type === 'carrier_offer_updated')
+    .sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+  const notifs = [...(priceNotifications || [])].sort(
+    (a, b) => new Date(a.created_at) - new Date(b.created_at)
+  );
+  const firstUpd = updates[0];
   const lastUpd = updates[updates.length - 1];
+
+  let firstAmount = null;
+  let firstAt = null;
+  let latestAmount = null;
+  let latestAt = null;
+
+  if (firstUpd) {
+    firstAmount =
+      firstUpd.payload?.previous_offer_clp != null
+        ? Number(firstUpd.payload.previous_offer_clp)
+        : null;
+    firstAt =
+      firstUpd.payload?.previous_offered_at ||
+      notifs[0]?.created_at ||
+      created?.created_at ||
+      firstUpd.created_at;
+    latestAmount =
+      lastUpd.payload?.carrier_offer_clp != null
+        ? Number(lastUpd.payload.carrier_offer_clp)
+        : null;
+    latestAt = lastUpd.created_at;
+  } else if (created?.payload?.carrier_offer_clp != null) {
+    firstAmount = Number(created.payload.carrier_offer_clp);
+    firstAt = notifs[0]?.created_at || created.created_at;
+    latestAmount = firstAmount;
+    latestAt = notifs[notifs.length - 1]?.created_at || created.created_at;
+  } else if (notifs.length) {
+    firstAt = notifs[0].created_at;
+    latestAt = notifs[notifs.length - 1].created_at;
+  }
+
+  const hasCorrection =
+    firstAmount != null &&
+    latestAmount != null &&
+    firstAmount !== latestAmount &&
+    updates.length > 0;
+
+  return { firstAmount, firstAt, latestAmount, latestAt, hasCorrection, notifs };
+}
+
+function resolvePriceOfferFromEvents(n, match, events, priceNotifications) {
+  const history = buildOfferHistory(events, priceNotifications);
+  const isNueva = n.title?.includes('Nueva');
+  const isActualizada = n.title?.includes('actualizada');
+
+  if (isActualizada && history.hasCorrection) {
+    return {
+      amount_clp: history.latestAmount,
+      previous_amount_clp: history.firstAmount,
+      previous_at: history.firstAt,
+      offered_at: history.latestAt || n.created_at,
+      is_update: true,
+    };
+  }
+
+  if (isNueva && history.hasCorrection) {
+    return {
+      amount_clp: history.firstAmount,
+      previous_amount_clp: null,
+      previous_at: null,
+      offered_at: history.firstAt || n.created_at,
+      is_update: false,
+    };
+  }
+
+  if (isNueva) {
+    const amount =
+      history.firstAmount ??
+      (n.amount_clp != null ? Number(n.amount_clp) : null) ??
+      (match?.carrier_offer_clp != null ? Number(match.carrier_offer_clp) : null);
+    return {
+      amount_clp: amount,
+      previous_amount_clp: null,
+      previous_at: null,
+      offered_at: history.firstAt || n.created_at,
+      is_update: false,
+    };
+  }
 
   let amount = n.amount_clp != null ? Number(n.amount_clp) : null;
   let previous = n.previous_amount_clp != null ? Number(n.previous_amount_clp) : null;
   let previous_at = n.previous_at || null;
-  const offered_at = n.created_at;
-  const isUpdate = n.title?.includes('actualizada') || previous != null;
+  let offered_at = n.created_at;
 
-  if (amount == null) {
-    if (n.title?.includes('Nueva')) {
-      amount =
-        created?.payload?.carrier_offer_clp != null
-          ? Number(created.payload.carrier_offer_clp)
-          : lastUpd?.payload?.previous_offer_clp != null
-            ? Number(lastUpd.payload.previous_offer_clp)
-            : match?.carrier_offer_clp != null
-              ? Number(match.carrier_offer_clp)
-              : null;
-    } else if (isUpdate) {
-      amount =
-        lastUpd?.payload?.carrier_offer_clp != null
-          ? Number(lastUpd.payload.carrier_offer_clp)
-          : match?.carrier_offer_clp != null
-            ? Number(match.carrier_offer_clp)
-            : null;
-    } else {
-      amount = match?.carrier_offer_clp != null ? Number(match.carrier_offer_clp) : null;
-    }
+  if (isActualizada && history.latestAmount != null) {
+    amount = history.latestAmount;
+    previous = history.firstAmount ?? previous;
+    previous_at = history.firstAt ?? previous_at;
+    offered_at = history.latestAt ?? offered_at;
   }
 
-  if (previous == null && isUpdate) {
-    previous =
-      lastUpd?.payload?.previous_offer_clp != null
-        ? Number(lastUpd.payload.previous_offer_clp)
-        : null;
-  }
-
-  if (!previous_at && previous != null) {
-    previous_at = created?.created_at || (updates[0] ? updates[0].created_at : null);
-  }
+  const isUpdate =
+    isActualizada && previous != null && amount != null && previous !== amount;
 
   return {
     amount_clp: amount,
     previous_amount_clp: previous,
     previous_at,
     offered_at,
-    is_update: isUpdate && previous != null && amount != null && previous !== amount,
+    is_update: isUpdate,
   };
 }
 
-function enrichPriceOfferNotification(n, match, events, carrier_name) {
-  const resolved = resolvePriceOfferFromEvents(n, match, events);
+function enrichPriceOfferNotification(n, match, events, carrier_name, priceNotifications) {
+  const resolved = resolvePriceOfferFromEvents(n, match, events, priceNotifications);
   const display = buildPriceOfferDisplay({
     carrier_name,
     amount_clp: resolved.amount_clp,

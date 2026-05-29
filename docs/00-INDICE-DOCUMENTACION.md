@@ -25,6 +25,7 @@ No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitáco
 | Journey usuario | [Journey-Usuario-Uber-Truck.html](./Journey-Usuario-Uber-Truck.html) (v2.5 · cuenta, multas, comprobante) |
 | Multas / soporte (MD) | [PENALTY-AND-SUPPORT.md](./PENALTY-AND-SUPPORT.md) |
 | Auth Gmail / Apple / correo (MD) | [AUTH-AND-EMAIL-ROADMAP.md](./AUTH-AND-EMAIL-ROADMAP.md) — pendiente producción |
+| Pitch vs WebCarga + panel admin | [PITCH-WEBCARGA-Y-PANEL-ADMIN.html](./PITCH-WEBCARGA-Y-PANEL-ADMIN.html) |
 | Resumen canvas | [Canvas-Resumen-Uber-Truck.html](./Canvas-Resumen-Uber-Truck.html) |
 | Cancelación / multas | [Politica-Cancelacion-Uber-Truck.html](./Politica-Cancelacion-Uber-Truck.html) · [Multas-Cuenta-Uber-Truck.html](./Multas-Cuenta-Uber-Truck.html) |
 | SQL Supabase | [Sql-Supabase-Uber-Truck.html](./Sql-Supabase-Uber-Truck.html) · [SQL-SUPABASE.md](./SQL-SUPABASE.md) |

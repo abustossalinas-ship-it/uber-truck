@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pitch vs WebCarga y panel admin — Uber Truck</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.35; max-width: 920px; margin: 2cm auto; color: #111; }
+    h1 { font-size: 18pt; border-bottom: 1px solid #333; padding-bottom: 6px; }
+    h2 { font-size: 14pt; margin-top: 1.4em; }
+    h3 { font-size: 12pt; margin-top: 1em; }
+    p { margin: 0.5em 0; text-align: justify; }
+    ul { margin: 0.4em 0 0.6em 1.2em; }
+    table { border-collapse: collapse; width: 100%; margin: 0.8em 0; font-size: 10pt; }
+    th, td { border: 1px solid #444; padding: 6px 8px; vertical-align: top; }
+    th { background: #e8e8e8; text-align: left; }
+    .meta { font-size: 10pt; color: #444; margin-bottom: 1em; }
+    .pitch { background: #f8fafc; border-left: 4px solid #f26522; padding: 0.6rem 1rem; margin: 0.6em 0; font-size: 10.5pt; }
+    .g-done { background: #c6e0b4; }
+    .g-todo { background: #ffe599; }
+    .g-na { background: #f0f0f0; color: #666; }
+    code { font-size: 9.5pt; background: #f5f5f5; padding: 1px 4px; }
+  </style>
+</head>
+<body>
+
+<p class="meta"><a href="/docs/">← Documentación</a> · <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica</a> · <a href="Piloto-M2-Corredor-KPIs-Riesgos.html">KPIs piloto M2</a> · <a href="Modelo-Negocio-Uber-Truck.html">Modelo de negocio</a></p>
+
+<h1>Pitch comercial vs WebCarga + panel admin operativo</h1>
+<p class="meta"><strong>Versión:</strong> 1.0 · 29 mayo 2026 · Software app <strong>0.0.57</strong> · Referencia competidor: <a href="https://app.webcarga.com/generador-de-cargas/">WebCarga — generador de cargas</a></p>
+
+<h2>1. Posicionamiento en una frase</h2>
+<table>
+  <tr><th>Actor</th><th>Mensaje</th></tr>
+  <tr><td><strong>WebCarga</strong></td><td>«Contrata el transporte con nosotros: red certificada, seguros, operación de punta a punta.»</td></tr>
+  <tr><td><strong>Uber Truck</strong></td><td>«Empareja carga y camión en minutos, con reglas claras tipo Uber — ideal para backhaul y PYME en un corredor.»</td></tr>
+</table>
+
+<h2>2. Mensajes de venta por segmento</h2>
+
+<h3>2.1 Embarcador PYME (tu foco piloto M2)</h3>
+<table>
+  <tr><th>Situación</th><th>Dolor</th><th>Uber Truck dice…</th><th>No decir (WebCarga gana ahí)</th></tr>
+  <tr><td>Urgencia 1–2 pallets, corredor RM ↔ puerto</td><td>«No tengo camión hoy»</td><td>Publicas la carga, ves ofertas con precio en CLP y aceptas en la app — sin llamar a 10 transportistas.</td><td>«Somos tu operador logístico nacional con 5.500 flotas.»</td></tr>
+  <tr><td>Ya conoces Uber</td><td>«Otra plataforma más»</td><td>Mismo cerebro: pedir → match → viaje en curso → chat → cerrar → calificar.</td><td>Catálogo de servicios dedicada/spot enterprise.</td></tr>
+  <tr><td>Miedo a cancelación</td><td>«¿Me multan?»</td><td>Motivos claros, multa sugerida, plazo 7 días; si pagas fuera de la app, el acreedor confirma con comprobante.</td><td>«Nosotros facturamos el 100% y asumimos el riesgo.»</td></tr>
+  <tr><td>Confianza limitada</td><td>«¿Y si roban?»</td><td>Declaras mercadería y valor ref.; términos; incidentes registrados; reputación ★ tras cada viaje.</td><td>«Toda carga va asegurada punto a punto por nosotros.»</td></tr>
+</table>
+<div class="pitch"><strong>Elevator pitch PYME:</strong> «Uber Truck es la app donde publicas tu carga en el corredor RM–Valparaíso/San Antonio, comparas ofertas de transportistas verificados y sigues el viaje como un Uber — sin corredor ni planilla.»</div>
+
+<h3>2.2 Embarcador enterprise (retail, gran cuenta)</h3>
+<table>
+  <tr><th>Situación</th><th>Dolor</th><th>Uber Truck (honesto hoy)</th><th>WebCarga</th></tr>
+  <tr><td>Compliance, un solo proveedor, seguro</td><td>Auditoría y SLA</td><td class="g-na">No competir en MVP — derivar o partnership futuro</td><td class="g-done">Certificación transportistas, pólizas, torre GPS, soporte 24/7</td></tr>
+  <tr><td>Volumen +4.000 viajes/mes</td><td>Capacidad y precio</td><td class="g-na">Piloto 20 viajes en un corredor primero</td><td class="g-done">Red nacional y flota dedicada</td></tr>
+  <tr><td>Subcontratación y factura única</td><td>Legal y finanzas</td><td class="g-todo">Roadmap: operador o integración B2B (add-on)</td><td class="g-done">Factura 100%, ley subcontratación, pago ~15 días al transportista</td></tr>
+</table>
+<div class="pitch"><strong>Mensaje enterprise (transparencia):</strong> «Hoy somos marketplace ágil para capacidad ociosa y PYME; cuando tengamos densidad y panel admin con KPIs auditables, podemos conversar piloto acotado o integración API — no reemplazamos a WebCarga en cuenta Walmart en esta etapa.»</div>
+
+<h3>2.3 Transportista (PYME / camión en ruta fija)</h3>
+<table>
+  <tr><th>Situación</th><th>Uber Truck dice…</th><th>WebCarga</th></tr>
+  <tr><td>Viaje de retorno vacío</td><td>Publicas capacidad en tu corredor; el embarcador te paga el desvío marginal.</td><td>Acceso a bolsa de cargas grande, pero más filtro/certificación.</td></tr>
+  <tr><td>Quiero control del precio</td><td>Tú envías la oferta en CLP; no solo «el primero que aplica».</td><td>Adjudicación centralizada / spot coordinado.</td></tr>
+  <tr><td>Cobro y trámites</td><td>Hoy transferencia + comprobante en app; cobro integrado en roadmap.</td><td>Cobro formalizado, pagos en plazo, apoyo SII/leasing.</td></tr>
+</table>
+
+<h3>2.4 Tabla comparativa rápida (para pitch o inversor)</h3>
+<table>
+  <tr><th>Criterio</th><th>WebCarga</th><th>Uber Truck (MVP)</th></tr>
+  <tr><td>Modelo</td><td>Operador digital + red cerrada certificada</td><td>Marketplace bilateral tipo Uber</td></tr>
+  <tr><td>Escala</td><td>Miles de viajes/mes, años en mercado</td><td>Piloto corredor, tracción por demostrar</td></tr>
+  <tr><td>UX embarcador</td><td>«Delega en WebCarga»</td><td>«Publica y elige oferta»</td></tr>
+  <tr><td>Precio</td><td>Tarifa / adjudicación plataforma</td><td>Rango + oferta transportista + aceptación</td></tr>
+  <tr><td>Seguro / factura</td><td>Incluido en propuesta comercial</td><td>Intermediación + términos; seguro fase 3</td></tr>
+  <tr><td>Datos / KPIs cliente</td><td>Operación madura (presumible reporting B2B)</td><td>Panel admin en diseño (§3)</td></tr>
+  <tr><td>Mejor encaje</td><td>Enterprise, primera milla, compliance total</td><td>Backhaul, PYME, corredor denso, add-on futuro</td></tr>
+</table>
+
+<h2>3. Panel admin — visión operativa (KPIs, NPS, viajes)</h2>
+<p><strong>Estado:</strong> no implementado en app v0.0.57. Hoy el fundador exporta desde Supabase o revisa casos en moderación de multas. Este apartado define el <strong>producto admin</strong> para piloto M2 y escala.</p>
+
+<h3>3.1 Objetivo</h3>
+<p>Un rol <code>admin</code> ve en un solo lugar <strong>todos los viajes y la salud del marketplace</strong>: volumen, conversión, tiempos, cancelaciones, ingreso estimado (take rate), satisfacción (NPS/★) y alertas — sin depender de SQL manual cada semana.</p>
+
+<h3>3.2 Pantallas propuestas</h3>
+<table>
+  <tr><th>Pantalla</th><th>Contenido</th><th>Uso</th></tr>
+  <tr><td><strong>Resumen (home)</strong></td><td>Tarjetas: viajes hoy/semana/mes, matches activos, completados, cancelados, GMV (<code>agreed_price_clp</code>), take rate estimado, usuarios activos, cuentas pendientes KYC</td><td>Reunión semanal piloto</td></tr>
+  <tr><td><strong>Viajes (tabla)</strong></td><td>Listado filtrable: fecha, corredor, estado, embarcador, transportista, precio, motivo cancelación, multa, ★</td><td>Auditoría y soporte</td></tr>
+  <tr><td><strong>KPIs marketplace</strong></td><td>Match rate, tiempo mediano a match, % cancel post-<code>accepted</code>, repetición embarcador 60d — ver <a href="Piloto-M2-Corredor-KPIs-Riesgos.html">piloto M2 §2</a></td><td>Meta M2 / inversor</td></tr>
+  <tr><td><strong>NPS y calidad</strong></td><td>Promedio ★ por rol, distribución 1–5, chips más frecuentes, NPS manual (encuesta 0–10 cargada por admin o formulario futuro)</td><td>Producto y retención</td></tr>
+  <tr><td><strong>Corredor piloto</strong></td><td>Solo RM ↔ V / San Antonio: cargas publicadas vs ofertas activas (meta ≥3 / ≥2 semanal)</td><td>Liquidez</td></tr>
+  <tr><td><strong>Cuenta y riesgo</strong></td><td>Multas abiertas, <code>confirm_expired</code>, casos soporte, usuarios bloqueados por banco/multa</td><td>Operación / moderador</td></tr>
+  <tr><td><strong>Aprobación cuentas</strong></td><td>Cola KYC <code>pending</code> → <code>approved</code> (ya parcial en app)</td><td>Semi-curado</td></tr>
+</table>
+
+<h3>3.3 KPIs — definición en panel (automático desde BD)</h3>
+<table>
+  <tr><th>KPI</th><th>Cálculo</th><th>Fuente</th><th>Meta M2</th></tr>
+  <tr><td>Viajes completados</td><td><code>COUNT(matches)</code> WHERE <code>status=completed</code></td><td>matches</td><td>20 (corredor)</td></tr>
+  <tr><td>GMV flete</td><td>SUM(<code>agreed_price_clp</code>) completados</td><td>matches</td><td>Registrar</td></tr>
+  <tr><td>Ingreso plataforma (est.)</td><td>GMV × 12–15%</td><td>config take rate</td><td>—</td></tr>
+  <tr><td>Match rate</td><td>Aceptados / cargas con ≥1 propuesta</td><td>load_requests, matches</td><td>≥ 60%</td></tr>
+  <tr><td>Tiempo a match</td><td>Mediana publicación → <code>accepted</code></td><td>timestamps</td><td>&lt; 4 h</td></tr>
+  <tr><td>Cancelación post-asignación</td><td>Cancel tras <code>accepted</code> / aceptados</td><td>matches</td><td>&lt; 10%</td></tr>
+  <tr><td>★ media embarcador / transportista</td><td>AVG(<code>stars</code>) por <code>rated_role</code></td><td>match_ratings</td><td>≥ 4.0 aspiracional</td></tr>
+  <tr><td>NPS</td><td>% promotores (9–10) − detractores (0–6)</td><td>Encuesta manual → tabla futura <code>pilot_surveys</code> o CSV import</td><td>≥ 7 (escala 0–10)</td></tr>
+  <tr><td>Repetición embarcador</td><td>% con ≥2 cargas en 60 días</td><td>load_requests</td><td>≥ 30%</td></tr>
+</table>
+
+<h3>3.4 API sugerida (implementación futura)</h3>
+<ul>
+  <li><code>GET /api/admin/dashboard?from=&amp;to=&amp;corridor=</code> — JWT <code>role=admin</code>, agregados.</li>
+  <li><code>GET /api/admin/trips</code> — paginado, filtros estado/fecha/empresa.</li>
+  <li><code>GET /api/admin/kpis</code> — series temporales (semana) para gráficos simples.</li>
+  <li><code>POST /api/admin/surveys/nps</code> — opcional: cargar NPS post-viaje manual en piloto.</li>
+</ul>
+<p>Implementación: <code>src/routes/admin.js</code> + <code>src/lib/admin-metrics.js</code> + pestaña <strong>Operaciones</strong> en UI solo admin (<code>public/admin-dashboard-ui.js</code>).</p>
+
+<h3>3.5 Fases de entrega</h3>
+<table>
+  <tr><th>Fase</th><th>Entregable</th><th>Prioridad</th></tr>
+  <tr><td><strong>F1</strong></td><td>Tabla viajes + contadores (completados, cancelados, GMV)</td><td>P1 — desbloquea piloto M2</td></tr>
+  <tr><td><strong>F2</strong></td><td>KPIs M2 + filtro corredor piloto</td><td>P1</td></tr>
+  <tr><td><strong>F3</strong></td><td>★ agregadas + export CSV</td><td>P2</td></tr>
+  <tr><td><strong>F4</strong></td><td>NPS en app o import + gráficos semanales</td><td>P2</td></tr>
+  <tr><td><strong>F5</strong></td><td>Alertas (liquidez baja, multas vencidas, KYC pendiente)</td><td>P2</td></tr>
+</table>
+
+<h2>4. Cómo usar este doc en la operación</h2>
+<ol>
+  <li><strong>Captación PYME:</strong> usar §2.1 y elevator pitch en WhatsApp / reunión nodo industrial.</li>
+  <li><strong>Enterprise:</strong> usar §2.2 sin overselling; ofrecer piloto acotado solo con panel F1 listo.</li>
+  <li><strong>Semanal piloto:</strong> cuando exista panel F1–F2, revisar mismos KPIs que <a href="Piloto-M2-Corredor-KPIs-Riesgos.html">anexo M2</a>.</li>
+  <li><strong>Roadmap producto:</strong> bloque <strong>F — Panel admin operativo</strong> en <a href="PROXIMOS-PASOS-ESTRATEGIA.md">próximos pasos</a>.</li>
+</ol>
+
+<p class="meta"><em>Fin — v1.0 (29 may 2026). Competidor citado: WebCarga generador de cargas. Panel admin: diseño; implementación pendiente.</em></p>
+</body>
+</html>

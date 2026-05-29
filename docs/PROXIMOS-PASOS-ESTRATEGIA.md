@@ -20,6 +20,7 @@ No perseguir la app perfecta en web: construir **operación tipo Uber** con mark
 | — | Recuperación de contraseña por email (Resend + SQL 017) | **Futuro** — código en repo v0.0.38, no activar aún (parte del bloque E) |
 | D | Pagos in-app tipo Uber (validar tarjeta/cuenta, cobro multas integrado) | **Pendiente producción** — hoy: banco inscrito + pago externo + comprobante; ver [PENALTY-AND-SUPPORT.md](./PENALTY-AND-SUPPORT.md) |
 | E | Login con **Gmail (Google)** y **Apple** + correo transaccional | **Pendiente producción** — hoy solo email/contraseña; ver [AUTH-AND-EMAIL-ROADMAP.md](./AUTH-AND-EMAIL-ROADMAP.md) |
+| F | **Panel admin** — viajes, KPIs marketplace, NPS/★, corredor piloto | **Pendiente** — diseño en [PITCH-WEBCARGA-Y-PANEL-ADMIN.html](./PITCH-WEBCARGA-Y-PANEL-ADMIN.html); F1 tabla + contadores para piloto M2 |
 
 ## Qué NO hacer aún
 

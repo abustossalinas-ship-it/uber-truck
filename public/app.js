@@ -91,6 +91,19 @@ function formatPublishedDate(iso) {
   return d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+function formatDateTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleString('es-CL', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
+}
+
 function statusPillHtml(status, createdAt) {
   const label = STATUS_LABEL[status] || status;
   const when = formatPublishedDate(createdAt);
@@ -964,6 +977,7 @@ async function refreshBoard() {
         <p class="muted">${l.pallets ? l.pallets + ' pallets · ' : ''}${l.volume_m3 ? l.volume_m3 + ' m³ · ' : ''}${l.cargo_type || ''}${l.distance_duration_min ? ' · ruta ' + l.distance_duration_min + ' min' : ''}${l.eta_total_min ? ' · ETA ~' + l.eta_total_min + ' min' : ''}</p>
         ${formatLoadTimingLine(l)}
         ${l.budget_min_clp || l.budget_max_clp ? `<p class="muted">Presupuesto flete: ${formatBudgetRange(l.budget_min_clp, l.budget_max_clp)}</p>` : ''}
+        ${l.created_at ? `<p class="muted">Publicada ${formatDateTime(l.created_at)}</p>` : ''}
         ${formatCargoTrustLine(l)}
       </article>`
           )
@@ -979,7 +993,7 @@ async function refreshBoard() {
         <strong>${o.carrier_name}${reputationBadgeInline(o.reputation)}</strong>
         ${statusPillHtml(o.status, o.created_at)}
         <p>${routeLine(o)}</p>
-        <p class="muted">${o.free_volume_m3 ? o.free_volume_m3 + ' m³ libres' : ''}</p>
+        <p class="muted">${o.free_volume_m3 ? o.free_volume_m3 + ' m³ libres' : ''}${o.created_at ? ' · Ofertado ' + formatDateTime(o.created_at) : ''}</p>
       </article>`
           )
           .join('');
@@ -1011,10 +1025,14 @@ async function refreshBoard() {
             const actions = buildMatchActions(m);
             const mutualBanner = matchMutualBanner(m);
             const cargoLine = formatCargoTrustLine(load);
+        const proposedAt = m.created_at
+          ? `<p class="muted match-meta">Propuesta ${formatDateTime(m.created_at)}${offer?.created_at ? ` · Oferta publicada ${formatDateTime(offer.created_at)}` : ''}</p>`
+          : '';
         return `
       <article class="item match-item" data-match-id="${m.id}">
         <strong>${title}</strong>
-        <span class="pill">${STATUS_LABEL[m.status] || m.status}</span>
+        ${statusPillHtml(m.status, m.created_at)}
+        ${proposedAt}
         ${buildMatchReputationHtml(m, load, offer)}
         ${mutualBanner}
         ${cargoLine}
@@ -1092,6 +1110,20 @@ async function refreshBoard() {
   loadSuggestionsFor(loadSel.value);
   updateMatchPriceStep();
   showMatchReady();
+  if (typeof ProposalCompare !== 'undefined') {
+    const compareLoad =
+      loadSel.value ||
+      (() => {
+        const proposed = matchRows.filter((m) => m.status === 'proposed');
+        const byLoad = {};
+        proposed.forEach((m) => {
+          byLoad[m.load_request_id] = (byLoad[m.load_request_id] || 0) + 1;
+        });
+        const top = Object.entries(byLoad).sort((a, b) => b[1] - a[1])[0];
+        return top && top[1] >= 2 ? top[0] : loadSel.value;
+      })();
+    ProposalCompare.render(compareLoad);
+  }
   renderBoardActor();
   if (typeof Comms !== 'undefined') Comms.refreshBell();
   if (typeof updateActiveTripBanner === 'function') {
@@ -1311,9 +1343,10 @@ $('form-match').addEventListener('submit', async (e) => {
   });
 });
 
-$('list-matches').addEventListener('click', async (e) => {
+$('panel-board')?.addEventListener('click', async (e) => {
   const btn = e.target.closest('button[data-action]');
   if (!btn || btn.disabled) return;
+  if (!btn.closest('#list-matches, #proposal-compare-panel, #list-matches-history')) return;
   const id = btn.dataset.id;
   const action = btn.dataset.action;
   if (action === 'chat') {

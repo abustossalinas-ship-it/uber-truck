@@ -116,10 +116,31 @@ async function updateNotification(id, patch) {
 /**
  * Una sola notificación de precio vigente por match: actualiza el monto si ya hay una sin leer.
  */
-async function notifyPriceOffer({ match_id, for_role, carrier_name, amount_clp, is_update }) {
+function formatOfferBody({ carrier_name, amount_clp, previous_amount_clp, is_update }) {
+  const name = carrier_name || 'Transportista';
   const amount = Number(amount_clp);
+  const prev = previous_amount_clp != null ? Number(previous_amount_clp) : null;
+  if (is_update && prev != null && prev !== amount) {
+    return `${name} actualizó la oferta: antes $${prev.toLocaleString('es-CL')} → ahora $${amount.toLocaleString('es-CL')} CLP.`;
+  }
+  return `${name} ofrece $${amount.toLocaleString('es-CL')} CLP.`;
+}
+
+async function notifyPriceOffer({
+  match_id,
+  for_role,
+  carrier_name,
+  amount_clp,
+  previous_amount_clp,
+  is_update,
+}) {
   const title = is_update ? 'Oferta de precio actualizada' : 'Nueva oferta de precio';
-  const body = `${carrier_name || 'Transportista'} ofrece $${amount.toLocaleString('es-CL')} CLP.`;
+  const body = formatOfferBody({
+    carrier_name,
+    amount_clp,
+    previous_amount_clp,
+    is_update,
+  });
 
   const existing = await listNotifications(for_role);
   const unreadPrice = existing.filter(
@@ -236,6 +257,7 @@ module.exports = {
   addNotification,
   updateNotification,
   notifyPriceOffer,
+  formatOfferBody,
   markNotificationRead,
   markAllReadForMatch,
   unreadCount,

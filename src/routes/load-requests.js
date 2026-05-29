@@ -23,6 +23,7 @@ const {
 } = require('../lib/match-price');
 const { validateCargoDeclaration, cargoTrustPayload } = require('../lib/cargo-trust');
 const { buildLoadTimingPayload } = require('../lib/load-time-estimate');
+const { rankProposalsForLoad, RANK_MODES } = require('../lib/proposal-ranking');
 const { requireApprovedOperator } = require('../lib/kyc-gate');
 
 const router = express.Router();
@@ -126,6 +127,53 @@ router.patch('/:id/budget', optionalAuth, ...operatorGate, async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al actualizar presupuesto' });
+  }
+});
+
+router.get('/:id/proposals/compare', optionalAuth, async (req, res) => {
+  try {
+    const load = await repo.getById('load_requests', req.params.id);
+    if (!load) return res.status(404).json({ ok: false, error: 'Carga no encontrada' });
+    const mode = String(req.query.mode || 'balanced');
+    if (!RANK_MODES[mode]) {
+      return res.status(400).json({ ok: false, error: 'mode: balanced, cheap, fast, trusted' });
+    }
+    const matches = await repo.list('matches', {});
+    const proposed = matches.filter(
+      (m) => m.load_request_id === load.id && m.status === 'proposed'
+    );
+    const offers = await repo.list('capacity_offers', {});
+    const offersById = Object.fromEntries(offers.map((o) => [o.id, o]));
+    const { getReputationIndex, pickRep } = require('../lib/match-ratings');
+    const repIndex = await getReputationIndex(repo);
+    for (const m of proposed) {
+      const offer = offersById[m.capacity_offer_id];
+      if (offer) {
+        offer.reputation = pickRep(
+          repIndex,
+          'carrier',
+          offer.carrier_user_id,
+          offer.carrier_name
+        );
+      }
+    }
+    const ranking = rankProposalsForLoad(load, proposed, offersById, mode);
+    res.json({
+      ok: true,
+      load: {
+        id: load.id,
+        company_name: load.company_name,
+        published_at: load.created_at,
+        budget_min_clp: load.budget_min_clp,
+        budget_max_clp: load.budget_max_clp,
+        eta_total_min: load.eta_total_min,
+      },
+      modes: Object.keys(RANK_MODES),
+      ranking,
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al comparar propuestas' });
   }
 });
 

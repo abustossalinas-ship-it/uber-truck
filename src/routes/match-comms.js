@@ -3,6 +3,7 @@
 const express = require('express');
 const repo = require('../lib/repository');
 const comms = require('../services/comms');
+const { listTripEvents } = require('../lib/trip-events');
 const { CHAT_PRESETS, otherRole, presetByCode } = require('../lib/match-comms');
 const { optionalAuth } = require('../lib/optional-auth');
 const { normalizeRole } = require('../lib/match-cancel');
@@ -92,10 +93,27 @@ router.get('/notifications/list', optionalAuth, async (req, res) => {
       if (n.type === 'price_offer' && match.carrier_offer_clp != null) {
         const parties = await getMatchParties(repo, match);
         const name = parties?.carrier_name || 'Transportista';
-        const amt = Number(match.carrier_offer_clp);
+        let previous = null;
+        if (n.title?.includes('actualizada')) {
+          try {
+            const events = await listTripEvents(match.id);
+            const updates = events.filter((e) => e.event_type === 'carrier_offer_updated');
+            const last = updates[updates.length - 1];
+            if (last?.payload?.previous_offer_clp != null) {
+              previous = last.payload.previous_offer_clp;
+            }
+          } catch {
+            /* optional */
+          }
+        }
         row = {
           ...n,
-          body: `${name} ofrece $${amt.toLocaleString('es-CL')} CLP.`,
+          body: comms.formatOfferBody({
+            carrier_name: name,
+            amount_clp: match.carrier_offer_clp,
+            previous_amount_clp: previous,
+            is_update: Boolean(previous != null || n.title?.includes('actualizada')),
+          }),
         };
       }
       visible.push(row);

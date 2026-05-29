@@ -347,16 +347,20 @@ router.patch('/:id/carrier-offer', optionalAuth, ...operatorGate, async (req, re
     if (!amount || amount < 1) {
       return res.status(400).json({ ok: false, error: 'Indica un monto válido en CLP' });
     }
+    const previousOffer = match.carrier_offer_clp;
     const updated = await repo.update('matches', match.id, {
       carrier_offer_clp: amount,
       price_status: 'pending_acceptance',
     });
-    await logMatchTrip(req, updated, {
-      event_type: 'carrier_offer_updated',
-      from_status: match.status,
-      to_status: match.status,
-      payload: { carrier_offer_clp: amount },
-    });
+      await logMatchTrip(req, updated, {
+        event_type: 'carrier_offer_updated',
+        from_status: match.status,
+        to_status: match.status,
+        payload: {
+          carrier_offer_clp: amount,
+          previous_offer_clp: previousOffer,
+        },
+      });
     if (req.user?.sub) {
       const offer = await repo.getById('capacity_offers', match.capacity_offer_id);
       if (offer && !offer.carrier_user_id) {
@@ -369,7 +373,8 @@ router.patch('/:id/carrier-offer', optionalAuth, ...operatorGate, async (req, re
       for_role: 'shipper',
       carrier_name: parties?.carrier_name,
       amount_clp: amount,
-      is_update: true,
+      previous_amount_clp: previousOffer,
+      is_update: previousOffer != null,
     });
     const rangeMsg = outsideRangeMessages(
       amount,

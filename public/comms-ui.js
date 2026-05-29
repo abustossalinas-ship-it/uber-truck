@@ -58,6 +58,18 @@ const Comms = {
     countEl.hidden = n === 0;
   },
 
+  formatNotifDate(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    if (Number.isNaN(d.getTime())) return '';
+    return d.toLocaleString('es-CL', {
+      day: '2-digit',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  },
+
   async openNotifPanel() {
     if (!this.isSessionActive()) {
       this.resetUi();
@@ -83,9 +95,13 @@ const Comms = {
           <button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en emparejamientos activos</button>
         </div>`
                 : `<button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en emparejamientos activos</button>`;
+              const when = this.formatNotifDate(n.created_at);
               return `
         <article class="notif-item ${n.read_at ? '' : 'unread'}" data-id="${n.id}" data-match="${n.match_id}">
-          <strong>${n.title}</strong>
+          <div class="notif-head">
+            <strong>${n.title}</strong>
+            ${when ? `<time class="notif-date">${when}</time>` : ''}
+          </div>
           <p class="muted">${n.body}</p>
           ${actions}
         </article>`;

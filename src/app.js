@@ -85,6 +85,7 @@ app.get('/health', async (_req, res) => {
       'password-reset',
       'buscando-camiones',
       'load-timing-eta',
+      'proposal-compare-ranking',
     ],
     deploy_manifest: manifest,
     railway: {

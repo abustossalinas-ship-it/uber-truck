@@ -28,7 +28,7 @@
   <div class="doc-title-wrap">
     <h1>Journey de usuario — Uber Truck</h1>
     <p class="meta"><strong>Producto:</strong> App tipo Uber para carga por camión (backhaul).<br />
-    <strong>Versión:</strong> 2.4 · 27 mayo 2026 · Software app <strong>0.0.31</strong> · Canal MVP: <strong>solo la app</strong> (web / PWA)</p>
+    <strong>Versión:</strong> 2.5 · 29 mayo 2026 · Software app <strong>0.0.57</strong> · Canal MVP: <strong>solo la app</strong> (web / PWA)</p>
   </div>
 </div>
 
@@ -51,7 +51,7 @@
 <table>
   <tr><th>Etapa</th><th>Acción</th><th>En la app</th><th>Emoción</th><th>Éxito</th></tr>
   <tr><td>1. Descubrimiento</td><td>Referido en ruta / nodo industrial</td><td>Link a la web</td><td>«¿Me pagan el espacio vacío?»</td><td>Abre la app</td></tr>
-  <tr><td>2. Registro</td><td>Login, rol transportista, empresa</td><td>Registro / JWT</td><td>Desconfianza si es largo</td><td>Cuenta activa</td></tr>
+  <tr><td>2. Registro</td><td>Email + contraseña, rol transportista, empresa (<strong>Gmail/Apple: pendiente</strong>)</td><td>Registro / JWT</td><td>Desconfianza si es largo</td><td>Cuenta activa (KYC si piloto curado)</td></tr>
   <tr><td>3. Publicar capacidad</td><td>Origen, destino, m³, tipo carga, ventana</td><td>Formulario transportista</td><td>«Que sea rápido»</td><td>Oferta publicada (&lt; 3 min)</td></tr>
   <tr><td>4. Propuesta + precio</td><td>Elige carga, envía <strong>oferta en CLP</strong> (puede estar fuera del rango del embarcador)</td><td>Tablero paso 3</td><td>«¿Me pagan bien el desvío?»</td><td>Oferta visible al embarcador</td></tr>
   <tr><td>5. Match</td><td>Embarcador <strong>acepta precio</strong> → match confirmado</td><td>Emparejamientos</td><td>«¿Cierra el trato?»</td><td>Aceptado en &lt; 30 min</td></tr>
@@ -61,13 +61,14 @@
   <tr><td>8. Cierre operativo</td><td>Embarcador o transportista marca <strong>Finalizar viaje (entregado)</strong></td><td>Emparejar (confirmación) → estado <code>completed</code></td><td>«¿Ya cerró el flete?»</td><td>Viaje en Completados</td></tr>
   <tr><td>9. Calificación</td><td>Califica al <strong>embarcador</strong> (1–5 ★, chips, comentario si ★ baja)</td><td><strong>Mis viajes → Completados</strong> → «Calificar embarcador ★»</td><td>«¿Me afecta mi reputación?»</td><td>Nota guardada · badge Calificado</td></tr>
   <tr><td>10. Post-viaje</td><td>Ve nota del embarcador (si ya calificó) y reputación histórica del embarcador</td><td>Bloque «Calificaciones del viaje» en la tarjeta</td><td>«¿Confío otra vez?»</td><td>Promedio ★ visible · vuelve a publicar</td></tr>
+  <tr><td>11. Multa (si canceló)</td><td>Inscribe banco si falta; declara transferencia + <strong>sube comprobante</strong></td><td><strong>Cuenta y multas</strong> → «Declarar pago realizado»</td><td>«¿Me desbloquean?»</td><td>Acreedor confirma en 24 h o moderador</td></tr>
 </table>
 
 <h2>4. Journey embarcador (demanda)</h2>
 <table>
   <tr><th>Etapa</th><th>Acción</th><th>En la app</th><th>Emoción</th><th>Éxito</th></tr>
   <tr><td>1. Necesidad</td><td>Carga urgente (ej. 2 pallets mañana)</td><td>—</td><td>«No hay camión»</td><td>Entra a la app</td></tr>
-  <tr><td>2. Registro</td><td>Login, rol embarcador</td><td>Registro / JWT</td><td>«¿Es confiable?»</td><td>Cuenta activa</td></tr>
+  <tr><td>2. Registro</td><td>Email + contraseña, rol embarcador (<strong>Gmail/Apple: pendiente</strong>)</td><td>Registro / JWT</td><td>«¿Es confiable?»</td><td>Cuenta activa</td></tr>
   <tr><td>3. Publicar carga</td><td>Maps, peso/volumen, <strong>declaración mercadería</strong> (descripción + valor ref. CLP), guía/folio, <strong>términos</strong>, rango flete («Ver rango sugerido»)</td><td>Formulario embarcador</td><td>«¿Me cubren si pasa algo?»</td><td>Carga publicada con términos aceptados</td></tr>
   <tr><td>4. Propuesta</td><td>Ve ofertas; transportista envía precio</td><td>Tablero + sugerencias</td><td>«¿Es justo?»</td><td>Compara ofertas</td></tr>
   <tr><td>5. Aceptar precio</td><td><strong>Aceptar precio y confirmar match</strong> (o ampliar rango si la oferta venía fuera)</td><td>Emparejamientos</td><td>«¿Cierro?»</td><td>Match aceptado</td></tr>
@@ -77,6 +78,7 @@
   <tr><td>8. Cierre operativo</td><td>Confirma entrega → <code>completed</code></td><td>Emparejar → <strong>Finalizar viaje</strong></td><td>«¿Cerré bien?»</td><td>Viaje en Completados</td></tr>
   <tr><td>9. Calificación</td><td>Califica al <strong>transportista</strong> (1–5 ★, chips por experiencia, comentario obligatorio en ★1–2)</td><td><strong>Mis viajes → Completados</strong> → «Calificar transportista ★»</td><td>«¿Quedó registrado?»</td><td>Nota pública en reputación del transportista</td></tr>
   <tr><td>10. Post-viaje</td><td>Ve nota del transportista y su reputación histórica en la misma tarjeta</td><td>Bloque calificaciones (sin ir a Emparejar)</td><td>«¿Repito con ellos?»</td><td>NPS ≥ 7 · repite carga</td></tr>
+  <tr><td>11. Multa / cobro (si aplica)</td><td>Si es <strong>acreedor</strong>: revisa comprobante del deudor y confirma o rechaza pago externo (24 h). Si es deudor: declara pago + comprobante. <strong>No sube</strong> comprobante como acreedor.</td><td><strong>Cuenta y multas</strong> → «Pagos por confirmar» / modal revisión</td><td>«¿Ya me pagaron?»</td><td>Confirmación o escalado a moderador</td></tr>
 </table>
 
 <h2>5. Paridad con Uber (mapa rápido)</h2>
@@ -90,7 +92,9 @@
   <tr><td>Mis viajes</td><td>Pestaña <strong>Mis viajes</strong>: En curso · En negociación · Completados (listado vertical)</td></tr>
   <tr><td>Calificar al otro</td><td>Mutuo post-<code>completed</code>; chips por rol; una nota por viaje y por rol</td></tr>
   <tr><td>Reputación ★</td><td>Promedio histórico en Completados (tablero Emparejar: pendiente M3)</td></tr>
-  <tr><td>Pago en app</td><td>Pasarela (pendiente)</td></tr>
+  <tr><td>Pago en app</td><td>Pasarela + tarjeta validada (pendiente producción); hoy transferencia + comprobante</td></tr>
+  <tr><td>Cuenta y multas</td><td>Panel fijo con sesión; banco obligatorio en prod para operar</td></tr>
+  <tr><td>Entrar con Gmail / Apple</td><td>OAuth (pendiente); hoy email + contraseña</td></tr>
   <tr><td>Tarifa / oferta</td><td>Rango embarcador + oferta transportista + aceptación</td></tr>
   <tr><td>Seguro / garantía de viaje</td><td>Valor ref. mercadería + términos (seguro integrado: fase 3)</td></tr>
 </table>
@@ -119,6 +123,7 @@
   <tr><td><strong>En curso</strong></td><td>Match <code>accepted</code> o <code>in_progress</code></td><td><strong>Gestionar viaje</strong> → Emparejar; Chat</td></tr>
   <tr><td><strong>En negociación</strong></td><td>Propuestas <code>proposed</code></td><td><strong>Ver propuesta</strong> → Emparejar</td></tr>
   <tr><td><strong>Completados</strong></td><td>Viajes <code>completed</code> (más reciente arriba; varios viajes = varias tarjetas)</td><td><strong>Calificar … ★</strong> si aún no calificaste; si ya calificaste, badge <strong>Calificado</strong>. Sin botón «Abrir».</td></tr>
+  <tr><td><strong>Cancelados</strong></td><td>Viajes <code>cancelled</code> con multa sugerida si aplica</td><td><strong>Multa / ayuda</strong> o ir a <strong>Cuenta y multas</strong>; sin «Gestionar viaje»</td></tr>
 </table>
 <h3>Flujo de calificación (ambos roles)</h3>
 <ol>
@@ -130,29 +135,53 @@
 </ol>
 <p class="meta">Técnico: migraciones SQL 012–014 · <a href="SQL-SUPABASE.md">SQL-SUPABASE.md</a> · <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica § bitácora</a>.</p>
 
-<h2>9. Estados en la app</h2>
+<h2 id="cuenta-multas">9. Cuenta, banco y multas (tipo Uber)</h2>
+<p>Con sesión, el recuadro <strong>Cuenta y multas</strong> queda visible (pestaña Cuenta). Antes de publicar u ofertar en <strong>producción</strong>, cada usuario debe completar datos bancarios chilenos (titular, RUT, banco, tipo, número).</p>
+<h3>Flujo de multa tras cancelación</h3>
+<ol>
+  <li>Al cancelar, la app sugiere monto y motivo; según el motivo, el <strong>deudor</strong> es embarcador o transportista.</li>
+  <li><strong>7 días</strong> para pagar; si vence, no puede publicar, ofertar ni emparejar hasta regularizar.</li>
+  <li>El <strong>deudor</strong> transfiere fuera de la app y pulsa <strong>Declarar pago realizado</strong> adjuntando captura del comprobante.</li>
+  <li>El <strong>acreedor</strong> (la contraparte: embarcador o transportista) entra a <strong>Pagos por confirmar (24 h)</strong>, abre el comprobante y <strong>confirma</strong> que recibió el pago o indica <strong>no recibí</strong>.</li>
+  <li>Si no hay respuesta en 24 h o hay disputa, un <strong>moderador</strong> (admin) revisa el caso en soporte; no hay desbloqueo automático.</li>
+</ol>
+<p class="meta">Detalle técnico y API: <a href="PENALTY-AND-SUPPORT.md">PENALTY-AND-SUPPORT.md</a> · <a href="Multas-Cuenta-Uber-Truck.html">Multas y cuenta (HTML)</a> · Memoria: <a href="Memoria-tecnica-Uber-Truck.html">§ bitácora 29 may</a>.</p>
+<p><strong>Futuro producción:</strong> validación de tarjeta y cobro integrado dentro de la app (como Uber); hoy no está implementado.</p>
+
+<h2 id="auth-email">9b. Acceso y correo (pendiente)</h2>
+<p>Hoy el ingreso es con <strong>email y contraseña</strong>. Para probar dos roles se usan dos correos o alias Gmail (<code>correo+embarcador@gmail.com</code>).</p>
+<p><strong>Pendiente producción (bloque E):</strong></p>
+<ul>
+  <li><strong>Continuar con Google</strong> — cuentas Gmail / Google Workspace.</li>
+  <li><strong>Continuar con Apple</strong> — Sign in with Apple (relevante para app iOS futura).</li>
+  <li><strong>Recuperar contraseña</strong> por enlace enviado al correo (Resend + dominio propio).</li>
+</ul>
+<p class="meta">Detalle: <a href="AUTH-AND-EMAIL-ROADMAP.md">AUTH-AND-EMAIL-ROADMAP.md</a> · <a href="Probar-Uber-Truck.html">Probar la app</a>.</p>
+
+<h2>10. Estados en la app</h2>
 <p><strong>Oferta capacidad:</strong> draft · published · reserved · expired · cancelled</p>
 <p><strong>Demanda carga:</strong> draft · published · matched · in_transit · delivered · cancelled</p>
 <p><strong>Match:</strong> proposed · accepted · in_progress · completed · disputed (+ cancelación y multas)</p>
 
-<h2>10. Fricciones y mitigación</h2>
+<h2>11. Fricciones y mitigación</h2>
 <ul>
   <li><strong>Robo / pérdida:</strong> declaración + términos + incidentes en app; seguro integrado fase 3.</li>
   <li><strong>«¿La app paga?»:</strong> copy claro: intermediación; valor ref. para seguro entre partes.</li>
   <li><strong>Confianza:</strong> KYC manual en piloto; <strong>reputación ★</strong> ya visible tras cada viaje completado.</li>
-  <li><strong>Cancelaciones:</strong> política en app + acuerdo mutuo.</li>
+  <li><strong>Cancelaciones:</strong> política en app + acuerdo mutuo + multa con plazo y confirmación de pago.</li>
+  <li><strong>«¿La app cobra sola?»:</strong> hoy no; transferencia manual + comprobante; pasarela en roadmap.</li>
   <li><strong>Espera en planta / comunicación:</strong> chips de calificación (ej. «Esperas largas», «Buena comunicación»).</li>
   <li><strong>«Califiqué pero el otro no puede»:</strong> usar cuenta distinta por rol; no reutilizar la misma sesión de embarcador para calificar como transportista sin cerrar sesión.</li>
 </ul>
 
-<h2>11. Corredor y liquidez (piloto M2)</h2>
+<h2>12. Corredor y liquidez (piloto M2)</h2>
 <ul>
   <li><strong>Enfoque:</strong> RM (origen) ↔ Valparaíso / San Antonio — no dispersar el piloto en rutas sin densidad.</li>
   <li><strong>Semanal:</strong> al menos 3 cargas y 2 ofertas activas en el mismo corredor.</li>
   <li><strong>Éxito M2:</strong> 20 viajes <code>completed</code> medidos con KPIs de marketplace (match rate, tiempo, cancelación, NPS).</li>
 </ul>
 
-<h2>12. KPIs marketplace (20 viajes)</h2>
+<h2>13. KPIs marketplace (20 viajes)</h2>
 <table>
   <tr><th>KPI</th><th>Meta M2</th></tr>
   <tr><td>Match rate</td><td>≥ 60%</td></tr>
@@ -166,12 +195,12 @@
 </table>
 <p>Definiciones y fuente de datos: <a href="Piloto-M2-Corredor-KPIs-Riesgos.html">anexo piloto M2</a>.</p>
 
-<h2>13. Riesgos y quién responde (resumen)</h2>
+<h2>14. Riesgos y quién responde (resumen)</h2>
 <p>Robo, carrier fantasma, retrasos y daños se mitigan con registro, términos, incidentes y (futuro) reputación y seguro. La <strong>app no sustituye</strong> al transportista ni paga la mercadería por defecto.</p>
 <p>Matriz completa y tabla de cobertura: <a href="Piloto-M2-Corredor-KPIs-Riesgos.html">Piloto M2 — riesgos</a> · <a href="Terminos-Confianza-Carga-Uber-Truck.html">Términos</a>.</p>
 
-<p class="meta">Modelo de negocio: <a href="Modelo-Negocio-Uber-Truck.html">Modelo-Negocio-Uber-Truck.html</a> · Gantt y backlog: <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica v3.5</a> · Probar: <a href="Probar-Uber-Truck.html">Probar-Uber-Truck.html</a></p>
+<p class="meta">Modelo de negocio: <a href="Modelo-Negocio-Uber-Truck.html">Modelo-Negocio-Uber-Truck.html</a> · Gantt y backlog: <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica v3.6</a> · Multas: <a href="PENALTY-AND-SUPPORT.md">PENALTY-AND-SUPPORT.md</a> · Auth/correo: <a href="AUTH-AND-EMAIL-ROADMAP.md">AUTH-AND-EMAIL-ROADMAP.md</a> · Probar: <a href="Probar-Uber-Truck.html">Probar-Uber-Truck.html</a></p>
 
-<p class="meta"><em>Fin del documento — v2.4 (27 may 2026): Mis viajes, calificación mutua ★+chips, Completados sin «Abrir»; alineado a app 0.0.31.</em></p>
+<p class="meta"><em>Fin del documento — v2.5 (29 may 2026): Cuenta y multas, comprobante deudor, confirmación acreedor/embarcador, cancelados sin «Gestionar viaje»; app 0.0.57.</em></p>
 </body>
 </html>

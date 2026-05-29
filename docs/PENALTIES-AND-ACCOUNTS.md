@@ -41,7 +41,7 @@ Campos en `users` (migración `008`):
 |------|-----|
 | **A (ahora)** | Resumen desde matches cancelados + recuadro + bloque en notificaciones |
 | **B** | Tabla `penalty_charges`, estados `suggested → pending → paid` |
-| **C** | Integración pasarela (Webpay / transferencia) + bloqueo por mora |
+| **C (pendiente producción)** | Integración interna tipo Uber: validar tarjeta/cuenta en app, cobro de multas in-app (pasarela + webhooks), desbloqueo al liquidar; ver [PENALTY-AND-SUPPORT.md](./PENALTY-AND-SUPPORT.md) § Producción futura |
 
 ## API
 

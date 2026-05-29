@@ -39,7 +39,7 @@
     <h1>Memoria técnica del proyecto</h1>
     <p class="meta"><strong>Producto:</strong> Uber Truck — marketplace de capacidad logística ociosa (backhaul), Chile.<br />
     <strong>Documento:</strong> memoria técnica viva del repositorio y del despliegue Railway.<br />
-    <strong>Versión documento:</strong> 3.5 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.31 (ratings M1+M2) &nbsp;|&nbsp; <strong>Fecha:</strong> 27 mayo 2026</p>
+    <strong>Versión documento:</strong> 3.6 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.57 (multas tipo Uber + cuenta) &nbsp;|&nbsp; <strong>Fecha:</strong> 29 mayo 2026</p>
   </div>
 </div>
 
@@ -68,6 +68,9 @@
   <tr><td>Viaje en curso (estados)</td><td>Emparejamiento: propuesto → aceptado → en ejecución → completado</td><td class="g-done">Hecho</td></tr>
   <tr><td>Chat con la otra parte</td><td>Chat in-app por match</td><td class="g-done">Hecho</td></tr>
   <tr><td>Cancelar con reglas</td><td>Modal motivos, acuerdo mutuo, multas sugeridas</td><td class="g-done">Hecho</td></tr>
+  <tr><td>Iniciar sesión / registro</td><td>Email + contraseña (JWT)</td><td class="g-done">Hecho MVP</td></tr>
+  <tr><td>Login Gmail / Apple</td><td>OAuth Google + Sign in with Apple</td><td class="g-todo">Pendiente producción — <a href="AUTH-AND-EMAIL-ROADMAP.md">bloque E</a></td></tr>
+  <tr><td>Recuperar contraseña</td><td>Enlace por correo (Resend)</td><td class="g-todo">Código en repo; no activo en prod</td></tr>
   <tr><td>Notificaciones</td><td>Campana in-app (JWT)</td><td class="g-done">Hecho</td></tr>
   <tr><td>Mis viajes</td><td>Pestaña <strong>Mis viajes</strong> + banner viaje activo</td><td class="g-done">Hecho (v012)</td></tr>
   <tr><td>Publicar / ofertar</td><td>Pestañas <strong>Pedir flete</strong> / <strong>Ofertar ruta</strong></td><td class="g-done">Hecho</td></tr>
@@ -75,10 +78,10 @@
   <tr><td>Precio oferta/demanda</td><td>Rango embarcador + oferta transportista + aceptación</td><td class="g-done">Hecho (v010)</td></tr>
   <tr><td>Declaración de carga y confianza</td><td>Valor ref. CLP, guía, términos, incidentes</td><td class="g-done">Hecho (v011)</td></tr>
   <tr><td>Mapa / dirección</td><td>Google Maps origen–destino + distancia</td><td class="g-done">Hecho</td></tr>
-  <tr><td>Mapa en vivo / seguimiento GPS</td><td>Tracking en ruta</td><td class="g-todo">Fase 4</td></tr>
-  <tr><td>Pago en app</td><td>Pasarela + generar cargo</td><td class="g-doing">Parcial (2.10)</td></tr>
+  <tr><td>Mapa en vivo / seguimiento GPS</td><td>Ubicación transportista + mapa en viaje activo</td><td class="g-done">Hecho (v0.0.34+)</td></tr>
+  <tr><td>Pago en app</td><td>Pasarela + validar tarjeta (tipo Uber)</td><td class="g-todo">Pendiente producción — ver <a href="PENALTY-AND-SUPPORT.md">bloque D</a></td></tr>
   <tr><td>Calificación ★</td><td>Mutua 1–5 + chips por rol (embarcador/transportista), reputación histórica en <strong>Mis viajes</strong></td><td class="g-done">Hecho (012–014, v0.0.28–0.0.31)</td></tr>
-  <tr><td>Perfil y cuenta</td><td>Login, empresa, banco, multas</td><td class="g-doing">Parcial</td></tr>
+  <tr><td>Perfil y cuenta</td><td>Login, empresa, <strong>banco obligatorio</strong> (prod), multas, comprobante, confirmación acreedor, soporte moderador</td><td class="g-done">Hecho MVP (v0.0.50–0.0.57); pasarela futura</td></tr>
   <tr><td>Reputación en tablero</td><td>Promedio ★ en cargas, ofertas, emparejamientos y sugerencias (M3)</td><td class="g-done">Hecho (v0.0.32)</td></tr>
 </table>
 
@@ -109,13 +112,17 @@
   <li><strong>Calificaciones estilo Uber (may 2026):</strong> <code>POST /api/matches/:id/rate</code>, catálogo <code>/rating-tags-catalog.json</code>, UI <code>trips-ui.js</code> + <code>rating-tags.js</code>.</li>
   <li>API: <code>capacity-offers</code>, <code>load-requests</code>, <code>matches</code>, sugerencias automáticas, comms, cuenta.</li>
   <li>UI embarcador / transportista, emparejamientos activos, modal cancelar, acuerdo mutuo bilateral.</li>
-  <li>Notificaciones in-app (JWT); recuadro cuenta y multas (sin pasarela).</li>
+  <li>Notificaciones in-app (JWT); panel <strong>Cuenta y multas</strong> siempre visible con sesión.</li>
+  <li><strong>Multas tipo Uber (v0.0.50–0.0.57):</strong> 7 días plazo → bloqueo operar; deudor declara pago externo + comprobante; acreedor (embarcador o transportista según caso) <strong>ve comprobante y confirma/rechaza</strong> en 24 h; sin respuesta → moderador; chat soporte con rol moderador (admin).</li>
+  <li><strong>Cuenta bancaria:</strong> <code>bank-gate</code> — en producción no publicar/ofertar/emparejar sin banco completo (<code>BANK_ENFORCE</code>).</li>
+  <li>GPS transportista en sesión; visibilidad en tablero con toggle (multa no apaga GPS).</li>
+  <li>KYC semi-curado (<code>kyc_status=approved</code>); <code>owner_user_id</code> en listados.</li>
   <li>Railway producción + <code>/health</code> + documentación en <code>/docs/</code>.</li>
 </ul>
 <h3>Pendiente en fase 2</h3>
 <ul>
   <li><strong>2.4–2.9:</strong> <code>owner_user_id</code> — mis cargas / mis ofertas.</li>
-  <li><strong>2.10e–f:</strong> generar cargo + pasarela; bloqueo por mora.</li>
+  <li><strong>2.10e–f (futuro):</strong> validar tarjeta/cuenta + cobro integrado multas (Webpay u otro); hoy pago manual + comprobante + confirmación acreedor.</li>
 </ul>
 
 <h2>Fase 3 — Piloto confianza</h2>
@@ -216,7 +223,7 @@
   <tr><td>NPS transportista</td><td>≥ 7</td><td>≥ 8</td></tr>
 </table>
 
-<p><strong>Interpretación 27 mayo 2026:</strong> núcleo digital (~82%) en prod; <strong>calificaciones mutuas validadas en producción</strong> (embarcador y transportista); foco = <strong>liquidez corredor RM ↔ V/San Antonio + piloto 20 viajes</strong>; cobros 2.10 ~25%. Add-on a terceros solo tras M2/M4.</p>
+<p><strong>Interpretación 29 mayo 2026:</strong> núcleo digital y <strong>cuenta/multas operativas</strong> en prod (v0.0.57); pasarela y validación de tarjetas <strong>documentadas como pendiente</strong> (<a href="PENALTY-AND-SUPPORT.md">PENALTY-AND-SUPPORT.md</a>, <a href="PROXIMOS-PASOS-ESTRATEGIA.md">bloque D</a>); foco = <strong>liquidez corredor RM ↔ V/San Antonio + piloto 20 viajes</strong>. Add-on a terceros solo tras M2/M4.</p>
 
 <h2>Piloto M2 — corredor único (liquidez)</h2>
 <p>El cuello de botella del marketplace no es el código sino la <strong>oferta y demanda simultánea</strong>. El piloto M2 se concentra en un corredor para lograr densidad operacional.</p>
@@ -273,7 +280,11 @@
   <tr><td>U6b</td><td>P1</td><td>KPIs marketplace M2 (semanal)</td><td>Match rate, tiempo match, NPS — ver anexo piloto</td><td>Jul–Ago 2026</td><td class="g-doing">Doc listo</td></tr>
   <tr><td>U6c</td><td>P1</td><td>Reputación v0</td><td>Historial cancelaciones + incidentes por cuenta</td><td>Post 5 viajes</td><td class="g-todo">Plan</td></tr>
   <tr><td>U6d</td><td>P1</td><td>Evidencia entrega</td><td>Foto + timestamp (antes GPS vivo)</td><td>Post-piloto corto</td><td class="g-todo">Plan</td></tr>
-  <tr><td>U7</td><td>P2</td><td>Generar cargo + pasarela</td><td>Webpay / transferencia</td><td>Post-piloto</td><td class="g-todo">Diseño</td></tr>
+  <tr><td>U7</td><td>P2</td><td>Pagos in-app tipo Uber (bloque D)</td><td>Validar tarjeta + cobro multas integrado + webhooks</td><td>Post-piloto</td><td class="g-todo">Doc listo; no desarrollar aún</td></tr>
+  <tr><td>U7a</td><td>P1</td><td>Multas + comprobante + confirmación acreedor</td><td>SQL 022–025, <code>penalties-ui.js</code>, 7 d / 24 h</td><td>May 2026</td><td class="g-done">Hecho v0.0.57</td></tr>
+  <tr><td>U7b</td><td>P1</td><td>Banco obligatorio para operar (prod)</td><td><code>bank-gate</code>, formulario cuenta</td><td>May 2026</td><td class="g-done">Hecho v0.0.56</td></tr>
+  <tr><td>U7c</td><td>P1</td><td>Soporte moderador en multas</td><td><code>support_cases</code>, chat admin</td><td>May 2026</td><td class="g-done">Hecho v0.0.50+</td></tr>
+  <tr><td>U10</td><td>P2</td><td>Login Gmail + Apple + email (bloque E)</td><td>OAuth + Resend + SQL 017</td><td>Post-piloto</td><td class="g-todo">Doc listo; no desarrollar aún</td></tr>
   <tr><td>U4e</td><td>P1</td><td>Calificaciones mutuas + chips (012–014)</td><td>Modal ★, Mis viajes, API rate, prod OK</td><td>May 2026</td><td class="g-done">Hecho</td></tr>
   <tr><td>U4f</td><td>P2</td><td>Reputación en tablero (M3)</td><td>★ promedio en cargas, ofertas, matches, sugerencias</td><td>May 2026</td><td class="g-done">Hecho</td></tr>
   <tr><td>U8</td><td>P2</td><td>KYC manual</td><td>Fase 3 operativa</td><td>Oct 2026+</td><td class="g-todo">Plan</td></tr>
@@ -303,7 +314,8 @@
   <tr><td>2.4</td><td>Panel matches + estados viaje</td><td>E</td><td>15-sep</td><td>25-oct</td><td></td><td></td><td></td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
   <tr><td>2.5</td><td>Deploy Railway + /health</td><td>E</td><td>18-oct</td><td>25-oct</td><td></td><td></td><td></td><td></td><td>█</td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
   <tr><td>2.x</td><td>Chat, acuerdo mutuo, notif, multas UI</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
-  <tr><td>2.10</td><td>Cuenta bancaria + cobro pasarela</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Parcial</td></tr>
+  <tr><td>2.10a</td><td>Banco + multas + comprobante (MVP)</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho (may 2026)</td></tr>
+  <tr><td>2.10b</td><td>Pasarela + tarjeta validada (tipo Uber)</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Pendiente prod.</td></tr>
   <tr><td>3.1</td><td>KYC + checklist vehículo</td><td>O/E</td><td>01-oct</td><td>15-nov</td><td></td><td></td><td></td><td></td><td>██</td><td>█</td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
   <tr><td>3.2</td><td>Ratings bidireccionales</td><td>E</td><td>15-oct</td><td>29-nov</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho (may 2026)</td></tr>
   <tr><td>3.3</td><td>Microseguro InsurTech POC</td><td>L/O</td><td>01-nov</td><td>31-dic</td><td></td><td></td><td></td><td></td><td></td><td>████</td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
@@ -316,7 +328,7 @@
 <h3>Avance fase 2 — resumen</h3>
 <ul>
   <li>MVP digital núcleo: ~82% (incl. calificaciones 012–014 y UX Mis viajes)</li>
-  <li>Multas / cobros (2.10): ~25%</li>
+  <li>Multas / cuenta (2.10a): ~90% (falta pasarela 2.10b)</li>
   <li>Fase 3 ratings: ~40% (mutuo en app; falta M3 tablero + KYC)</li>
   <li>Proyecto total (hasta M5): ~38%</li>
 </ul>
@@ -334,8 +346,22 @@
   <tr><td>Fix alcance</td><td>Ofertas sin <code>carrier_user_id</code>: match visible si empresa coincide</td><td>Backfill al ofertar precio</td></tr>
   <tr><td>UX Mis viajes</td><td>Completados: listado vertical (más reciente arriba); sin botón «Abrir» → Emparejar</td><td>«Gestionar viaje» solo en curso/negociación</td></tr>
 </table>
-<p><strong>Deploy:</strong> Railway <code>uber-truck-production.up.railway.app</code> · rama <code>main</code> · versión app <strong>0.0.31</strong>.</p>
-<p><strong>Archivos clave:</strong> <code>src/routes/match-ratings.js</code>, <code>src/lib/match-ratings.js</code>, <code>src/services/supabase.js</code>, <code>public/trips-ui.js</code>, <code>public/rating-tags.js</code>.</p>
+
+<h2>Bitácora de avance — 29 mayo 2026 (v0.0.50–0.0.57)</h2>
+<table>
+  <tr><th>Área</th><th>Entregado</th><th>Notas</th></tr>
+  <tr><td>Multas y bloqueo</td><td>7 días (<code>PENALTY_DUE_DAYS</code>), gate operar, banner bloqueo</td><td>SQL 022–024; <code>penalty-gate.js</code></td></tr>
+  <tr><td>Pago declarado</td><td>Deudor: declarar + comprobante JPG/PNG/WebP</td><td>SQL 025; <code>claim-paid</code>, <code>payment-proof</code></td></tr>
+  <tr><td>Confirmación acreedor</td><td>Embarcador/transportista acreedor: <strong>ver comprobante</strong>, confirmar o rechazar (24 h)</td><td>Sección «Pagos por confirmar»; modal revisión; <strong>no sube</strong> comprobante</td></tr>
+  <tr><td>Moderador</td><td>Casos soporte, chat moderador, cierre admin</td><td><code>support_cases</code>; botones solo rol admin</td></tr>
+  <tr><td>Cuenta bancaria</td><td>Obligatoria en prod para publicar/ofertar/emparejar</td><td><code>bank-gate.js</code>, <code>BANK_ENFORCE</code></td></tr>
+  <tr><td>UX cuenta</td><td>Panel multas siempre visible; viajes cancelados sin «Gestionar viaje»</td><td><code>penalties-ui.js</code>, <code>trips-ui.js</code></td></tr>
+  <tr><td>Pendiente prod.</td><td>Pasarela + validar tarjeta tipo Uber</td><td>Doc: <a href="PENALTY-AND-SUPPORT.md">PENALTY-AND-SUPPORT.md</a> § Producción futura</td></tr>
+  <tr><td>Pendiente prod.</td><td>Login Gmail (Google) + Apple + correo transaccional</td><td>Doc: <a href="AUTH-AND-EMAIL-ROADMAP.md">AUTH-AND-EMAIL-ROADMAP.md</a></td></tr>
+</table>
+<p><strong>Deploy:</strong> Railway <code>uber-truck-production.up.railway.app</code> · rama <code>main</code> · versión app <strong>0.0.57</strong>.</p>
+<p><strong>SQL pendiente usuario:</strong> ejecutar en Supabase <code>RUN_022_023</code>, <code>RUN_024</code>, <code>RUN_025</code> (ver <a href="SQL-SUPABASE.md">SQL-SUPABASE.md</a>).</p>
+<p><strong>Archivos clave:</strong> <code>src/lib/penalty-ledger.js</code>, <code>src/lib/penalty-payment.js</code>, <code>src/lib/bank-gate.js</code>, <code>src/routes/account.js</code>, <code>public/penalties-ui.js</code>.</p>
 
 <div class="rule"></div>
 
@@ -355,10 +381,11 @@
 <p><strong>Rol:</strong> persistencia; migraciones en <code>supabase/migrations/</code>. Proyecto prod: <code>ljinhegtywixtbzjgjfn</code>. Service role solo en servidor.</p>
 
 <h2>Capa 05 — Autenticación (JWT + bcrypt)</h2>
-<p><strong>Rol:</strong> registro/login; tabla <code>users</code>; roles <code>shipper</code> / <code>carrier</code>. Sin sesión → sin notificaciones ni cuenta personalizada.</p>
+<p><strong>Rol:</strong> registro/login con <strong>email y contraseña</strong>; tabla <code>users</code>; roles <code>shipper</code> / <code>carrier</code>. Sin sesión → sin notificaciones ni cuenta personalizada.</p>
+<p><strong>Pendiente producción:</strong> OAuth <strong>Google (Gmail)</strong> y <strong>Sign in with Apple</strong>; recuperación de contraseña por correo (Resend). Ver <a href="AUTH-AND-EMAIL-ROADMAP.md">AUTH-AND-EMAIL-ROADMAP.md</a>.</p>
 
 <h2>Capa 06 — Lógica de dominio</h2>
-<p><strong>Rol:</strong> <code>src/lib/</code> — match, cancelación (<code>match-cancel-reasons.js</code>), precio (<code>match-price.js</code>), <strong>confianza/carga</strong> (<code>cargo-trust.js</code>), ledger multas, repositorio.</p>
+<p><strong>Rol:</strong> <code>src/lib/</code> — match, cancelación (<code>match-cancel-reasons.js</code>), precio (<code>match-price.js</code>), <strong>confianza/carga</strong> (<code>cargo-trust.js</code>), <strong>multas</strong> (<code>penalty-ledger.js</code>, <code>penalty-payment.js</code>, <code>penalty-gate.js</code>, <code>bank-gate.js</code>, <code>payment-proof.js</code>), repositorio.</p>
 
 <h2>Capa 07 — Servicios</h2>
 <p><strong>Rol:</strong> <code>src/services/</code> — Supabase client, comms, integraciones futuras (mapas, pagos).</p>
@@ -382,7 +409,8 @@
 <table>
   <tr><th>Capa futura</th><th>Tecnología</th><th>Fase</th></tr>
   <tr><td>Mapas / geocoding</td><td>Google Maps / Mapbox</td><td>2+</td></tr>
-  <tr><td>Pagos</td><td>Webpay u otro</td><td>2.10</td></tr>
+  <tr><td>Pagos in-app</td><td>Webpay / Mercado Pago / Stripe Chile — validación tarjeta + cobro multas</td><td>2.10b (pendiente)</td></tr>
+  <tr><td>Auth social + email</td><td>Google OAuth, Apple Sign In, Resend</td><td>E (pendiente)</td></tr>
   <tr><td>KYC / seguro</td><td>APIs terceros Chile</td><td>3</td></tr>
 </table>
 
@@ -411,8 +439,13 @@
   <tr><td>POST</td><td>/api/matches/:id/mutual-cancel</td><td>Acuerdo mutuo</td></tr>
   <tr><td>GET</td><td>/api/matches/cancel-options</td><td>Motivos y multas</td></tr>
   <tr><td>GET/POST</td><td>/api/comms/…</td><td>Chat y notificaciones</td></tr>
-  <tr><td>GET</td><td>/api/account/summary</td><td>Multas y plazos</td></tr>
+  <tr><td>GET</td><td>/api/account/summary</td><td>Multas, plazos, <code>pending_confirmations</code>, <code>bank_required_for_operate</code></td></tr>
   <tr><td>PATCH</td><td>/api/account/bank</td><td>Cuenta bancaria Chile</td></tr>
+  <tr><td>POST</td><td>/api/account/penalties/:matchId/claim-paid</td><td>Deudor declara pago + comprobante (base64)</td></tr>
+  <tr><td>GET</td><td>/api/account/penalties/:matchId/payment-proof</td><td>Imagen comprobante (JWT participante)</td></tr>
+  <tr><td>POST</td><td>/api/account/penalties/:matchId/confirm-payment</td><td>Acreedor confirma recepción</td></tr>
+  <tr><td>POST</td><td>/api/account/penalties/:matchId/dispute-payment</td><td>Acreedor rechaza (nota obligatoria)</td></tr>
+  <tr><td>POST</td><td>/api/account/penalties/:matchId/mark-paid</td><td>Admin / moderador cierra multa</td></tr>
   <tr><td>POST/GET</td><td>/api/matches/:id/incidents</td><td>Reportar / listar incidentes (JWT, participantes)</td></tr>
   <tr><td>GET</td><td>/api/matches/rating-tags/catalog</td><td>Catálogo chips por rol (JSON)</td></tr>
   <tr><td>POST</td><td>/api/matches/:id/rate</td><td>Calificar viaje completado (stars, comment, tags); 409 si ya calificó</td></tr>
@@ -431,6 +464,9 @@
   <li><strong>Confianza:</strong> plataforma como intermediario; embarcador declara mercadería y valor referencial; aceptación <code>cargo-trust-v1</code>; folio guía opcional (sin validación SII automática en MVP).</li>
   <li><strong>Incidentes:</strong> registro en <code>match_incidents</code>; resolución entre partes y aseguradoras; la app no reembolsa valor declarado por defecto.</li>
   <li><strong>Calificaciones:</strong> solo en <code>completed</code>; una nota por rol por viaje; reputación pública = promedio histórico de estrellas recibidas; chips según catálogo por rol y banda de estrellas.</li>
+  <li><strong>Multas:</strong> al cancelar se sugiere monto y <code>reason_code</code>; deudor según motivo (embarcador o transportista); <strong>7 días</strong> para pagar antes de bloqueo; deudor declara transferencia + comprobante → acreedor <strong>24 h</strong> para confirmar o disputar; sin confirmación → escalado moderador (sin auto-desbloqueo).</li>
+  <li><strong>Banco:</strong> en producción con Supabase, datos bancarios completos obligatorios para operar (<code>BANK_ENFORCE</code>); no sustituye pasarela futura.</li>
+  <li><strong>Pagos integrados:</strong> no implementados; ver <a href="PENALTY-AND-SUPPORT.md">PENALTY-AND-SUPPORT.md</a> y <a href="PENALTIES-AND-ACCOUNTS.md">PENALTIES-AND-ACCOUNTS.md</a> fase C.</li>
 </ul>
 
 <h2>Seguridad y cumplimiento</h2>
@@ -449,6 +485,6 @@
   docs/            ← memoria HTML (este archivo)
   canvases/        ← estado de avance (Cursor)</code>
 
-<p class="meta"><em>Fin del documento — v3.5 (27 may 2026): calificaciones mutuas M1+M2 en prod; bitácora; fixes PGRST204 y UX Mis viajes; software 0.0.31.</em></p>
+<p class="meta"><em>Fin del documento — v3.6 (29 may 2026): multas tipo Uber v0.0.57, banco obligatorio, comprobante y confirmación acreedor; pasarela/tarjeta pendiente producción; software 0.0.57.</em></p>
 </body>
 </html>

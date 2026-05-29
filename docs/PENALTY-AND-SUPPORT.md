@@ -47,3 +47,26 @@ SQL: `025_penalty_payment_proof.sql` / `RUN_025_SUPABASE.sql`
 ## GPS vs tablero
 
 El GPS del transportista sigue activo con sesión. El interruptor solo controla visibilidad en el tablero.
+
+## Pendiente — producción futura (tipo Uber)
+
+**No implementado.** El MVP actual usa:
+
+- Cuenta bancaria inscrita (titular, RUT, banco, número) para operar.
+- Pago de multas **fuera de la app** + comprobante del deudor + confirmación del acreedor.
+
+### Objetivo posterior
+
+| Capacidad | Descripción |
+|-----------|-------------|
+| **Medios de pago in-app** | Tarjeta débito/crédito y/o cuenta vinculada validada por pasarela (Webpay Plus, Mercado Pago, Stripe u otro acuerdo Chile). |
+| **Validación de tarjeta / cuenta** | Verificación al registrar (microcargo, tokenización, 3DS) como en Uber: el usuario no opera cargos automáticos sin medio verificado. |
+| **Cobro integrado de multas** | Cargo automático o botón «Pagar multa» dentro de la app; al liquidar, desbloqueo sin depender de transferencia manual + comprobante. |
+| **Wallet / saldo interno** (opcional) | Compensación entre partes en plataforma antes de retiro a banco. |
+
+### Qué queda fuera del alcance actual
+
+- Tokenización de tarjetas, webhooks de pasarela, conciliación contable.
+- Desbloqueo automático al pagar por pasarela (hoy solo `confirmed` por acreedor o `settled_moderator`).
+
+Referencia de diseño: [PENALTIES-AND-ACCOUNTS.md](./PENALTIES-AND-ACCOUNTS.md) fase C · [PROXIMOS-PASOS-ESTRATEGIA.md](./PROXIMOS-PASOS-ESTRATEGIA.md).

@@ -11,7 +11,7 @@
 |-----------|--------|
 | **Memoria técnica** | [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html) |
 
-Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX, hitos, **Gantt**, **próximos pasos**, **bitácora de avance**, stack por capas, API y avance. **Última actualización:** 27 mayo 2026 · software **0.0.31**.
+Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX, hitos, **Gantt**, **próximos pasos**, **bitácora de avance**, stack por capas, API y avance. **Última actualización:** 29 mayo 2026 · software **0.0.57**.
 
 No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitácora MVP digital (evita duplicados).
 
@@ -22,7 +22,9 @@ No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitáco
 | Tema | HTML |
 |------|------|
 | Modelo de negocio | [Modelo-Negocio-Uber-Truck.html](./Modelo-Negocio-Uber-Truck.html) |
-| Journey usuario | [Journey-Usuario-Uber-Truck.html](./Journey-Usuario-Uber-Truck.html) (v2.4 · Mis viajes + calificaciones) |
+| Journey usuario | [Journey-Usuario-Uber-Truck.html](./Journey-Usuario-Uber-Truck.html) (v2.5 · cuenta, multas, comprobante) |
+| Multas / soporte (MD) | [PENALTY-AND-SUPPORT.md](./PENALTY-AND-SUPPORT.md) |
+| Auth Gmail / Apple / correo (MD) | [AUTH-AND-EMAIL-ROADMAP.md](./AUTH-AND-EMAIL-ROADMAP.md) — pendiente producción |
 | Resumen canvas | [Canvas-Resumen-Uber-Truck.html](./Canvas-Resumen-Uber-Truck.html) |
 | Cancelación / multas | [Politica-Cancelacion-Uber-Truck.html](./Politica-Cancelacion-Uber-Truck.html) · [Multas-Cuenta-Uber-Truck.html](./Multas-Cuenta-Uber-Truck.html) |
 | SQL Supabase | [Sql-Supabase-Uber-Truck.html](./Sql-Supabase-Uber-Truck.html) · [SQL-SUPABASE.md](./SQL-SUPABASE.md) |

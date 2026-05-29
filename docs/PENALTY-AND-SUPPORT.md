@@ -23,9 +23,20 @@
 1. `RUN_022_023_SUPABASE.sql` — ayuda + columnas pagada (023)
 2. `RUN_024_SUPABASE.sql` — estados de pago (024)
 
+## Cuenta bancaria (producción)
+
+En producción (`BANK_ENFORCE`, por defecto activo con Supabase) **no puedes publicar, ofertar ni emparejar** sin inscribir cuenta bancaria (titular, RUT, banco, tipo, número).
+
+## Comprobante de transferencia
+
+Al **declarar pago** el deudor debe adjuntar captura JPG/PNG/WebP (máx. ~1,8 MB). El acreedor y moderador pueden verla en **Ver comprobante** o vía caso de ayuda.
+
+SQL: `025_penalty_payment_proof.sql` / `RUN_025_SUPABASE.sql`
+
 ## API
 
-- `POST /api/account/penalties/:matchId/claim-paid` — deudor
+- `POST /api/account/penalties/:matchId/claim-paid` — deudor (`note`, `proof_base64`, `proof_mime`)
+- `GET /api/account/penalties/:matchId/payment-proof` — imagen (JWT)
 - `POST /api/account/penalties/:matchId/confirm-payment` — acreedor
 - `POST /api/account/penalties/:matchId/dispute-payment` — acreedor (`note` obligatorio)
 - `POST /api/account/penalties/:matchId/mark-paid` — admin / moderador

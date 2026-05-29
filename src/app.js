@@ -14,7 +14,7 @@ function readDeployManifest() {
 
 const app = express();
 
-app.use(express.json());
+app.use(express.json({ limit: '3mb' }));
 
 const publicDir = path.join(__dirname, '..', 'public');
 app.get('/', (_req, res) => {

@@ -159,6 +159,12 @@ ALTER TABLE matches
 CREATE INDEX IF NOT EXISTS idx_matches_penalty_paid ON matches (penalty_paid_at)
   WHERE penalty_paid_at IS NOT NULL;
 
+-- 025 — Comprobante transferencia (declarar pago multa)
+ALTER TABLE matches
+  ADD COLUMN IF NOT EXISTS penalty_payment_proof_mime TEXT,
+  ADD COLUMN IF NOT EXISTS penalty_payment_proof_data TEXT,
+  ADD COLUMN IF NOT EXISTS penalty_payment_proof_at TIMESTAMPTZ;
+
 -- 024 — Flujo declarar pago → confirmar acreedor (24 h)
 ALTER TABLE matches
   ADD COLUMN IF NOT EXISTS penalty_payment_status TEXT NOT NULL DEFAULT 'pending',

@@ -127,10 +127,13 @@ function buildPenaltyItem(match, load, offer) {
     payment_note: match.penalty_payment_note || null,
     deadline_days: PENALTY_DUE_DAYS,
     confirm_hours: PENALTY_CONFIRM_HOURS,
+    has_payment_proof: Boolean(match.penalty_payment_proof_data),
+    payment_proof_at: match.penalty_payment_proof_at || null,
     can_claim:
       !settled && ['pending', 'disputed', 'confirm_expired'].includes(payment_status),
     can_confirm: payment_status === 'claimed',
     can_dispute: payment_status === 'claimed',
+    can_view_proof: Boolean(match.penalty_payment_proof_data),
   };
 }
 

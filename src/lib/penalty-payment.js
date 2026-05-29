@@ -9,8 +9,9 @@ const {
   PENALTY_CONFIRM_HOURS,
 } = require('./penalty-ledger');
 const { logMatchTrip } = require('./match-trip-log');
-const { userCanAccessMatch, findOpenCaseForMatch } = require('./support-cases');
+const { userCanAccessMatch, findOpenCaseForMatch, addMessage } = require('./support-cases');
 const comms = require('../services/comms');
+const { parseProofInput, proofViewPath } = require('./payment-proof');
 
 function httpError(message, status) {
   const e = new Error(message);
@@ -150,7 +151,20 @@ async function processExpiredClaims() {
   }
 }
 
-async function claimPenaltyPaid(matchId, user, note) {
+async function attachProofToSupportCase(matchId, user, proofPath) {
+  const supportCase = await findOpenCaseForMatch(matchId);
+  if (!supportCase?.id) return;
+  const body =
+    `Comprobante de transferencia adjunto al declarar pago.\nVer: ${proofPath}`;
+  await addMessage({
+    case_id: supportCase.id,
+    user,
+    body,
+    as_moderator: false,
+  });
+}
+
+async function claimPenaltyPaid(matchId, user, { note, proof_base64, proof_mime } = {}) {
   const { match, parties } = await assertPenaltyMatch(matchId, user);
   if (!userIsDebtor(user, parties)) {
     throw httpError('Solo quien debe la multa puede declarar el pago', 403);
@@ -166,23 +180,32 @@ async function claimPenaltyPaid(matchId, user, note) {
     throw httpError('No puedes declarar pago en este estado', 400);
   }
 
+  const proof = parseProofInput({ proof_base64, proof_mime });
   const now = new Date();
   const deadline = new Date(now.getTime() + PENALTY_CONFIRM_HOURS * 60 * 60 * 1000);
+  const viewPath = proofViewPath(matchId);
   let updated;
   try {
     updated = await repo.update('matches', matchId, {
-    penalty_payment_status: 'claimed',
-    penalty_claimed_at: now.toISOString(),
-    penalty_claimed_by_user_id: user.sub,
-    penalty_claim_note: note?.trim() || null,
-    penalty_confirm_deadline_at: deadline.toISOString(),
-    penalty_disputed_at: null,
-    penalty_dispute_note: null,
+      penalty_payment_status: 'claimed',
+      penalty_claimed_at: now.toISOString(),
+      penalty_claimed_by_user_id: user.sub,
+      penalty_claim_note: note?.trim() || null,
+      penalty_confirm_deadline_at: deadline.toISOString(),
+      penalty_disputed_at: null,
+      penalty_dispute_note: null,
+      penalty_payment_proof_mime: proof.mime,
+      penalty_payment_proof_data: proof.base64,
+      penalty_payment_proof_at: now.toISOString(),
     });
   } catch (e) {
-    if (e.message?.includes('penalty_payment_status') || e.code === 'PGRST204') {
+    if (
+      e.message?.includes('penalty_payment_status') ||
+      e.message?.includes('penalty_payment_proof') ||
+      e.code === 'PGRST204'
+    ) {
       throw httpError(
-        'Falta migración SQL 024 en Supabase (penalty_payment_status). Ejecuta RUN_024_SUPABASE.sql',
+        'Faltan migraciones SQL 024/025 en Supabase. Ejecuta RUN_024 y RUN_025.',
         503
       );
     }
@@ -198,18 +221,45 @@ async function claimPenaltyPaid(matchId, user, note) {
       amount_clp: Number(match.penalty_amount_clp),
       confirm_deadline_at: deadline.toISOString(),
       note: note?.trim() || null,
+      has_proof: true,
+      proof_bytes: proof.size,
     },
   });
+
+  try {
+    await attachProofToSupportCase(matchId, user, viewPath);
+  } catch (e) {
+    console.error('support proof message', e);
+  }
 
   const amount = Number(match.penalty_amount_clp).toLocaleString('es-CL');
   await notifyPenalty(
     matchId,
     parties.creditor_role,
     'Confirma recepción del pago de multa',
-    `El deudor declaró pago de $${amount} CLP. Tienes ${PENALTY_CONFIRM_HOURS} h para confirmar o rechazar en Cuenta y multas.`
+    `El deudor declaró pago de $${amount} CLP con comprobante adjunto. Tienes ${PENALTY_CONFIRM_HOURS} h para confirmar o rechazar en Cuenta y multas.`
   );
 
-  return { match: updated };
+  return { match: updated, proof_url: viewPath };
+}
+
+async function getPenaltyPaymentProof(matchId, user) {
+  const { match } = await assertPenaltyMatch(matchId, user);
+  if (!match.penalty_payment_proof_data) {
+    throw httpError('No hay comprobante de pago para este viaje', 404);
+  }
+  const debtor = DEBTOR_BY_REASON[match.reason_code];
+  const creditor = debtor === 'shipper' ? 'carrier' : 'shipper';
+  const canView =
+    user.role === 'admin' ||
+    user.role === debtor ||
+    user.role === creditor;
+  if (!canView) throw httpError('Sin acceso al comprobante', 403);
+  return {
+    mime: match.penalty_payment_proof_mime || 'image/jpeg',
+    base64: match.penalty_payment_proof_data,
+    uploaded_at: match.penalty_payment_proof_at,
+  };
 }
 
 async function confirmPenaltyPayment(matchId, user) {
@@ -344,5 +394,6 @@ module.exports = {
   confirmPenaltyPayment,
   disputePenaltyPayment,
   markPenaltyPaid,
+  getPenaltyPaymentProof,
   getMatchPenaltyParties,
 };

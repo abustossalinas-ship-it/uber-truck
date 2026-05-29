@@ -93,6 +93,11 @@ const Penalties = {
         `<button type="button" class="tab tab-sm tab-outline" data-dispute-penalty="${p.match_id}">No recibí el pago</button>`
       );
     }
+    if (p.can_view_proof) {
+      parts.push(
+        `<button type="button" class="tab tab-sm tab-outline" data-view-payment-proof="${p.match_id}">Ver comprobante</button>`
+      );
+    }
     if (p.status !== 'paid') {
       parts.push(
         `<button type="button" class="tab tab-sm" data-open-support="${p.match_id}" data-support-subject="Multa ${this.formatClp(p.amount_clp)}">Ayuda / revisión</button>`
@@ -145,6 +150,71 @@ const Penalties = {
     box.querySelectorAll('[data-dispute-penalty]').forEach((btn) => {
       btn.addEventListener('click', () => this.disputePenalty(btn.dataset.disputePenalty));
     });
+    box.querySelectorAll('[data-view-payment-proof]').forEach((btn) => {
+      btn.addEventListener('click', () => this.viewPaymentProof(btn.dataset.viewPaymentProof));
+    });
+  },
+
+  claimMatchId: null,
+
+  openClaimPaymentModal(matchId) {
+    this.claimMatchId = matchId;
+    const modal = document.getElementById('claim-payment-modal');
+    const err = document.getElementById('claim-payment-error');
+    const file = document.getElementById('claim-payment-file');
+    const note = document.getElementById('claim-payment-note');
+    const previewWrap = document.getElementById('claim-payment-preview-wrap');
+    const preview = document.getElementById('claim-payment-preview');
+    document.getElementById('claim-payment-match-id').value = matchId || '';
+    if (note) note.value = '';
+    if (file) file.value = '';
+    if (previewWrap) previewWrap.hidden = true;
+    if (preview) preview.removeAttribute('src');
+    if (err) {
+      err.hidden = true;
+      err.textContent = '';
+    }
+    if (modal) {
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+    }
+  },
+
+  closeClaimPaymentModal() {
+    this.claimMatchId = null;
+    const modal = document.getElementById('claim-payment-modal');
+    if (modal) {
+      modal.hidden = true;
+      modal.setAttribute('aria-hidden', 'true');
+    }
+  },
+
+  async fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = () => reject(new Error('No se pudo leer la imagen'));
+      reader.readAsDataURL(file);
+    });
+  },
+
+  async viewPaymentProof(matchId) {
+    if (!matchId) return;
+    try {
+      const res = await fetch(`/api/account/penalties/${encodeURIComponent(matchId)}/payment-proof`, {
+        headers: this.headers(),
+      });
+      if (!res.ok) {
+        const json = await res.json().catch(() => ({}));
+        throw new Error(json.error || 'No se pudo abrir el comprobante');
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      window.open(url, '_blank', 'noopener');
+      setTimeout(() => URL.revokeObjectURL(url), 60000);
+    } catch (e) {
+      alert(e.message);
+    }
   },
 
   async postPenalty(matchId, path, body) {
@@ -159,18 +229,50 @@ const Penalties = {
   },
 
   async claimPenalty(matchId) {
-    const note = window.prompt(
-      'Nota opcional (transferencia, fecha, banco):',
-      'Transferencia realizada según acuerdo'
-    );
-    if (note === null) return;
+    this.openClaimPaymentModal(matchId);
+  },
+
+  async submitClaimPayment(e) {
+    e.preventDefault();
+    const matchId = this.claimMatchId || document.getElementById('claim-payment-match-id')?.value;
+    const fileInput = document.getElementById('claim-payment-file');
+    const errEl = document.getElementById('claim-payment-error');
+    const note = document.getElementById('claim-payment-note')?.value?.trim();
+    const file = fileInput?.files?.[0];
+    if (!matchId || !file) {
+      if (errEl) {
+        errEl.textContent = 'Selecciona una imagen del comprobante.';
+        errEl.hidden = false;
+      }
+      return;
+    }
+    const submitBtn = e.target.querySelector('button[type="submit"]');
+    const prev = submitBtn?.textContent;
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Enviando…';
+    }
     try {
-      const json = await this.postPenalty(matchId, 'claim-paid', { note: note || undefined });
+      const dataUrl = await this.fileToBase64(file);
+      const json = await this.postPenalty(matchId, 'claim-paid', {
+        note: note || undefined,
+        proof_base64: dataUrl,
+        proof_mime: file.type,
+      });
+      this.closeClaimPaymentModal();
       alert(json.message);
       await this.refresh();
       if (typeof refreshBoard === 'function') refreshBoard();
     } catch (e) {
-      alert(e.message);
+      if (errEl) {
+        errEl.textContent = e.message;
+        errEl.hidden = false;
+      } else alert(e.message);
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = prev || 'Enviar comprobante';
+      }
     }
   },
 
@@ -253,9 +355,11 @@ const Penalties = {
         : !hasAnyPenalty
           ? '<p class="muted">Sin multas en tus emparejamientos cancelados.</p>'
           : '';
-    const bankWarn = s.bank_required_for_charges
-      ? `<p class="penalty-bank-warn">Para <strong>generar un cargo</strong> debes inscribir cuenta bancaria.</p>`
-      : '';
+    const bankOperate = s.bank_required_for_operate
+      ? `<p class="penalty-bank-warn"><strong>Cuenta bancaria obligatoria</strong> para operar en producción (publicar, ofertar, emparejar). <button type="button" class="link-btn" id="btn-open-bank-inline">Inscribir ahora</button></p>`
+      : s.bank_required_for_charges
+        ? `<p class="penalty-bank-warn">Inscribe cuenta bancaria para multas y cobros.</p>`
+        : '';
     const bankOk = s.bank_account?.complete
       ? '<p class="muted">Cuenta bancaria registrada.</p>'
       : `<button type="button" class="tab tab-sm" id="btn-open-bank">Inscribir cuenta bancaria</button>`;
@@ -271,7 +375,7 @@ const Penalties = {
       <p class="muted">Resumen para ${rolText || 'tu cuenta'}. Plazo ${p.penalty_due_days || 7} días para pagar; al declarar pago el acreedor tiene ${confirmH} h para confirmar. Sin confirmación → moderador.</p>
       ${blockWarn}
       ${pendingBlock}
-      ${bankWarn}
+      ${bankOperate}
       <div class="penalty-grid">
         <section>
           <h3>Debes (como ${rolText?.toLowerCase() || 'usuario'})</h3>
@@ -293,6 +397,7 @@ const Penalties = {
       <p class="muted penalty-note">${s.note || ''}</p>
     `;
     document.getElementById('btn-open-bank')?.addEventListener('click', () => this.openBankModal());
+    document.getElementById('btn-open-bank-inline')?.addEventListener('click', () => this.openBankModal());
     this.bindPenaltyActions(box);
   },
 
@@ -402,7 +507,8 @@ const Penalties = {
       op?.blocked ||
       op?.has_debt ||
       p?.pending_confirmations?.length ||
-      p?.total_owed_clp > 0;
+      p?.total_owed_clp > 0 ||
+      this.summary?.bank_required_for_operate;
     if (!showStrip) {
       el.hidden = true;
       el.innerHTML = '';
@@ -412,20 +518,24 @@ const Penalties = {
     el.hidden = false;
     if (op?.blocked) document.body.classList.add('penalty-blocked');
     else document.body.classList.remove('penalty-blocked');
-    const title = op?.blocked
-      ? op.block_reason === 'awaiting_confirm'
-        ? 'Esperando confirmación del acreedor'
-        : 'No puedes tomar nuevos viajes'
-      : p?.pending_confirmations?.length
-        ? 'Pagos por confirmar'
-        : 'Multas pendientes';
-    const detail = op?.blocked
-      ? op.message
-      : p?.pending_confirmations?.length
-        ? `Tienes ${p.pending_confirmations.length} pago(s) declarados por confirmar (24 h).`
-        : p?.total_owed_clp > 0
-          ? `Debes ${this.formatClp(p.total_owed_clp)} en multas sugeridas.`
-          : op?.message || '';
+    const title = this.summary?.bank_required_for_operate
+      ? 'Cuenta bancaria requerida'
+      : op?.blocked
+        ? op.block_reason === 'awaiting_confirm'
+          ? 'Esperando confirmación del acreedor'
+          : 'No puedes tomar nuevos viajes'
+        : p?.pending_confirmations?.length
+          ? 'Pagos por confirmar'
+          : 'Multas pendientes';
+    const detail = this.summary?.bank_required_for_operate
+      ? 'Inscribe tu cuenta bancaria para publicar, ofertar y emparejar.'
+      : op?.blocked
+        ? op.message
+        : p?.pending_confirmations?.length
+          ? `Tienes ${p.pending_confirmations.length} pago(s) declarados por confirmar (24 h).`
+          : p?.total_owed_clp > 0
+            ? `Debes ${this.formatClp(p.total_owed_clp)} en multas sugeridas.`
+            : op?.message || '';
     el.innerHTML = `<div class="penalty-block-inner"><p><strong>${title}</strong> — ${detail || ''} <button type="button" class="link-btn" data-scroll-penalties>Ver detalle</button></p></div>`;
     el.querySelector('[data-scroll-penalties]')?.addEventListener('click', () => {
       document.getElementById('account-penalties-panel')?.scrollIntoView({ behavior: 'smooth' });
@@ -455,6 +565,21 @@ function $(id) {
 document.getElementById('form-bank')?.addEventListener('submit', (e) => Penalties.submitBank(e));
 document.querySelectorAll('[data-close-bank]').forEach((el) => {
   el.addEventListener('click', () => Penalties.closeBankModal());
+});
+document.getElementById('form-claim-payment')?.addEventListener('submit', (e) =>
+  Penalties.submitClaimPayment(e)
+);
+document.querySelectorAll('[data-close-claim-payment]').forEach((el) => {
+  el.addEventListener('click', () => Penalties.closeClaimPaymentModal());
+});
+document.getElementById('claim-payment-file')?.addEventListener('change', (e) => {
+  const file = e.target.files?.[0];
+  const wrap = document.getElementById('claim-payment-preview-wrap');
+  const img = document.getElementById('claim-payment-preview');
+  if (!file || !wrap || !img) return;
+  const url = URL.createObjectURL(file);
+  img.src = url;
+  wrap.hidden = false;
 });
 
 window.Penalties = Penalties;

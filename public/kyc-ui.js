@@ -45,6 +45,16 @@ function assertCanOperate() {
     alert(text);
     return false;
   }
+  const bankRequired =
+    typeof Penalties !== 'undefined' && Penalties.summary?.bank_required_for_operate;
+  if (bankRequired) {
+    alert(
+      'Debes inscribir tu cuenta bancaria antes de operar. Ve a Cuenta y multas → Inscribir cuenta bancaria.'
+    );
+    document.getElementById('account-penalties-panel')?.scrollIntoView({ behavior: 'smooth' });
+    if (typeof Penalties !== 'undefined') Penalties.openBankModal();
+    return false;
+  }
   const blocked = typeof Penalties !== 'undefined' && Penalties.summary?.operating_status?.blocked;
   if (blocked) {
     alert(
@@ -57,6 +67,14 @@ function assertCanOperate() {
 }
 
 function handleApiKycError(res, json) {
+  if (res?.status === 403 && json?.bank_required) {
+    if (typeof Penalties !== 'undefined') {
+      Penalties.refresh();
+      Penalties.openBankModal();
+    }
+    alert(json.error || 'Inscribe tu cuenta bancaria para operar.');
+    return true;
+  }
   if (res?.status === 403 && json?.penalty_block) {
     if (typeof Penalties !== 'undefined') Penalties.refresh();
     alert(json.error || 'Multas vencidas: operación bloqueada');

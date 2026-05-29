@@ -14,11 +14,12 @@ const {
   assertCanPublishOffer,
 } = require('../lib/access-scope');
 const { requireApprovedOperator } = require('../lib/kyc-gate');
+const { requireBankAccount } = require('../lib/bank-gate');
 const { requirePenaltyClear } = require('../lib/penalty-gate');
 const { buildOfferScheduleFields } = require('../lib/trip-schedule');
 
 const router = express.Router();
-const operatorGate = [requireAuthIfDb, requireApprovedOperator, requirePenaltyClear];
+const operatorGate = [requireAuthIfDb, requireApprovedOperator, requireBankAccount, requirePenaltyClear];
 
 router.get('/', optionalAuth, async (req, res) => {
   try {

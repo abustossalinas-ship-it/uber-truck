@@ -41,6 +41,7 @@ const { copyBudgetFromLoad, outsideRangeMessages } = require('../lib/match-price
 const { enrichMatchesWithRatings } = require('../lib/match-ratings');
 const { requireAuthIfDb } = require('../lib/require-auth');
 const { requireApprovedOperator } = require('../lib/kyc-gate');
+const { requireBankAccount } = require('../lib/bank-gate');
 const { requirePenaltyClear } = require('../lib/penalty-gate');
 const { openCaseForCancelledMatch } = require('../lib/support-cases');
 const { logMatchTrip } = require('../lib/match-trip-log');
@@ -48,7 +49,7 @@ const { listTripEvents } = require('../lib/trip-events');
 const { buildMatchTracking } = require('../lib/match-tracking');
 
 const router = express.Router();
-const operatorGate = [requireAuthIfDb, requireApprovedOperator, requirePenaltyClear];
+const operatorGate = [requireAuthIfDb, requireApprovedOperator, requireBankAccount, requirePenaltyClear];
 
 const MATCH_TRANSITIONS = {
   proposed: ['accepted', 'cancelled'],

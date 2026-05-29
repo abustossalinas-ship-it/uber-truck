@@ -608,7 +608,7 @@
     <div class="cancel-modal-backdrop" data-close-bank></div>
     <div class="cancel-modal-card" role="dialog">
       <h3>Cuenta bancaria</h3>
-      <p class="muted">Obligatoria para generar cargos por multas (cuando el cobro esté activo).</p>
+      <p class="muted">Obligatoria en producción antes de publicar, ofertar o emparejar (como Uber).</p>
       <form id="form-bank">
         <label>Titular</label>
         <input id="bank-holder-name" required />
@@ -627,6 +627,29 @@
         <div class="cancel-modal-actions">
           <button type="button" class="btn-secondary" data-close-bank>Cerrar</button>
           <button type="submit" class="btn-danger">Guardar cuenta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="claim-payment-modal" class="cancel-modal" hidden aria-hidden="true">
+    <div class="cancel-modal-backdrop" data-close-claim-payment></div>
+    <div class="cancel-modal-card" role="dialog">
+      <h3>Declarar pago de multa</h3>
+      <p class="muted">Adjunta captura de la transferencia (JPG/PNG, máx. ~1,8 MB). El acreedor tiene 24 h para confirmar.</p>
+      <form id="form-claim-payment">
+        <input type="hidden" id="claim-payment-match-id" />
+        <label>Nota (opcional)</label>
+        <textarea id="claim-payment-note" rows="2" maxlength="500" placeholder="Ej. transferencia 28 may, BancoEstado, ref. 12345"></textarea>
+        <label>Comprobante (captura de pantalla)</label>
+        <input type="file" id="claim-payment-file" accept="image/jpeg,image/png,image/webp" required />
+        <p id="claim-payment-preview-wrap" class="claim-proof-preview-wrap" hidden>
+          <img id="claim-payment-preview" alt="Vista previa comprobante" class="claim-proof-preview" />
+        </p>
+        <p id="claim-payment-error" class="auth-error" role="alert" hidden></p>
+        <div class="cancel-modal-actions">
+          <button type="button" class="btn-secondary" data-close-claim-payment>Cancelar</button>
+          <button type="submit" class="btn-danger">Enviar comprobante</button>
         </div>
       </form>
     </div>
@@ -722,8 +745,8 @@
   <script src="/proposal-compare-ui.js?v=0.0.47"></script>
   <script src="/auth-ui.js?v=0.0.38"></script>
   <script src="/tracking-ui.js?v=0.0.51"></script>
-  <script src="/penalties-ui.js?v=0.0.53"></script>
-  <script src="/support-ui.js?v=0.0.55"></script>
+  <script src="/penalties-ui.js?v=0.0.56"></script>
+  <script src="/support-ui.js?v=0.0.56"></script>
   <script src="/comms-ui.js?v=0.0.52"></script>
   <script src="/rating-tags.js?v=0.0.31"></script>
   <script src="/trips-ui.js?v=0.0.54"></script>

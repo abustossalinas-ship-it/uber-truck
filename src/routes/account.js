@@ -6,11 +6,13 @@ const repo = require('../lib/repository');
 const { authMiddleware } = require('../lib/auth');
 const { buildPenaltySummary, bankAccountFromUser } = require('../lib/penalty-ledger');
 const { getOperatingStatus } = require('../lib/penalty-gate');
+const { bankEnforced, fetchBankAccount } = require('../lib/bank-gate');
 const {
   markPenaltyPaid,
   claimPenaltyPaid,
   confirmPenaltyPayment,
   disputePenaltyPayment,
+  getPenaltyPaymentProof,
 } = require('../lib/penalty-payment');
 
 const router = express.Router();
@@ -44,22 +46,10 @@ router.get('/summary', authMiddleware, async (req, res) => {
     }
     const operating = await getOperatingStatus(req.user);
 
-    let bank = { complete: false, fields: {} };
-    if (supabase.isConfigured()) {
-      const sb = supabase.getClient();
-      const { data, error } = await sb
-        .from('users')
-        .select(
-          'bank_holder_name, bank_rut, bank_name, bank_account_type, bank_account_number, bank_registered_at'
-        )
-        .eq('id', req.user.sub)
-        .maybeSingle();
-      if (error) throw error;
-      bank = bankAccountFromUser(data);
-    }
-
-    const needsBank =
-      penalties.total_owed_clp > 0 && !bank.complete;
+    const bank = req.user?.sub ? await fetchBankAccount(req.user.sub) : { complete: false, fields: {} };
+    const enforced = bankEnforced() && req.user?.role !== 'admin';
+    const bank_required_for_operate = enforced && !bank.complete;
+    const needsBank = bank_required_for_operate || (penalties.total_owed_clp > 0 && !bank.complete);
 
     res.json({
       ok: true,
@@ -67,7 +57,9 @@ router.get('/summary', authMiddleware, async (req, res) => {
       penalties_error,
       operating_status: operating,
       bank_account: bank,
+      bank_enforced: enforced,
       can_generate_charge: bank.complete,
+      bank_required_for_operate,
       bank_required_for_charges: needsBank,
       note:
         'Declara el pago; el acreedor tiene 24 h para confirmar. Sin confirmación se escala a moderador. Admin puede cerrar el caso.',
@@ -142,14 +134,34 @@ async function runPenaltyRoute(req, res, fn) {
 
 router.post('/penalties/:matchId/claim-paid', authMiddleware, async (req, res) => {
   await runPenaltyRoute(req, res, async () => {
-    const { match } = await claimPenaltyPaid(req.params.matchId, req.user, req.body?.note);
+    const { match, proof_url } = await claimPenaltyPaid(req.params.matchId, req.user, {
+      note: req.body?.note,
+      proof_base64: req.body?.proof_base64,
+      proof_mime: req.body?.proof_mime,
+    });
     const h = process.env.PENALTY_CONFIRM_HOURS || 24;
     return {
       ok: true,
       data: match,
-      message: `Pago declarado. El acreedor tiene ${h} h para confirmar. Hasta entonces no puedes tomar nuevos viajes.`,
+      proof_url,
+      message: `Pago declarado con comprobante. El acreedor tiene ${h} h para confirmar.`,
     };
   });
+});
+
+router.get('/penalties/:matchId/payment-proof', authMiddleware, async (req, res) => {
+  try {
+    const proof = await getPenaltyPaymentProof(req.params.matchId, req.user);
+    const buf = Buffer.from(proof.base64, 'base64');
+    res.setHeader('Content-Type', proof.mime);
+    res.setHeader('Cache-Control', 'private, max-age=3600');
+    res.send(buf);
+  } catch (e) {
+    const code = e.status || 500;
+    if (code !== 500) return res.status(code).json({ ok: false, error: e.message });
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al leer comprobante' });
+  }
 });
 
 router.post('/penalties/:matchId/confirm-payment', authMiddleware, async (req, res) => {

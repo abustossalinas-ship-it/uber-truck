@@ -1213,6 +1213,17 @@ body.kyc-pending #btn-create-match {
   margin: 0.5rem 0;
 }
 
+.claim-proof-preview-wrap {
+  margin: 0.5rem 0;
+}
+
+.claim-proof-preview {
+  max-width: 100%;
+  max-height: 220px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
 .pill-warn {
   background: #ffebee;
   color: #b71c1c;

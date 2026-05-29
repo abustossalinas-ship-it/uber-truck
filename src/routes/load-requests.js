@@ -23,6 +23,7 @@ const {
 } = require('../lib/match-price');
 const { validateCargoDeclaration, cargoTrustPayload } = require('../lib/cargo-trust');
 const { buildLoadTimingPayload } = require('../lib/load-time-estimate');
+const { buildLoadScheduleFields } = require('../lib/trip-schedule');
 const { rankProposalsForLoad, RANK_MODES } = require('../lib/proposal-ranking');
 const { requireApprovedOperator } = require('../lib/kyc-gate');
 
@@ -164,6 +165,9 @@ router.get('/:id/proposals/compare', optionalAuth, async (req, res) => {
         id: load.id,
         company_name: load.company_name,
         published_at: load.created_at,
+        schedule_mode: load.schedule_mode,
+        scheduled_pickup_at: load.scheduled_pickup_at,
+        needed_by_at: load.needed_by_at,
         budget_min_clp: load.budget_min_clp,
         budget_max_clp: load.budget_max_clp,
         eta_total_min: load.eta_total_min,
@@ -220,8 +224,13 @@ router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
       : body.company_name.trim();
 
   try {
+    const schedule = buildLoadScheduleFields(body);
+    if (schedule.errors.length) {
+      return res.status(400).json({ ok: false, errors: schedule.errors });
+    }
     const timing = buildLoadTimingPayload({
       ...body,
+      cargo_ready_at: schedule.cargo_ready_at || body.cargo_ready_at,
       distance_duration_min: body.distance_duration_min,
     });
     const row = await repo.insert('load_requests', {
@@ -236,9 +245,11 @@ router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
       pallets: body.pallets != null ? Number(body.pallets) : null,
       cargo_type: body.cargo_type?.trim() || null,
       urgency: ['urgent', 'flexible'].includes(body.urgency) ? body.urgency : 'normal',
+      schedule_mode: schedule.schedule_mode,
+      scheduled_pickup_at: schedule.scheduled_pickup_at,
       needed_by: timing.needed_by,
       needed_by_at: timing.needed_by_at,
-      cargo_ready_at: timing.cargo_ready_at,
+      cargo_ready_at: schedule.cargo_ready_at || timing.cargo_ready_at,
       prep_min: timing.prep_min,
       load_min: timing.load_min,
       paperwork_min: timing.paperwork_min,

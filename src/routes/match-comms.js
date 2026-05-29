@@ -82,6 +82,7 @@ router.get('/notifications/list', optionalAuth, async (req, res) => {
     }
     const raw = await comms.listNotifications(role);
     const visible = [];
+    const eventsByMatch = new Map();
     for (const n of raw) {
       const match = await repo.getById('matches', n.match_id);
       const stale = !match || STALE_MATCH_STATUSES.has(match.status);
@@ -90,31 +91,22 @@ router.get('/notifications/list', optionalAuth, async (req, res) => {
         continue;
       }
       let row = n;
-      if (n.type === 'price_offer' && match.carrier_offer_clp != null) {
+      if (n.type === 'price_offer') {
         const parties = await getMatchParties(repo, match);
         const name = parties?.carrier_name || 'Transportista';
-        let previous = null;
-        if (n.title?.includes('actualizada')) {
+        if (!eventsByMatch.has(match.id)) {
           try {
-            const events = await listTripEvents(match.id);
-            const updates = events.filter((e) => e.event_type === 'carrier_offer_updated');
-            const last = updates[updates.length - 1];
-            if (last?.payload?.previous_offer_clp != null) {
-              previous = last.payload.previous_offer_clp;
-            }
+            eventsByMatch.set(match.id, await listTripEvents(match.id));
           } catch {
-            /* optional */
+            eventsByMatch.set(match.id, []);
           }
         }
-        row = {
-          ...n,
-          body: comms.formatOfferBody({
-            carrier_name: name,
-            amount_clp: match.carrier_offer_clp,
-            previous_amount_clp: previous,
-            is_update: Boolean(previous != null || n.title?.includes('actualizada')),
-          }),
-        };
+        row = comms.enrichPriceOfferNotification(
+          n,
+          match,
+          eventsByMatch.get(match.id),
+          name
+        );
       }
       visible.push(row);
     }

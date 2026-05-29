@@ -975,6 +975,7 @@ async function refreshBoard() {
         ${statusPillHtml(l.status, l.created_at)}
         <p>${routeLine(l)}</p>
         <p class="muted">${l.pallets ? l.pallets + ' pallets · ' : ''}${l.volume_m3 ? l.volume_m3 + ' m³ · ' : ''}${l.cargo_type || ''}${l.distance_duration_min ? ' · ruta ' + l.distance_duration_min + ' min' : ''}${l.eta_total_min ? ' · ETA ~' + l.eta_total_min + ' min' : ''}</p>
+        ${typeof formatTripScheduleHtml === 'function' ? formatTripScheduleHtml(l, 'load') : ''}
         ${formatLoadTimingLine(l)}
         ${l.budget_min_clp || l.budget_max_clp ? `<p class="muted">Presupuesto flete: ${formatBudgetRange(l.budget_min_clp, l.budget_max_clp)}</p>` : ''}
         ${l.created_at ? `<p class="muted">Publicada ${formatDateTime(l.created_at)}</p>` : ''}
@@ -993,6 +994,7 @@ async function refreshBoard() {
         <strong>${o.carrier_name}${reputationBadgeInline(o.reputation)}</strong>
         ${statusPillHtml(o.status, o.created_at)}
         <p>${routeLine(o)}</p>
+        ${typeof formatTripScheduleHtml === 'function' ? formatTripScheduleHtml(o, 'offer') : ''}
         <p class="muted">${o.free_volume_m3 ? o.free_volume_m3 + ' m³ libres' : ''}${o.created_at ? ' · Ofertado ' + formatDateTime(o.created_at) : ''}</p>
       </article>`
           )
@@ -1025,6 +1027,10 @@ async function refreshBoard() {
             const actions = buildMatchActions(m);
             const mutualBanner = matchMutualBanner(m);
             const cargoLine = formatCargoTrustLine(load);
+        const scheduleLine =
+          load && typeof formatTripScheduleHtml === 'function'
+            ? formatTripScheduleHtml(load, 'load')
+            : '';
         const proposedAt = m.created_at
           ? `<p class="muted match-meta">Propuesta ${formatDateTime(m.created_at)}${offer?.created_at ? ` · Oferta publicada ${formatDateTime(offer.created_at)}` : ''}</p>`
           : '';
@@ -1033,6 +1039,7 @@ async function refreshBoard() {
         <strong>${title}</strong>
         ${statusPillHtml(m.status, m.created_at)}
         ${proposedAt}
+        ${scheduleLine}
         ${buildMatchReputationHtml(m, load, offer)}
         ${mutualBanner}
         ${cargoLine}
@@ -1071,7 +1078,11 @@ async function refreshBoard() {
       l.budget_min_clp || l.budget_max_clp
         ? ` · ${formatBudgetRange(l.budget_min_clp, l.budget_max_clp)}`
         : '';
-    loadSel.innerHTML += `<option value="${l.id}">${l.company_name} — ${routeLine(l)}${br}</option>`;
+    const sched =
+      l.schedule_mode === 'scheduled' && l.scheduled_pickup_at
+        ? ` · ${formatDateTime(l.scheduled_pickup_at)}`
+        : '';
+    loadSel.innerHTML += `<option value="${l.id}">${l.company_name} — ${routeLine(l)}${sched}${br}</option>`;
   });
   if (keepLoad && loadSel.querySelector(`option[value="${keepLoad}"]`)) {
     loadSel.value = keepLoad;
@@ -1226,6 +1237,13 @@ $('form-load').addEventListener('submit', async (e) => {
   if (typeof LoadTimingUI !== 'undefined') {
     Object.assign(body, LoadTimingUI.getPayload(e.target));
   }
+  if (typeof TripScheduleUI !== 'undefined') {
+    Object.assign(body, TripScheduleUI.getPayload(e.target));
+  }
+  if (body.schedule_mode === 'scheduled' && !body.scheduled_pickup_at) {
+    alert('Al programar el viaje, indica fecha y hora de retiro.');
+    return;
+  }
   body.terms_cargo_accepted = true;
   if (body.has_dispatch_guide === 'yes') body.has_dispatch_guide = 'yes';
   const res = await API.postLoad(body);
@@ -1272,6 +1290,13 @@ $('form-offer').addEventListener('submit', async (e) => {
   const body = cleanFormBody(new FormData(e.target));
   if (!body.carrier_name || !body.origin_city || !body.destination_city) {
     alert('Completa transportista, ciudad de origen y ciudad de destino.');
+    return;
+  }
+  if (typeof TripScheduleUI !== 'undefined') {
+    Object.assign(body, TripScheduleUI.getPayload(e.target));
+  }
+  if (body.schedule_mode === 'scheduled' && !body.scheduled_depart_at) {
+    alert('Al programar el viaje, indica fecha y hora de salida.');
     return;
   }
   const res = await API.postOffer(body);

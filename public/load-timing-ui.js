@@ -84,8 +84,6 @@ const LoadTimingUI = {
       prep_cargo_ready: form.querySelector('[name="prep_cargo_ready"]')?.checked || false,
       prep_docs_ready: form.querySelector('[name="prep_docs_ready"]')?.checked || false,
       prep_pickup_window_set: form.querySelector('[name="prep_pickup_window_set"]')?.checked || false,
-      cargo_ready_at: form.querySelector('[name="cargo_ready_at"]')?.value || undefined,
-      needed_by_at: form.querySelector('[name="needed_by_at"]')?.value || undefined,
     };
   },
 

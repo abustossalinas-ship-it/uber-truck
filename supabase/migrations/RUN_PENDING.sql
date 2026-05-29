@@ -94,3 +94,18 @@ ALTER TABLE load_requests
   ADD COLUMN IF NOT EXISTS origin_ops_min INT,
   ADD COLUMN IF NOT EXISTS eta_total_min INT,
   ADD COLUMN IF NOT EXISTS prep_checklist JSONB NOT NULL DEFAULT '{}'::jsonb;
+
+-- 020 — Programar viaje
+ALTER TABLE load_requests
+  ADD COLUMN IF NOT EXISTS schedule_mode TEXT NOT NULL DEFAULT 'now',
+  ADD COLUMN IF NOT EXISTS scheduled_pickup_at TIMESTAMPTZ;
+
+ALTER TABLE capacity_offers
+  ADD COLUMN IF NOT EXISTS schedule_mode TEXT NOT NULL DEFAULT 'now',
+  ADD COLUMN IF NOT EXISTS scheduled_depart_at TIMESTAMPTZ;
+
+-- 021 — Metadatos oferta en notificaciones
+ALTER TABLE match_notifications
+  ADD COLUMN IF NOT EXISTS amount_clp BIGINT,
+  ADD COLUMN IF NOT EXISTS previous_amount_clp BIGINT,
+  ADD COLUMN IF NOT EXISTS previous_at TIMESTAMPTZ;

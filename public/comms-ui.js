@@ -96,13 +96,24 @@ const Comms = {
         </div>`
                 : `<button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en emparejamientos activos</button>`;
               const when = this.formatNotifDate(n.created_at);
+              const offerBody =
+                n.type === 'price_offer' && Array.isArray(n.offer_lines) && n.offer_lines.length
+                  ? n.offer_lines
+                      .map((line) => {
+                        const lineWhen = line.at ? this.formatNotifDate(line.at) : '';
+                        return `<p class="notif-offer-line"><strong>${line.label}:</strong> $${Number(line.amount_clp).toLocaleString('es-CL')} CLP${lineWhen ? ` · <time class="notif-date">${lineWhen}</time>` : ''}</p>`;
+                      })
+                      .join('')
+                  : `<p class="muted">${n.body}</p>`;
+              const headWhen =
+                n.type === 'price_offer' && n.offer_lines?.length > 1 ? '' : when ? `<time class="notif-date">${when}</time>` : '';
               return `
         <article class="notif-item ${n.read_at ? '' : 'unread'}" data-id="${n.id}" data-match="${n.match_id}">
           <div class="notif-head">
             <strong>${n.title}</strong>
-            ${when ? `<time class="notif-date">${when}</time>` : ''}
+            ${headWhen}
           </div>
-          <p class="muted">${n.body}</p>
+          ${offerBody}
           ${actions}
         </article>`;
             })

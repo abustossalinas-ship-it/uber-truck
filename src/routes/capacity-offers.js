@@ -14,6 +14,7 @@ const {
   assertCanPublishOffer,
 } = require('../lib/access-scope');
 const { requireApprovedOperator } = require('../lib/kyc-gate');
+const { buildOfferScheduleFields } = require('../lib/trip-schedule');
 
 const router = express.Router();
 const operatorGate = [requireAuthIfDb, requireApprovedOperator];
@@ -72,6 +73,10 @@ router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
       : body.carrier_name.trim();
 
   try {
+    const schedule = buildOfferScheduleFields(body);
+    if (schedule.errors.length) {
+      return res.status(400).json({ ok: false, errors: schedule.errors });
+    }
     const row = await repo.insert('capacity_offers', {
       carrier_user_id: req.user?.sub || null,
       carrier_name: carrierName,
@@ -82,8 +87,10 @@ router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
       free_volume_m3: body.free_volume_m3 != null ? Number(body.free_volume_m3) : null,
       max_weight_kg: body.max_weight_kg != null ? Number(body.max_weight_kg) : null,
       cargo_types: body.cargo_types?.trim() || null,
-      available_from: body.available_from || null,
-      available_until: body.available_until || null,
+      schedule_mode: schedule.schedule_mode,
+      scheduled_depart_at: schedule.scheduled_depart_at,
+      available_from: schedule.available_from,
+      available_until: schedule.available_until,
       status: 'published',
       notes: body.notes?.trim() || null,
       ...addressPayload(body),

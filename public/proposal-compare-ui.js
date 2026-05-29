@@ -78,10 +78,14 @@ const ProposalCompare = {
       return;
     }
     const load = json.load;
+    const sched =
+      load.schedule_mode === 'scheduled' && load.scheduled_pickup_at
+        ? ` · Retiro programado ${this.formatDate(load.scheduled_pickup_at)}`
+        : '';
     const rows = json.ranking.data.map((r) => this.renderRow(r, load)).join('');
     panel.innerHTML = `
       <h3>Comparar ofertas de transportistas</h3>
-      <p class="muted">Carga publicada ${this.formatDate(load.published_at)} · ${json.ranking.proposal_count} propuestas con precio</p>
+      <p class="muted">Carga publicada ${this.formatDate(load.published_at)}${sched} · ${json.ranking.proposal_count} propuestas con precio</p>
       <div class="compare-mode-bar">
         <label for="compare-mode-select">Ordenar según</label>
         <select id="compare-mode-select">

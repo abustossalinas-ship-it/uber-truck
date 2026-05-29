@@ -1668,3 +1668,73 @@ body.kyc-pending #btn-create-match {
   border-top: 1px solid var(--border);
   margin-top: 2rem;
 }
+
+/* Programar viaje (Uber-style) */
+.trip-schedule {
+  margin: 0.75rem 0 1.25rem;
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--brand-gray-50);
+}
+
+.schedule-mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.schedule-mode-tab {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  padding: 0.65rem 0.75rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.schedule-mode-tab small {
+  font-weight: 400;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.schedule-mode-tab:has(input:checked) {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+
+.schedule-mode-tab input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.schedule-pick-panel {
+  margin-bottom: 0.75rem;
+}
+
+.pill-scheduled {
+  background: var(--accent-soft);
+  color: var(--accent-hover);
+  border: 1px solid rgba(242, 101, 34, 0.35);
+}
+
+.trip-schedule-line {
+  margin: 0.35rem 0 0.5rem;
+}
+
+.notif-offer-line {
+  margin: 0.35rem 0;
+  font-size: 0.92rem;
+}
+
+.notif-offer-line .notif-date {
+  font-weight: 500;
+  color: var(--text-muted);
+}

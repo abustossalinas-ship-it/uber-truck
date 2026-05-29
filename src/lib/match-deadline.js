@@ -24,8 +24,9 @@ function originOpsMinutes(load) {
 /** Plazo para retirar carga (antes de «En ruta»). */
 function pickupDeadlineAt(load, match) {
   const ops = originOpsMinutes(load);
-  if (load?.cargo_ready_at) {
-    const ready = new Date(load.cargo_ready_at);
+  const pickupAt = load?.scheduled_pickup_at || load?.cargo_ready_at;
+  if (pickupAt) {
+    const ready = new Date(pickupAt);
     if (!Number.isNaN(ready.getTime())) return addMinutes(ready, ops);
   }
   const anchor =

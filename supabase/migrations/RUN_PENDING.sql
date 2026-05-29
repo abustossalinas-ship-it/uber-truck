@@ -158,3 +158,20 @@ ALTER TABLE matches
 
 CREATE INDEX IF NOT EXISTS idx_matches_penalty_paid ON matches (penalty_paid_at)
   WHERE penalty_paid_at IS NOT NULL;
+
+-- 024 — Flujo declarar pago → confirmar acreedor (24 h)
+ALTER TABLE matches
+  ADD COLUMN IF NOT EXISTS penalty_payment_status TEXT NOT NULL DEFAULT 'pending',
+  ADD COLUMN IF NOT EXISTS penalty_claimed_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS penalty_claimed_by_user_id UUID REFERENCES users (id),
+  ADD COLUMN IF NOT EXISTS penalty_claim_note TEXT,
+  ADD COLUMN IF NOT EXISTS penalty_confirm_deadline_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS penalty_confirmed_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS penalty_confirmed_by_user_id UUID REFERENCES users (id),
+  ADD COLUMN IF NOT EXISTS penalty_disputed_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS penalty_dispute_note TEXT;
+
+UPDATE matches
+SET penalty_payment_status = 'settled_moderator'
+WHERE penalty_paid_at IS NOT NULL
+  AND penalty_payment_status = 'pending';

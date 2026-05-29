@@ -6,7 +6,12 @@ const repo = require('../lib/repository');
 const { authMiddleware } = require('../lib/auth');
 const { buildPenaltySummary, bankAccountFromUser } = require('../lib/penalty-ledger');
 const { getOperatingStatus } = require('../lib/penalty-gate');
-const { markPenaltyPaid } = require('../lib/penalty-payment');
+const {
+  markPenaltyPaid,
+  claimPenaltyPaid,
+  confirmPenaltyPayment,
+  disputePenaltyPayment,
+} = require('../lib/penalty-payment');
 
 const router = express.Router();
 
@@ -40,7 +45,8 @@ router.get('/summary', authMiddleware, async (req, res) => {
       bank_account: bank,
       can_generate_charge: bank.complete,
       bank_required_for_charges: needsBank,
-      note: 'Multas sugeridas; cobro automático en fase posterior. Tras el plazo, operaciones bloqueadas hasta regularizar.',
+      note:
+        'Declara el pago; el acreedor tiene 24 h para confirmar. Sin confirmación se escala a moderador. Admin puede cerrar el caso.',
     });
   } catch (e) {
     console.error(e);
@@ -97,29 +103,74 @@ router.patch('/bank', authMiddleware, async (req, res) => {
   }
 });
 
-router.post('/penalties/:matchId/mark-paid', authMiddleware, async (req, res) => {
+async function runPenaltyRoute(req, res, fn) {
   try {
+    const payload = await fn();
+    const operating = await getOperatingStatus(req.user);
+    res.json({ ...payload, operating_status: operating });
+  } catch (e) {
+    const code = e.status || 500;
+    if (code !== 500) return res.status(code).json({ ok: false, error: e.message });
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error en multa' });
+  }
+}
+
+router.post('/penalties/:matchId/claim-paid', authMiddleware, async (req, res) => {
+  await runPenaltyRoute(req, res, async () => {
+    const { match } = await claimPenaltyPaid(req.params.matchId, req.user, req.body?.note);
+    const h = process.env.PENALTY_CONFIRM_HOURS || 24;
+    return {
+      ok: true,
+      data: match,
+      message: `Pago declarado. El acreedor tiene ${h} h para confirmar. Hasta entonces no puedes tomar nuevos viajes.`,
+    };
+  });
+});
+
+router.post('/penalties/:matchId/confirm-payment', authMiddleware, async (req, res) => {
+  await runPenaltyRoute(req, res, async () => {
+    const { match } = await confirmPenaltyPayment(req.params.matchId, req.user);
+    return {
+      ok: true,
+      data: match,
+      message: 'Pago confirmado. El deudor puede volver a operar si no tiene otras multas bloqueantes.',
+    };
+  });
+});
+
+router.post('/penalties/:matchId/dispute-payment', authMiddleware, async (req, res) => {
+  await runPenaltyRoute(req, res, async () => {
+    const { match } = await disputePenaltyPayment(
+      req.params.matchId,
+      req.user,
+      req.body?.note
+    );
+    return {
+      ok: true,
+      data: match,
+      message:
+        'Pago no confirmado. El deudor sigue bloqueado; puede abrir ayuda o volver a declarar el pago.',
+    };
+  });
+});
+
+router.post('/penalties/:matchId/mark-paid', authMiddleware, async (req, res) => {
+  await runPenaltyRoute(req, res, async () => {
     const { match, already_paid } = await markPenaltyPaid(
       req.params.matchId,
       req.user,
       req.body?.note
     );
-    const operating = await getOperatingStatus(req.user);
-    res.json({
+    return {
       ok: true,
       data: match,
       already_paid,
-      operating_status: operating,
       message: already_paid
-        ? 'La multa ya estaba marcada como pagada.'
-        : 'Multa marcada como pagada. Operaciones desbloqueadas si no hay otras deudas vencidas.',
-    });
-  } catch (e) {
-    const code = e.status || 500;
-    if (code !== 500) return res.status(code).json({ ok: false, error: e.message });
-    console.error(e);
-    res.status(500).json({ ok: false, error: 'Error al marcar multa pagada' });
-  }
+        ? 'La multa ya estaba regularizada.'
+        : 'Cerrado por moderador. Operaciones desbloqueadas si no hay otras deudas.',
+    };
+  });
 });
 
 module.exports = router;

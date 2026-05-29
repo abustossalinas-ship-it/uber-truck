@@ -13,49 +13,158 @@ const Penalties = {
     return `$${Number(n || 0).toLocaleString('es-CL')} CLP`;
   },
 
-  async fetchSummary() {
-    if (!this.isSessionActive()) return null;
-    const json = await fetch('/api/account/summary', { headers: this.headers() }).then((r) => r.json());
-    if (!json.ok) return null;
-    this.summary = json;
-    return json;
+  statusPill(p) {
+    if (p.status === 'paid') return '<span class="pill pill-ok">Regularizada</span>';
+    if (p.status === 'awaiting_confirm') {
+      const h = p.hours_left_confirm != null ? `${p.hours_left_confirm} h restantes` : '24 h';
+      return `<span class="pill pill-warn">Esperando confirmación · ${h}</span>`;
+    }
+    if (p.status === 'disputed') return '<span class="pill pill-warn">Pago rechazado</span>';
+    if (p.status === 'confirm_expired') {
+      return '<span class="pill pill-warn">Plazo confirmación vencido · moderador</span>';
+    }
+    if (p.status === 'overdue') {
+      return `<span class="pill pill-warn">${p.days_late} día(s) de atraso</span>`;
+    }
+    return `<span class="pill">Plazo ${p.deadline_days} días</span>`;
   },
 
-  renderPenaltyLines(items, label, { showAdminPaid = false } = {}) {
-    if (!items?.length) return `<p class="muted">Sin ${label}.</p>`;
+  actionButtons(p, { showAdminPaid = false } = {}) {
     const isAdmin = typeof Auth !== 'undefined' && Auth.user?.role === 'admin';
+    const role = typeof getActorRole === 'function' ? getActorRole() : Auth?.user?.role;
+    const parts = [];
+    if (p.can_claim && p.debtor_role === role) {
+      parts.push(
+        `<button type="button" class="tab tab-sm" data-claim-penalty="${p.match_id}">Declarar pago realizado</button>`
+      );
+    }
+    if (p.can_confirm && p.creditor_role === role) {
+      parts.push(
+        `<button type="button" class="tab tab-sm" data-confirm-penalty="${p.match_id}">Confirmar que recibí el pago</button>`
+      );
+    }
+    if (p.can_dispute && p.creditor_role === role) {
+      parts.push(
+        `<button type="button" class="tab tab-sm tab-outline" data-dispute-penalty="${p.match_id}">No recibí el pago</button>`
+      );
+    }
+    if (p.status !== 'paid') {
+      parts.push(
+        `<button type="button" class="tab tab-sm" data-open-support="${p.match_id}" data-support-subject="Multa ${this.formatClp(p.amount_clp)}">Ayuda / revisión</button>`
+      );
+    }
+    if (showAdminPaid && isAdmin && p.status !== 'paid') {
+      parts.push(
+        `<button type="button" class="tab tab-sm" data-mark-penalty-paid="${p.match_id}">Cerrar por moderador</button>`
+      );
+    }
+    return parts.length
+      ? `<div class="penalty-line-actions">${parts.join('')}</div>`
+      : '';
+  },
+
+  renderPenaltyLines(items, label, opts = {}) {
+    if (!items?.length) return `<p class="muted">Sin ${label}.</p>`;
     return items
       .map((p) => {
-        const late =
-          p.status === 'overdue'
-            ? `<span class="pill pill-warn">${p.days_late} día(s) de atraso</span>`
-            : p.status === 'paid'
-              ? `<span class="pill pill-ok">Pagada</span>`
-              : `<span class="pill">Plazo ${p.deadline_days} días</span>`;
         const due = p.due_at
           ? new Date(p.due_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' })
           : '—';
-        const paidNote =
+        const extra =
           p.status === 'paid' && p.paid_at
             ? `<p class="muted">Regularizada ${new Date(p.paid_at).toLocaleDateString('es-CL')}</p>`
-            : '';
-        const adminBtn =
-          showAdminPaid && isAdmin && p.status !== 'paid'
-            ? `<button type="button" class="tab tab-sm" data-mark-penalty-paid="${p.match_id}">Marcar pagada (admin)</button>`
-            : '';
-        const helpBtn =
-          p.status !== 'paid'
-            ? `<button type="button" class="tab tab-sm" data-open-support="${p.match_id}" data-support-subject="Multa ${this.formatClp(p.amount_clp)}">Ayuda / revisión</button>`
-            : '';
+            : p.claim_note
+              ? `<p class="muted">Nota de pago: ${p.claim_note}</p>`
+              : '';
         return `<div class="penalty-line">
           <strong>${p.pair}</strong>
-          <p>${this.formatClp(p.amount_clp)} · vence ${due} ${late}</p>
+          <p>${this.formatClp(p.amount_clp)} · vence ${due} ${this.statusPill(p)}</p>
           <p class="muted">${p.reason_summary || p.reason_code || ''}</p>
-          ${paidNote}
-          <div class="penalty-line-actions">${helpBtn}${adminBtn}</div>
+          ${extra}
+          ${this.actionButtons(p, opts)}
         </div>`;
       })
       .join('');
+  },
+
+  bindPenaltyActions(box) {
+    box.querySelectorAll('[data-mark-penalty-paid]').forEach((btn) => {
+      btn.addEventListener('click', () => this.markPenaltyPaid(btn.dataset.markPenaltyPaid));
+    });
+    box.querySelectorAll('[data-claim-penalty]').forEach((btn) => {
+      btn.addEventListener('click', () => this.claimPenalty(btn.dataset.claimPenalty));
+    });
+    box.querySelectorAll('[data-confirm-penalty]').forEach((btn) => {
+      btn.addEventListener('click', () => this.confirmPenalty(btn.dataset.confirmPenalty));
+    });
+    box.querySelectorAll('[data-dispute-penalty]').forEach((btn) => {
+      btn.addEventListener('click', () => this.disputePenalty(btn.dataset.disputePenalty));
+    });
+  },
+
+  async postPenalty(matchId, path, body) {
+    const res = await fetch(`/api/account/penalties/${encodeURIComponent(matchId)}/${path}`, {
+      method: 'POST',
+      headers: this.headers(),
+      body: JSON.stringify(body || {}),
+    });
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || 'Error');
+    return json;
+  },
+
+  async claimPenalty(matchId) {
+    const note = window.prompt(
+      'Nota opcional (transferencia, fecha, banco):',
+      'Transferencia realizada según acuerdo'
+    );
+    if (note === null) return;
+    try {
+      const json = await this.postPenalty(matchId, 'claim-paid', { note: note || undefined });
+      alert(json.message);
+      await this.refresh();
+      if (typeof refreshBoard === 'function') refreshBoard();
+    } catch (e) {
+      alert(e.message);
+    }
+  },
+
+  async confirmPenalty(matchId) {
+    if (!window.confirm('¿Confirmas que recibiste el pago de esta multa?')) return;
+    try {
+      const json = await this.postPenalty(matchId, 'confirm-payment');
+      alert(json.message);
+      await this.refresh();
+      if (typeof refreshBoard === 'function') refreshBoard();
+    } catch (e) {
+      alert(e.message);
+    }
+  },
+
+  async disputePenalty(matchId) {
+    const note = window.prompt('Motivo del rechazo (obligatorio):', 'No se recibió el pago acordado');
+    if (!note?.trim()) return;
+    try {
+      const json = await this.postPenalty(matchId, 'dispute-payment', { note });
+      alert(json.message);
+      await this.refresh();
+    } catch (e) {
+      alert(e.message);
+    }
+  },
+
+  async markPenaltyPaid(matchId) {
+    if (!matchId) return;
+    const note = window.prompt('Nota de cierre moderador (opcional):', 'Resolución moderador');
+    if (note === null) return;
+    try {
+      const json = await this.postPenalty(matchId, 'mark-paid', { note: note || undefined });
+      alert(json.message);
+      await this.refresh();
+      if (typeof refreshBoard === 'function') refreshBoard();
+    } catch (e) {
+      alert(e.message);
+    }
   },
 
   renderBox() {
@@ -75,22 +184,30 @@ const Penalties = {
     const rolText =
       typeof window.roleLabel === 'function' ? window.roleLabel(p.role) : p.role;
     const op = s.operating_status || {};
+    const confirmH = p.penalty_confirm_hours || 24;
     const blockWarn = op.blocked
-      ? `<p class="penalty-block-warn"><strong>Operaciones bloqueadas:</strong> ${op.message || 'Multas vencidas. Regulariza o abre un caso de ayuda.'}</p>`
+      ? `<p class="penalty-block-warn"><strong>Operaciones bloqueadas:</strong> ${op.message || ''}</p>`
       : op.has_debt
         ? `<p class="muted penalty-grace-hint">${op.message || ''}</p>`
         : '';
     const bankWarn = s.bank_required_for_charges
-      ? `<p class="penalty-bank-warn">Para <strong>generar un cargo</strong> debes inscribir cuenta bancaria (obligatorio si tienes multas pendientes).</p>`
+      ? `<p class="penalty-bank-warn">Para <strong>generar un cargo</strong> debes inscribir cuenta bancaria.</p>`
       : '';
     const bankOk = s.bank_account?.complete
       ? '<p class="muted">Cuenta bancaria registrada.</p>'
       : `<button type="button" class="tab tab-sm" id="btn-open-bank">Inscribir cuenta bancaria</button>`;
 
+    const pendingBlock = p.pending_confirmations?.length
+      ? `<section class="penalty-confirm-pending"><h3>Confirma pagos recibidos (${confirmH} h)</h3>
+         <p class="muted">Como acreedor debes validar si recibiste el pago declarado por la contraparte.</p>
+         ${this.renderPenaltyLines(p.pending_confirmations, 'por confirmar')}</section>`
+      : '';
+
     box.innerHTML = `
       <h2>Cuenta y multas</h2>
-      <p class="muted">Resumen para ${rolText || 'tu cuenta'}. Multas sugeridas según cancelaciones. Plazo ${p.penalty_due_days || 7} días; después se bloquean nuevas cargas/ofertas/viajes.</p>
+      <p class="muted">Resumen para ${rolText || 'tu cuenta'}. Plazo ${p.penalty_due_days || 7} días para pagar; al declarar pago el acreedor tiene ${confirmH} h para confirmar. Sin confirmación → moderador.</p>
       ${blockWarn}
+      ${pendingBlock}
       ${bankWarn}
       <div class="penalty-grid">
         <section>
@@ -113,57 +230,38 @@ const Penalties = {
       <p class="muted penalty-note">${s.note || ''}</p>
     `;
     document.getElementById('btn-open-bank')?.addEventListener('click', () => this.openBankModal());
-    box.querySelectorAll('[data-mark-penalty-paid]').forEach((btn) => {
-      btn.addEventListener('click', () => this.markPenaltyPaid(btn.dataset.markPenaltyPaid));
-    });
-  },
-
-  async markPenaltyPaid(matchId) {
-    if (!matchId) return;
-    const note = window.prompt('Nota de regularización (opcional):', 'Pago acordado / revisión moderador');
-    if (note === null) return;
-    const res = await fetch(`/api/account/penalties/${encodeURIComponent(matchId)}/mark-paid`, {
-      method: 'POST',
-      headers: this.headers(),
-      body: JSON.stringify({ note: note || undefined }),
-    });
-    const json = await res.json();
-    if (!res.ok) {
-      alert(json.error || 'No se pudo marcar');
-      return;
-    }
-    alert(json.message || 'Multa regularizada');
-    await this.refresh();
-    if (typeof refreshBoard === 'function') refreshBoard();
+    this.bindPenaltyActions(box);
   },
 
   renderNotifSummary() {
     const el = document.getElementById('notif-penalties-summary');
     if (!el || !this.summary) return;
     const p = this.summary.penalties || {};
-    if (!p.owed?.length && !p.owed_to_me?.length && !this.summary.bank_required_for_charges) {
+    if (
+      !p.owed?.length &&
+      !p.owed_to_me?.length &&
+      !p.pending_confirmations?.length &&
+      !this.summary.bank_required_for_charges
+    ) {
       el.innerHTML = '';
       el.hidden = true;
       return;
     }
     el.hidden = false;
     let html = '<div class="notif-penalty-summary"><h4>Cuenta y multas</h4>';
+    if (p.pending_confirmations?.length) {
+      html += `<p class="penalty-bank-warn"><strong>${p.pending_confirmations.length} pago(s) por confirmar</strong></p>`;
+    }
     if (p.total_owed_clp > 0) {
       html += `<p><strong>Debes:</strong> ${this.formatClp(p.total_owed_clp)}`;
+      if (p.awaiting_confirm_count) {
+        html += ` · <span class="pill pill-warn">${p.awaiting_confirm_count} esperando confirmación</span>`;
+      }
       if (p.overdue_count) html += ` · <span class="pill pill-warn">${p.overdue_count} vencida(s)</span>`;
       html += '</p>';
-      p.owed.slice(0, 2).forEach((x) => {
-        html += `<p class="muted">${x.pair}: ${this.formatClp(x.amount_clp)}`;
-        if (x.days_late) html += ` (${x.days_late} días atraso)`;
-        html += '</p>';
-      });
     }
     if (p.total_receivable_clp > 0) {
       html += `<p><strong>Te deben:</strong> ${this.formatClp(p.total_receivable_clp)}</p>`;
-    }
-    if (this.summary.bank_required_for_charges) {
-      html +=
-        '<p class="penalty-bank-warn">Inscribe cuenta bancaria para poder generar cargos.</p>';
     }
     html += '</div>';
     el.innerHTML = html;
@@ -239,8 +337,12 @@ const Penalties = {
     el.hidden = false;
     if (op.blocked) document.body.classList.add('penalty-blocked');
     else document.body.classList.remove('penalty-blocked');
+    const title =
+      op.block_reason === 'awaiting_confirm'
+        ? 'Esperando confirmación del acreedor'
+        : 'No puedes tomar nuevos viajes';
     el.innerHTML = op.blocked
-      ? `<div class="penalty-block-inner"><p><strong>No puedes tomar nuevos viajes</strong> — multas vencidas (${this.formatClp(op.total_owed_clp)}). Regulariza o abre <button type="button" class="link-btn" data-scroll-penalties>ayuda / revisión</button>.</p></div>`
+      ? `<div class="penalty-block-inner"><p><strong>${title}</strong> — ${op.message || ''} <button type="button" class="link-btn" data-scroll-penalties>Ir a multas</button></p></div>`
       : `<div class="penalty-block-inner"><p>${op.message || ''}</p></div>`;
     el.querySelector('[data-scroll-penalties]')?.addEventListener('click', () => {
       document.getElementById('account-penalties-panel')?.scrollIntoView({ behavior: 'smooth' });

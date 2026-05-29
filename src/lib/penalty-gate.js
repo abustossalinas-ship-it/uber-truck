@@ -1,36 +1,7 @@
 'use strict';
 
 const repo = require('./repository');
-const { buildPenaltySummary, PENALTY_DUE_DAYS } = require('./penalty-ledger');
-
-function evaluateOperatingBlock(summary) {
-  const totalOwed = Number(summary?.total_owed_clp) || 0;
-  const overdueCount = Number(summary?.overdue_count) || 0;
-  const dueDays = summary?.penalty_due_days || PENALTY_DUE_DAYS;
-  const hasDebt = totalOwed > 0;
-  const blocked = hasDebt && overdueCount > 0;
-
-  let message = null;
-  if (blocked) {
-    message =
-      `Tienes multas vencidas por $${totalOwed.toLocaleString('es-CL')} CLP. ` +
-      `No puedes publicar, ofertar ni tomar nuevos viajes hasta regularizar. ` +
-      `Abre «Ayuda / revisión» en Cuenta y multas o contacta al moderador.`;
-  } else if (hasDebt) {
-    message =
-      `Tienes $${totalOwed.toLocaleString('es-CL')} CLP en multas sugeridas. ` +
-      `Plazo de pago: ${dueDays} días desde la cancelación. Después del vencimiento se bloquean nuevas operaciones.`;
-  }
-
-  return {
-    blocked,
-    has_debt: hasDebt,
-    total_owed_clp: totalOwed,
-    overdue_count: overdueCount,
-    penalty_due_days: dueDays,
-    message,
-  };
-}
+const { buildPenaltySummary, evaluateOperatingBlock } = require('./penalty-ledger');
 
 async function getOperatingStatus(user) {
   if (!user?.sub) {
@@ -64,15 +35,8 @@ async function requirePenaltyClear(req, res, next) {
   }
 }
 
-/** Permite apagar disponibilidad aunque haya multa vencida. */
-async function requirePenaltyClearUnlessGoingOffline(req, res, next) {
-  if (req.body?.is_available === false) return next();
-  return requirePenaltyClear(req, res, next);
-}
-
 module.exports = {
   evaluateOperatingBlock,
   getOperatingStatus,
   requirePenaltyClear,
-  requirePenaltyClearUnlessGoingOffline,
 };

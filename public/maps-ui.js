@@ -201,7 +201,8 @@ const MapsUI = {
       const dm = form.querySelector('[name="distance_duration_min"]');
       if (dk) dk.value = j.distance_km;
       if (dm) dm.value = j.duration_min;
-      box.textContent = `Distancia: ${j.distance_text} · Tiempo estimado: ${j.duration_text}`;
+      box.textContent = `Distancia: ${j.distance_text} · Ruta: ${j.duration_text}`;
+      if (typeof LoadTimingUI !== 'undefined') LoadTimingUI.recalc(form);
     } catch {
       box.textContent = 'Error al calcular distancia.';
     }

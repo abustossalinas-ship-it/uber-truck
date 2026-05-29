@@ -208,6 +208,58 @@
           <input type="hidden" name="distance_km" />
           <input type="hidden" name="distance_duration_min" />
 
+          <h3 class="form-section">Tiempos (ruta + operación en origen)</h3>
+          <p class="muted">
+            Como Uber Eats: la <strong>ruta</strong> la calcula Maps; la <strong>preparación</strong> (carga, papeles) la declaras tú.
+            El transportista ve el total estimado antes de ofertar.
+          </p>
+          <fieldset class="prep-checklist">
+            <legend>Checklist antes del retiro</legend>
+            <label class="legal-check">
+              <input type="checkbox" name="prep_cargo_ready" />
+              Mercadería armada y lista en bodega
+            </label>
+            <label class="legal-check">
+              <input type="checkbox" name="prep_docs_ready" />
+              Guía / documentos listos (o no aplica)
+            </label>
+            <label class="legal-check">
+              <input type="checkbox" name="prep_pickup_window_set" />
+              Ventana de retiro acordada con planta
+            </label>
+          </fieldset>
+          <div class="grid grid-2">
+            <div>
+              <label>Mercadería lista desde (opcional)</label>
+              <input name="cargo_ready_at" type="datetime-local" />
+            </div>
+            <div>
+              <label>Debe llegar a destino antes de (opcional)</label>
+              <input name="needed_by_at" type="datetime-local" />
+            </div>
+          </div>
+          <details class="timing-advanced">
+            <summary>Ajustar minutos (opcional)</summary>
+            <div class="grid grid-2">
+              <div>
+                <label>Prep. bodega (min)</label>
+                <input name="prep_min" type="number" min="0" max="480" placeholder="Auto" />
+              </div>
+              <div>
+                <label>Carga al camión (min)</label>
+                <input name="load_min" type="number" min="0" max="480" placeholder="Auto" />
+              </div>
+              <div>
+                <label>Papeles / planta (min)</label>
+                <input name="paperwork_min" type="number" min="0" max="240" placeholder="Auto" />
+              </div>
+              <div>
+                <label>Descarga destino (min)</label>
+                <input name="unload_min" type="number" min="0" max="480" placeholder="Auto" />
+              </div>
+            </div>
+          </details>
+
           <label>Cubicación (preset)</label>
           <select id="load-cubicacion-preset">
             <option value="">Elegir cubicación…</option>
@@ -265,6 +317,7 @@
           <select name="urgency">
             <option value="normal">Normal</option>
             <option value="urgent">Urgente</option>
+            <option value="flexible">Flexible</option>
           </select>
           <h3 class="form-section">Presupuesto para el flete</h3>
           <p class="muted">
@@ -600,12 +653,13 @@
   <script src="/role-shell-ui.js?v=0.0.27"></script>
   <script src="/maps-ui.js?v=0.0.24"></script>
   <script src="/load-budget-ui.js?v=0.0.25"></script>
+  <script src="/load-timing-ui.js?v=0.0.41"></script>
   <script src="/auth-ui.js?v=0.0.38"></script>
   <script src="/tracking-ui.js?v=0.0.37"></script>
   <script src="/penalties-ui.js?v=0.0.19"></script>
   <script src="/comms-ui.js?v=0.0.19"></script>
   <script src="/rating-tags.js?v=0.0.31"></script>
   <script src="/trips-ui.js?v=0.0.36"></script>
-  <script src="/app.js?v=0.0.40"></script>
+  <script src="/app.js?v=0.0.41"></script>
 </body>
 </html>

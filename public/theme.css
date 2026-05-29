@@ -732,6 +732,32 @@ select.offer-picked {
   border: 2px solid var(--brand-black);
 }
 
+.distance-box-eta {
+  line-height: 1.45;
+}
+
+.prep-checklist {
+  border: 1px solid var(--border, #e8e4df);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin: 0.75rem 0;
+}
+
+.prep-checklist legend {
+  font-weight: 600;
+  padding: 0 0.25rem;
+}
+
+.timing-advanced {
+  margin: 0.5rem 0 1rem;
+}
+
+.timing-advanced summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--brand, #f26522);
+}
+
 .match-role-hint,
 .match-cancel-hint {
   width: 100%;

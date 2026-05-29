@@ -84,6 +84,7 @@ app.get('/health', async (_req, res) => {
       'carrier-available',
       'password-reset',
       'buscando-camiones',
+      'load-timing-eta',
     ],
     deploy_manifest: manifest,
     railway: {

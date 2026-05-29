@@ -22,6 +22,7 @@ const {
   suggestReferenceBudget,
 } = require('../lib/match-price');
 const { validateCargoDeclaration, cargoTrustPayload } = require('../lib/cargo-trust');
+const { buildLoadTimingPayload } = require('../lib/load-time-estimate');
 const { requireApprovedOperator } = require('../lib/kyc-gate');
 
 const router = express.Router();
@@ -171,6 +172,10 @@ router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
       : body.company_name.trim();
 
   try {
+    const timing = buildLoadTimingPayload({
+      ...body,
+      distance_duration_min: body.distance_duration_min,
+    });
     const row = await repo.insert('load_requests', {
       shipper_user_id: req.user?.sub || null,
       company_name: companyName,
@@ -182,8 +187,17 @@ router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
       weight_kg: body.weight_kg != null ? Number(body.weight_kg) : null,
       pallets: body.pallets != null ? Number(body.pallets) : null,
       cargo_type: body.cargo_type?.trim() || null,
-      urgency: body.urgency === 'urgent' ? 'urgent' : 'normal',
-      needed_by: body.needed_by || null,
+      urgency: ['urgent', 'flexible'].includes(body.urgency) ? body.urgency : 'normal',
+      needed_by: timing.needed_by,
+      needed_by_at: timing.needed_by_at,
+      cargo_ready_at: timing.cargo_ready_at,
+      prep_min: timing.prep_min,
+      load_min: timing.load_min,
+      paperwork_min: timing.paperwork_min,
+      unload_min: timing.unload_min,
+      origin_ops_min: timing.origin_ops_min,
+      eta_total_min: timing.eta_total_min,
+      prep_checklist: timing.prep_checklist,
       status: 'published',
       notes: body.notes?.trim() || null,
       budget_min_clp: body.budget_min_clp != null ? Number(body.budget_min_clp) : null,

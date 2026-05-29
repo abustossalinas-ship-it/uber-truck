@@ -82,3 +82,15 @@ CREATE INDEX IF NOT EXISTS idx_password_reset_user ON password_reset_tokens (use
 ALTER TABLE matches
   ADD COLUMN IF NOT EXISTS carrier_marked_delivered_at TIMESTAMPTZ,
   ADD COLUMN IF NOT EXISTS shipper_confirmed_receipt_at TIMESTAMPTZ;
+
+-- 019 — Tiempos operativos en carga
+ALTER TABLE load_requests
+  ADD COLUMN IF NOT EXISTS needed_by_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS cargo_ready_at TIMESTAMPTZ,
+  ADD COLUMN IF NOT EXISTS prep_min INT,
+  ADD COLUMN IF NOT EXISTS load_min INT,
+  ADD COLUMN IF NOT EXISTS paperwork_min INT,
+  ADD COLUMN IF NOT EXISTS unload_min INT,
+  ADD COLUMN IF NOT EXISTS origin_ops_min INT,
+  ADD COLUMN IF NOT EXISTS eta_total_min INT,
+  ADD COLUMN IF NOT EXISTS prep_checklist JSONB NOT NULL DEFAULT '{}'::jsonb;

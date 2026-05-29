@@ -901,7 +901,8 @@ async function refreshBoard() {
         <strong>${l.company_name}${reputationBadgeInline(l.reputation)}</strong>
         <span class="pill">${STATUS_LABEL[l.status] || l.status}</span>
         <p>${routeLine(l)}</p>
-        <p class="muted">${l.pallets ? l.pallets + ' pallets · ' : ''}${l.volume_m3 ? l.volume_m3 + ' m³ · ' : ''}${l.cargo_type || ''}${l.distance_duration_min ? ' · ~' + l.distance_duration_min + ' min' : ''}</p>
+        <p class="muted">${l.pallets ? l.pallets + ' pallets · ' : ''}${l.volume_m3 ? l.volume_m3 + ' m³ · ' : ''}${l.cargo_type || ''}${l.distance_duration_min ? ' · ruta ' + l.distance_duration_min + ' min' : ''}${l.eta_total_min ? ' · ETA ~' + l.eta_total_min + ' min' : ''}</p>
+        ${formatLoadTimingLine(l)}
         ${l.budget_min_clp || l.budget_max_clp ? `<p class="muted">Presupuesto flete: ${formatBudgetRange(l.budget_min_clp, l.budget_max_clp)}</p>` : ''}
         ${formatCargoTrustLine(l)}
       </article>`
@@ -1129,6 +1130,9 @@ $('form-load').addEventListener('submit', async (e) => {
   }
   const body = cleanFormBody(fd);
   delete body.cargo_density;
+  if (typeof LoadTimingUI !== 'undefined') {
+    Object.assign(body, LoadTimingUI.getPayload(e.target));
+  }
   body.terms_cargo_accepted = true;
   if (body.has_dispatch_guide === 'yes') body.has_dispatch_guide = 'yes';
   const res = await API.postLoad(body);

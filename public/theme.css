@@ -1224,6 +1224,43 @@ body.kyc-pending #btn-create-match {
   border: 1px solid var(--border);
 }
 
+.penalty-creditor-review {
+  border: 2px solid var(--accent);
+  border-radius: 10px;
+  padding: 0.75rem;
+  margin-bottom: 0.75rem;
+  background: var(--accent-soft);
+}
+
+.creditor-proof-thumb-wrap {
+  margin: 0.5rem 0;
+}
+
+.creditor-proof-thumb {
+  max-width: 100%;
+  max-height: 140px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  cursor: pointer;
+}
+
+.creditor-proof-large {
+  max-width: 100%;
+  max-height: 55vh;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.creditor-review-proof {
+  min-height: 120px;
+  margin: 0.75rem 0;
+  text-align: center;
+}
+
+.btn-creditor-review {
+  font-weight: 700;
+}
+
 .pill-warn {
   background: #ffebee;
   color: #b71c1c;

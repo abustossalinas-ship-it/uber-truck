@@ -655,6 +655,21 @@
     </div>
   </div>
 
+  <div id="creditor-review-modal" class="cancel-modal" hidden aria-hidden="true">
+    <div class="cancel-modal-backdrop" data-close-creditor-review></div>
+    <div class="cancel-modal-card cancel-modal-card-wide" role="dialog">
+      <h3>Validar pago declarado</h3>
+      <p class="muted">Revisa el comprobante de transferencia. Si el abono está en tu cuenta, confirma; si no, rechaza.</p>
+      <p id="creditor-review-meta" class="creditor-review-meta"></p>
+      <div id="creditor-review-proof" class="creditor-review-proof"></div>
+      <div class="cancel-modal-actions">
+        <button type="button" class="btn-secondary" data-close-creditor-review>Cerrar</button>
+        <button type="button" class="tab tab-sm tab-outline" id="btn-creditor-dispute">No recibí el pago</button>
+        <button type="button" class="btn-danger" id="btn-creditor-confirm">Confirmar pago recibido</button>
+      </div>
+    </div>
+  </div>
+
   <div id="cancel-modal" class="cancel-modal" hidden aria-hidden="true">
     <div class="cancel-modal-backdrop" data-close-cancel></div>
     <div class="cancel-modal-card cancel-modal-card-wide" role="dialog" aria-labelledby="cancel-modal-title">
@@ -745,7 +760,7 @@
   <script src="/proposal-compare-ui.js?v=0.0.47"></script>
   <script src="/auth-ui.js?v=0.0.38"></script>
   <script src="/tracking-ui.js?v=0.0.51"></script>
-  <script src="/penalties-ui.js?v=0.0.56"></script>
+  <script src="/penalties-ui.js?v=0.0.57"></script>
   <script src="/support-ui.js?v=0.0.56"></script>
   <script src="/comms-ui.js?v=0.0.52"></script>
   <script src="/rating-tags.js?v=0.0.31"></script>

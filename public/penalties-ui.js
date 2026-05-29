@@ -74,7 +74,7 @@ const Penalties = {
     return `<span class="pill">Plazo ${p.deadline_days} días</span>`;
   },
 
-  actionButtons(p, { showAdminPaid = false } = {}) {
+  actionButtons(p, { showAdminPaid = false, creditorReview = false } = {}) {
     const isAdmin = typeof Auth !== 'undefined' && Auth.user?.role === 'admin';
     const role = typeof getActorRole === 'function' ? getActorRole() : Auth?.user?.role;
     const parts = [];
@@ -83,19 +83,30 @@ const Penalties = {
         `<button type="button" class="tab tab-sm" data-claim-penalty="${p.match_id}">Declarar pago realizado</button>`
       );
     }
-    if (p.can_confirm && p.creditor_role === role) {
+    if (creditorReview && p.can_confirm && p.creditor_role === role) {
       parts.push(
-        `<button type="button" class="tab tab-sm" data-confirm-penalty="${p.match_id}">Confirmar que recibí el pago</button>`
+        `<button type="button" class="tab tab-sm btn-creditor-review" data-creditor-review="${p.match_id}">Revisar comprobante y confirmar</button>`
       );
+    } else {
+      if (p.can_view_proof && p.creditor_role === role) {
+        parts.push(
+          `<button type="button" class="tab tab-sm tab-outline" data-view-payment-proof="${p.match_id}">Ver comprobante</button>`
+        );
+      }
+      if (p.can_confirm && p.creditor_role === role) {
+        parts.push(
+          `<button type="button" class="tab tab-sm" data-confirm-penalty="${p.match_id}">Confirmar que recibí el pago</button>`
+        );
+      }
+      if (p.can_dispute && p.creditor_role === role) {
+        parts.push(
+          `<button type="button" class="tab tab-sm tab-outline" data-dispute-penalty="${p.match_id}">No recibí el pago</button>`
+        );
+      }
     }
-    if (p.can_dispute && p.creditor_role === role) {
+    if (p.can_view_proof && p.debtor_role === role && !creditorReview) {
       parts.push(
-        `<button type="button" class="tab tab-sm tab-outline" data-dispute-penalty="${p.match_id}">No recibí el pago</button>`
-      );
-    }
-    if (p.can_view_proof) {
-      parts.push(
-        `<button type="button" class="tab tab-sm tab-outline" data-view-payment-proof="${p.match_id}">Ver comprobante</button>`
+        `<button type="button" class="tab tab-sm tab-outline" data-view-payment-proof="${p.match_id}">Ver mi comprobante enviado</button>`
       );
     }
     if (p.status !== 'paid') {
@@ -111,6 +122,29 @@ const Penalties = {
     return parts.length
       ? `<div class="penalty-line-actions">${parts.join('')}</div>`
       : '';
+  },
+
+  renderCreditorPendingCards(items) {
+    if (!items?.length) return `<p class="muted">Sin pagos por confirmar.</p>`;
+    return items
+      .map((p) => {
+        const h =
+          p.hours_left_confirm != null ? `${p.hours_left_confirm} h restantes` : '24 h';
+        const note = p.claim_note
+          ? `<p class="muted">Nota del transportista: ${p.claim_note}</p>`
+          : '';
+        return `<div class="penalty-line penalty-creditor-review" data-creditor-card="${p.match_id}">
+          <strong>${p.pair}</strong>
+          <p>${this.formatClp(p.amount_clp)} · pago declarado fuera de la app · ${h}</p>
+          <p class="muted">${p.reason_summary || ''}</p>
+          ${note}
+          <div class="creditor-proof-thumb-wrap" data-proof-thumb="${p.match_id}">
+            <p class="muted">Cargando comprobante…</p>
+          </div>
+          ${this.actionButtons(p, { creditorReview: true })}
+        </div>`;
+      })
+      .join('');
   },
 
   renderPenaltyLines(items, label, opts = {}) {
@@ -153,6 +187,103 @@ const Penalties = {
     box.querySelectorAll('[data-view-payment-proof]').forEach((btn) => {
       btn.addEventListener('click', () => this.viewPaymentProof(btn.dataset.viewPaymentProof));
     });
+    box.querySelectorAll('[data-creditor-review]').forEach((btn) => {
+      btn.addEventListener('click', () => this.openCreditorReviewModal(btn.dataset.creditorReview));
+    });
+    box.querySelectorAll('[data-proof-thumb]').forEach((el) => {
+      this.loadProofThumbnail(el.dataset.proofThumb, el);
+    });
+  },
+
+  reviewMatchId: null,
+
+  async loadProofIntoElement(matchId, container, { large = false } = {}) {
+    if (!matchId || !container) return;
+    try {
+      const res = await fetch(
+        `/api/account/penalties/${encodeURIComponent(matchId)}/payment-proof`,
+        { headers: this.headers() }
+      );
+      if (!res.ok) {
+        container.innerHTML = '<p class="muted">Sin comprobante adjunto.</p>';
+        return;
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const cls = large ? 'creditor-proof-large' : 'creditor-proof-thumb';
+      container.innerHTML = `<img src="${url}" alt="Comprobante de transferencia" class="${cls}" data-creditor-review-img="${matchId}" />`;
+      container.querySelector('[data-creditor-review-img]')?.addEventListener('click', () => {
+        if (!large) this.openCreditorReviewModal(matchId);
+      });
+    } catch {
+      container.innerHTML = '<p class="muted">No se pudo cargar el comprobante.</p>';
+    }
+  },
+
+  loadProofThumbnail(matchId, el) {
+    this.loadProofIntoElement(matchId, el);
+  },
+
+  openCreditorReviewModal(matchId) {
+    this.reviewMatchId = matchId;
+    const modal = document.getElementById('creditor-review-modal');
+    const meta = document.getElementById('creditor-review-meta');
+    const proofBox = document.getElementById('creditor-review-proof');
+    const item = [
+      ...(this.summary?.penalties?.pending_confirmations || []),
+      ...(this.summary?.penalties?.owed_to_me || []),
+    ].find((x) => x.match_id === matchId);
+    if (meta && item) {
+      meta.innerHTML = `<strong>${item.pair}</strong> · ${this.formatClp(item.amount_clp)}${
+        item.claim_note ? `<br><span class="muted">Nota: ${item.claim_note}</span>` : ''
+      }`;
+    }
+    if (proofBox) {
+      proofBox.innerHTML = '<p class="muted">Cargando comprobante…</p>';
+      this.loadProofIntoElement(matchId, proofBox, { large: true });
+    }
+    if (modal) {
+      modal.hidden = false;
+      modal.setAttribute('aria-hidden', 'false');
+    }
+  },
+
+  closeCreditorReviewModal() {
+    this.reviewMatchId = null;
+    const modal = document.getElementById('creditor-review-modal');
+    if (modal) {
+      modal.hidden = true;
+      modal.setAttribute('aria-hidden', 'true');
+    }
+  },
+
+  async confirmFromReviewModal() {
+    const id = this.reviewMatchId;
+    if (!id) return;
+    if (!window.confirm('¿Confirmas que el comprobante coincide y recibiste el pago en tu cuenta?')) return;
+    try {
+      const json = await this.postPenalty(id, 'confirm-payment');
+      this.closeCreditorReviewModal();
+      alert(json.message);
+      await this.refresh();
+    } catch (e) {
+      alert(e.message);
+    }
+  },
+
+  async disputeFromReviewModal() {
+    const id = this.reviewMatchId;
+    if (!id) return;
+    const note = window.prompt('Indica por qué no validas el pago (obligatorio):', 'El comprobante no coincide o no hay abono en cuenta');
+    if (!note?.trim()) return;
+    try {
+      const json = await this.postPenalty(id, 'dispute-payment', { note });
+      this.closeCreditorReviewModal();
+      alert(json.message);
+      await this.refresh();
+    } catch (e) {
+      alert(e.message);
+    }
   },
 
   claimMatchId: null,
@@ -277,6 +408,10 @@ const Penalties = {
   },
 
   async confirmPenalty(matchId) {
+    if (this.summary?.penalties?.pending_confirmations?.some((x) => x.match_id === matchId)) {
+      this.openCreditorReviewModal(matchId);
+      return;
+    }
     if (!window.confirm('¿Confirmas que recibiste el pago de esta multa?')) return;
     try {
       const json = await this.postPenalty(matchId, 'confirm-payment');
@@ -365,9 +500,9 @@ const Penalties = {
       : `<button type="button" class="tab tab-sm" id="btn-open-bank">Inscribir cuenta bancaria</button>`;
 
     const pendingBlock = p.pending_confirmations?.length
-      ? `<section class="penalty-confirm-pending"><h3>Confirma pagos recibidos (${confirmH} h)</h3>
-         <p class="muted">Como acreedor debes validar si recibiste el pago declarado por la contraparte.</p>
-         ${this.renderPenaltyLines(p.pending_confirmations, 'por confirmar')}</section>`
+      ? `<section class="penalty-confirm-pending"><h3>Pagos por confirmar (${confirmH} h)</h3>
+         <p class="muted">El transportista declaró pago <strong>fuera de la app</strong>. Tú solo <strong>ves el comprobante</strong> y confirmas o rechazas si el dinero llegó a tu cuenta.</p>
+         ${this.renderCreditorPendingCards(p.pending_confirmations)}</section>`
       : '';
 
     box.innerHTML = `
@@ -571,6 +706,15 @@ document.getElementById('form-claim-payment')?.addEventListener('submit', (e) =>
 );
 document.querySelectorAll('[data-close-claim-payment]').forEach((el) => {
   el.addEventListener('click', () => Penalties.closeClaimPaymentModal());
+});
+document.getElementById('btn-creditor-confirm')?.addEventListener('click', () =>
+  Penalties.confirmFromReviewModal()
+);
+document.getElementById('btn-creditor-dispute')?.addEventListener('click', () =>
+  Penalties.disputeFromReviewModal()
+);
+document.querySelectorAll('[data-close-creditor-review]').forEach((el) => {
+  el.addEventListener('click', () => Penalties.closeCreditorReviewModal());
 });
 document.getElementById('claim-payment-file')?.addEventListener('change', (e) => {
   const file = e.target.files?.[0];

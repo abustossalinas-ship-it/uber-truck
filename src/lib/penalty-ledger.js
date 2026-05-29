@@ -176,12 +176,13 @@ async function buildPenaltySummary(repo, user) {
     }
 
     const creditor = item.creditor_role;
-    if (item.payment_status === 'claimed' && creditor === role) {
+    if (creditor === role && item.payment_status === 'claimed') {
       pending_confirmations.push(item);
+    } else if (historicalDebtor === role) {
+      owed.push(item);
+    } else if (creditor === role) {
+      owedToMe.push(item);
     }
-
-    if (historicalDebtor === role) owed.push(item);
-    else if (creditor === role) owedToMe.push(item);
   }
 
   const sum = (arr) => arr.reduce((a, x) => a + (x.amount_clp || 0), 0);

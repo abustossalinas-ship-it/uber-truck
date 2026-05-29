@@ -29,7 +29,9 @@ En producción (`BANK_ENFORCE`, por defecto activo con Supabase) **no puedes pub
 
 ## Comprobante de transferencia
 
-Al **declarar pago** el deudor debe adjuntar captura JPG/PNG/WebP (máx. ~1,8 MB). El acreedor y moderador pueden verla en **Ver comprobante** o vía caso de ayuda.
+Al **declarar pago** solo el **deudor** (transportista o embarcador según el caso) adjunta captura JPG/PNG/WebP (máx. ~1,8 MB).
+
+El **acreedor** (la contraparte) **no sube** comprobante: solo **visualiza** el adjunto y **confirma** o **rechaza** que el pago externo llegó a su cuenta (24 h).
 
 SQL: `025_penalty_payment_proof.sql` / `RUN_025_SUPABASE.sql`
 

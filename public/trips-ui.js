@@ -48,6 +48,7 @@ function tripPhase(m) {
   if (['accepted', 'in_progress'].includes(m.status)) return 'active';
   if (m.status === 'proposed') return 'pending';
   if (m.status === 'completed') return 'done';
+  if (m.status === 'cancelled') return 'cancelled';
   return 'other';
 }
 
@@ -159,7 +160,7 @@ function renderTripsList(matches, loadById, offerById) {
   const sorted = [...(matches || [])].sort(
     (a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at)
   );
-  const groups = { active: [], pending: [], done: [], other: [] };
+  const groups = { active: [], pending: [], done: [], cancelled: [], other: [] };
   sorted.forEach((m) => groups[tripPhase(m)].push(m));
 
   function cards(rows, empty) {
@@ -182,8 +183,21 @@ function renderTripsList(matches, loadById, offerById) {
         const rateTarget = role === 'shipper' ? 'transportista' : 'embarcador';
         const ratingsBlock =
           m.status === 'completed' ? buildTripRatingsBlock(m, role, title) : '';
+        const cancelDetail =
+          m.status === 'cancelled'
+            ? `<p class="trip-cancel-detail muted">${m.cancel_reason || 'Viaje cancelado'}${
+                m.penalty_amount_clp
+                  ? ` · Multa sugerida $${Number(m.penalty_amount_clp).toLocaleString('es-CL')} CLP`
+                  : ''
+              }</p>`
+            : '';
         let actions = '';
-        if (m.status !== 'completed') {
+        if (m.status === 'cancelled') {
+          if (m.penalty_type === 'fee_suggested' && m.penalty_amount_clp) {
+            actions += `<button type="button" class="tab tab-sm" data-open-support="${m.id}" data-support-subject="Multa viaje cancelado">Multa / ayuda</button>`;
+            actions += `<button type="button" class="tab tab-sm" data-scroll-penalties>Ir a Cuenta y multas</button>`;
+          }
+        } else if (m.status !== 'completed') {
           const openLabel =
             m.status === 'proposed' ? 'Ver propuesta' : 'Gestionar viaje';
           actions = `<button type="button" class="btn-secondary" data-trip-view="${m.id}">${openLabel}</button>`;
@@ -212,6 +226,7 @@ function renderTripsList(matches, loadById, offerById) {
           <p>${route}</p>
           ${price ? `<p class="muted">${price}</p>` : ''}
           ${m.delivery_note ? `<p class="muted">Entrega: ${m.delivery_note}</p>` : ''}
+          ${cancelDetail}
           ${mapSlot}
           ${ratingsBlock}
           <div class="actions">${actions}</div>
@@ -227,6 +242,8 @@ function renderTripsList(matches, loadById, offerById) {
     ${cards(groups.pending, 'Sin propuestas abiertas.')}
     <h3>Completados</h3>
     ${cards(groups.done, 'Aún no hay viajes cerrados.')}
+    <h3>Cancelados</h3>
+    ${cards(groups.cancelled, 'Sin viajes cancelados.')}
     ${groups.other.length ? `<h3>Otros</h3>${cards(groups.other, '')}` : ''}
   `;
 
@@ -248,6 +265,12 @@ function renderTripsList(matches, loadById, offerById) {
       if (typeof Comms !== 'undefined') {
         Comms.openChat(btn.dataset.tripChat, btn.dataset.tripTitle || '');
       }
+    });
+  });
+  el.querySelectorAll('[data-scroll-penalties]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      document.getElementById('account-penalties-panel')?.scrollIntoView({ behavior: 'smooth' });
+      if (typeof Penalties !== 'undefined') Penalties.refresh();
     });
   });
   groups.active.forEach((m) => {

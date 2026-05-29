@@ -1348,6 +1348,10 @@ body.kyc-pending #btn-create-match {
   display: none;
 }
 
+.support-admin-actions[hidden] {
+  display: none !important;
+}
+
 .chat-drawer-header {
   display: flex;
   justify-content: space-between;

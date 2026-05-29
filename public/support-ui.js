@@ -38,10 +38,11 @@ const SupportUI = {
     drawer.hidden = false;
     drawer.setAttribute('aria-hidden', 'false');
     await this.loadMessages();
-    if (typeof Auth !== 'undefined' && Auth.user?.role === 'admin') {
-      document.getElementById('support-admin-actions')?.removeAttribute('hidden');
-    } else {
-      document.getElementById('support-admin-actions')?.setAttribute('hidden', '');
+    const adminActions = document.getElementById('support-admin-actions');
+    const isAdmin = typeof Auth !== 'undefined' && Auth.user?.role === 'admin';
+    if (adminActions) {
+      adminActions.hidden = !isAdmin;
+      adminActions.setAttribute('aria-hidden', isAdmin ? 'false' : 'true');
     }
   },
 

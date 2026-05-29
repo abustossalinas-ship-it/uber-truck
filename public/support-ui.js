@@ -2,6 +2,7 @@
 
 const SupportUI = {
   activeCaseId: null,
+  activeMatchId: null,
 
   headers() {
     return typeof apiHeaders === 'function' ? apiHeaders() : { 'Content-Type': 'application/json' };
@@ -107,6 +108,31 @@ const SupportUI = {
     await this.loadMessages();
   },
 
+  async markPenaltyPaid() {
+    if (!this.activeMatchId) {
+      alert('Este caso no tiene emparejamiento vinculado.');
+      return;
+    }
+    const note = window.prompt('Nota de regularización (opcional):', 'Acuerdo en revisión moderador');
+    if (note === null) return;
+    const res = await fetch(
+      `/api/account/penalties/${encodeURIComponent(this.activeMatchId)}/mark-paid`,
+      {
+        method: 'POST',
+        headers: this.headers(),
+        body: JSON.stringify({ note: note || undefined }),
+      }
+    );
+    const json = await res.json();
+    if (!res.ok) {
+      alert(json.error || 'No se pudo marcar');
+      return;
+    }
+    alert(json.message || 'Multa regularizada');
+    if (typeof Penalties !== 'undefined') Penalties.refresh();
+    await this.loadMessages();
+  },
+
   async setStatus(status) {
     if (!this.activeCaseId) return;
     const res = await fetch(`/api/support/cases/${this.activeCaseId}/status`, {
@@ -135,6 +161,9 @@ document.getElementById('support-mark-review')?.addEventListener('click', () =>
 );
 document.getElementById('support-mark-resolved')?.addEventListener('click', () =>
   SupportUI.setStatus('resolved')
+);
+document.getElementById('support-mark-penalty-paid')?.addEventListener('click', () =>
+  SupportUI.markPenaltyPaid()
 );
 
 document.body.addEventListener('click', (e) => {

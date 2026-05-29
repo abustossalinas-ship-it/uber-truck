@@ -6,6 +6,7 @@ const repo = require('../lib/repository');
 const { authMiddleware } = require('../lib/auth');
 const { buildPenaltySummary, bankAccountFromUser } = require('../lib/penalty-ledger');
 const { getOperatingStatus } = require('../lib/penalty-gate');
+const { markPenaltyPaid } = require('../lib/penalty-payment');
 
 const router = express.Router();
 
@@ -93,6 +94,31 @@ router.patch('/bank', authMiddleware, async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al guardar cuenta bancaria' });
+  }
+});
+
+router.post('/penalties/:matchId/mark-paid', authMiddleware, async (req, res) => {
+  try {
+    const { match, already_paid } = await markPenaltyPaid(
+      req.params.matchId,
+      req.user,
+      req.body?.note
+    );
+    const operating = await getOperatingStatus(req.user);
+    res.json({
+      ok: true,
+      data: match,
+      already_paid,
+      operating_status: operating,
+      message: already_paid
+        ? 'La multa ya estaba marcada como pagada.'
+        : 'Multa marcada como pagada. Operaciones desbloqueadas si no hay otras deudas vencidas.',
+    });
+  } catch (e) {
+    const code = e.status || 500;
+    if (code !== 500) return res.status(code).json({ ok: false, error: e.message });
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al marcar multa pagada' });
   }
 });
 

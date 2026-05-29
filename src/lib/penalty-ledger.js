@@ -12,8 +12,13 @@ const DEBTOR_BY_REASON = {
   carrier_no_show: 'carrier',
 };
 
+function isPenaltySettled(match) {
+  return Boolean(match?.penalty_paid_at);
+}
+
 function debtorRoleForMatch(match) {
   if (!match || match.status !== 'cancelled') return null;
+  if (isPenaltySettled(match)) return null;
   if (match.penalty_type !== 'fee_suggested' || !match.penalty_amount_clp) return null;
   return DEBTOR_BY_REASON[match.reason_code] || null;
 }
@@ -42,6 +47,9 @@ function buildPenaltyItem(match, load, offer) {
   const due = dueDateFromCancel(match);
   const late = due ? daysLate(due) : 0;
   const debtor = debtorRoleForMatch(match);
+  const settled = isPenaltySettled(match);
+  let status = late > 0 ? 'overdue' : 'pending';
+  if (settled) status = 'paid';
   return {
     match_id: match.id,
     pair: `${load?.company_name || 'Embarcador'} ↔ ${offer?.carrier_name || 'Transportista'}`,
@@ -52,8 +60,10 @@ function buildPenaltyItem(match, load, offer) {
     reason_summary: match.cancel_reason || null,
     debtor_role: debtor,
     due_at: due ? due.toISOString() : null,
-    days_late: late,
-    status: late > 0 ? 'overdue' : 'pending',
+    days_late: settled ? 0 : late,
+    status,
+    paid_at: match.penalty_paid_at || null,
+    payment_note: match.penalty_payment_note || null,
     deadline_days: PENALTY_DUE_DAYS,
   };
 }
@@ -63,13 +73,24 @@ async function buildPenaltySummary(repo, userRole) {
   const matches = await repo.list('matches', {});
   const owed = [];
   const owedToMe = [];
+  const paid_history = [];
 
   for (const m of matches) {
-    const debtor = debtorRoleForMatch(m);
-    if (!debtor) continue;
+    if (m.penalty_type !== 'fee_suggested' || !m.penalty_amount_clp) continue;
+    if (m.status !== 'cancelled') continue;
+    const historicalDebtor = DEBTOR_BY_REASON[m.reason_code] || null;
+    if (!historicalDebtor) continue;
     const load = await repo.getById('load_requests', m.load_request_id);
     const offer = await repo.getById('capacity_offers', m.capacity_offer_id);
     const item = buildPenaltyItem(m, load, offer);
+
+    if (isPenaltySettled(m)) {
+      if (historicalDebtor === role) paid_history.push(item);
+      continue;
+    }
+
+    const debtor = debtorRoleForMatch(m);
+    if (!debtor) continue;
     if (debtor === role) owed.push(item);
     else owedToMe.push(item);
   }
@@ -80,6 +101,7 @@ async function buildPenaltySummary(repo, userRole) {
     role,
     owed,
     owed_to_me: owedToMe,
+    paid_history,
     total_owed_clp: sum(owed),
     total_receivable_clp: sum(owedToMe),
     overdue_count: owed.filter((x) => x.status === 'overdue').length,
@@ -110,6 +132,7 @@ function bankAccountFromUser(user) {
 
 module.exports = {
   PENALTY_DUE_DAYS,
+  isPenaltySettled,
   debtorRoleForMatch,
   buildPenaltySummary,
   bankAccountFromUser,

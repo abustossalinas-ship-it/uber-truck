@@ -42,11 +42,10 @@ function stopGpsWatch() {
   }
 }
 
+/** Transportista: GPS activo con sesión (mapa en viaje + última posición). El toggle solo es visibilidad en tablero. */
 function shouldShareGps() {
   const user = typeof Auth !== 'undefined' ? Auth.user : null;
-  if (!user || user.role !== 'carrier') return false;
-  if (user.is_available) return true;
-  return Boolean(activeTrackMatchId);
+  return Boolean(user && user.role === 'carrier');
 }
 
 async function postCarrierLocation(lat, lng) {
@@ -116,16 +115,24 @@ async function refreshCarrierPresencePanel() {
   }
   if (label) {
     label.textContent = toggle.checked
-      ? 'Disponible — visible para emparejar'
-      : 'No disponible';
+      ? 'Visible en tablero para nuevas cargas'
+      : 'No visible en tablero (GPS sigue activo en viaje)';
   }
   if (status) {
     const t = formatGpsTime(user.location_updated_at);
     status.textContent = toggle.checked
-      ? `Ubicación activa${t ? ` · última: ${t}` : ''}`
-      : 'Activa «Disponible» para compartir GPS cuando busques carga.';
+      ? `GPS activo · visible en tablero${t ? ` · última: ${t}` : ''}`
+      : `GPS activo en sesión${t ? ` · última: ${t}` : ''} · activa el interruptor para aparecer en el tablero`;
   }
   syncGpsWatch();
+  if (user.role === 'carrier') {
+    try {
+      const pos = await readCurrentPosition();
+      await postCarrierLocation(pos.lat, pos.lng);
+    } catch (_) {
+      /* permiso GPS pendiente */
+    }
+  }
 }
 
 async function setCarrierAvailable(on) {

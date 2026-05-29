@@ -21,22 +21,38 @@ const Penalties = {
     return json;
   },
 
-  renderPenaltyLines(items, label) {
+  renderPenaltyLines(items, label, { showAdminPaid = false } = {}) {
     if (!items?.length) return `<p class="muted">Sin ${label}.</p>`;
+    const isAdmin = typeof Auth !== 'undefined' && Auth.user?.role === 'admin';
     return items
       .map((p) => {
         const late =
           p.status === 'overdue'
             ? `<span class="pill pill-warn">${p.days_late} día(s) de atraso</span>`
-            : `<span class="pill">Plazo ${p.deadline_days} días</span>`;
+            : p.status === 'paid'
+              ? `<span class="pill pill-ok">Pagada</span>`
+              : `<span class="pill">Plazo ${p.deadline_days} días</span>`;
         const due = p.due_at
           ? new Date(p.due_at).toLocaleDateString('es-CL', { day: 'numeric', month: 'short' })
           : '—';
+        const paidNote =
+          p.status === 'paid' && p.paid_at
+            ? `<p class="muted">Regularizada ${new Date(p.paid_at).toLocaleDateString('es-CL')}</p>`
+            : '';
+        const adminBtn =
+          showAdminPaid && isAdmin && p.status !== 'paid'
+            ? `<button type="button" class="tab tab-sm" data-mark-penalty-paid="${p.match_id}">Marcar pagada (admin)</button>`
+            : '';
+        const helpBtn =
+          p.status !== 'paid'
+            ? `<button type="button" class="tab tab-sm" data-open-support="${p.match_id}" data-support-subject="Multa ${this.formatClp(p.amount_clp)}">Ayuda / revisión</button>`
+            : '';
         return `<div class="penalty-line">
           <strong>${p.pair}</strong>
           <p>${this.formatClp(p.amount_clp)} · vence ${due} ${late}</p>
           <p class="muted">${p.reason_summary || p.reason_code || ''}</p>
-          <button type="button" class="tab tab-sm" data-open-support="${p.match_id}" data-support-subject="Multa ${this.formatClp(p.amount_clp)}">Ayuda / revisión</button>
+          ${paidNote}
+          <div class="penalty-line-actions">${helpBtn}${adminBtn}</div>
         </div>`;
       })
       .join('');
@@ -80,18 +96,45 @@ const Penalties = {
         <section>
           <h3>Debes (como ${rolText?.toLowerCase() || 'usuario'})</h3>
           <p class="penalty-total">${this.formatClp(p.total_owed_clp)}</p>
-          ${this.renderPenaltyLines(p.owed, 'multas por pagar')}
+          ${this.renderPenaltyLines(p.owed, 'multas por pagar', { showAdminPaid: true })}
         </section>
         <section>
           <h3>Te deben</h3>
           <p class="penalty-total receivable">${this.formatClp(p.total_receivable_clp)}</p>
-          ${this.renderPenaltyLines(p.owed_to_me, 'por cobrar')}
+          ${this.renderPenaltyLines(p.owed_to_me, 'por cobrar', { showAdminPaid: true })}
         </section>
       </div>
+      ${
+        p.paid_history?.length
+          ? `<section class="penalty-paid-history"><h3>Multas regularizadas</h3>${this.renderPenaltyLines(p.paid_history, 'historial')}</section>`
+          : ''
+      }
       ${bankOk}
       <p class="muted penalty-note">${s.note || ''}</p>
     `;
     document.getElementById('btn-open-bank')?.addEventListener('click', () => this.openBankModal());
+    box.querySelectorAll('[data-mark-penalty-paid]').forEach((btn) => {
+      btn.addEventListener('click', () => this.markPenaltyPaid(btn.dataset.markPenaltyPaid));
+    });
+  },
+
+  async markPenaltyPaid(matchId) {
+    if (!matchId) return;
+    const note = window.prompt('Nota de regularización (opcional):', 'Pago acordado / revisión moderador');
+    if (note === null) return;
+    const res = await fetch(`/api/account/penalties/${encodeURIComponent(matchId)}/mark-paid`, {
+      method: 'POST',
+      headers: this.headers(),
+      body: JSON.stringify({ note: note || undefined }),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      alert(json.error || 'No se pudo marcar');
+      return;
+    }
+    alert(json.message || 'Multa regularizada');
+    await this.refresh();
+    if (typeof refreshBoard === 'function') refreshBoard();
   },
 
   renderNotifSummary() {

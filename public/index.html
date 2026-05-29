@@ -373,11 +373,14 @@
 
     <section id="panel-carrier" class="panel">
       <section id="carrier-presence-panel" class="carrier-presence card" hidden>
-        <h3>Disponible para cargas</h3>
-        <p class="muted">Comparte tu ubicación cuando estés libre o durante un viaje en curso (embarcador ve el mapa).</p>
+        <h3>Ubicación y visibilidad</h3>
+        <p class="muted">
+          Con sesión de transportista, el <strong>GPS queda activo</strong> (mapa del viaje en ruta y última posición).
+          El interruptor solo indica si apareces en el <strong>tablero</strong> para nuevas cargas.
+        </p>
         <label class="carrier-available-toggle">
           <input type="checkbox" id="carrier-available-toggle" />
-          <span id="carrier-available-label">No disponible</span>
+          <span id="carrier-available-label">No visible en tablero</span>
         </label>
         <p id="carrier-gps-status" class="muted"></p>
       </section>
@@ -579,6 +582,7 @@
     <div id="support-admin-actions" class="support-admin-actions" hidden>
       <button type="button" class="tab tab-sm" id="support-mark-review">En revisión</button>
       <button type="button" class="tab tab-sm" id="support-mark-resolved">Resuelto</button>
+      <button type="button" class="tab tab-sm" id="support-mark-penalty-paid">Marcar multa pagada</button>
     </div>
     <form id="form-support" class="chat-form">
       <input id="support-input" type="text" placeholder="Describe lo ocurrido, acuerdos, horarios…" maxlength="2000" />
@@ -717,9 +721,9 @@
   <script src="/load-timing-ui.js?v=0.0.47"></script>
   <script src="/proposal-compare-ui.js?v=0.0.47"></script>
   <script src="/auth-ui.js?v=0.0.38"></script>
-  <script src="/tracking-ui.js?v=0.0.37"></script>
-  <script src="/penalties-ui.js?v=0.0.19"></script>
-  <script src="/support-ui.js?v=0.0.50"></script>
+  <script src="/tracking-ui.js?v=0.0.51"></script>
+  <script src="/penalties-ui.js?v=0.0.51"></script>
+  <script src="/support-ui.js?v=0.0.51"></script>
   <script src="/comms-ui.js?v=0.0.50"></script>
   <script src="/rating-tags.js?v=0.0.31"></script>
   <script src="/trips-ui.js?v=0.0.36"></script>

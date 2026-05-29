@@ -208,14 +208,18 @@ router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
     });
 
     if (carrierOffer != null && role === 'carrier') {
-      const parties = await getMatchParties(repo, row);
-      await comms.addNotification({
-        match_id: row.id,
-        for_role: 'shipper',
-        type: 'price_offer',
-        title: 'Nueva oferta de precio',
-        body: `${parties?.carrier_name || 'Transportista'} ofrece $${carrierOffer.toLocaleString('es-CL')} CLP.`,
-      });
+      try {
+        const parties = await getMatchParties(repo, row);
+        await comms.addNotification({
+          match_id: row.id,
+          for_role: 'shipper',
+          type: 'price_offer',
+          title: 'Nueva oferta de precio',
+          body: `${parties?.carrier_name || 'Transportista'} ofrece $${carrierOffer.toLocaleString('es-CL')} CLP.`,
+        });
+      } catch (notifyErr) {
+        console.error('match notification failed', notifyErr);
+      }
     }
 
     const rangeMsg = outsideRangeMessages(
@@ -231,7 +235,8 @@ router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
     });
   } catch (e) {
     console.error(e);
-    const dup = e.code === '23505' || /duplicate/i.test(e.message || '');
+    const msg = e.message || '';
+    const dup = e.code === '23505' || /duplicate/i.test(msg);
     if (dup) {
       return res.status(409).json({
         ok: false,
@@ -239,7 +244,18 @@ router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
           'Ya existe un emparejamiento para esta carga y esta oferta. Revisa la sección Emparejamientos más abajo.',
       });
     }
-    res.status(500).json({ ok: false, error: 'Error al crear match' });
+    if (/trip_events|price_status|carrier_offer_clp|42P01|PGRST204/i.test(msg)) {
+      return res.status(503).json({
+        ok: false,
+        error:
+          'Falta aplicar migraciones SQL en Supabase (010 precios, 015 trip_events). Revisa docs/SQL-SUPABASE.md.',
+        detail: msg,
+      });
+    }
+    res.status(500).json({
+      ok: false,
+      error: msg || 'Error al crear match',
+    });
   }
 });
 

@@ -12,15 +12,20 @@ function actorFromReq(req) {
 
 async function logMatchTrip(req, match, { event_type, from_status, to_status, payload = {} }) {
   if (!match?.id) return null;
-  const row = await recordTripEvent({
-    match_id: match.id,
-    event_type,
-    from_status: from_status ?? null,
-    to_status: to_status ?? null,
-    actor_role: actorFromReq(req),
-    actor_user_id: req.user?.sub || null,
-    payload,
-  });
+  let row = null;
+  try {
+    row = await recordTripEvent({
+      match_id: match.id,
+      event_type,
+      from_status: from_status ?? null,
+      to_status: to_status ?? null,
+      actor_role: actorFromReq(req),
+      actor_user_id: req.user?.sub || null,
+      payload,
+    });
+  } catch (e) {
+    console.error('trip_event log failed', e.message || e);
+  }
   if (to_status) {
     realtime.publishMatch(match.id, {
       type: 'status',

@@ -1175,7 +1175,9 @@ $('form-match').addEventListener('submit', async (e) => {
   const res = await API.postMatch(body);
   const json = await res.json();
   if (!res.ok) {
-    alert(json.error || json.errors?.join('\n') || 'Error');
+    let errMsg = json.error || json.errors?.join('\n') || 'Error';
+    if (json.detail && res.status === 503) errMsg += `\n\nDetalle: ${json.detail}`;
+    alert(errMsg);
     if (res.status === 409) {
       refreshBoard().then(() => {
         $('list-matches')?.scrollIntoView({ behavior: 'smooth', block: 'start' });

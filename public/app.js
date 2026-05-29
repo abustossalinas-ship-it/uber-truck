@@ -84,6 +84,20 @@ const STATUS_LABEL = {
   cancelled: 'Cancelado',
 };
 
+function formatPublishedDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('es-CL', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function statusPillHtml(status, createdAt) {
+  const label = STATUS_LABEL[status] || status;
+  const when = formatPublishedDate(createdAt);
+  if (!when) return `<span class="pill">${label}</span>`;
+  return `<span class="pill pill-with-date" title="Publicado ${when}">${label} <span class="pill-date">${when}</span></span>`;
+}
+
 const CANCEL_ACTION_LABEL = {
   withdraw: 'Retirada',
   reject: 'Rechazada',
@@ -945,7 +959,7 @@ async function refreshBoard() {
             (l) => `
       <article class="item" data-id="${l.id}">
         <strong>${l.company_name}${reputationBadgeInline(l.reputation)}</strong>
-        <span class="pill">${STATUS_LABEL[l.status] || l.status}</span>
+        ${statusPillHtml(l.status, l.created_at)}
         <p>${routeLine(l)}</p>
         <p class="muted">${l.pallets ? l.pallets + ' pallets · ' : ''}${l.volume_m3 ? l.volume_m3 + ' m³ · ' : ''}${l.cargo_type || ''}${l.distance_duration_min ? ' · ruta ' + l.distance_duration_min + ' min' : ''}${l.eta_total_min ? ' · ETA ~' + l.eta_total_min + ' min' : ''}</p>
         ${formatLoadTimingLine(l)}
@@ -963,7 +977,7 @@ async function refreshBoard() {
             (o) => `
       <article class="item" data-id="${o.id}">
         <strong>${o.carrier_name}${reputationBadgeInline(o.reputation)}</strong>
-        <span class="pill">${STATUS_LABEL[o.status] || o.status}</span>
+        ${statusPillHtml(o.status, o.created_at)}
         <p>${routeLine(o)}</p>
         <p class="muted">${o.free_volume_m3 ? o.free_volume_m3 + ' m³ libres' : ''}</p>
       </article>`
@@ -1013,7 +1027,7 @@ async function refreshBoard() {
 
   $('list-matches').innerHTML = renderMatchCards(
     activeMatches,
-    'Sin emparejamientos activos. Crea uno arriba o revisa el historial.'
+    'Sin emparejamientos activos. Crea una propuesta arriba o revisa cargas y ofertas abajo.'
   );
   const histEl = $('list-matches-history');
   const histWrap = $('matches-history-wrap');

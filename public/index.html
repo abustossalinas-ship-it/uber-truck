@@ -498,7 +498,15 @@
           <button type="submit" id="btn-create-match" class="btn-match-cta">Crear propuesta de emparejamiento</button>
         </form>
       </div>
-      <div class="grid grid-2">
+      <section class="board-matches-block">
+        <h2 id="matches-active-heading">Emparejamientos activos</h2>
+        <div id="list-matches"></div>
+        <details id="matches-history-wrap" class="matches-history">
+          <summary>Historial cancelados / retirados</summary>
+          <div id="list-matches-history"></div>
+        </details>
+      </section>
+      <div class="grid grid-2 board-market-block">
         <div>
           <h2 id="board-loads-title">Cargas</h2>
           <div id="list-loads"></div>
@@ -508,12 +516,6 @@
           <div id="list-offers"></div>
         </div>
       </div>
-      <h2 id="matches-active-heading" style="margin-top:1.5rem">Emparejamientos activos</h2>
-      <div id="list-matches"></div>
-      <details id="matches-history-wrap" class="matches-history">
-        <summary>Historial cancelados / retirados</summary>
-        <div id="list-matches-history"></div>
-      </details>
     </section>
   </main>
 
@@ -660,6 +662,6 @@
   <script src="/comms-ui.js?v=0.0.19"></script>
   <script src="/rating-tags.js?v=0.0.31"></script>
   <script src="/trips-ui.js?v=0.0.36"></script>
-  <script src="/app.js?v=0.0.42"></script>
+  <script src="/app.js?v=0.0.44"></script>
 </body>
 </html>

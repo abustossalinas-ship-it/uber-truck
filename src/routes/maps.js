@@ -2,6 +2,8 @@
 
 const express = require('express');
 const maps = require('../services/google-maps');
+const { verifyToken } = require('../lib/auth');
+const { buildMatchTracking } = require('../lib/match-tracking');
 const { LOAD_PRESETS, OFFER_PRESETS } = require('../lib/cubicacion-presets');
 const { densityOptions, STANDARD_PALLET_M3 } = require('../lib/cubicacion-estimate');
 const { suggestReferenceBudget } = require('../lib/match-price');
@@ -63,6 +65,50 @@ router.get('/place/:placeId', async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: e.message || 'Error place details' });
+  }
+});
+
+/** Mapa estático del viaje — proxy servidor (la API key no se expone al navegador). */
+router.get('/trip-map/:matchId', async (req, res) => {
+  const token =
+    req.query.access_token ||
+    (req.headers.authorization?.startsWith('Bearer ')
+      ? req.headers.authorization.slice(7)
+      : null);
+  const user = token ? verifyToken(token) : null;
+  if (!user) {
+    return res.status(401).json({ ok: false, error: 'Inicia sesión para ver el mapa' });
+  }
+  if (!maps.isConfigured()) {
+    return res.status(503).json({ ok: false, error: 'Google Maps no configurado' });
+  }
+  try {
+    const tracking = await buildMatchTracking(req.params.matchId, user);
+    if (!tracking.static_map_url) {
+      return res.status(404).json({
+        ok: false,
+        error:
+          'Sin coordenadas de ruta. La carga debe publicarse eligiendo dirección en Google Maps.',
+      });
+    }
+    const imgRes = await fetch(tracking.static_map_url);
+    if (!imgRes.ok) {
+      const errText = await imgRes.text().catch(() => '');
+      console.error('static map upstream', imgRes.status, errText.slice(0, 200));
+      return res.status(502).json({
+        ok: false,
+        error:
+          'Google rechazó el mapa. Habilita «Maps Static API» en Google Cloud para esta API key.',
+        status: imgRes.status,
+      });
+    }
+    const buf = Buffer.from(await imgRes.arrayBuffer());
+    res.setHeader('Content-Type', imgRes.headers.get('content-type') || 'image/png');
+    res.setHeader('Cache-Control', 'private, max-age=60');
+    res.send(buf);
+  } catch (e) {
+    console.error(e);
+    res.status(e.status || 500).json({ ok: false, error: e.message || 'Error al generar mapa' });
   }
 });
 

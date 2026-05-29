@@ -173,6 +173,13 @@ document.getElementById('carrier-available-toggle')?.addEventListener('change', 
   }
 });
 
+function tripMapImageSrc(matchId, tracking) {
+  if (matchId && typeof Auth !== 'undefined' && Auth.token) {
+    return `/api/maps/trip-map/${encodeURIComponent(matchId)}?access_token=${encodeURIComponent(Auth.token)}`;
+  }
+  return tracking?.static_map_url || null;
+}
+
 function renderTripMapEl(container, tracking) {
   if (!container) return;
   if (!tracking?.tracking_active) {
@@ -182,13 +189,29 @@ function renderTripMapEl(container, tracking) {
   }
   container.hidden = false;
   const updated = formatGpsTime(tracking.carrier_position?.updated_at);
-  const mapBlock = tracking.static_map_url
-    ? `<img class="trip-map-img" src="${tracking.static_map_url}" alt="Mapa del viaje: origen, destino y camión" loading="lazy" />`
-    : `<p class="muted">Mapa no disponible (configura GOOGLE_MAPS_API_KEY en el servidor).</p>`;
+  const mapSrc = tripMapImageSrc(tracking.match_id, tracking);
+  const hasRoute = tracking.route?.origin?.lat != null && tracking.route?.destination?.lat != null;
+  const mapBlock = mapSrc
+    ? `<img class="trip-map-img" src="${mapSrc}" alt="Mapa del viaje: origen, destino y camión" loading="lazy" />`
+    : hasRoute
+      ? `<p class="muted">Mapa no disponible (configura GOOGLE_MAPS_API_KEY en el servidor).</p>`
+      : `<p class="muted">Sin mapa: la carga no tiene coordenadas. Vuelve a publicarla eligiendo origen y destino en Google Maps.</p>`;
   const posNote = tracking.carrier_position
-    ? `<p class="muted trip-map-meta">Camión${updated ? ` · ${updated}` : ''}</p>`
-    : `<p class="muted trip-map-meta">Aún sin posición GPS del transportista. El camión aparecerá cuando comparta ubicación.</p>`;
+    ? `<p class="muted trip-map-meta">Camión en mapa (naranja)${updated ? ` · ${updated}` : ''}</p>`
+    : `<p class="muted trip-map-meta">Origen (verde) y destino (rojo). El camión (naranja) aparece cuando el transportista activa «Disponible» o comparte GPS en ruta.</p>`;
   container.innerHTML = `<div class="trip-map-card">${mapBlock}${posNote}</div>`;
+  const img = container.querySelector('.trip-map-img');
+  if (img) {
+    img.addEventListener('error', () => {
+      img.replaceWith(
+        Object.assign(document.createElement('p'), {
+          className: 'muted trip-map-fallback',
+          textContent:
+            'No se pudo cargar el mapa. En Google Cloud habilita «Maps Static API» para la misma clave que Places.',
+        })
+      );
+    });
+  }
 }
 
 async function refreshActiveTripMap(matchId) {

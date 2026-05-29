@@ -107,6 +107,12 @@ function staticMapUrl({ origin, destination, carrier, size = '640x280' }) {
   url.searchParams.set('maptype', 'roadmap');
   url.searchParams.set('key', apiKey());
   url.searchParams.set('language', 'es');
+  if (origin?.lat != null && destination?.lat != null) {
+    url.searchParams.append(
+      'path',
+      `color:0xf26522|weight:4|${origin.lat},${origin.lng}|${destination.lat},${destination.lng}`
+    );
+  }
   for (const p of parts) {
     url.searchParams.append('markers', p.replace(/^markers=/, ''));
   }

@@ -17,8 +17,31 @@ const router = express.Router();
 
 router.get('/summary', authMiddleware, async (req, res) => {
   try {
-    const role = req.user.role === 'carrier' ? 'carrier' : 'shipper';
-    const penalties = await buildPenaltySummary(repo, role);
+    let penalties;
+    let penalties_error = null;
+    try {
+      penalties = await buildPenaltySummary(repo, req.user);
+    } catch (e) {
+      console.error('buildPenaltySummary', e);
+      penalties_error = e.message || 'Error al calcular multas';
+      const role = req.user.role === 'carrier' ? 'carrier' : 'shipper';
+      penalties = {
+        role,
+        owed: [],
+        owed_to_me: [],
+        paid_history: [],
+        pending_confirmations: [],
+        total_owed_clp: 0,
+        total_receivable_clp: 0,
+        overdue_count: 0,
+        awaiting_confirm_count: 0,
+        blocked_awaiting_confirm: false,
+        blocked_disputed: false,
+        blocked_overdue: false,
+        penalty_due_days: Number(process.env.PENALTY_DUE_DAYS) || 7,
+        penalty_confirm_hours: Number(process.env.PENALTY_CONFIRM_HOURS) || 24,
+      };
+    }
     const operating = await getOperatingStatus(req.user);
 
     let bank = { complete: false, fields: {} };
@@ -41,6 +64,7 @@ router.get('/summary', authMiddleware, async (req, res) => {
     res.json({
       ok: true,
       penalties,
+      penalties_error,
       operating_status: operating,
       bank_account: bank,
       can_generate_charge: bank.complete,

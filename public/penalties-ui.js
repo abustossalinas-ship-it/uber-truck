@@ -13,6 +13,51 @@ const Penalties = {
     return `$${Number(n || 0).toLocaleString('es-CL')} CLP`;
   },
 
+  emptyPenalties() {
+    const role = typeof getActorRole === 'function' ? getActorRole() : 'shipper';
+    return {
+      role,
+      owed: [],
+      owed_to_me: [],
+      paid_history: [],
+      pending_confirmations: [],
+      total_owed_clp: 0,
+      total_receivable_clp: 0,
+      overdue_count: 0,
+      awaiting_confirm_count: 0,
+      penalty_due_days: 7,
+      penalty_confirm_hours: 24,
+    };
+  },
+
+  async fetchSummary() {
+    if (!this.isSessionActive()) return null;
+    try {
+      const res = await fetch('/api/account/summary', { headers: this.headers() });
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        this.summary = {
+          ok: false,
+          error: json.error || 'No se pudo cargar multas',
+          penalties: this.emptyPenalties(),
+          operating_status: { blocked: false, has_debt: false },
+        };
+        return this.summary;
+      }
+      this.summary = { ...json, ok: true };
+      return this.summary;
+    } catch (e) {
+      console.error(e);
+      this.summary = {
+        ok: false,
+        error: 'Sin conexión con el servidor',
+        penalties: this.emptyPenalties(),
+        operating_status: { blocked: false, has_debt: false },
+      };
+      return this.summary;
+    }
+  },
+
   statusPill(p) {
     if (p.status === 'paid') return '<span class="pill pill-ok">Regularizada</span>';
     if (p.status === 'awaiting_confirm') {
@@ -172,24 +217,42 @@ const Penalties = {
     if (!box) return;
     if (!this.isSessionActive()) {
       box.hidden = true;
-      return;
-    }
-    const s = this.summary;
-    if (!s) {
-      box.hidden = true;
+      box.innerHTML = '';
       return;
     }
     box.hidden = false;
-    const p = s.penalties || {};
+    const s = this.summary;
+    if (!s) {
+      box.innerHTML =
+        '<h2>Cuenta y multas</h2><p class="muted">Cargando resumen…</p>';
+      return;
+    }
+    const p = s.penalties || this.emptyPenalties();
+    if (s.ok === false || s.penalties_error) {
+      box.innerHTML = `
+        <h2>Cuenta y multas</h2>
+        <p class="penalty-block-warn"><strong>No se pudo cargar:</strong> ${s.error || s.penalties_error || 'Error'}</p>
+        <p class="muted">Si acabas de desplegar v0.0.52+, ejecuta <code>RUN_024_SUPABASE.sql</code> en Supabase.</p>
+        <button type="button" class="tab tab-sm" id="btn-penalties-retry">Reintentar</button>`;
+      document.getElementById('btn-penalties-retry')?.addEventListener('click', () => this.refresh());
+      return;
+    }
     const rolText =
       typeof window.roleLabel === 'function' ? window.roleLabel(p.role) : p.role;
     const op = s.operating_status || {};
     const confirmH = p.penalty_confirm_hours || 24;
+    const hasAnyPenalty =
+      p.total_owed_clp > 0 ||
+      p.total_receivable_clp > 0 ||
+      p.pending_confirmations?.length ||
+      p.paid_history?.length;
     const blockWarn = op.blocked
       ? `<p class="penalty-block-warn"><strong>Operaciones bloqueadas:</strong> ${op.message || ''}</p>`
       : op.has_debt
         ? `<p class="muted penalty-grace-hint">${op.message || ''}</p>`
-        : '';
+        : !hasAnyPenalty
+          ? '<p class="muted">Sin multas en tus emparejamientos cancelados.</p>'
+          : '';
     const bankWarn = s.bank_required_for_charges
       ? `<p class="penalty-bank-warn">Para <strong>generar un cargo</strong> debes inscribir cuenta bancaria.</p>`
       : '';
@@ -319,6 +382,11 @@ const Penalties = {
       this.summary = null;
       return;
     }
+    const box = document.getElementById('account-penalties-panel');
+    if (box) {
+      box.hidden = false;
+      box.innerHTML = '<h2>Cuenta y multas</h2><p class="muted">Cargando resumen…</p>';
+    }
     await this.fetchSummary();
     this.renderBox();
     this.renderNotifSummary();
@@ -329,21 +397,36 @@ const Penalties = {
     const el = document.getElementById('penalty-block-banner');
     if (!el) return;
     const op = this.summary?.operating_status;
-    if (!op?.blocked && !op?.has_debt) {
+    const p = this.summary?.penalties;
+    const showStrip =
+      op?.blocked ||
+      op?.has_debt ||
+      p?.pending_confirmations?.length ||
+      p?.total_owed_clp > 0;
+    if (!showStrip) {
       el.hidden = true;
+      el.innerHTML = '';
       document.body.classList.remove('penalty-blocked');
       return;
     }
     el.hidden = false;
-    if (op.blocked) document.body.classList.add('penalty-blocked');
+    if (op?.blocked) document.body.classList.add('penalty-blocked');
     else document.body.classList.remove('penalty-blocked');
-    const title =
-      op.block_reason === 'awaiting_confirm'
+    const title = op?.blocked
+      ? op.block_reason === 'awaiting_confirm'
         ? 'Esperando confirmación del acreedor'
-        : 'No puedes tomar nuevos viajes';
-    el.innerHTML = op.blocked
-      ? `<div class="penalty-block-inner"><p><strong>${title}</strong> — ${op.message || ''} <button type="button" class="link-btn" data-scroll-penalties>Ir a multas</button></p></div>`
-      : `<div class="penalty-block-inner"><p>${op.message || ''}</p></div>`;
+        : 'No puedes tomar nuevos viajes'
+      : p?.pending_confirmations?.length
+        ? 'Pagos por confirmar'
+        : 'Multas pendientes';
+    const detail = op?.blocked
+      ? op.message
+      : p?.pending_confirmations?.length
+        ? `Tienes ${p.pending_confirmations.length} pago(s) declarados por confirmar (24 h).`
+        : p?.total_owed_clp > 0
+          ? `Debes ${this.formatClp(p.total_owed_clp)} en multas sugeridas.`
+          : op?.message || '';
+    el.innerHTML = `<div class="penalty-block-inner"><p><strong>${title}</strong> — ${detail || ''} <button type="button" class="link-btn" data-scroll-penalties>Ver detalle</button></p></div>`;
     el.querySelector('[data-scroll-penalties]')?.addEventListener('click', () => {
       document.getElementById('account-penalties-panel')?.scrollIntoView({ behavior: 'smooth' });
     });

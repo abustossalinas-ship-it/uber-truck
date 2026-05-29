@@ -134,12 +134,25 @@ function buildPenaltyItem(match, load, offer) {
   };
 }
 
-async function buildPenaltySummary(repo, userRole) {
-  const { processExpiredClaims } = require('./penalty-payment');
-  await processExpiredClaims();
+async function buildPenaltySummary(repo, user) {
+  const role =
+    user?.role === 'carrier' ? 'carrier' : user?.role === 'shipper' ? 'shipper' : 'shipper';
 
-  const role = userRole === 'carrier' ? 'carrier' : 'shipper';
-  const matches = await repo.list('matches', {});
+  try {
+    const { processExpiredClaims } = require('./penalty-payment');
+    await processExpiredClaims();
+  } catch (e) {
+    console.error('processExpiredClaims', e);
+  }
+
+  const { filterMatchesForUser } = require('./access-scope');
+  const allMatches = await repo.list('matches', {});
+  const matches = user?.sub
+    ? await filterMatchesForUser(allMatches, user)
+    : allMatches.filter((m) => {
+        const debtor = DEBTOR_BY_REASON[m.reason_code];
+        return debtor === role;
+      });
   const owed = [];
   const owedToMe = [];
   const paid_history = [];

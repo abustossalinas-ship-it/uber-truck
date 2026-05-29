@@ -1156,8 +1156,13 @@ body.kyc-pending #btn-create-match {
 }
 
 .account-penalties-panel {
-  margin: 0 1rem 1rem;
+  margin: 0 auto 1rem;
   max-width: 960px;
+  padding: 0 1rem;
+}
+
+.account-penalties-panel:not([hidden]) {
+  display: block;
 }
 
 .account-penalties-panel h2 {
@@ -1742,7 +1747,20 @@ body.kyc-pending #btn-create-match {
 .penalty-block-banner {
   border: 2px solid #c62828;
   background: #ffebee;
-  margin-bottom: 1rem;
+  margin: 0 auto 1rem;
+  max-width: 960px;
+  padding: 0 1rem;
+}
+
+.penalty-block-banner:not([hidden]) {
+  display: block;
+}
+
+.penalty-block-banner .penalty-block-inner {
+  padding: 0.75rem 1rem;
+  border-radius: 10px;
+  border: 1px solid #ef9a9a;
+  background: #fff;
 }
 
 .penalty-block-inner {

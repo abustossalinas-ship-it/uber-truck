@@ -129,9 +129,15 @@ async function processExpiredClaims() {
     const parties = await getMatchPenaltyParties(m);
     if (!parties) continue;
 
-    const updated = await repo.update('matches', m.id, {
-      penalty_payment_status: 'confirm_expired',
-    });
+    let updated;
+    try {
+      updated = await repo.update('matches', m.id, {
+        penalty_payment_status: 'confirm_expired',
+      });
+    } catch (e) {
+      console.error('confirm_expired update', m.id, e.message);
+      continue;
+    }
 
     await logMatchTrip({
       match_id: m.id,
@@ -162,7 +168,9 @@ async function claimPenaltyPaid(matchId, user, note) {
 
   const now = new Date();
   const deadline = new Date(now.getTime() + PENALTY_CONFIRM_HOURS * 60 * 60 * 1000);
-  const updated = await repo.update('matches', matchId, {
+  let updated;
+  try {
+    updated = await repo.update('matches', matchId, {
     penalty_payment_status: 'claimed',
     penalty_claimed_at: now.toISOString(),
     penalty_claimed_by_user_id: user.sub,
@@ -170,7 +178,16 @@ async function claimPenaltyPaid(matchId, user, note) {
     penalty_confirm_deadline_at: deadline.toISOString(),
     penalty_disputed_at: null,
     penalty_dispute_note: null,
-  });
+    });
+  } catch (e) {
+    if (e.message?.includes('penalty_payment_status') || e.code === 'PGRST204') {
+      throw httpError(
+        'Falta migración SQL 024 en Supabase (penalty_payment_status). Ejecuta RUN_024_SUPABASE.sql',
+        503
+      );
+    }
+    throw e;
+  }
 
   await logMatchTrip({
     match_id: matchId,

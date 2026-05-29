@@ -10,10 +10,21 @@ async function getOperatingStatus(user) {
   if (user.role === 'admin') {
     return { blocked: false, has_debt: false, total_owed_clp: 0, overdue_count: 0, role: 'admin' };
   }
-  const role = user.role === 'carrier' ? 'carrier' : 'shipper';
-  const summary = await buildPenaltySummary(repo, role);
+  let summary;
+  try {
+    summary = await buildPenaltySummary(repo, user);
+  } catch (e) {
+    console.error('getOperatingStatus', e);
+    return {
+      blocked: false,
+      has_debt: false,
+      total_owed_clp: 0,
+      overdue_count: 0,
+      role: user.role === 'carrier' ? 'carrier' : 'shipper',
+    };
+  }
   const status = evaluateOperatingBlock(summary);
-  return { ...status, role };
+  return { ...status, role: user.role === 'carrier' ? 'carrier' : 'shipper' };
 }
 
 async function requirePenaltyClear(req, res, next) {

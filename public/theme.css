@@ -1440,6 +1440,25 @@ body.kyc-pending #btn-create-match {
   background: var(--accent-hover);
 }
 
+.admin-kyc-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin: 0.75rem 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+}
+
+.admin-kyc-panel .admin-kyc-list {
+  margin-top: 0.75rem;
+}
+
+.admin-kyc-item .pill-muted {
+  background: var(--brand-gray-100);
+  color: var(--text-muted);
+}
+
 .site-footer {
   text-align: center;
   padding: 1rem;

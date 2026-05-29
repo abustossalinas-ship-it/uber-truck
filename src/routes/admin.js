@@ -23,6 +23,7 @@ router.get('/users', authMiddleware, requireAdmin, async (req, res) => {
     let q = sb
       .from('users')
       .select('id, email, full_name, role, company_name, phone, kyc_status, created_at')
+      .neq('role', 'admin')
       .order('created_at', { ascending: false });
     if (status !== 'all') q = q.eq('kyc_status', status);
     const { data, error } = await q;

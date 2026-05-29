@@ -37,7 +37,12 @@
   <section id="admin-kyc-panel" class="admin-kyc-panel card" hidden>
     <h2>Aprobación de cuentas (admin)</h2>
     <p class="muted">Marketplace semi-curado: solo cuentas <strong>aprobadas</strong> pueden publicar y emparejar.</p>
-    <button type="button" class="btn-secondary" id="admin-kyc-refresh">Actualizar pendientes</button>
+    <nav class="admin-kyc-tabs" id="admin-kyc-tabs" role="tablist" aria-label="Estado KYC">
+      <button type="button" class="tab active" data-admin-kyc-tab="pending" role="tab" aria-selected="true">Pendientes</button>
+      <button type="button" class="tab" data-admin-kyc-tab="approved" role="tab" aria-selected="false">Aprobadas</button>
+      <button type="button" class="tab" data-admin-kyc-tab="rejected" role="tab" aria-selected="false">Rechazadas</button>
+    </nav>
+    <button type="button" class="btn-secondary" id="admin-kyc-refresh">Actualizar lista</button>
     <div id="admin-kyc-list" class="admin-kyc-list"></div>
   </section>
 
@@ -552,7 +557,7 @@
   </div>
 
   <script src="/kyc-ui.js?v=0.0.33"></script>
-  <script src="/admin-ui.js?v=0.0.33"></script>
+  <script src="/admin-ui.js?v=0.0.34"></script>
   <script src="/realtime-ui.js?v=0.0.33"></script>
   <script src="/invite-ui.js?v=0.0.20"></script>
   <script src="/roles-ui.js?v=0.0.19"></script>

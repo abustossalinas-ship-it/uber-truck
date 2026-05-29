@@ -110,6 +110,21 @@ document.getElementById('admin-kyc-tabs')?.addEventListener('click', (e) => {
 
 document.getElementById('admin-kyc-refresh')?.addEventListener('click', refreshAdminKycPanel);
 
+document.getElementById('admin-backfill-owners')?.addEventListener('click', async () => {
+  if (!confirm('¿Vincular cargas y ofertas sin dueño a usuarios con el mismo nombre de empresa?')) return;
+  try {
+    const res = await fetch('/api/admin/backfill-owners', {
+      method: 'POST',
+      headers: await adminHeaders(),
+    });
+    const json = await res.json();
+    alert(json.message || json.error || 'Listo');
+  } catch (e) {
+    console.error(e);
+    alert('No se pudo conectar.');
+  }
+});
+
 document.getElementById('admin-kyc-list')?.addEventListener('click', (e) => {
   const approve = e.target.closest('[data-kyc-approve]');
   const reject = e.target.closest('[data-kyc-reject]');

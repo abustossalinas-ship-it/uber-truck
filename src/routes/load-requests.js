@@ -10,6 +10,7 @@ const { optionalAuth } = require('../lib/optional-auth');
 const { requireAuthIfDb } = require('../lib/require-auth');
 const {
   loadListFilters,
+  filterLoadsForUser,
   assertCanPublishLoad,
   assertCanMatchLoad,
 } = require('../lib/access-scope');
@@ -30,6 +31,7 @@ router.get('/', optionalAuth, async (req, res) => {
   try {
     const filters = loadListFilters(req.user, req.query);
     let rows = await repo.list('load_requests', filters);
+    rows = filterLoadsForUser(rows, req.user);
     const { getReputationIndex, pickRep } = require('../lib/match-ratings');
     const repIndex = await getReputationIndex(repo);
     rows = rows.map((l) => ({
@@ -49,10 +51,11 @@ router.get('/:id/match-suggestions', optionalAuth, async (req, res) => {
     if (!load) return res.status(404).json({ ok: false, error: 'Carga no encontrada' });
     const scopeErr = assertCanMatchLoad(req.user, load);
     if (scopeErr) return res.status(403).json({ ok: false, error: scopeErr });
-    const offerFilters = req.user?.role === 'carrier'
-      ? { carrier_user_id: req.user.sub, status: 'published' }
-      : { status: 'published' };
-    const offers = await repo.list('capacity_offers', offerFilters);
+    const { filterOffersForUser } = require('../lib/access-scope');
+    let offers = await repo.list('capacity_offers', { status: 'published' });
+    if (req.user?.role === 'carrier') {
+      offers = filterOffersForUser(offers, req.user);
+    }
     const { rankOffersForLoad } = require('../lib/match-score');
     const { getReputationIndex, pickRep } = require('../lib/match-ratings');
     const repIndex = await getReputationIndex(repo);
@@ -91,9 +94,8 @@ router.patch('/:id/budget', optionalAuth, ...operatorGate, async (req, res) => {
     if (req.user?.role !== 'shipper' && req.user?.role !== 'admin') {
       return res.status(403).json({ ok: false, error: 'Solo el embarcador puede ajustar el rango' });
     }
-    if (req.user?.role === 'shipper' && load.shipper_user_id && load.shipper_user_id !== req.user.sub) {
-      return res.status(403).json({ ok: false, error: 'No es tu carga' });
-    }
+    const scopeErr = assertCanMatchLoad(req.user, load);
+    if (scopeErr) return res.status(403).json({ ok: false, error: scopeErr });
     const lockErr = await assertCanAdjustLoadBudget(repo, load.id);
     if (lockErr) return res.status(409).json({ ok: false, error: lockErr });
 

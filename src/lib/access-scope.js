@@ -1,6 +1,7 @@
 'use strict';
 
 const repo = require('./repository');
+const { loadBelongsToUser, offerBelongsToUser } = require('./ownership');
 
 /** Filtros de listado según rol (JWT: sub, role, company_name). */
 function loadListFilters(user, query = {}) {
@@ -10,7 +11,7 @@ function loadListFilters(user, query = {}) {
   if (!user) return base;
   if (user.role === 'admin') return base;
   if (user.role === 'shipper') {
-    return { ...base, shipper_user_id: user.sub };
+    return { ...base };
   }
   if (user.role === 'carrier') {
     return { ...base, status: query.status || 'published' };
@@ -25,12 +26,24 @@ function offerListFilters(user, query = {}) {
   if (!user) return base;
   if (user.role === 'admin') return base;
   if (user.role === 'carrier') {
-    return { ...base, carrier_user_id: user.sub };
+    return { ...base, status: query.status || 'published' };
   }
   if (user.role === 'shipper') {
     return { ...base, status: query.status || 'published' };
   }
   return base;
+}
+
+function filterLoadsForUser(rows, user) {
+  if (!user || user.role === 'admin') return rows;
+  if (user.role === 'shipper') return rows.filter((l) => loadBelongsToUser(l, user));
+  return rows;
+}
+
+function filterOffersForUser(rows, user) {
+  if (!user || user.role === 'admin') return rows;
+  if (user.role === 'carrier') return rows.filter((o) => offerBelongsToUser(o, user));
+  return rows;
 }
 
 async function filterMatchesForUser(matches, user) {
@@ -41,15 +54,10 @@ async function filterMatchesForUser(matches, user) {
   const offerById = Object.fromEntries(offers.map((o) => [o.id, o]));
   return matches.filter((m) => {
     if (user.role === 'shipper') {
-      return loadById[m.load_request_id]?.shipper_user_id === user.sub;
+      return loadBelongsToUser(loadById[m.load_request_id], user);
     }
     if (user.role === 'carrier') {
-      const offer = offerById[m.capacity_offer_id];
-      if (!offer) return false;
-      if (offer.carrier_user_id) return offer.carrier_user_id === user.sub;
-      const company = (user.company_name || '').trim();
-      const offerName = (offer.carrier_name || '').trim();
-      return Boolean(company && offerName && company === offerName);
+      return offerBelongsToUser(offerById[m.capacity_offer_id], user);
     }
     return true;
   });
@@ -70,18 +78,16 @@ function assertCanPublishOffer(user) {
 }
 
 function assertCanMatchLoad(user, load) {
-  if (!user) return null;
-  if (user.role === 'admin') return null;
-  if (user.role === 'shipper' && load.shipper_user_id && load.shipper_user_id !== user.sub) {
+  if (!user || user.role === 'admin') return null;
+  if (user.role === 'shipper' && !loadBelongsToUser(load, user)) {
     return 'Solo puedes emparejar cargas de tu empresa';
   }
   return null;
 }
 
 function assertCanMatchOffer(user, offer) {
-  if (!user) return null;
-  if (user.role === 'admin') return null;
-  if (user.role === 'carrier' && offer.carrier_user_id && offer.carrier_user_id !== user.sub) {
+  if (!user || user.role === 'admin') return null;
+  if (user.role === 'carrier' && !offerBelongsToUser(offer, user)) {
     return 'Solo puedes emparejar usando tus ofertas';
   }
   return null;
@@ -90,6 +96,8 @@ function assertCanMatchOffer(user, offer) {
 module.exports = {
   loadListFilters,
   offerListFilters,
+  filterLoadsForUser,
+  filterOffersForUser,
   filterMatchesForUser,
   assertCanPublishLoad,
   assertCanPublishOffer,

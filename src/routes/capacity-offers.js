@@ -8,7 +8,11 @@ const { addressPayload } = require('../lib/geo-fields');
 const { requireMapsAddresses } = require('../lib/geo-validate');
 const { optionalAuth } = require('../lib/optional-auth');
 const { requireAuthIfDb } = require('../lib/require-auth');
-const { offerListFilters, assertCanPublishOffer } = require('../lib/access-scope');
+const {
+  offerListFilters,
+  filterOffersForUser,
+  assertCanPublishOffer,
+} = require('../lib/access-scope');
 const { requireApprovedOperator } = require('../lib/kyc-gate');
 
 const router = express.Router();
@@ -18,6 +22,7 @@ router.get('/', optionalAuth, async (req, res) => {
   try {
     const filters = offerListFilters(req.user, req.query);
     let rows = await repo.list('capacity_offers', filters);
+    rows = filterOffersForUser(rows, req.user);
     const { getReputationIndex, pickRep } = require('../lib/match-ratings');
     const repIndex = await getReputationIndex(repo);
     rows = rows.map((o) => ({

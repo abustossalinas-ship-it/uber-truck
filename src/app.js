@@ -82,6 +82,7 @@ app.get('/health', async (_req, res) => {
       'trip-events-realtime',
       'gps-tracking',
       'carrier-available',
+      'password-reset',
       'buscando-camiones',
     ],
     deploy_manifest: manifest,

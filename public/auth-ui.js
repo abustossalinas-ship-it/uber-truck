@@ -36,7 +36,7 @@ const Auth = {
     localStorage.removeItem('ut_user');
     if (typeof Comms !== 'undefined') Comms.resetUi();
     if (typeof Penalties !== 'undefined') Penalties.resetUi();
-    setAuthMode(false);
+    setAuthMode(false, false);
     clearAuthError();
     this.render();
   },
@@ -46,6 +46,7 @@ const Auth = {
     const btnReg = document.getElementById('btn-register');
     const label = document.getElementById('auth-user');
     if (!btn) return;
+    const btnChangePw = document.getElementById('btn-change-password');
     if (this.user) {
       label.hidden = false;
       const rol =
@@ -54,10 +55,13 @@ const Auth = {
       label.textContent = `${this.user.name || this.user.email} · ${rol}${org}`;
       btn.textContent = 'Salir';
       if (btnReg) btnReg.hidden = true;
+      if (btnChangePw) btnChangePw.hidden = false;
     } else {
       label.hidden = true;
       btn.textContent = 'Ingresar';
       if (btnReg) btnReg.hidden = false;
+      if (btnChangePw) btnChangePw.hidden = true;
+      document.getElementById('change-password-panel')?.setAttribute('hidden', '');
     }
     if (typeof renderKycBanner === 'function') renderKycBanner();
     if (typeof refreshAdminKycPanel === 'function') refreshAdminKycPanel();
@@ -77,6 +81,7 @@ const Auth = {
 };
 
 let authRegisterMode = false;
+let authForgotMode = false;
 
 function showAuthError(message) {
   const el = document.getElementById('auth-error');
@@ -124,27 +129,55 @@ function setRegisterFieldsRequired(register) {
   });
 }
 
-function setAuthMode(register) {
+function setAuthMode(register, forgot = false) {
   authRegisterMode = register;
+  authForgotMode = forgot;
   const panel = document.getElementById('auth-panel');
   const title = document.getElementById('auth-title');
-  const submit = document.getElementById('auth-submit');
+  const formLogin = document.getElementById('form-auth');
+  const formForgot = document.getElementById('form-forgot');
   const toggle = document.getElementById('auth-toggle-mode');
+  const forgotLink = document.getElementById('auth-forgot-link');
+  const backLogin = document.getElementById('auth-back-login');
   if (!panel) return;
-  panel.classList.toggle('is-register', register);
-  setRegisterFieldsRequired(register);
+  panel.classList.toggle('is-register', register && !forgot);
+  panel.classList.toggle('is-forgot', forgot);
+  setRegisterFieldsRequired(register && !forgot);
   clearAuthError();
-  title.textContent = register ? 'Crear cuenta empresa' : 'Iniciar sesión';
-  submit.textContent = register ? 'Registrarse' : 'Entrar';
-  if (toggle) toggle.textContent = register ? 'Ya tengo cuenta — iniciar sesión' : '¿No tienes cuenta? Crear cuenta';
-  if (register) updateRegisterLabels();
+  const forgotErr = document.getElementById('auth-forgot-error');
+  if (forgotErr) {
+    forgotErr.textContent = '';
+    forgotErr.hidden = true;
+  }
+  if (forgot) {
+    title.textContent = 'Recuperar contraseña';
+    if (formLogin) formLogin.hidden = true;
+    if (formForgot) formForgot.hidden = false;
+    if (toggle) toggle.hidden = true;
+    if (forgotLink) forgotLink.hidden = true;
+    if (backLogin) backLogin.hidden = false;
+  } else {
+    if (formLogin) formLogin.hidden = false;
+    if (formForgot) formForgot.hidden = true;
+    if (toggle) {
+      toggle.hidden = false;
+      toggle.textContent = register ? 'Ya tengo cuenta — iniciar sesión' : '¿No tienes cuenta? Crear cuenta';
+    }
+    if (forgotLink) forgotLink.hidden = register;
+    if (backLogin) backLogin.hidden = true;
+    title.textContent = register ? 'Crear cuenta empresa' : 'Iniciar sesión';
+    const submit = document.getElementById('auth-submit');
+    if (submit) submit.textContent = register ? 'Registrarse' : 'Entrar';
+    if (register) updateRegisterLabels();
+  }
 }
 
-function openAuthPanel(register = false) {
+function openAuthPanel(register = false, forgot = false) {
   const panel = document.getElementById('auth-panel');
   if (!panel) return;
-  setAuthMode(register);
+  setAuthMode(register, forgot);
   panel.hidden = false;
+  document.getElementById('change-password-panel')?.setAttribute('hidden', '');
   panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
@@ -170,7 +203,118 @@ document.getElementById('btn-register')?.addEventListener('click', () => {
 });
 
 document.getElementById('auth-toggle-mode')?.addEventListener('click', () => {
-  openAuthPanel(!authRegisterMode);
+  openAuthPanel(!authRegisterMode, false);
+});
+
+document.getElementById('auth-forgot-link')?.addEventListener('click', () => {
+  const email = document.querySelector('#form-auth [name="email"]')?.value;
+  openAuthPanel(false, true);
+  const forgotEmail = document.querySelector('#form-forgot [name="email"]');
+  if (forgotEmail && email) forgotEmail.value = email;
+});
+
+document.getElementById('auth-back-login')?.addEventListener('click', () => {
+  openAuthPanel(false, false);
+});
+
+document.getElementById('form-forgot')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errEl = document.getElementById('auth-forgot-error');
+  const btn = document.getElementById('auth-forgot-submit');
+  const email = new FormData(e.target).get('email');
+  if (errEl) errEl.hidden = true;
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Enviando…';
+  }
+  try {
+    const res = await fetch('/api/auth/forgot-password', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    });
+    const json = await res.json();
+    if (!res.ok && res.status !== 200) {
+      if (errEl) {
+        errEl.textContent = json.error || 'No se pudo enviar';
+        errEl.hidden = false;
+      }
+      return;
+    }
+    let msg = json.message || 'Revisa tu correo.';
+    if (json.dev_reset_url) {
+      msg += `\n\n[Desarrollo] Enlace directo:\n${json.dev_reset_url}`;
+    }
+    alert(msg);
+    openAuthPanel(false, false);
+  } catch (err) {
+    console.error(err);
+    if (errEl) {
+      errEl.textContent = 'No se pudo conectar.';
+      errEl.hidden = false;
+    }
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = 'Enviar enlace';
+    }
+  }
+});
+
+document.getElementById('btn-change-password')?.addEventListener('click', () => {
+  if (!Auth.user) return;
+  document.getElementById('auth-panel')?.setAttribute('hidden', '');
+  const panel = document.getElementById('change-password-panel');
+  if (panel) {
+    panel.hidden = false;
+    panel.removeAttribute('hidden');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+});
+
+document.getElementById('change-password-cancel')?.addEventListener('click', () => {
+  document.getElementById('change-password-panel')?.setAttribute('hidden', '');
+});
+
+document.getElementById('form-change-password')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const errEl = document.getElementById('change-password-error');
+  const fd = new FormData(e.target);
+  const current = fd.get('current_password');
+  const next = fd.get('new_password');
+  const confirm = fd.get('new_password_confirm');
+  if (next !== confirm) {
+    if (errEl) {
+      errEl.textContent = 'La nueva contraseña y la repetición no coinciden.';
+      errEl.hidden = false;
+    }
+    return;
+  }
+  if (errEl) errEl.hidden = true;
+  try {
+    const res = await fetch('/api/auth/change-password', {
+      method: 'POST',
+      headers: Auth.headers(),
+      body: JSON.stringify({ current_password: current, new_password: next }),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      if (errEl) {
+        errEl.textContent = json.error || 'Error';
+        errEl.hidden = false;
+      }
+      return;
+    }
+    alert(json.message || 'Contraseña actualizada.');
+    e.target.reset();
+    document.getElementById('change-password-panel')?.setAttribute('hidden', '');
+  } catch (err) {
+    console.error(err);
+    if (errEl) {
+      errEl.textContent = 'No se pudo conectar.';
+      errEl.hidden = false;
+    }
+  }
 });
 
 const formAuth = document.getElementById('form-auth');
@@ -262,5 +406,5 @@ formAuth?.addEventListener('submit', async (e) => {
   }
 });
 
-setAuthMode(false);
+setAuthMode(false, false);
 Auth.render();

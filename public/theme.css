@@ -1422,6 +1422,31 @@ body.kyc-pending #btn-create-match {
   background: var(--accent-hover);
 }
 
+.auth-login-footer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1rem;
+  align-items: center;
+}
+
+.auth-panel.is-forgot #form-auth {
+  display: none;
+}
+
+.auth-forgot {
+  margin-top: 0.5rem;
+}
+
+#change-password-panel form {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+#change-password-panel .btn-secondary {
+  margin-top: 0.35rem;
+}
+
 .carrier-presence {
   margin-bottom: 1rem;
 }

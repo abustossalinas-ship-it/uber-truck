@@ -27,6 +27,7 @@
       <span id="auth-user" class="auth-user muted" hidden></span>
       <button type="button" class="tab tab-sm" id="btn-auth">Ingresar</button>
       <button type="button" class="tab tab-sm tab-outline" id="btn-register">Crear cuenta</button>
+      <button type="button" class="tab tab-sm tab-outline" id="btn-change-password" hidden>Cambiar clave</button>
     </div>
   </header>
 
@@ -99,9 +100,33 @@
       <input name="admin_key" id="auth-admin-key" class="register-only admin-only" hidden autocomplete="off" />
       <button type="submit" id="auth-submit">Entrar</button>
     </form>
-    <p class="muted">
+    <form id="form-forgot" class="auth-forgot" hidden>
+      <p class="muted">Te enviaremos un enlace a tu correo (válido 1 hora).</p>
+      <label>Email de tu cuenta</label>
+      <input name="email" type="email" required autocomplete="username" />
+      <p id="auth-forgot-error" class="auth-error" role="alert" hidden></p>
+      <button type="submit" id="auth-forgot-submit">Enviar enlace</button>
+    </form>
+    <p class="muted auth-login-footer">
+      <button type="button" class="link-btn login-only" id="auth-forgot-link">¿Olvidaste tu contraseña?</button>
       <button type="button" class="link-btn" id="auth-toggle-mode">Crear cuenta</button>
+      <button type="button" class="link-btn forgot-only" id="auth-back-login" hidden>Volver a iniciar sesión</button>
     </p>
+  </div>
+
+  <div id="change-password-panel" class="auth-panel card" hidden>
+    <h2>Cambiar contraseña</h2>
+    <form id="form-change-password">
+      <label>Contraseña actual</label>
+      <input name="current_password" type="password" minlength="6" required autocomplete="current-password" />
+      <label>Nueva contraseña</label>
+      <input name="new_password" type="password" minlength="6" required autocomplete="new-password" />
+      <label>Repetir nueva contraseña</label>
+      <input name="new_password_confirm" type="password" minlength="6" required autocomplete="new-password" />
+      <p id="change-password-error" class="auth-error" role="alert" hidden></p>
+      <button type="submit">Actualizar contraseña</button>
+      <button type="button" class="btn-secondary" id="change-password-cancel">Cancelar</button>
+    </form>
   </div>
 
   <div id="active-trip-banner" class="active-trip-banner" hidden></div>
@@ -575,7 +600,7 @@
   <script src="/role-shell-ui.js?v=0.0.27"></script>
   <script src="/maps-ui.js?v=0.0.24"></script>
   <script src="/load-budget-ui.js?v=0.0.25"></script>
-  <script src="/auth-ui.js?v=0.0.21"></script>
+  <script src="/auth-ui.js?v=0.0.38"></script>
   <script src="/tracking-ui.js?v=0.0.37"></script>
   <script src="/penalties-ui.js?v=0.0.19"></script>
   <script src="/comms-ui.js?v=0.0.19"></script>

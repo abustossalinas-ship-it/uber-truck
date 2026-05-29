@@ -230,12 +230,12 @@ router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
     if (carrierOffer != null && role === 'carrier') {
       try {
         const parties = await getMatchParties(repo, row);
-        await comms.addNotification({
+        await comms.notifyPriceOffer({
           match_id: row.id,
           for_role: 'shipper',
-          type: 'price_offer',
-          title: 'Nueva oferta de precio',
-          body: `${parties?.carrier_name || 'Transportista'} ofrece $${carrierOffer.toLocaleString('es-CL')} CLP.`,
+          carrier_name: parties?.carrier_name,
+          amount_clp: carrierOffer,
+          is_update: false,
         });
       } catch (notifyErr) {
         console.error('match notification failed', notifyErr);
@@ -364,12 +364,12 @@ router.patch('/:id/carrier-offer', optionalAuth, ...operatorGate, async (req, re
       }
     }
     const parties = await getMatchParties(repo, match);
-    await comms.addNotification({
+    await comms.notifyPriceOffer({
       match_id: match.id,
       for_role: 'shipper',
-      type: 'price_offer',
-      title: 'Oferta de precio actualizada',
-      body: `${parties?.carrier_name || 'Transportista'} ofrece $${amount.toLocaleString('es-CL')} CLP.`,
+      carrier_name: parties?.carrier_name,
+      amount_clp: amount,
+      is_update: true,
     });
     const rangeMsg = outsideRangeMessages(
       amount,

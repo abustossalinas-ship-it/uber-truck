@@ -88,8 +88,19 @@ router.get('/notifications/list', optionalAuth, async (req, res) => {
         if (!n.read_at) await comms.markNotificationRead(n.id);
         continue;
       }
-      visible.push(n);
+      let row = n;
+      if (n.type === 'price_offer' && match.carrier_offer_clp != null) {
+        const parties = await getMatchParties(repo, match);
+        const name = parties?.carrier_name || 'Transportista';
+        const amt = Number(match.carrier_offer_clp);
+        row = {
+          ...n,
+          body: `${name} ofrece $${amt.toLocaleString('es-CL')} CLP.`,
+        };
+      }
+      visible.push(row);
     }
+    visible.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     const unread = visible.filter((n) => !n.read_at).length;
     res.json({ ok: true, data: visible, unread });
   } catch (e) {

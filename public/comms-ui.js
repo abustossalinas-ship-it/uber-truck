@@ -70,7 +70,7 @@ const Comms = {
     const json = await fetch('/api/comms/notifications/list', {
       headers: this.headers(),
     }).then((r) => r.json());
-    const rows = json.data || [];
+    const rows = (json.data || []).slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     list.innerHTML =
       rows.length === 0
         ? '<p class="muted">Sin notificaciones.</p>'

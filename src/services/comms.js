@@ -92,6 +92,60 @@ async function listNotifications(forRole) {
   return (data || []).map(rowToApi);
 }
 
+async function updateNotification(id, patch) {
+  if (useJson()) {
+    const store = readJsonComms();
+    const n = store.match_notifications.find((x) => x.id === id);
+    if (!n) return null;
+    if (patch.title != null) n.title = patch.title;
+    if (patch.body != null) n.body = patch.body;
+    writeJsonComms(store);
+    return rowToApi(n);
+  }
+  const sb = supabase.getClient();
+  const { data, error } = await sb
+    .from('match_notifications')
+    .update(patch)
+    .eq('id', id)
+    .select()
+    .single();
+  if (error) throw error;
+  return rowToApi(data);
+}
+
+/**
+ * Una sola notificación de precio vigente por match: actualiza el monto si ya hay una sin leer.
+ */
+async function notifyPriceOffer({ match_id, for_role, carrier_name, amount_clp, is_update }) {
+  const amount = Number(amount_clp);
+  const title = is_update ? 'Oferta de precio actualizada' : 'Nueva oferta de precio';
+  const body = `${carrier_name || 'Transportista'} ofrece $${amount.toLocaleString('es-CL')} CLP.`;
+
+  const existing = await listNotifications(for_role);
+  const unreadPrice = existing.filter(
+    (n) => n.match_id === match_id && n.type === 'price_offer' && !n.read_at
+  );
+
+  if (unreadPrice.length > 0) {
+    const sorted = [...unreadPrice].sort(
+      (a, b) => new Date(b.created_at) - new Date(a.created_at)
+    );
+    const primary = sorted[0];
+    for (let i = 1; i < sorted.length; i++) {
+      await markNotificationRead(sorted[i].id);
+    }
+    return updateNotification(primary.id, { title, body });
+  }
+
+  return addNotification({
+    match_id,
+    for_role,
+    type: 'price_offer',
+    title,
+    body,
+  });
+}
+
 async function addNotification({ match_id, for_role, type, title, body }) {
   const existing = await listNotifications(for_role);
   const dup = existing.find(
@@ -180,6 +234,8 @@ module.exports = {
   addMessage,
   listNotifications,
   addNotification,
+  updateNotification,
+  notifyPriceOffer,
   markNotificationRead,
   markAllReadForMatch,
   unreadCount,

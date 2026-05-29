@@ -219,6 +219,45 @@ function isOutsideBudget(m) {
   return false;
 }
 
+/** Detecta ofertas muy bajas vs rango (ej. 350 en vez de 350000). */
+function suggestOfferTypoFix(amount, budgetMin, budgetMax) {
+  const n = Number(amount);
+  const min = budgetMin != null ? Number(budgetMin) : null;
+  const max = budgetMax != null ? Number(budgetMax) : null;
+  if (!min || !Number.isFinite(n) || n <= 0) return null;
+  if (n >= min * 0.25) return null;
+  for (const mult of [10, 100, 1000]) {
+    const c = n * mult;
+    if (c >= min * 0.85 && (max == null || c <= max * 1.15)) return c;
+  }
+  return null;
+}
+
+async function promptCarrierOfferAmount(match, currentOffer) {
+  const cur = currentOffer != null ? String(currentOffer) : '';
+  const hint = suggestOfferTypoFix(cur, match.budget_min_clp, match.budget_max_clp);
+  const defaultVal = hint ? String(hint) : cur;
+  const range = formatBudgetRange(match.budget_min_clp, match.budget_max_clp);
+  let msg = `Nuevo monto de tu oferta en CLP.\n\nRango publicado del embarcador: ${range}.`;
+  if (hint && Number(cur) !== hint) {
+    msg += `\n\n¿Quisiste decir $${hint.toLocaleString('es-CL')}? (detectamos un posible error de ceros).`;
+  }
+  const val = prompt(msg, defaultVal);
+  if (val === null) return null;
+  const amount = Number(String(val).replace(/\D/g, ''));
+  if (!amount || amount < 1) {
+    alert('Indica un monto válido en CLP.');
+    return null;
+  }
+  if (hint && amount === Number(cur) && Number(cur) < (match.budget_min_clp || 0) * 0.25) {
+    const useFix = confirm(
+      `Tu oferta ($${amount.toLocaleString('es-CL')}) está muy por debajo del rango.\n\n¿Usar $${hint.toLocaleString('es-CL')} CLP?`
+    );
+    if (useFix) return hint;
+  }
+  return amount;
+}
+
 function buildMatchPriceBox(m) {
   const role = getActorRole() === 'carrier' ? 'carrier' : 'shipper';
   const range = formatBudgetRange(m.budget_min_clp, m.budget_max_clp);
@@ -231,10 +270,11 @@ function buildMatchPriceBox(m) {
   if (m.carrier_offer_clp) {
     html += `<p>Oferta transportista: <strong>$${Number(m.carrier_offer_clp).toLocaleString('es-CL')} CLP</strong></p>`;
     if (outside) {
+      const typo = role === 'carrier' ? suggestOfferTypoFix(m.carrier_offer_clp, m.budget_min_clp, m.budget_max_clp) : null;
       html +=
         role === 'shipper'
           ? `<p class="match-price-outside">Fuera de tu rango publicado. Puedes <strong>aceptar</strong> igual o <strong>ampliar el rango</strong> si no cerraste con otro transportista.</p>`
-          : `<p class="match-price-outside">Fuera del rango del embarcador (referencia). Tu oferta sigue válida por peso, urgencia o ruta.</p>`;
+          : `<p class="match-price-outside">Fuera del rango del embarcador.${typo ? ` ¿Quisiste <strong>$${typo.toLocaleString('es-CL')}</strong>?` : ''} Usa <strong>Corregir oferta</strong> para actualizar el monto.</p>`;
     }
     if (role === 'shipper') {
       html += `<div class="match-price-cta"><button type="button" class="btn-accept-match" data-action="accept_offer" data-id="${m.id}">Aceptar precio y confirmar match</button></div>`;
@@ -243,8 +283,11 @@ function buildMatchPriceBox(m) {
       }
     } else {
       html += `<p class="muted">Esperando que el embarcador acepte tu oferta.</p>`;
-      html += `<input type="number" class="match-offer-input" data-id="${m.id}" min="1" step="1000" value="${m.carrier_offer_clp}" />`;
-      html += `<button type="button" class="btn-secondary" data-action="offer_price" data-id="${m.id}">Actualizar oferta</button>`;
+      html += `<div class="match-price-cta match-carrier-offer-cta">`;
+      html += `<button type="button" class="btn-secondary" data-action="fix_offer" data-id="${m.id}" data-offer="${m.carrier_offer_clp}">Corregir oferta (CLP)</button>`;
+      html += `</div>`;
+      html += `<input type="number" class="match-offer-input" data-id="${m.id}" min="1" step="1000" value="${m.carrier_offer_clp}" aria-label="Monto oferta CLP" />`;
+      html += `<button type="button" class="btn-secondary" data-action="offer_price" data-id="${m.id}">Guardar monto del cuadro</button>`;
     }
   } else if (role === 'carrier') {
     html += `<input type="number" class="match-offer-input" data-id="${m.id}" min="1" step="1000" placeholder="Tu oferta CLP" />`;
@@ -327,7 +370,10 @@ function buildMatchActions(m) {
       html += `<button type="button" class="btn-secondary" data-action="change_offer" data-load-id="${m.load_request_id}" data-offer-id="${m.capacity_offer_id}" data-id="${m.id}" data-price="${m.agreed_price_clp || ''}">Cambiar oferta</button>`;
     }
     if (role === 'carrier') {
-      html += `<button type="button" class="btn-secondary" data-action="reject" data-id="${m.id}" data-phase="proposed" data-price="${m.agreed_price_clp || ''}">Rechazar</button>`;
+      if (m.carrier_offer_clp) {
+        html += `<button type="button" class="btn-secondary" data-action="fix_offer" data-id="${m.id}" data-offer="${m.carrier_offer_clp}">Corregir oferta</button>`;
+      }
+      html += `<button type="button" class="btn-secondary" data-action="reject" data-id="${m.id}" data-phase="proposed" data-price="${m.agreed_price_clp || ''}">Rechazar propuesta</button>`;
     }
   }
   if (m.status === 'accepted' || m.status === 'in_progress') {
@@ -928,6 +974,7 @@ async function refreshBoard() {
   const offerById = Object.fromEntries((offers.data || []).map((o) => [o.id, o]));
 
   const matchRows = matches.data || [];
+  window._boardMatchesById = Object.fromEntries(matchRows.map((m) => [m.id, m]));
   matchRows.forEach((m) => {
     const offer = offerById[m.capacity_offer_id];
     if (offer) m._offerName = offer.carrier_name;
@@ -1300,18 +1347,31 @@ $('list-matches').addEventListener('click', async (e) => {
     }
     return;
   }
-  if (action === 'offer_price') {
-    const input = document.querySelector(`.match-offer-input[data-id="${id}"]`);
-    const amount = input?.value;
-    if (!amount) {
-      alert('Ingresa el monto en CLP');
-      return;
+  if (action === 'fix_offer' || action === 'offer_price') {
+    const match = window._boardMatchesById?.[id];
+    let amount;
+    if (action === 'fix_offer' && match) {
+      amount = await promptCarrierOfferAmount(match, btn.dataset.offer || match.carrier_offer_clp);
+      if (amount == null) return;
+    } else {
+      const input = document.querySelector(`.match-offer-input[data-id="${id}"]`);
+      amount = input?.value;
+      if (!amount) {
+        alert('Ingresa el monto en CLP o usa «Corregir oferta».');
+        return;
+      }
+      amount = Number(amount);
     }
-    const json = await API.patchCarrierOffer(id, amount);
-    if (!json.ok) alert(json.error || 'Error');
-    else {
-      alert(json.range_message || json.message || 'Oferta enviada');
-      refreshBoard();
+    if (!beginMatchAction(btn)) return;
+    try {
+      const json = await API.patchCarrierOffer(id, amount);
+      if (!json.ok) alert(json.error || 'Error');
+      else {
+        alert(json.range_message || json.message || 'Oferta actualizada');
+        await refreshBoard();
+      }
+    } finally {
+      endMatchAction(btn);
     }
     return;
   }

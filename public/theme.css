@@ -758,6 +758,14 @@ select.offer-picked {
   color: var(--brand, #f26522);
 }
 
+.match-carrier-offer-cta {
+  margin: 0.5rem 0;
+}
+
+.match-carrier-offer-cta .btn-secondary {
+  font-weight: 600;
+}
+
 .match-role-hint,
 .match-cancel-hint {
   width: 100%;

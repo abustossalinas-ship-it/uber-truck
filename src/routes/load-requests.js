@@ -26,9 +26,10 @@ const { buildLoadTimingPayload } = require('../lib/load-time-estimate');
 const { buildLoadScheduleFields } = require('../lib/trip-schedule');
 const { rankProposalsForLoad, RANK_MODES } = require('../lib/proposal-ranking');
 const { requireApprovedOperator } = require('../lib/kyc-gate');
+const { requirePenaltyClear } = require('../lib/penalty-gate');
 
 const router = express.Router();
-const operatorGate = [requireAuthIfDb, requireApprovedOperator];
+const operatorGate = [requireAuthIfDb, requireApprovedOperator, requirePenaltyClear];
 
 router.get('/', optionalAuth, async (req, res) => {
   try {

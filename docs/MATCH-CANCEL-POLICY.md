@@ -62,8 +62,14 @@ Las multas son **sugeridas** y quedan registradas para acuerdo entre partes. Ube
 
 **Transportista:** no hay botón de cancelar; usar **Reportar incidente** o acuerdo mutuo vía embarcador.
 
+## Multas — plazo y bloqueo (v0.0.50)
+
+- Plazo por defecto **7 días** (`PENALTY_DUE_DAYS`) desde la cancelación.
+- Con multa **vencida**, el deudor no puede publicar carga/oferta, emparejar ni activar «disponible».
+- Se abre **caso de ayuda** con moderador (admin). Ver `docs/PENALTY-AND-SUPPORT.md`.
+
 ## Próximos hitos (no MVP)
 
-- Cobro / garantía integrada.
+- Cobro / garantía integrada y desbloqueo al marcar «pagada».
 - Strikes automáticos en reputación tras cancelaciones con multa.
 - Campo obligatorio `needed_by` en formulario de carga.

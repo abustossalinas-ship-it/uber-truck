@@ -41,12 +41,14 @@ const { copyBudgetFromLoad, outsideRangeMessages } = require('../lib/match-price
 const { enrichMatchesWithRatings } = require('../lib/match-ratings');
 const { requireAuthIfDb } = require('../lib/require-auth');
 const { requireApprovedOperator } = require('../lib/kyc-gate');
+const { requirePenaltyClear } = require('../lib/penalty-gate');
+const { openCaseForCancelledMatch } = require('../lib/support-cases');
 const { logMatchTrip } = require('../lib/match-trip-log');
 const { listTripEvents } = require('../lib/trip-events');
 const { buildMatchTracking } = require('../lib/match-tracking');
 
 const router = express.Router();
-const operatorGate = [requireAuthIfDb, requireApprovedOperator];
+const operatorGate = [requireAuthIfDb, requireApprovedOperator, requirePenaltyClear];
 
 const MATCH_TRANSITIONS = {
   proposed: ['accepted', 'cancelled'],
@@ -563,12 +565,21 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
         payload: { action, reason_code: req.body?.reason_code || null },
       });
       const repNote = reputationMessage(reason);
+      let support_case = null;
+      if (action === 'cancel' && penalty?.type === 'fee_suggested' && penalty?.amount_clp) {
+        support_case = await openCaseForCancelledMatch(updated, role, penalty);
+      }
       return res.json({
         ok: true,
         data: updated,
         message: cancelMessage(action),
         penalty,
         reputation_note: repNote,
+        support_case,
+        support_hint:
+          support_case?.id
+            ? 'Se abrió un caso de ayuda. Usa «Ayuda / revisión» en Cuenta y multas para aportar antecedentes.'
+            : null,
       });
     }
 

@@ -760,7 +760,15 @@ async function submitCancelModal(e) {
   if (json.reputation_note) {
     msg += `\n\n${json.reputation_note}`;
   }
+  if (json.support_hint) {
+    msg += `\n\n${json.support_hint}`;
+  }
   alert(msg);
+  if (json.support_case?.id && typeof SupportUI !== 'undefined') {
+    if (confirm('¿Abrir el chat de ayuda / moderación de este caso ahora?')) {
+      SupportUI.openDrawer(json.support_case.id, json.support_case.subject);
+    }
+  }
   if (typeof Comms !== 'undefined') Comms.refreshBell();
   if (json.data?.status === 'cancelled') {
     $('matches-history-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'start' });

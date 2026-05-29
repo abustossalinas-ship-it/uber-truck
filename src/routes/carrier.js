@@ -3,6 +3,7 @@
 const express = require('express');
 const { authMiddleware } = require('../lib/auth');
 const { requireApprovedOperator } = require('../lib/kyc-gate');
+const { requirePenaltyClearUnlessGoingOffline } = require('../lib/penalty-gate');
 const {
   getUserPresence,
   setCarrierAvailability,
@@ -36,6 +37,7 @@ router.patch(
   authMiddleware,
   requireCarrier,
   requireApprovedOperator,
+  requirePenaltyClearUnlessGoingOffline,
   async (req, res) => {
     const { is_available, lat, lng } = req.body || {};
     if (typeof is_available !== 'boolean') {

@@ -36,6 +36,7 @@ const Penalties = {
           <strong>${p.pair}</strong>
           <p>${this.formatClp(p.amount_clp)} · vence ${due} ${late}</p>
           <p class="muted">${p.reason_summary || p.reason_code || ''}</p>
+          <button type="button" class="tab tab-sm" data-open-support="${p.match_id}" data-support-subject="Multa ${this.formatClp(p.amount_clp)}">Ayuda / revisión</button>
         </div>`;
       })
       .join('');
@@ -57,6 +58,12 @@ const Penalties = {
     const p = s.penalties || {};
     const rolText =
       typeof window.roleLabel === 'function' ? window.roleLabel(p.role) : p.role;
+    const op = s.operating_status || {};
+    const blockWarn = op.blocked
+      ? `<p class="penalty-block-warn"><strong>Operaciones bloqueadas:</strong> ${op.message || 'Multas vencidas. Regulariza o abre un caso de ayuda.'}</p>`
+      : op.has_debt
+        ? `<p class="muted penalty-grace-hint">${op.message || ''}</p>`
+        : '';
     const bankWarn = s.bank_required_for_charges
       ? `<p class="penalty-bank-warn">Para <strong>generar un cargo</strong> debes inscribir cuenta bancaria (obligatorio si tienes multas pendientes).</p>`
       : '';
@@ -66,7 +73,8 @@ const Penalties = {
 
     box.innerHTML = `
       <h2>Cuenta y multas</h2>
-      <p class="muted">Resumen para ${rolText || 'tu cuenta'}. Multas sugeridas según cancelaciones.</p>
+      <p class="muted">Resumen para ${rolText || 'tu cuenta'}. Multas sugeridas según cancelaciones. Plazo ${p.penalty_due_days || 7} días; después se bloquean nuevas cargas/ofertas/viajes.</p>
+      ${blockWarn}
       ${bankWarn}
       <div class="penalty-grid">
         <section>
@@ -173,6 +181,27 @@ const Penalties = {
     await this.fetchSummary();
     this.renderBox();
     this.renderNotifSummary();
+    this.renderBlockBanner();
+  },
+
+  renderBlockBanner() {
+    const el = document.getElementById('penalty-block-banner');
+    if (!el) return;
+    const op = this.summary?.operating_status;
+    if (!op?.blocked && !op?.has_debt) {
+      el.hidden = true;
+      document.body.classList.remove('penalty-blocked');
+      return;
+    }
+    el.hidden = false;
+    if (op.blocked) document.body.classList.add('penalty-blocked');
+    else document.body.classList.remove('penalty-blocked');
+    el.innerHTML = op.blocked
+      ? `<div class="penalty-block-inner"><p><strong>No puedes tomar nuevos viajes</strong> — multas vencidas (${this.formatClp(op.total_owed_clp)}). Regulariza o abre <button type="button" class="link-btn" data-scroll-penalties>ayuda / revisión</button>.</p></div>`
+      : `<div class="penalty-block-inner"><p>${op.message || ''}</p></div>`;
+    el.querySelector('[data-scroll-penalties]')?.addEventListener('click', () => {
+      document.getElementById('account-penalties-panel')?.scrollIntoView({ behavior: 'smooth' });
+    });
   },
 
   resetUi() {

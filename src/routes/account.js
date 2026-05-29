@@ -5,6 +5,7 @@ const supabase = require('../services/supabase');
 const repo = require('../lib/repository');
 const { authMiddleware } = require('../lib/auth');
 const { buildPenaltySummary, bankAccountFromUser } = require('../lib/penalty-ledger');
+const { getOperatingStatus } = require('../lib/penalty-gate');
 
 const router = express.Router();
 
@@ -12,6 +13,7 @@ router.get('/summary', authMiddleware, async (req, res) => {
   try {
     const role = req.user.role === 'carrier' ? 'carrier' : 'shipper';
     const penalties = await buildPenaltySummary(repo, role);
+    const operating = await getOperatingStatus(req.user);
 
     let bank = { complete: false, fields: {} };
     if (supabase.isConfigured()) {
@@ -33,10 +35,11 @@ router.get('/summary', authMiddleware, async (req, res) => {
     res.json({
       ok: true,
       penalties,
+      operating_status: operating,
       bank_account: bank,
       can_generate_charge: bank.complete,
       bank_required_for_charges: needsBank,
-      note: 'Multas sugeridas; cobro automático en fase posterior.',
+      note: 'Multas sugeridas; cobro automático en fase posterior. Tras el plazo, operaciones bloqueadas hasta regularizar.',
     });
   } catch (e) {
     console.error(e);

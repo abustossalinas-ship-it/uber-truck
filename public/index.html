@@ -34,6 +34,7 @@
   <section id="account-penalties-panel" class="account-penalties-panel card" hidden></section>
 
   <section id="kyc-banner" class="kyc-banner card" hidden aria-live="polite"></section>
+  <section id="penalty-block-banner" class="penalty-block-banner card" hidden aria-live="polite"></section>
 
   <section id="admin-kyc-panel" class="admin-kyc-panel card" hidden>
     <h2>Aprobación de cuentas (admin)</h2>
@@ -568,6 +569,23 @@
     <button type="button" class="link-btn" id="notif-close">Cerrar</button>
   </div>
 
+  <div id="support-drawer" class="chat-drawer support-drawer" hidden aria-hidden="true">
+    <div class="chat-drawer-header">
+      <h3 id="support-title">Ayuda / revisión</h3>
+      <button type="button" class="link-btn" id="support-close">Cerrar</button>
+    </div>
+    <p class="muted support-lead">Como Uber: aporta antecedentes; un moderador (admin) revisa y puede cerrar el caso.</p>
+    <div id="support-messages" class="chat-messages"></div>
+    <div id="support-admin-actions" class="support-admin-actions" hidden>
+      <button type="button" class="tab tab-sm" id="support-mark-review">En revisión</button>
+      <button type="button" class="tab tab-sm" id="support-mark-resolved">Resuelto</button>
+    </div>
+    <form id="form-support" class="chat-form">
+      <input id="support-input" type="text" placeholder="Describe lo ocurrido, acuerdos, horarios…" maxlength="2000" />
+      <button type="submit">Enviar</button>
+    </form>
+  </div>
+
   <div id="chat-drawer" class="chat-drawer" hidden aria-hidden="true">
     <div class="chat-drawer-header">
       <h3 id="chat-title">Chat del emparejamiento</h3>
@@ -701,9 +719,10 @@
   <script src="/auth-ui.js?v=0.0.38"></script>
   <script src="/tracking-ui.js?v=0.0.37"></script>
   <script src="/penalties-ui.js?v=0.0.19"></script>
-  <script src="/comms-ui.js?v=0.0.49"></script>
+  <script src="/support-ui.js?v=0.0.50"></script>
+  <script src="/comms-ui.js?v=0.0.50"></script>
   <script src="/rating-tags.js?v=0.0.31"></script>
   <script src="/trips-ui.js?v=0.0.36"></script>
-  <script src="/app.js?v=0.0.47"></script>
+  <script src="/app.js?v=0.0.50"></script>
 </body>
 </html>

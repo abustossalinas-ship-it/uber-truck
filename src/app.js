@@ -86,6 +86,8 @@ app.get('/health', async (_req, res) => {
       'buscando-camiones',
       'load-timing-eta',
       'proposal-compare-ranking',
+      'penalty-block-overdue',
+      'support-cases-moderator',
     ],
     deploy_manifest: manifest,
     railway: {
@@ -149,5 +151,6 @@ app.use('/api/account', require('./routes/account'));
 app.use('/api/admin', require('./routes/admin'));
 app.use('/api/carrier', require('./routes/carrier'));
 app.use('/api/realtime', require('./routes/realtime'));
+app.use('/api/support', require('./routes/support'));
 
 module.exports = app;

@@ -16,6 +16,8 @@ const EMPTY = {
   match_incidents: [],
   match_ratings: [],
   trip_events: [],
+  support_cases: [],
+  support_messages: [],
 };
 
 const SEED = {
@@ -83,6 +85,8 @@ function readStore() {
       match_incidents: data.match_incidents || [],
       match_ratings: data.match_ratings || [],
       trip_events: data.trip_events || [],
+      support_cases: data.support_cases || [],
+      support_messages: data.support_messages || [],
     };
   } catch {
     return structuredClone(EMPTY);
@@ -121,6 +125,15 @@ function list(collection, filters = {}) {
   if (filters.match_id) {
     rows = rows.filter((row) => row.match_id === filters.match_id);
   }
+  if (filters.case_id) {
+    rows = rows.filter((row) => row.case_id === filters.case_id);
+  }
+  if (filters.opened_by_user_id) {
+    rows = rows.filter((row) => row.opened_by_user_id === filters.opened_by_user_id);
+  }
+  if (filters.status) {
+    rows = rows.filter((row) => row.status === filters.status);
+  }
   return rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 }
 
@@ -144,7 +157,11 @@ function insert(collection, row) {
               ? 'inc'
               : collection === 'match_ratings'
                 ? 'rtg'
-                : 'mt'
+                : collection === 'support_cases'
+                  ? 'sc'
+                  : collection === 'support_messages'
+                    ? 'sm'
+                    : 'mt'
       ),
     created_at: row.created_at || new Date().toISOString(),
   };

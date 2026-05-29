@@ -36,17 +36,32 @@ function renderKycBanner() {
 }
 
 function assertCanOperate() {
-  if (isOperatorApproved()) return true;
-  const user = Auth.user;
-  const text =
-    user?.kyc_status === 'rejected'
-      ? 'Tu cuenta no fue aprobada para operar.'
-      : 'Tu cuenta aún no está aprobada. Espera la confirmación del administrador.';
-  alert(text);
-  return false;
+  if (!isOperatorApproved()) {
+    const user = Auth.user;
+    const text =
+      user?.kyc_status === 'rejected'
+        ? 'Tu cuenta no fue aprobada para operar.'
+        : 'Tu cuenta aún no está aprobada. Espera la confirmación del administrador.';
+    alert(text);
+    return false;
+  }
+  const blocked = typeof Penalties !== 'undefined' && Penalties.summary?.operating_status?.blocked;
+  if (blocked) {
+    alert(
+      Penalties.summary.operating_status.message ||
+        'Tienes multas vencidas. No puedes tomar nuevos viajes hasta regularizar.'
+    );
+    return false;
+  }
+  return true;
 }
 
 function handleApiKycError(res, json) {
+  if (res?.status === 403 && json?.penalty_block) {
+    if (typeof Penalties !== 'undefined') Penalties.refresh();
+    alert(json.error || 'Multas vencidas: operación bloqueada');
+    return true;
+  }
   if (res?.status === 403 && json?.kyc_status) {
     if (typeof Auth !== 'undefined' && Auth.user) {
       Auth.user.kyc_status = json.kyc_status;

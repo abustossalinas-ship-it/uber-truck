@@ -1738,3 +1738,48 @@ body.kyc-pending #btn-create-match {
   font-weight: 500;
   color: var(--text-muted);
 }
+
+.penalty-block-banner {
+  border: 2px solid #c62828;
+  background: #ffebee;
+  margin-bottom: 1rem;
+}
+
+.penalty-block-inner {
+  padding: 0.25rem 0;
+}
+
+.penalty-block-warn {
+  background: #ffebee;
+  border: 1px solid #ef9a9a;
+  padding: 0.65rem 0.75rem;
+  border-radius: 8px;
+  margin: 0.5rem 0;
+}
+
+.penalty-grace-hint {
+  margin: 0.35rem 0;
+}
+
+.support-drawer .chat-bubble.moderator {
+  border-left: 3px solid var(--accent);
+  background: var(--accent-soft);
+}
+
+.support-lead {
+  margin: 0 0 0.75rem;
+  font-size: 0.9rem;
+}
+
+.support-admin-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+body.penalty-blocked #btn-create-match,
+body.penalty-blocked #form-load button[type="submit"],
+body.penalty-blocked #form-offer button[type="submit"] {
+  opacity: 0.55;
+  pointer-events: none;
+}

@@ -994,6 +994,9 @@ async function refreshBoard() {
   if (typeof syncBoardRealtime === 'function') {
     syncBoardRealtime(activeMatches);
   }
+  if (typeof onBoardMatchesUpdated === 'function') {
+    onBoardMatchesUpdated(matchRows);
+  }
 }
 
 async function loadSuggestionsFor(loadId) {

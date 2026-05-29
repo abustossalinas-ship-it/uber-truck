@@ -53,3 +53,15 @@ ALTER TABLE match_ratings
 -- 014 — rater_user_id si falta
 ALTER TABLE match_ratings
   ADD COLUMN IF NOT EXISTS rater_user_id UUID REFERENCES users (id);
+
+-- 016 — GPS transportista (disponible + tracking en viaje)
+ALTER TABLE users
+  ADD COLUMN IF NOT EXISTS is_available BOOLEAN NOT NULL DEFAULT false,
+  ADD COLUMN IF NOT EXISTS last_lat DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS last_lng DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS location_updated_at TIMESTAMPTZ;
+
+ALTER TABLE matches
+  ADD COLUMN IF NOT EXISTS track_lat DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS track_lng DOUBLE PRECISION,
+  ADD COLUMN IF NOT EXISTS track_updated_at TIMESTAMPTZ;

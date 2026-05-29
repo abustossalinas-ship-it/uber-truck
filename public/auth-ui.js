@@ -17,6 +17,10 @@ const Auth = {
       company_name: user.company_name,
       phone: user.phone,
       kyc_status: user.kyc_status || 'pending',
+      is_available: Boolean(user.is_available),
+      last_lat: user.last_lat ?? null,
+      last_lng: user.last_lng ?? null,
+      location_updated_at: user.location_updated_at || null,
     };
     localStorage.setItem('ut_token', token);
     localStorage.setItem('ut_user', JSON.stringify(this.user));
@@ -57,6 +61,7 @@ const Auth = {
     }
     if (typeof renderKycBanner === 'function') renderKycBanner();
     if (typeof refreshAdminKycPanel === 'function') refreshAdminKycPanel();
+    if (typeof refreshCarrierPresencePanel === 'function') refreshCarrierPresencePanel();
     if (typeof applyRoleUi === 'function') applyRoleUi();
     if (typeof renderBoardActor === 'function') renderBoardActor();
     if (typeof refreshBoard === 'function') refreshBoard();

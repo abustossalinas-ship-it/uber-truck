@@ -1440,6 +1440,47 @@ body.kyc-pending #btn-create-match {
   background: var(--accent-hover);
 }
 
+.carrier-presence {
+  margin-bottom: 1rem;
+}
+
+.carrier-available-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+  margin: 0.5rem 0;
+}
+
+.carrier-available-toggle input {
+  width: 1.15rem;
+  height: 1.15rem;
+  accent-color: var(--accent);
+}
+
+.trip-map-wrap {
+  margin: 0.65rem 0;
+}
+
+.trip-map-img {
+  width: 100%;
+  max-width: 100%;
+  height: auto;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  display: block;
+}
+
+.trip-map-meta {
+  margin: 0.35rem 0 0;
+  font-size: 0.8rem;
+}
+
+.active-trip-banner .trip-map-wrap {
+  margin-top: 0.5rem;
+}
+
 .admin-kyc-tabs {
   display: flex;
   gap: 0.5rem;

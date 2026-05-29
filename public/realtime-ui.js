@@ -42,6 +42,13 @@ function syncBoardRealtime(matches) {
     if (payload.type === 'status' || payload.type === 'trip_event') {
       if (typeof refreshBoard === 'function') refreshBoard();
       if (typeof Comms !== 'undefined') Comms.refreshBell?.();
+      if (
+        payload.type === 'trip_event' &&
+        payload.event?.event_type === 'location_update' &&
+        typeof refreshActiveTripMap === 'function'
+      ) {
+        refreshActiveTripMap(active.id);
+      }
     }
   });
 }

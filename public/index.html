@@ -275,6 +275,15 @@
     </section>
 
     <section id="panel-carrier" class="panel">
+      <section id="carrier-presence-panel" class="carrier-presence card" hidden>
+        <h3>Disponible para cargas</h3>
+        <p class="muted">Comparte tu ubicación cuando estés libre o durante un viaje en curso (embarcador ve el mapa).</p>
+        <label class="carrier-available-toggle">
+          <input type="checkbox" id="carrier-available-toggle" />
+          <span id="carrier-available-label">No disponible</span>
+        </label>
+        <p id="carrier-gps-status" class="muted"></p>
+      </section>
       <form id="form-offer" data-maps-form>
         <h2>Publicar capacidad disponible (backhaul)</h2>
         <p class="muted" style="margin-top:-0.5rem;margin-bottom:1rem">
@@ -558,17 +567,18 @@
 
   <script src="/kyc-ui.js?v=0.0.33"></script>
   <script src="/admin-ui.js?v=0.0.34"></script>
-  <script src="/realtime-ui.js?v=0.0.33"></script>
+  <script src="/realtime-ui.js?v=0.0.34"></script>
   <script src="/invite-ui.js?v=0.0.20"></script>
   <script src="/roles-ui.js?v=0.0.19"></script>
   <script src="/role-shell-ui.js?v=0.0.27"></script>
   <script src="/maps-ui.js?v=0.0.24"></script>
   <script src="/load-budget-ui.js?v=0.0.25"></script>
-  <script src="/auth-ui.js?v=0.0.20"></script>
+  <script src="/auth-ui.js?v=0.0.21"></script>
+  <script src="/tracking-ui.js?v=0.0.34"></script>
   <script src="/penalties-ui.js?v=0.0.19"></script>
   <script src="/comms-ui.js?v=0.0.19"></script>
   <script src="/rating-tags.js?v=0.0.31"></script>
-  <script src="/trips-ui.js?v=0.0.35"></script>
-  <script src="/app.js?v=0.0.27"></script>
+  <script src="/trips-ui.js?v=0.0.36"></script>
+  <script src="/app.js?v=0.0.34"></script>
 </body>
 </html>

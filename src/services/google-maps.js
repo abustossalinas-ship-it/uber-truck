@@ -85,9 +85,38 @@ async function distanceKm(origin, destination) {
   };
 }
 
+/** Mapa estático para embarcador / seguimiento (origen, destino, camión). */
+function staticMapUrl({ origin, destination, carrier, size = '640x280' }) {
+  if (!isConfigured()) return null;
+  const parts = [];
+  if (origin?.lat != null) {
+    parts.push(`markers=color:green|label:${origin.label || 'O'}|${origin.lat},${origin.lng}`);
+  }
+  if (destination?.lat != null) {
+    parts.push(
+      `markers=color:red|label:${destination.label || 'D'}|${destination.lat},${destination.lng}`
+    );
+  }
+  if (carrier?.lat != null) {
+    parts.push(`markers=color:orange|label:${carrier.label || 'T'}|${carrier.lat},${carrier.lng}`);
+  }
+  if (!parts.length) return null;
+  const url = new URL('https://maps.googleapis.com/maps/api/staticmap');
+  url.searchParams.set('size', size);
+  url.searchParams.set('scale', '2');
+  url.searchParams.set('maptype', 'roadmap');
+  url.searchParams.set('key', apiKey());
+  url.searchParams.set('language', 'es');
+  for (const p of parts) {
+    url.searchParams.append('markers', p.replace(/^markers=/, ''));
+  }
+  return url.toString();
+}
+
 module.exports = {
   isConfigured,
   autocomplete,
   placeDetails,
   distanceKm,
+  staticMapUrl,
 };

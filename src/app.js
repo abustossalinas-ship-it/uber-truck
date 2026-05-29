@@ -80,6 +80,8 @@ app.get('/health', async (_req, res) => {
       'board-reputation',
       'kyc-curated-marketplace',
       'trip-events-realtime',
+      'gps-tracking',
+      'carrier-available',
       'buscando-camiones',
     ],
     deploy_manifest: manifest,
@@ -142,6 +144,7 @@ app.use('/api/matches', require('./routes/matches'));
 app.use('/api/comms', require('./routes/match-comms'));
 app.use('/api/account', require('./routes/account'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/carrier', require('./routes/carrier'));
 app.use('/api/realtime', require('./routes/realtime'));
 
 module.exports = app;

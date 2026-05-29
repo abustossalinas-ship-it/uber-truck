@@ -12,7 +12,7 @@ No perseguir la app perfecta en web: construir **operación tipo Uber** con mark
 |---|--------|--------|
 | C | Semi-curado KYC (aprobar cuentas) | Hecho v0.0.33 |
 | A | `trip_events` + SSE realtime en viajes | Hecho v0.0.33 |
-| B | GPS + «Disponible» + mapa en viaje activo | Siguiente |
+| B | GPS + «Disponible» + mapa en viaje activo | Hecho v0.0.34 |
 | — | Mis cargas / mis ofertas (`owner_user_id`) | Después de B |
 | — | PWA instalable | Paralelo a móvil |
 | — | React Native + Expo + TestFlight | Tras GPS en web/API |

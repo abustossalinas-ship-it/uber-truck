@@ -3,6 +3,7 @@
 const express = require('express');
 const { registerUser, loginUser, authMiddleware } = require('../lib/auth');
 const { fetchKycStatus } = require('../lib/kyc-gate');
+const { getUserPresence } = require('../lib/carrier-presence');
 const supabase = require('../services/supabase');
 
 const router = express.Router();
@@ -54,6 +55,10 @@ router.get('/me', authMiddleware, async (req, res) => {
     let user = { ...req.user };
     if (supabase.isConfigured() && req.user?.sub) {
       user.kyc_status = await fetchKycStatus(req.user.sub);
+      if (user.role === 'carrier') {
+        const presence = await getUserPresence(req.user.sub);
+        if (presence) Object.assign(user, presence);
+      }
     }
     res.json({ ok: true, user });
   } catch (e) {

@@ -74,7 +74,9 @@ async function registerUser({ email, password, full_name, role, company_name, ph
       password_hash: hash,
       kyc_status: resolvedRole === 'admin' ? 'approved' : 'pending',
     })
-    .select('id, email, full_name, role, company_name, phone, kyc_status')
+    .select(
+      'id, email, full_name, role, company_name, phone, kyc_status, is_available, last_lat, last_lng, location_updated_at'
+    )
     .single();
   if (error) {
     if (error.code === '23505') {
@@ -119,6 +121,10 @@ async function loginUser({ email, password }) {
     company_name: data.company_name,
     phone: data.phone,
     kyc_status: data.kyc_status || 'pending',
+    is_available: Boolean(data.is_available),
+    last_lat: data.last_lat ?? null,
+    last_lng: data.last_lng ?? null,
+    location_updated_at: data.location_updated_at || null,
   };
   return { user, token: signToken(user) };
 }

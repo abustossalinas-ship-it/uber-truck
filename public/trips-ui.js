@@ -137,12 +137,14 @@ function updateActiveTripBanner(matches, loadById, offerById) {
       <p class="active-trip-tag">${statusText}</p>
       <p class="active-trip-route"><strong>${role === 'shipper' ? carrier : shipper}</strong> · ${route}</p>
       ${price ? `<p class="active-trip-price">${price} CLP acordados</p>` : ''}
+      <div id="active-trip-map" class="trip-map-wrap"></div>
       <button type="button" class="btn-secondary" data-goto-trip="${active.id}">Ver viaje</button>
     </div>`;
   banner.querySelector('[data-goto-trip]')?.addEventListener('click', () => {
     if (typeof showTab === 'function') showTab('trips');
     if (typeof scrollToActiveMatch === 'function') scrollToActiveMatch(active.id);
   });
+  if (typeof refreshActiveTripMap === 'function') refreshActiveTripMap(active.id);
 }
 
 function renderTripsList(matches, loadById, offerById) {
@@ -200,6 +202,9 @@ function renderTripsList(matches, loadById, offerById) {
         if (['accepted', 'in_progress'].includes(m.status)) {
           actions += `<button type="button" class="btn-secondary" data-trip-chat="${m.id}" data-trip-title="${title.replace(/"/g, '')}">Chat</button>`;
         }
+        const mapSlot = ['accepted', 'in_progress'].includes(m.status)
+          ? `<div class="trip-map-wrap" data-trip-map="${m.id}"></div>`
+          : '';
         return `
         <article class="item trip-card" data-trip-id="${m.id}">
           <strong>${title}</strong>
@@ -207,6 +212,7 @@ function renderTripsList(matches, loadById, offerById) {
           <p>${route}</p>
           ${price ? `<p class="muted">${price}</p>` : ''}
           ${m.delivery_note ? `<p class="muted">Entrega: ${m.delivery_note}</p>` : ''}
+          ${mapSlot}
           ${ratingsBlock}
           <div class="actions">${actions}</div>
         </article>`;
@@ -243,6 +249,9 @@ function renderTripsList(matches, loadById, offerById) {
         Comms.openChat(btn.dataset.tripChat, btn.dataset.tripTitle || '');
       }
     });
+  });
+  groups.active.forEach((m) => {
+    if (typeof refreshActiveTripMap === 'function') refreshActiveTripMap(m.id);
   });
 }
 

@@ -35,6 +35,7 @@ const { requireAuthIfDb } = require('../lib/require-auth');
 const { requireApprovedOperator } = require('../lib/kyc-gate');
 const { logMatchTrip } = require('../lib/match-trip-log');
 const { listTripEvents } = require('../lib/trip-events');
+const { buildMatchTracking } = require('../lib/match-tracking');
 
 const router = express.Router();
 const operatorGate = [requireAuthIfDb, requireApprovedOperator];
@@ -89,6 +90,16 @@ router.get('/', optionalAuth, async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al listar matches' });
+  }
+});
+
+router.get('/:id/tracking', optionalAuth, requireAuthIfDb, async (req, res) => {
+  try {
+    const data = await buildMatchTracking(req.params.id, req.user);
+    res.json({ ok: true, data });
+  } catch (e) {
+    console.error(e);
+    res.status(e.status || 500).json({ ok: false, error: e.message || 'Error al leer tracking' });
   }
 });
 

@@ -14,6 +14,34 @@ function readDeployManifest() {
 
 const app = express();
 
+const CORS_ORIGINS = new Set([
+  'https://localhost',
+  'http://localhost',
+  'capacitor://localhost',
+  'ionic://localhost',
+  'https://uber-truck-production.up.railway.app',
+]);
+
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+  if (
+    origin &&
+    (CORS_ORIGINS.has(origin) ||
+      /^https:\/\/[a-z0-9-]+\.up\.railway\.app$/i.test(origin))
+  ) {
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+    res.setHeader('Access-Control-Allow-Credentials', 'true');
+  }
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+  if (req.method === 'OPTIONS') {
+    res.status(204).end();
+    return;
+  }
+  next();
+});
+
 app.use(express.json({ limit: '3mb' }));
 
 const publicDir = path.join(__dirname, '..', 'public');

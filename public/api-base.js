@@ -1,10 +1,13 @@
 /** Resuelve /api y /health hacia Railway cuando la UI se sirve desde Capacitor local. */
 (function () {
+  const DEFAULT_ORIGIN = 'https://uber-truck-production.up.railway.app';
+
   function apiOrigin() {
     try {
-      return new URL(window.CUBIK_BRAND?.productionUrl || '').origin;
+      const raw = window.CUBIK_BRAND?.productionUrl || DEFAULT_ORIGIN;
+      return new URL(raw).origin;
     } catch {
-      return '';
+      return DEFAULT_ORIGIN;
     }
   }
 
@@ -17,6 +20,7 @@
   }
 
   window.apiUrl = resolveUrl;
+  window.apiOrigin = apiOrigin;
 
   window.apiFetch = function apiFetch(path, options) {
     return fetch(resolveUrl(path), options);

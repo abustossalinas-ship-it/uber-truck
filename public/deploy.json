@@ -1,6 +1,6 @@
 {
-  "version": "0.0.11",
-  "git_sha": "pending",
+  "version": "0.0.77",
+  "git_sha": "7328719",
   "ui": "match-cancel-v2",
-  "note": "Chat, notificaciones, acuerdo mutuo dentro de cancelar"
+  "note": "Arranque app bundle local; API en Railway"
 }

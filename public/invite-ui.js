@@ -2,17 +2,18 @@
   const share = document.getElementById('invite-share-url');
   const demoUrl = document.getElementById('demo-url');
   const origin = window.location.origin;
+  const testerUrl = `${origin}/probar`;
   if (share) {
-    share.href = origin;
-    share.textContent = origin.replace(/^https?:\/\//, '');
+    share.href = testerUrl;
+    share.textContent = testerUrl.replace(/^https?:\/\//, '');
   }
   if (demoUrl) demoUrl.textContent = origin.replace(/^https?:\/\//, '');
 
   document.getElementById('btn-copy-invite-link')?.addEventListener('click', async () => {
-    const url = origin;
+    const url = testerUrl;
     try {
       await navigator.clipboard.writeText(url);
-      alert('Link copiado. Compártelo por WhatsApp o correo.');
+      alert('Link copiado. Compártelo por WhatsApp (Android e iPhone).');
     } catch {
       prompt('Copia este link:', url);
     }

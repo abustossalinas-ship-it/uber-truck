@@ -1,8 +1,8 @@
 {
-  "name": "Cubik",
+  "name": "Cubik Envíos Chile",
   "short_name": "Cubik",
-  "description": "Optimiza tus envíos — cubicación disponible conectada con demanda",
-  "start_url": "/",
+  "description": "Publica carga u oferta rutas. Empareja camiones en Chile.",
+  "start_url": "/?app=1",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
@@ -11,13 +11,13 @@
   "lang": "es-CL",
   "icons": [
     {
-      "src": "/brand/logo.png",
+      "src": "/brand/logo-mark.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/brand/logo.png",
+      "src": "/brand/logo-mark.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"

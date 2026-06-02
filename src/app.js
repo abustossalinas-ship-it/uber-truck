@@ -45,6 +45,10 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '3mb' }));
 
 const publicDir = path.join(__dirname, '..', 'public');
+app.get('/probar', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.sendFile(path.join(publicDir, 'probar.html'));
+});
 app.get('/', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.sendFile(path.join(publicDir, 'index.html'));

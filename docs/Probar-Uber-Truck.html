@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Cómo probar Uber Truck</title>
+  <title>Cómo probar Cubik Envíos Chile</title>
   <style>
     body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.35; max-width: 900px; margin: 2cm auto; color: #111; }
     h1 { font-size: 18pt; border-bottom: 1px solid #333; padding-bottom: 6px; }
@@ -17,117 +17,79 @@
     .doc-title-wrap h1 { margin-top: 0; }
     ol { margin: 0.4em 0 0.6em 1.2em; }
     code { background: #f5f5f5; padding: 2px 6px; }
+    .link-box { background: #f4f7fb; border: 1px solid #29abe2; padding: 12px 14px; border-radius: 8px; margin: 1em 0; }
+    .link-box a { word-break: break-all; font-weight: bold; }
   </style>
 </head>
 <body>
 
 <div class="doc-header">
-  <img src="/brand/logo.png" width="72" height="72" alt="Uber Truck" />
+  <img src="/brand/logo-mark.png" width="72" height="72" alt="Cubik" />
   <div class="doc-title-wrap">
-    <h1>Cómo probar Uber Truck</h1>
-    <p class="meta">Para testers · 27 mayo 2026 (v3.1) · App 0.0.31 · Sin instalar programas ni acceder a la base de datos</p>
+    <h1>Cómo probar Cubik Envíos Chile</h1>
+    <p class="meta">Para testers · 2 jun 2026 (v4.0) · App <strong>0.0.78</strong> · Sin Play Store ni App Store por ahora</p>
   </div>
 </div>
 
-<p class="meta"><a href="/">← Abrir la app</a> · <a href="/docs/">Documentación</a></p>
+<p class="meta"><a href="https://uber-truck-production.up.railway.app/probar">Abrir link testers</a> · <a href="/docs/">Documentación</a> · <a href="Journey-Usuario-Uber-Truck.html">Journey del usuario</a></p>
 
-<h2>1. Qué necesitas</h2>
+<div class="link-box">
+  <strong>Link único (Android + iPhone):</strong><br />
+  <a href="https://uber-truck-production.up.railway.app/probar">https://uber-truck-production.up.railway.app/probar</a>
+</div>
+
+<h2>1. Por dispositivo</h2>
+<table>
+  <tr><th>Dispositivo</th><th>Pasos</th></tr>
+  <tr>
+    <td><strong>Android</strong></td>
+    <td>
+      <strong>Opción A — APK:</strong> instala <code>cubik-android.apk</code> (WhatsApp o carpeta Descargas).<br />
+      <strong>Opción B — Web:</strong> abre el link <code>/probar</code> → <strong>Abrir Cubik</strong>.
+    </td>
+  </tr>
+  <tr>
+    <td><strong>iPhone</strong></td>
+    <td>Safari → link <code>/probar</code> → <strong>Abrir Cubik</strong> → Compartir → <strong>Añadir a inicio</strong>.</td>
+  </tr>
+  <tr>
+    <td><strong>Emulador Android Studio</strong></td>
+    <td>Run ▶ en proyecto <code>android/</code> o arrastra el APK al emulador.</td>
+  </tr>
+</table>
+
+<h2>2. Generar APK (desarrollador)</h2>
+<ol>
+  <li>Terminal en la raíz del repo: <code>npm run cap:sync:bundle</code></li>
+  <li><code>npm run android:apk</code> → archivo en <code>%USERPROFILE%\Downloads\cubik-android.apk</code></li>
+  <li>O en Android Studio: carpeta <code>android/</code> → <strong>Build → Build APK(s)</strong> → <code>app-debug.apk</code></li>
+</ol>
+
+<h2>3. Dos roles (embarcador + transportista)</h2>
+<table>
+  <tr><th>Método</th><th>Cómo</th></tr>
+  <tr><td>Dos emuladores API 37</td><td>Device Manager → encender embarcador y transportista → instalar app en cada uno → cuentas distintas</td></tr>
+  <tr><td>Dos emails</td><td><code>tu+carga@gmail.com</code> embarcador · <code>tu+ruta@gmail.com</code> transportista</td></tr>
+  <tr><td>Admin</td><td><code>admin@ubertruck.cl</code> (si ya existe en prod)</td></tr>
+</table>
+
+<h2>4. Flujo de prueba (10 minutos)</h2>
+<ol>
+  <li><strong>Embarcador</strong> — Crear cuenta → Publicar carga (Maps, presupuesto, declaración mercadería).</li>
+  <li><strong>Transportista</strong> — Crear cuenta → Publicar oferta en ruta compatible.</li>
+  <li><strong>Tablero / Emparejar</strong> — Propuesta → aceptar precio → viaje activo.</li>
+  <li><strong>Mis viajes</strong> — En curso → completar → calificar mutuamente.</li>
+</ol>
+<p>Detalle paso a paso: <a href="Journey-Usuario-Uber-Truck.html">Journey de usuario</a> · Corredor piloto: <a href="Piloto-M2-Corredor-KPIs-Riesgos.html">RM ↔ Valparaíso / San Antonio</a>.</p>
+
+<h2>5. Links útiles</h2>
 <ul>
-  <li>Navegador en el celular o PC (Chrome, Safari, Edge).</li>
-  <li>Conexión a internet.</li>
-  <li><strong>No</strong> necesitas instalar programas, ni tener acceso a la base de datos, al servidor ni al código del proyecto.</li>
+  <li><a href="https://uber-truck-production.up.railway.app/probar">/probar</a> — landing testers</li>
+  <li><a href="https://uber-truck-production.up.railway.app/?app=1">/?app=1</a> — app directa (modo móvil)</li>
+  <li><a href="https://uber-truck-production.up.railway.app/health">/health</a> — versión servidor</li>
+  <li><a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica v3.7</a></li>
 </ul>
 
-<p><strong>Link de la app:</strong> <a href="https://uber-truck-production.up.railway.app">https://uber-truck-production.up.railway.app</a></p>
-
-<p><strong>Recorrido del usuario (journey):</strong> <a href="Journey-Usuario-Uber-Truck.html">Journey-Usuario-Uber-Truck.html</a> — paso a paso de embarcador y transportista en la app (solo lectura, para entender el flujo antes de probar).</p>
-
-<h2>2. Crear tu cuenta</h2>
-<ol>
-  <li>Abre el link de arriba.</li>
-  <li>Pulsa <strong>Crear cuenta</strong> (arriba a la derecha).</li>
-  <li>Completa email, contraseña (mín. 6), <strong>tipo de cuenta</strong>, <strong>razón social</strong> y <strong>nombre de contacto</strong> (teléfono opcional):
-    <ul>
-      <li><strong>Empresa embarcadora</strong> — publica cargas; en el tablero ves solo <em>tus</em> cargas y el mercado de ofertas de transportistas.</li>
-      <li><strong>Empresa transportista</strong> — publica capacidad; ves el mercado de cargas y solo <em>tus</em> ofertas.</li>
-    </ul>
-  </li>
-  <li>Pulsa <strong>Registrarse</strong>. Quedas con sesión iniciada.</li>
-</ol>
-
-<h2>3. Probar los dos roles (embarcador y transportista)</h2>
-<p>Cada cuenta tiene <strong>un solo rol</strong>. Para probar ambos como en un juego de roles:</p>
-<table>
-  <tr><th>Opción</th><th>Cómo</th></tr>
-  <tr><td>Dos cuentas (recomendado)</td><td>Registro 1: <code>tucorreo+embarcador@gmail.com</code> · Registro 2: <code>tucorreo+transportista@gmail.com</code> (mismo buzón en Gmail si usas +alias)</td></tr>
-  <tr><td>Dos navegadores</td><td>Chrome normal + ventana incógnito, una cuenta en cada uno</td></tr>
-  <tr><td>Dos personas</td><td>Una crea cuenta embarcador, otra transportista, y hacen match en el tablero</td></tr>
-</table>
-
-<h2>4. Piloto M2 — corredor recomendado</h2>
-<p>Para pruebas que cuenten para el piloto de 20 viajes, usa rutas en el corredor <strong>RM → Valparaíso o San Antonio</strong> (origen y destino desde Maps). Detalle: <a href="Piloto-M2-Corredor-KPIs-Riesgos.html">Piloto M2 — corredor y KPIs</a>.</p>
-
-<h2>5. Flujo de prueba (10 minutos)</h2>
-<ol>
-  <li><strong>Embarcador</strong> — pestaña <strong>Mis cargas</strong>:
-    <ul>
-      <li>Origen y destino desde la <strong>lista de Google Maps</strong> (obligatorio elegir sugerencia).</li>
-      <li>Cubicación, peso y <strong>rango de presupuesto del flete</strong> (mín–máx CLP). Opcional: <strong>Ver rango sugerido</strong>.</li>
-      <li><strong>Declaración de mercadería:</strong> descripción, <strong>valor referencial CLP</strong> (valor de la carga, no del flete), guía de despacho (sí/no), folio opcional.</li>
-      <li>Marca la casilla de <strong>términos de confianza y carga</strong> (enlace al documento legal en borrador).</li>
-    </ul>
-  </li>
-  <li><strong>Transportista</strong> — pestaña <strong>Mis ofertas</strong>: publicar capacidad en ruta compatible (también con dirección validada en Maps).</li>
-  <li><strong>Tablero / emparejar</strong>:
-    <ul>
-      <li>Transportista: elige carga + oferta, ingresa <strong>tu oferta en CLP</strong>, crea propuesta.</li>
-      <li>Embarcador: en Emparejamientos, <strong>Aceptar precio y confirmar match</strong> (si la oferta está fuera del rango, puedes aceptar igual o <strong>Ampliar mi rango presupuesto</strong>).</li>
-      <li>Luego: <strong>En ruta</strong> → <strong>Cerrar</strong>.</li>
-    </ul>
-  </li>
-  <li><strong>Chat</strong> y <strong>notificaciones</strong> (campana) con sesión iniciada.</li>
-  <li>Con viaje <strong>aceptado o en ruta</strong>: prueba <strong>Reportar incidente</strong> (robo, daño, etc.) — queda registrado; la app no paga automáticamente.</li>
-  <li><strong>Calificaciones (dos cuentas):</strong> tras <strong>Finalizar viaje</strong>, cada rol entra a <strong>Mis viajes → Completados</strong> y pulsa <strong>Calificar … ★</strong>. El otro rol debe usar su propia cuenta (no la misma sesión). Ver detalle en el <a href="Journey-Usuario-Uber-Truck.html#mis-viajes-calificaciones">Journey §8</a>.</li>
-</ol>
-
-<h2>6. Confianza y carga</h2>
-<table>
-  <tr><th>Concepto</th><th>Qué probar</th></tr>
-  <tr><td>Valor referencial</td><td>Distinto del presupuesto de flete; aparece en tablero en línea azul.</td></tr>
-  <tr><td>Términos</td><td>Sin marcar la casilla no deja publicar.</td></tr>
-  <tr><td>Guía SII</td><td>Solo folio manual en piloto; no hay validación automática aún.</td></tr>
-  <tr><td>Incidente</td><td>Botón en emparejamiento activo; tipos: theft, damage, shortage, delay, other.</td></tr>
-</table>
-<p><a href="Terminos-Confianza-Carga-Uber-Truck.html">Términos de confianza y carga</a></p>
-
-<h2>7. Precios (oferta / demanda)</h2>
-<table>
-  <tr><th>Situación</th><th>Qué esperar</th></tr>
-  <tr><td>Rango del embarcador</td><td>Orientativo; no impide que el transportista oferte otro monto.</td></tr>
-  <tr><td>Oferta fuera del rango</td><td>Mensaje amarillo; la propuesta sigue válida.</td></tr>
-  <tr><td>Ampliar rango</td><td>Solo embarcador; no si ya hay otro match con precio acordado.</td></tr>
-</table>
-
-<h2>8. Si algo falla</h2>
-<table>
-  <tr><th>Error</th><th>Qué hacer</th></tr>
-  <tr><td>«Registro no disponible» o «base de datos no configurada»</td><td>El servidor aún no está listo; avisa al dueño del proyecto (no es culpa tuya).</td></tr>
-  <tr><td>«Email ya registrado»</td><td>Usa <strong>Ingresar</strong> con esa cuenta o otro email.</td></tr>
-  <tr><td>No ves notificaciones</td><td>Debes estar con <strong>Ingresar</strong>, no solo modo demo sin login.</td></tr>
-  <tr><td>Error al publicar carga (columna desconocida)</td><td>Dueño del proyecto: aplicar migración <code>011</code> en Supabase.</td></tr>
-  <tr><td>Error al reportar incidente</td><td>Misma migración <code>011</code> (tabla <code>match_incidents</code>).</td></tr>
-  <tr><td>No aparece «Calificar» o falla al guardar nota</td><td>Dueño del proyecto: migraciones <code>012</code>–<code>013</code> y <code>NOTIFY pgrst, 'reload schema';</code> en Supabase.</td></tr>
-  <tr><td>Transportista no puede calificar tras embarcador</td><td>Cerrar sesión e ingresar con cuenta transportista; recargar con Ctrl+Shift+R.</td></tr>
-</table>
-
-<h2>9. Para el dueño del proyecto (solo Ariel)</h2>
-<p class="meta">Los testers no hacen esto. Base de datos conectada, variables Railway y migraciones <code>003</code>–<code>013</code> (calificaciones 012–013).</p>
-
-<p class="meta">
-  <a href="Journey-Usuario-Uber-Truck.html">Journey del usuario</a> ·
-  <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica</a> ·
-  <a href="DEMO-GUION.md">Guion demo 3 min</a>
-</p>
-
+<p class="meta"><em>Fin — v4.0 (2 jun 2026). Cubik Envíos Chile · no requiere acceso a base de datos ni código.</em></p>
 </body>
 </html>

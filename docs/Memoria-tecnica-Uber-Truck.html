@@ -39,11 +39,11 @@
     <h1>Memoria técnica del proyecto</h1>
     <p class="meta"><strong>Producto:</strong> Uber Truck — marketplace de capacidad logística ociosa (backhaul), Chile.<br />
     <strong>Documento:</strong> memoria técnica viva del repositorio y del despliegue Railway.<br />
-    <strong>Versión documento:</strong> 3.6 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.57 (multas tipo Uber + cuenta) &nbsp;|&nbsp; <strong>Fecha:</strong> 29 mayo 2026</p>
+    <strong>Versión documento:</strong> 3.7 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.78 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 2 jun 2026</p>
   </div>
 </div>
 
-<p class="meta"><a href="/docs/">← Documentación</a> · <a href="/">Inicio app</a> · <strong>Producción:</strong> <a href="https://uber-truck-production.up.railway.app">uber-truck-production.up.railway.app</a></p>
+<p class="meta"><a href="/docs/">← Documentación</a> · <a href="/">Inicio app</a> · <strong>Producción:</strong> <a href="https://uber-truck-production.up.railway.app">uber-truck-production.up.railway.app</a> · <strong>Probar (testers):</strong> <a href="https://uber-truck-production.up.railway.app/probar">/probar</a></p>
 
 <h2>Propósito y forma de mantenimiento</h2>
 <p>Este archivo es la <strong>referencia única</strong> de arquitectura, hitos, cronograma Gantt, próximos pasos y stack por capas. Actualizarlo cuando cambien migraciones Supabase, rutas API, reglas de cancelación/multas o el avance real frente al plan.</p>
@@ -83,6 +83,9 @@
   <tr><td>Calificación ★</td><td>Mutua 1–5 + chips por rol (embarcador/transportista), reputación histórica en <strong>Mis viajes</strong></td><td class="g-done">Hecho (012–014, v0.0.28–0.0.31)</td></tr>
   <tr><td>Perfil y cuenta</td><td>Login, empresa, <strong>banco obligatorio</strong> (prod), multas, comprobante, confirmación acreedor, soporte moderador</td><td class="g-done">Hecho MVP (v0.0.50–0.0.57); pasarela futura</td></tr>
   <tr><td>Reputación en tablero</td><td>Promedio ★ en cargas, ofertas, emparejamientos y sugerencias (M3)</td><td class="g-done">Hecho (v0.0.32)</td></tr>
+  <tr><td>App móvil Cubik (Android)</td><td>Capacitor + shell UX (bienvenida, bottom nav, bundle local)</td><td class="g-done">Hecho v0.0.75–0.0.78</td></tr>
+  <tr><td>Distribución testers sin tienda</td><td>Link <code>/probar</code> (PWA) + APK debug</td><td class="g-done">Hecho jun 2026</td></tr>
+  <tr><td>App iOS nativa</td><td>TestFlight / App Store</td><td class="g-todo">Pendiente — hoy PWA Safari vía <code>/probar</code></td></tr>
 </table>
 
 <div class="rule"></div>
@@ -364,6 +367,38 @@
 <p><strong>SQL pendiente usuario:</strong> ejecutar en Supabase <code>RUN_022_023</code>, <code>RUN_024</code>, <code>RUN_025</code> (ver <a href="SQL-SUPABASE.md">SQL-SUPABASE.md</a>).</p>
 <p><strong>Archivos clave:</strong> <code>src/lib/penalty-ledger.js</code>, <code>src/lib/penalty-payment.js</code>, <code>src/lib/bank-gate.js</code>, <code>src/routes/account.js</code>, <code>public/penalties-ui.js</code>.</p>
 
+<h2>Bitácora de avance — 2 junio 2026 (Cubik v0.0.75–0.0.78)</h2>
+<table>
+  <tr><th>Área</th><th>Entregado</th><th>Notas</th></tr>
+  <tr><td>Marca Cubik</td><td>Shell móvil, splash, logo isotipo, bienvenida «Optimiza tus envíos»</td><td><code>app-shell.js</code>, <code>generate-android-icons.cjs</code></td></tr>
+  <tr><td>Arranque app</td><td>Bundle local en APK; splash 500 ms; sin fetch tablero sin sesión; CORS <code>https://localhost</code></td><td>v0.0.76–0.0.77</td></tr>
+  <tr><td>Login móvil</td><td>Alertas email vs contraseña; gate bienvenida sin legacy debajo</td><td><code>auth-ui.js</code>, <code>src/lib/auth.js</code></td></tr>
+  <tr><td>Capacitor Android</td><td><code>cl.cubik.logistics</code>; <code>npm run cap:sync:bundle</code> (default); APK <code>npm run android:apk</code> → Descargas</td><td>UI en assets; API en Railway</td></tr>
+  <tr><td>Testers sin tienda</td><td>Página <a href="https://uber-truck-production.up.railway.app/probar">/probar</a> — Android (APK o PWA) + iPhone (PWA Safari)</td><td><code>public/probar.html</code></td></tr>
+  <tr><td>Play Store (nombre)</td><td>Decisión: <strong>Cubik Envíos Chile</strong> (solo Chile al publicar)</td><td>USD 25 cuando suban prueba cerrada</td></tr>
+  <tr><td>Validado usuario</td><td>Login admin OK; 2 emuladores (embarcador + transportista API 37); tiempos ~2 s</td><td>Jun 2026</td></tr>
+</table>
+<p><strong>Links operativos:</strong></p>
+<ul>
+  <li><strong>App / API:</strong> <a href="https://uber-truck-production.up.railway.app">https://uber-truck-production.up.railway.app</a></li>
+  <li><strong>Testers (un link):</strong> <a href="https://uber-truck-production.up.railway.app/probar">https://uber-truck-production.up.railway.app/probar</a></li>
+  <li><strong>Modo app web:</strong> <a href="https://uber-truck-production.up.railway.app/?app=1">/?app=1</a></li>
+  <li><strong>Health:</strong> <a href="https://uber-truck-production.up.railway.app/health">/health</a></li>
+  <li><strong>APK Android:</strong> generar con <code>npm run android:apk</code> → <code>%USERPROFILE%\Downloads\cubik-android.apk</code></li>
+</ul>
+<p><strong>Comandos:</strong> <code>npm run cap:sync:bundle</code> · <code>npm run android:apk</code> · <code>npm run cap:open:android</code></p>
+
+<h2>Próxima etapa (jun 2026)</h2>
+<ol>
+  <li><strong>P0 — Prueba funcional profunda</strong> (mañana): publicar carga + oferta + emparejar + viaje completo + calificar en ambos roles (2 cuentas / 2 emuladores).</li>
+  <li><strong>P0 — Piloto M2</strong>: 20 viajes <code>completed</code> en corredor RM ↔ Valparaíso/San Antonio con testers reales.</li>
+  <li><strong>P1 — Distribución</strong>: seguir con APK + link <code>/probar</code>; Play Console prueba cerrada cuando quieran tienda (USD 25).</li>
+  <li><strong>P1 — iPhone</strong>: testers vía <code>/probar</code> (PWA); TestFlight solo con Apple Developer (USD 99/año + Mac).</li>
+  <li><strong>P1 — Política privacidad</strong> URL pública antes de Play Store.</li>
+  <li><strong>P2 — Push FCM</strong>, keystore release, OAuth Gmail/Apple (bloque E).</li>
+</ol>
+<p>Detalle estratégico: <a href="PROXIMOS-PASOS-ESTRATEGIA.md">PROXIMOS-PASOS-ESTRATEGIA.md</a> · UX app: <a href="CUBIK-APP-UX.md">CUBIK-APP-UX.md</a> · Play: <a href="CUBIK-PLAY-STORE.md">CUBIK-PLAY-STORE.md</a></p>
+
 <div class="rule"></div>
 
 <h1>Parte II — Stack tecnológico por capas</h1>
@@ -391,8 +426,9 @@
 <h2>Capa 07 — Servicios</h2>
 <p><strong>Rol:</strong> <code>src/services/</code> — Supabase client, comms, integraciones futuras (mapas, pagos).</p>
 
-<h2>Capa 08 — Frontend web (SPA ligera)</h2>
-<p><strong>Rol:</strong> <code>public/index.html</code>, <code>app.js</code>, <code>trips-ui.js</code> (Mis viajes + modal calificar), <code>rating-tags.js</code>, <code>maps-ui.js</code>, <code>load-budget-ui.js</code>, <code>auth-ui.js</code>, <code>comms-ui.js</code>, <code>penalties-ui.js</code>, <code>role-shell-ui.js</code>, <code>theme.css</code>. Marca: naranja <code>#F26522</code>.</p>
+<h2>Capa 08 — Frontend web + app móvil Cubik</h2>
+<p><strong>Rol:</strong> <code>public/</code> — SPA web + modo app (<code>?app=1</code>, PWA, Capacitor). Shell móvil: <code>app-shell.js</code>, <code>app-shell.css</code>. API remota vía <code>api-base.js</code> cuando UI va en bundle APK. Marca Cubik: <code>brand-config.js</code>, <code>public/brand/</code>.</p>
+<p><strong>Android:</strong> Capacitor 7, package <code>cl.cubik.logistics</code>, carpeta <code>android/</code>. Distribución testers: <a href="https://uber-truck-production.up.railway.app/probar">/probar</a> + APK debug.</p>
 
 <h2>Capa 09 — Experiencia producto (paridad Uber)</h2>
 <p><strong>Rol:</strong> flujos, copy y pantallas en <code>public/</code> alineados a «pedir → match → viaje activo → historial»; roles embarcador/transportista como pasajero/conductor. Piloto y validación <strong>solo dentro de esta app</strong>, no canales externos.</p>
@@ -486,6 +522,6 @@
   docs/            ← memoria HTML (este archivo)
   canvases/        ← estado de avance (Cursor)</code>
 
-<p class="meta"><em>Fin del documento — v3.6 (29 may 2026): multas tipo Uber v0.0.57, banco obligatorio, comprobante y confirmación acreedor; pasarela/tarjeta pendiente producción; software 0.0.57.</em></p>
+<p class="meta"><em>Fin del documento — v3.7 (2 jun 2026): Cubik app móvil v0.0.78, link /probar, APK bundle, CORS Capacitor; software 0.0.78.</em></p>
 </body>
 </html>

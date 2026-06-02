@@ -28,11 +28,21 @@
   <div class="doc-title-wrap">
     <h1>Journey de usuario — Uber Truck</h1>
     <p class="meta"><strong>Producto:</strong> App tipo Uber para carga por camión (backhaul).<br />
-    <strong>Versión:</strong> 2.5 · 29 mayo 2026 · Software app <strong>0.0.57</strong> · Canal MVP: <strong>solo la app</strong> (web / PWA)</p>
+    <strong>Versión:</strong> 2.6 · 2 jun 2026 · Software app <strong>0.0.78</strong> · Canal: <strong>app Cubik</strong> (web PWA + APK Android)</p>
   </div>
 </div>
 
-<p class="meta"><a href="/docs/">← Documentación</a> · <a href="Probar-Uber-Truck.html">Cómo probar la app</a> · <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica</a> · <a href="/">Inicio app</a></p>
+<p class="meta"><a href="/docs/">← Documentación</a> · <a href="Probar-Uber-Truck.html">Cómo probar la app</a> · <a href="https://uber-truck-production.up.railway.app/probar">Link testers /probar</a> · <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica</a> · <a href="/">Inicio app</a></p>
+
+<h2 id="acceso-testers">0. Cómo entrar a la app (jun 2026)</h2>
+<table>
+  <tr><th>Dispositivo</th><th>Cómo acceder</th><th>Link / archivo</th></tr>
+  <tr><td><strong>Android</strong></td><td>APK instalado o PWA desde navegador</td><td><code>%USERPROFILE%\Downloads\cubik-android.apk</code> o <a href="https://uber-truck-production.up.railway.app/probar">/probar</a></td></tr>
+  <tr><td><strong>iPhone</strong></td><td>Safari → Abrir Cubik → Añadir a inicio</td><td><a href="https://uber-truck-production.up.railway.app/probar">https://uber-truck-production.up.railway.app/probar</a></td></tr>
+  <tr><td><strong>PC / emulador</strong></td><td>Modo app en navegador</td><td><a href="https://uber-truck-production.up.railway.app/?app=1">/?app=1</a></td></tr>
+  <tr><td><strong>Dos roles</strong></td><td>Dos cuentas (emails distintos) o dos emuladores API 37</td><td>Embarcador + transportista en paralelo</td></tr>
+</table>
+<p><strong>Nombre tienda (futuro):</strong> Cubik Envíos Chile · package Android <code>cl.cubik.logistics</code>.</p>
 
 <h2>1. Propósito</h2>
 <p>Recorridos end-to-end de <strong>transportista</strong> y <strong>embarcador</strong> usando la misma lógica mental que Uber: publicar → emparejar → viaje activo → cerrar. Incluye emociones, fricciones y métricas por etapa.</p>
@@ -50,7 +60,7 @@
 <h2>3. Journey transportista (oferta)</h2>
 <table>
   <tr><th>Etapa</th><th>Acción</th><th>En la app</th><th>Emoción</th><th>Éxito</th></tr>
-  <tr><td>1. Descubrimiento</td><td>Referido en ruta / nodo industrial</td><td>Link a la web</td><td>«¿Me pagan el espacio vacío?»</td><td>Abre la app</td></tr>
+  <tr><td>1. Descubrimiento</td><td>Referido en ruta / nodo industrial</td><td>Link <a href="https://uber-truck-production.up.railway.app/probar">/probar</a> o APK</td><td>«¿Me pagan el espacio vacío?»</td><td>Abre Cubik</td></tr>
   <tr><td>2. Registro</td><td>Email + contraseña, rol transportista, empresa (<strong>Gmail/Apple: pendiente</strong>)</td><td>Registro / JWT</td><td>Desconfianza si es largo</td><td>Cuenta activa (KYC si piloto curado)</td></tr>
   <tr><td>3. Publicar capacidad</td><td>Origen, destino, m³, tipo carga, ventana</td><td>Formulario transportista</td><td>«Que sea rápido»</td><td>Oferta publicada (&lt; 3 min)</td></tr>
   <tr><td>4. Propuesta + precio</td><td>Elige carga, envía <strong>oferta en CLP</strong> (puede estar fuera del rango del embarcador)</td><td>Tablero paso 3</td><td>«¿Me pagan bien el desvío?»</td><td>Oferta visible al embarcador</td></tr>
@@ -67,7 +77,7 @@
 <h2>4. Journey embarcador (demanda)</h2>
 <table>
   <tr><th>Etapa</th><th>Acción</th><th>En la app</th><th>Emoción</th><th>Éxito</th></tr>
-  <tr><td>1. Necesidad</td><td>Carga urgente (ej. 2 pallets mañana)</td><td>—</td><td>«No hay camión»</td><td>Entra a la app</td></tr>
+  <tr><td>1. Necesidad</td><td>Carga urgente (ej. 2 pallets mañana)</td><td>Link <a href="https://uber-truck-production.up.railway.app/probar">/probar</a></td><td>«No hay camión»</td><td>Entra a Cubik</td></tr>
   <tr><td>2. Registro</td><td>Email + contraseña, rol embarcador (<strong>Gmail/Apple: pendiente</strong>)</td><td>Registro / JWT</td><td>«¿Es confiable?»</td><td>Cuenta activa</td></tr>
   <tr><td>3. Publicar carga</td><td>Maps, peso/volumen, <strong>declaración mercadería</strong> (descripción + valor ref. CLP), guía/folio, <strong>términos</strong>, rango flete («Ver rango sugerido»)</td><td>Formulario embarcador</td><td>«¿Me cubren si pasa algo?»</td><td>Carga publicada con términos aceptados</td></tr>
   <tr><td>4. Propuesta</td><td>Ve ofertas; transportista envía precio</td><td>Tablero + sugerencias</td><td>«¿Es justo?»</td><td>Compara ofertas</td></tr>
@@ -201,6 +211,6 @@
 
 <p class="meta">Modelo de negocio: <a href="Modelo-Negocio-Uber-Truck.html">Modelo-Negocio-Uber-Truck.html</a> · Gantt y backlog: <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica v3.6</a> · Multas: <a href="PENALTY-AND-SUPPORT.md">PENALTY-AND-SUPPORT.md</a> · Auth/correo: <a href="AUTH-AND-EMAIL-ROADMAP.md">AUTH-AND-EMAIL-ROADMAP.md</a> · Probar: <a href="Probar-Uber-Truck.html">Probar-Uber-Truck.html</a></p>
 
-<p class="meta"><em>Fin del documento — v2.5 (29 may 2026): Cuenta y multas, comprobante deudor, confirmación acreedor/embarcador, cancelados sin «Gestionar viaje»; app 0.0.57.</em></p>
+<p class="meta"><em>Fin del documento — v2.6 (2 jun 2026): acceso testers /probar + APK Android; app Cubik v0.0.78.</em></p>
 </body>
 </html>

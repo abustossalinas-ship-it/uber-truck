@@ -9,6 +9,8 @@ dist/
 coverage/
 data/store.json
 
+public/downloads/*.apk
+
 # Capacitor / Android build
 android/.gradle/
 android/.idea/

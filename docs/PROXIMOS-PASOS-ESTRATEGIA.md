@@ -1,10 +1,19 @@
-# Próximos pasos estratégicos — Uber Truck
+# Próximos pasos estratégicos — Cubik / Uber Truck
 
-Alineado al documento *«Tu siguiente paso NO debería ser»* y al estado del repo (mayo 2026).
+Alineado al estado del repo (**jun 2026**, software **0.0.78**).
 
 ## Principio
 
 No perseguir la app perfecta en web: construir **operación tipo Uber** con marketplace **semi-curado**, tracking y evidencia. Piloto masivo (M2, 20 viajes) cuando la base operacional esté lista.
+
+## Links operativos (testers)
+
+| Uso | URL |
+|-----|-----|
+| **Landing testers** | https://uber-truck-production.up.railway.app/probar |
+| **App directa** | https://uber-truck-production.up.railway.app/?app=1 |
+| **APK Android** | `npm run android:apk` → `%USERPROFILE%\Downloads\cubik-android.apk` |
+| **iPhone** | Solo link `/probar` + Safari «Añadir a inicio» (sin APK) |
 
 ## Orden de implementación
 
@@ -13,33 +22,33 @@ No perseguir la app perfecta en web: construir **operación tipo Uber** con mark
 | C | Semi-curado KYC (aprobar cuentas) | Hecho v0.0.33 |
 | A | `trip_events` + SSE realtime en viajes | Hecho v0.0.33 |
 | B | GPS + «Disponible» + mapa en viaje activo | Hecho v0.0.34 |
-| — | Mis cargas / mis ofertas (`owner_user_id`) | Después de B |
-| G | **Cubik** — PWA + Capacitor → Play prueba cerrada | **En curso v0.0.60** — ver [CUBIK-PLAY-STORE.md](./CUBIK-PLAY-STORE.md) |
+| G | **Cubik** — shell móvil + Capacitor Android bundle | **Hecho v0.0.78** — ver [CUBIK-APP-UX.md](./CUBIK-APP-UX.md) |
+| G2 | Distribución testers sin tienda (`/probar` + APK) | **Hecho jun 2026** |
+| G3 | Play Store prueba cerrada «Cubik Envíos Chile» | **Siguiente opcional** — USD 25 |
+| G4 | iOS TestFlight | **Futuro** — USD 99/año + Mac; hoy PWA |
 | H | Piloto curado (5 carriers + 3 embarcadores) | Al final |
-| — | Recuperación de contraseña por email (Resend + SQL 017) | **Futuro** — código en repo v0.0.38, no activar aún (parte del bloque E) |
-| D | Pagos in-app tipo Uber (validar tarjeta/cuenta, cobro multas integrado) | **Pendiente producción** — hoy: banco inscrito + pago externo + comprobante; ver [PENALTY-AND-SUPPORT.md](./PENALTY-AND-SUPPORT.md) |
-| E | Login con **Gmail (Google)** y **Apple** + correo transaccional | **Pendiente producción** — hoy solo email/contraseña; ver [AUTH-AND-EMAIL-ROADMAP.md](./AUTH-AND-EMAIL-ROADMAP.md) |
-| F | **Panel admin** — viajes, KPIs marketplace, NPS/★, corredor piloto | **F1–F2 hecho v0.0.58** — KPIs + tabla viajes; NPS import en roadmap |
+| — | Recuperación contraseña por email | Futuro — bloque E |
+| D | Pagos in-app | Pendiente — ver [PENALTY-AND-SUPPORT.md](./PENALTY-AND-SUPPORT.md) |
+| E | Login Gmail / Apple | Pendiente — [AUTH-AND-EMAIL-ROADMAP.md](./AUTH-AND-EMAIL-ROADMAP.md) |
+| F | Panel admin KPIs | F1–F2 hecho v0.0.58 |
+
+## Siguiente etapa inmediata (jun 2026)
+
+1. **Prueba funcional mañana** — emparejar, viaje completo, chat, calificación, multas (2 roles / 2 emuladores).
+2. **Piloto M2** — 20 viajes `completed` corredor RM ↔ Valparaíso/San Antonio.
+3. **Operación** — aprobar KYC testers; WhatsApp solo excepciones.
+4. **Cuando quieran tienda** — Play Console + política privacidad + AAB firmado.
+5. **Push FCM** — `google-services.json` + plugin (opcional).
 
 ## Qué NO hacer aún
 
-- Configurar Resend / `EMAIL_FROM` ni migración 017 (recuperación por correo)
-- OAuth Google (Gmail) / Sign in with Apple en login (bloque E — documentado, no desarrollar aún)
-- Marketplace abierto sin aprobación
-- App Store / Play Store pública
-- IA, pricing dinámico
-- Pasarela / validación de tarjetas / cobro automático de multas (bloque D — documentado, no desarrollar aún)
-- Piloto 20 viajes sin GPS ni evidencia de entrega
-
-## Operación (rol del fundador)
-
-1. Crear cuenta **admin** (`ADMIN_REGISTER_KEY`)
-2. Aprobar en panel **Aprobación de cuentas** o SQL en `docs/SQL-SUPABASE.md`
-3. Invitar 5 transportistas + 3 embarcadores del corredor RM ↔ V / San Antonio
-4. WhatsApp solo para excepciones; la app para match, estados y tracking
+- App Store / Play producción abierta sin piloto M2
+- OAuth / Resend sin priorizar viajes reales
+- Marketplace abierto sin aprobación KYC
 
 ## Referencia
 
 - [Memoria técnica](./Memoria-tecnica-Uber-Truck.html)
-- [SQL Supabase](./SQL-SUPABASE.md)
 - [Journey](./Journey-Usuario-Uber-Truck.html)
+- [Probar app](./Probar-Uber-Truck.html)
+- [Play Store](./CUBIK-PLAY-STORE.md)

@@ -112,6 +112,7 @@
       No necesitas Play Store ni App Store por ahora.
     </p>
     <a class="btn-primary" id="btn-open" href="/?app=1">Abrir Cubik</a>
+    <a class="btn-outline hidden" id="btn-apk" href="/downloads/cubik-android.apk" download>Descargar APK (Android)</a>
     <button type="button" class="btn-outline" id="btn-copy">Copiar link para testers</button>
 
     <div class="steps hidden" id="steps-ios">
@@ -126,9 +127,9 @@
     <div class="steps hidden" id="steps-android">
       <h2>Android (Chrome)</h2>
       <ol>
-        <li>Pulsa <strong>Abrir Cubik</strong>.</li>
-        <li>Si Chrome ofrece <strong>Instalar app</strong>, acéptalo.</li>
-        <li>Si no, usa la app desde el navegador o el acceso directo.</li>
+        <li>Pulsa <strong>Abrir Cubik</strong> (web) o <strong>Descargar APK</strong> si está disponible.</li>
+        <li>APK: permite instalar desde Chrome/WhatsApp → abre el archivo → Instalar.</li>
+        <li>Web: si Chrome ofrece <strong>Instalar app</strong>, acéptalo.</li>
       </ol>
     </div>
 
@@ -156,6 +157,12 @@
       document.getElementById('steps-ios')?.classList.toggle('hidden', !isIOS);
       document.getElementById('steps-android')?.classList.toggle('hidden', !isAndroid);
       document.getElementById('steps-desktop')?.classList.toggle('hidden', isIOS || isAndroid);
+
+      fetch('/downloads/cubik-android.apk', { method: 'HEAD' })
+        .then((r) => {
+          if (r.ok && isAndroid) document.getElementById('btn-apk')?.classList.remove('hidden');
+        })
+        .catch(() => {});
 
       document.getElementById('btn-open')?.addEventListener('click', () => {
         try {

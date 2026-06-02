@@ -13,7 +13,8 @@
     "cap:open:android": "npx cap open android",
     "cap:icons": "node scripts/generate-android-icons.cjs && npm run cap:sync",
     "cap:sync:remote": "node scripts/cap-config-remote.cjs && node scripts/generate-android-icons.cjs && npx cap sync android",
-    "cap:sync:bundle": "node scripts/cap-config-bundle.cjs && node scripts/generate-android-icons.cjs && npx cap sync android"
+    "cap:sync:bundle": "node scripts/cap-config-bundle.cjs && node scripts/generate-android-icons.cjs && npx cap sync android",
+    "android:apk": "node scripts/build-android-apk.cjs"
   },
   "engines": {
     "node": ">=20"

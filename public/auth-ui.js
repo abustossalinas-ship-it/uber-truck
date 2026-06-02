@@ -63,6 +63,11 @@ const Auth = {
       if (btnChangePw) btnChangePw.hidden = true;
       document.getElementById('change-password-panel')?.setAttribute('hidden', '');
     }
+    const isAppGuest = document.body.classList.contains('cubik-app') && !this.user;
+    if (isAppGuest) {
+      if (typeof AppShell?.hideNativeSplash === 'function') AppShell.hideNativeSplash();
+      return;
+    }
     if (typeof renderKycBanner === 'function') renderKycBanner();
     if (typeof refreshAdminKycPanel === 'function') refreshAdminKycPanel();
     if (typeof refreshAdminHubNav === 'function') refreshAdminHubNav();
@@ -78,14 +83,8 @@ const Auth = {
     if (typeof applyRoleUi === 'function') applyRoleUi();
     if (typeof renderBoardActor === 'function') renderBoardActor();
     if (typeof refreshBoard === 'function') refreshBoard();
-    if (typeof Comms !== 'undefined') {
-      if (this.user) Comms.refreshBell();
-      else Comms.resetUi();
-    }
-    if (typeof Penalties !== 'undefined') {
-      if (this.user) Penalties.refresh();
-      else Penalties.resetUi();
-    }
+    if (typeof Comms !== 'undefined') Comms.resetUi();
+    if (typeof Penalties !== 'undefined') Penalties.resetUi();
   },
 };
 

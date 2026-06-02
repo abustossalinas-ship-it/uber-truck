@@ -4,6 +4,7 @@
 const AppShell = {
   tab: 'home',
   deep: null,
+  _splashHidden: false,
 
   isNative() {
     return Boolean(window.Capacitor?.isNativePlatform?.());
@@ -25,6 +26,7 @@ const AppShell = {
     document.body.classList.add('cubik-app');
     const gate = document.getElementById('app-gate');
     if (gate) gate.hidden = false;
+    this.hideNativeSplash();
     this.bindWelcome();
     this.bindBottomNav();
     this.bindTopBar();
@@ -47,15 +49,24 @@ const AppShell = {
     }
   },
 
+  hideNativeSplash() {
+    if (this._splashHidden) return;
+    const Cap = window.Capacitor;
+    if (!Cap?.Plugins?.SplashScreen) {
+      if (this.isNative()) setTimeout(() => this.hideNativeSplash(), 50);
+      return;
+    }
+    this._splashHidden = true;
+    Cap.Plugins.SplashScreen.hide?.().catch(() => {});
+  },
+
   async runNativeSetup() {
     const Cap = window.Capacitor;
     if (!Cap?.Plugins) {
       setTimeout(() => this.runNativeSetup(), 80);
       return;
     }
-    try {
-      await Cap.Plugins.SplashScreen?.hide?.();
-    } catch (_) {}
+    this.hideNativeSplash();
     try {
       const StatusBar = Cap.Plugins.StatusBar;
       if (StatusBar) {
@@ -77,7 +88,7 @@ const AppShell = {
         if (!canGoBack) Cap.Plugins.App?.exitApp?.();
       });
     } catch (_) {}
-    this.initPushStub();
+    setTimeout(() => this.initPushStub(), 8000);
   },
 
   async initPushStub() {

@@ -15,10 +15,13 @@
   },
   "plugins": {
     "SplashScreen": {
-      "launchShowDuration": 2200,
+      "launchShowDuration": 500,
       "launchAutoHide": true,
       "backgroundColor": "#F4F7FB",
-      "showSpinner": false
+      "showSpinner": false,
+      "useDialog": true,
+      "androidSplashResourceName": "splash",
+      "androidScaleType": "CENTER_INSIDE"
     },
     "StatusBar": {
       "style": "DARK",

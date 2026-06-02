@@ -976,6 +976,13 @@ function setMatchOffer(offerId, label) {
 }
 
 async function refreshBoard() {
+  if (
+    document.body.classList.contains('cubik-app') &&
+    typeof Auth !== 'undefined' &&
+    !Auth.user
+  ) {
+    return;
+  }
   const gen = ++boardRefreshGen;
   const keepLoad = stickyMatchLoadId || $('match-load')?.value || '';
   const keepOffer = stickyMatchOfferId || $('match-offer')?.value || '';
@@ -1702,7 +1709,12 @@ document.querySelectorAll('[data-close-cancel]').forEach((el) => {
 });
 
 renderBoardActor();
-showTab('shipper');
+const isAppGuest =
+  document.body.classList.contains('cubik-app') &&
+  (typeof Auth === 'undefined' || !Auth.user);
+if (!isAppGuest) {
+  showTab('shipper');
+}
 if (typeof Comms !== 'undefined') {
   if (typeof Auth !== 'undefined' && Auth.user) Comms.refreshBell();
   else Comms.resetUi();
@@ -1710,4 +1722,7 @@ if (typeof Comms !== 'undefined') {
 if (typeof Penalties !== 'undefined') {
   if (typeof Auth !== 'undefined' && Auth.user) Penalties.refresh();
   else Penalties.resetUi();
+}
+if (isAppGuest && typeof AppShell?.hideNativeSplash === 'function') {
+  AppShell.hideNativeSplash();
 }

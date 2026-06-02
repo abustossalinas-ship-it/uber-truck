@@ -1,13 +1,13 @@
 {
   "name": "Cubik",
   "short_name": "Cubik",
-  "description": "Conecta cubicación logística disponible con demanda en tiempo real",
+  "description": "Optimiza tus envíos — cubicación disponible conectada con demanda",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#F9FAFB",
-  "theme_color": "#F26522",
+  "background_color": "#0f2744",
+  "theme_color": "#0f2744",
   "lang": "es-CL",
   "icons": [
     {

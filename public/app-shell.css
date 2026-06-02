@@ -285,7 +285,7 @@ body.cubik-app #change-password-panel::before {
   width: clamp(72px, 22vw, 96px);
   height: clamp(72px, 22vw, 96px);
   margin: 0 auto 0.75rem;
-  background: url('/brand/logo-mark.png') center / contain no-repeat;
+  background: url('/brand/logo-mark.png?v=0.0.74') center / contain no-repeat;
 }
 
 body.cubik-app #auth-panel > h2,

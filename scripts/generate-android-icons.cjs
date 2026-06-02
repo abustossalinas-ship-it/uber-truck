@@ -9,6 +9,9 @@ const sharp = require('sharp');
 const LOGO = path.join(__dirname, '..', 'public', 'brand', 'logo.png');
 const RES = path.join(__dirname, '..', 'android', 'app', 'src', 'main', 'res');
 const BG = { r: 244, g: 247, b: 251, alpha: 1 };
+/** Solo el cubo 3D; más alto incluye restos del texto "Cubik" (líneas azules) */
+const ISOTIPO_CROP_RATIO = 0.42;
+const BRAND_TEXT_TOP_RATIO = 0.44;
 
 const LAUNCHER = {
   'mipmap-mdpi': { icon: 48, fg: 108 },
@@ -52,8 +55,7 @@ function stripBlackBackground(inputSharp) {
 
 async function loadIsotipo() {
   const meta = await sharp(LOGO).metadata();
-  // Cubo completo (misma zona que logo-mark en bienvenida)
-  const cropH = Math.max(1, Math.round(meta.height * 0.52));
+  const cropH = Math.max(1, Math.round(meta.height * ISOTIPO_CROP_RATIO));
   const cropped = sharp(LOGO).extract({
     left: 0,
     top: 0,
@@ -69,7 +71,7 @@ async function loadFullBrand() {
 
 async function loadBrandText() {
   const meta = await sharp(LOGO).metadata();
-  const top = Math.max(0, Math.round(meta.height * 0.48));
+  const top = Math.max(0, Math.round(meta.height * BRAND_TEXT_TOP_RATIO));
   const cropped = sharp(LOGO).extract({
     left: 0,
     top,

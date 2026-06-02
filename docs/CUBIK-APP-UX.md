@@ -36,7 +36,7 @@ npm run cap:sync:bundle
 npm run cap:open:android
 ```
 
-Plugins: SplashScreen, StatusBar, App (back), PushNotifications (stub; requiere `google-services.json` para FCM).
+Plugins: SplashScreen, StatusBar, App (back), PushNotifications (stub; requiere `google-services.json` para FCM). Guía push: [CUBIK-PUSH-FCM.md](./CUBIK-PUSH-FCM.md).
 
 ## Probar en PC
 

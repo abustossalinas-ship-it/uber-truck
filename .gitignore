@@ -8,3 +8,11 @@ Thumbs.db
 dist/
 coverage/
 data/store.json
+
+# Capacitor / Android build
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+*.keystore
+!android/app/src/main/**/*.keystore

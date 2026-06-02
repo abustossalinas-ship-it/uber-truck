@@ -1,0 +1,26 @@
+{
+  "name": "Cubik",
+  "short_name": "Cubik",
+  "description": "Conecta cubicación logística disponible con demanda en tiempo real",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#F9FAFB",
+  "theme_color": "#F26522",
+  "lang": "es-CL",
+  "icons": [
+    {
+      "src": "/brand/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/brand/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
+  ]
+}

@@ -1,60 +1,54 @@
-# Identidad visual — Uber Truck
+# Cubik — identidad (producto Play Store)
 
-**Eslogan:** Inteligencia en movimiento.
+**Nombre comercial:** Cubik  
+**Eslogan:** Conecta cubicación disponible con demanda en tiempo real  
+**Package Android:** `cl.cubik.logistics`  
+**Repo / infra interna:** uber-truck (Railway sin cambiar URL por ahora)
+
+## Por qué Cubik
+
+Comunica la ventaja: **espacio / cubicación disponible**, no solo “camión”. Marca tech global para LATAM.
+
+### Shortlist descartada (referencia)
+
+| Marca | Nota |
+|-------|------|
+| **Cubik** ✓ | Elegida |
+| Trayek | — |
+| FlowCargo | — |
+| RutaGo | — |
+| Andes Flow | — |
+
+## Visual (heredado MVP)
+
+| Token | HEX |
+|-------|-----|
+| Naranja primario | `#F26522` |
+| Negro | `#000000` |
+| Fondo | `#F9FAFB` |
+
+Logo actual: `public/brand/logo.png` (reemplazar por isotipo Cubik antes de listing final si aplica).
+
+## Play Store
+
+Guía: [CUBIK-PLAY-STORE.md](./CUBIK-PLAY-STORE.md)
+
+## Documento histórico Uber Truck
+
+Ver sección colorimetría abajo (tokens CSS sin cambiar).
+
+---
+
+# Identidad visual — base MVP (tokens)
+
+**Eslogan legacy:** Inteligencia en movimiento.
 
 ## Logo
 
 | Uso | Ruta |
 |-----|------|
 | App / web | `public/brand/logo.png` |
-| Favicon | `public/brand/logo.png` (mismo archivo) |
-
-No modificar proporciones del isotipo. En fondos oscuros usar versión sobre blanco o contenedor blanco con borde redondeado (como el arte original).
 
 ## Colorimetría
 
-Extraída del logo oficial (naranja camión / franja TRUCK, negro tipografía, blanco fondo).
-
-| Token | HEX | Uso |
-|-------|-----|-----|
-| **Naranja primario** | `#F26522` | CTAs, pestaña activa, badges, acentos |
-| **Naranja oscuro** | `#D95418` | Hover botones, estados pressed |
-| **Naranja claro** | `#FF8A4C` | Highlights secundarios |
-| **Negro** | `#000000` | Texto principal, títulos |
-| **Blanco** | `#FFFFFF` | Fondos de tarjeta, header logo |
-| **Gris 50** | `#F9FAFB` | Fondo página |
-| **Gris 200** | `#E5E7EB` | Bordes, inputs |
-| **Gris 700** | `#374151` | Texto secundario |
-
-### CSS (implementado)
-
-Variables en `public/theme.css`:
-
-```css
---brand-orange: #f26522;
---brand-black: #000000;
---brand-white: #ffffff;
-```
-
-### Contraste
-
-- Texto negro sobre blanco o gris 50: OK (WCAG AA).
-- Texto blanco sobre naranja `#F26522`: usar solo en botones; verificar tamaño mínimo 14px bold.
-
-## Tipografía
-
-- **UI:** Segoe UI, Inter o system-ui — sans-serif, peso 600 en títulos.
-- **Títulos marca:** mayúsculas solo en eslogan; “Uber Truck” en sentence case en UI.
-
-## Componentes
-
-| Elemento | Estilo |
-|----------|--------|
-| Botón primario | Fondo `#F26522`, texto negro o blanco según contraste |
-| Botón secundario | Borde negro, fondo blanco |
-| Tarjetas | Fondo blanco, sombra suave, radio 12px |
-| Pills de estado | Fondo `rgba(242,101,34,0.12)`, texto naranja oscuro |
-
-## Railway / favicon
-
-Al desplegar, `public/brand/logo.png` se sirve en `/brand/logo.png`. No requiere CDN aparte en MVP.
+Variables en `public/theme.css`: `--brand-orange: #f26522;`

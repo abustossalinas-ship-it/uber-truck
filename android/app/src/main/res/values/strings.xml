@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Cubik</string>
+    <string name="title_activity_main">Cubik</string>
+    <string name="package_name">cl.cubik.logistics</string>
+    <string name="custom_url_scheme">cl.cubik.logistics</string>
+</resources>

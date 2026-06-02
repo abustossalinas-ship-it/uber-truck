@@ -14,8 +14,7 @@ No perseguir la app perfecta en web: construir **operación tipo Uber** con mark
 | A | `trip_events` + SSE realtime en viajes | Hecho v0.0.33 |
 | B | GPS + «Disponible» + mapa en viaje activo | Hecho v0.0.34 |
 | — | Mis cargas / mis ofertas (`owner_user_id`) | Después de B |
-| — | PWA instalable | Paralelo a móvil |
-| — | React Native + Expo + TestFlight | Tras GPS en web/API |
+| G | **Cubik** — PWA + Capacitor → Play prueba cerrada | **En curso v0.0.60** — ver [CUBIK-PLAY-STORE.md](./CUBIK-PLAY-STORE.md) |
 | H | Piloto curado (5 carriers + 3 embarcadores) | Al final |
 | — | Recuperación de contraseña por email (Resend + SQL 017) | **Futuro** — código en repo v0.0.38, no activar aún (parte del bloque E) |
 | D | Pagos in-app tipo Uber (validar tarjeta/cuenta, cobro multas integrado) | **Pendiente producción** — hoy: banco inscrito + pago externo + comprobante; ver [PENALTY-AND-SUPPORT.md](./PENALTY-AND-SUPPORT.md) |

@@ -1698,6 +1698,21 @@ body.kyc-pending #btn-create-match {
   margin-top: 0.5rem;
 }
 
+.pwa-install-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  margin-top: 0.75rem;
+  border: 1px dashed var(--accent);
+  background: var(--accent-soft);
+}
+
+.pwa-install-banner p {
+  margin: 0;
+  flex: 1 1 200px;
+}
+
 .admin-hub-nav {
   margin-top: 0.75rem;
   border: 2px solid var(--accent);

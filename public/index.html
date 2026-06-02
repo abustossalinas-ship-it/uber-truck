@@ -4,19 +4,24 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#F26522" />
-  <title>Uber Truck — Inteligencia en movimiento</title>
+  <meta name="application-name" content="Cubik" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="Cubik" />
+  <title>Cubik — cubicación disponible, conectada</title>
   <link rel="icon" href="/brand/logo.png" type="image/png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="apple-touch-icon" href="/brand/logo.png" />
   <link rel="stylesheet" href="/theme.css?v=0.0.20" />
+  <script src="/brand-config.js?v=0.0.60"></script>
 </head>
 <body>
   <header class="site-header">
-    <img class="brand-logo" src="/brand/logo.png" width="120" height="120" alt="Uber Truck" />
+    <img class="brand-logo" src="/brand/logo.png" width="120" height="120" alt="Cubik" />
     <div class="brand-copy">
-      <h1>Uber Truck</h1>
-      <p class="tagline">Inteligencia en movimiento</p>
+      <h1>Cubik</h1>
+      <p class="tagline">Conecta cubicación disponible con demanda en tiempo real</p>
       <p class="lead">
-        Aprovecha cubicación ociosa en rutas ya planificadas. Las PYME publican pedidos extras sin
-        contratar un camión dedicado cada mes por imprevistos.
+        El espacio disponible en tu ruta es el activo. Publica carga u oferta de cubicación en rutas ya planificadas — marketplace curado, flujo tipo Uber para camión.
       </p>
       <span class="hero-tag" id="storage-badge">MVP demo</span>
     </div>
@@ -30,6 +35,12 @@
       <button type="button" class="tab tab-sm tab-outline" id="btn-change-password" hidden>Cambiar clave</button>
     </div>
   </header>
+
+  <section id="pwa-install-banner" class="pwa-install-banner card" hidden>
+    <p><strong>Instalar Cubik</strong> en este dispositivo para demo sin buscar el link.</p>
+    <button type="button" class="tab tab-sm" id="pwa-install-btn">Instalar app</button>
+    <button type="button" class="tab tab-sm tab-outline" id="pwa-install-dismiss">Ahora no</button>
+  </section>
 
   <section id="penalty-block-banner" class="penalty-block-banner card" hidden aria-live="polite"></section>
   <section id="account-penalties-panel" class="account-penalties-panel card" hidden></section>
@@ -46,7 +57,7 @@
         Operaciones · KPIs
       </button>
     </div>
-    <p class="muted admin-hub-hint">Aprueba embarcadores y transportistas antes del piloto. Multas y comprobantes requieren SQL 022–025 en Supabase.</p>
+    <p class="muted admin-hub-hint">Aprueba embarcadores y transportistas antes del piloto. Demo Play: ver <a href="/docs/CUBIK-PLAY-STORE.md">Cubik Play Store</a>.</p>
   </section>
 
   <section id="admin-kyc-panel" class="admin-kyc-panel card" hidden>
@@ -95,7 +106,7 @@
   </section>
 
   <section class="invite-tester card" id="invite-tester">
-    <h2>Probar Uber Truck (sin instalar nada)</h2>
+    <h2>Probar Cubik (sin instalar nada)</h2>
     <p class="muted">
       Solo necesitas este enlace en el celular o PC. <strong>No</strong> hace falta instalar nada ni acceder a la base de datos del proyecto.
       Crea tu cuenta como <strong>embarcador</strong> o <strong>transportista</strong> (usa dos emails si quieres probar ambos roles).
@@ -791,6 +802,7 @@
     </div>
   </div>
 
+  <script src="/pwa-ui.js?v=0.0.60"></script>
   <script src="/kyc-ui.js?v=0.0.33"></script>
   <script src="/admin-ui.js?v=0.0.59"></script>
   <script src="/realtime-ui.js?v=0.0.34"></script>

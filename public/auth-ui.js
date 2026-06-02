@@ -97,7 +97,26 @@ function showAuthError(message) {
   if (!el) return;
   el.textContent = message;
   el.hidden = false;
-  el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  el.removeAttribute('hidden');
+  const panel = document.getElementById('auth-panel');
+  if (panel) {
+    panel.hidden = false;
+    panel.removeAttribute('hidden');
+  }
+  if (document.body.classList.contains('cubik-app')) {
+    document.getElementById('app-welcome')?.setAttribute('hidden', '');
+    const welcome = document.getElementById('app-welcome');
+    if (welcome) welcome.hidden = true;
+  } else {
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+}
+
+function notifyAuthFailure(message) {
+  showAuthError(message);
+  if (document.body.classList.contains('cubik-app')) {
+    alert(message);
+  }
 }
 
 function clearAuthError() {
@@ -404,7 +423,7 @@ formAuth?.addEventListener('submit', async (e) => {
     }
     if (!res.ok) {
       const msg = authErrorMessage(res, json, authRegisterMode);
-      showAuthError(msg);
+      notifyAuthFailure(msg);
       return;
     }
     Auth.save(json.token, json.user);
@@ -422,7 +441,7 @@ formAuth?.addEventListener('submit', async (e) => {
     if (typeof Penalties !== 'undefined') Penalties.refresh();
   } catch (err) {
     console.error(err);
-    showAuthError('No se pudo conectar con el servidor. Revisa tu internet e intenta de nuevo.');
+    notifyAuthFailure('No se pudo conectar con el servidor. Revisa tu internet e intenta de nuevo.');
   } finally {
     if (submitBtn) {
       submitBtn.disabled = false;

@@ -155,15 +155,6 @@ const AppShell = {
     };
     if (typeof Auth !== 'undefined') wrapRender();
     else document.addEventListener('DOMContentLoaded', wrapRender);
-
-    const form = document.getElementById('form-auth');
-    form?.addEventListener(
-      'submit',
-      () => {
-        setTimeout(() => this.syncAuthState(), 300);
-      },
-      true
-    );
   },
 
   bindBackButton() {
@@ -193,9 +184,23 @@ const AppShell = {
     } else {
       this.deep = null;
       document.body.classList.remove('app-deep', 'app-main-visible');
-      document.getElementById('auth-panel')?.setAttribute('hidden', '');
-      const welcome = document.getElementById('app-welcome');
-      if (welcome) welcome.hidden = false;
+      const authPanel = document.getElementById('auth-panel');
+      const authError = document.getElementById('auth-error');
+      const authOpenWithError =
+        authPanel &&
+        !authPanel.hidden &&
+        authError &&
+        !authError.hidden &&
+        authError.textContent.trim();
+      if (!authOpenWithError) {
+        authPanel?.setAttribute('hidden', '');
+        const welcome = document.getElementById('app-welcome');
+        if (welcome) welcome.hidden = false;
+      } else {
+        document.getElementById('app-welcome')?.setAttribute('hidden', '');
+        const welcome = document.getElementById('app-welcome');
+        if (welcome) welcome.hidden = true;
+      }
       this.restorePanelsHome();
     }
   },

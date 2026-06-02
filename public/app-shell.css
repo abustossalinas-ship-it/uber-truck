@@ -304,6 +304,26 @@ body.cubik-app #auth-panel .auth-login-footer {
   margin-right: auto;
 }
 
+body.cubik-app #auth-panel .auth-error {
+  width: 100%;
+  max-width: 22rem;
+  margin-left: auto;
+  margin-right: auto;
+  display: block;
+}
+
+body.cubik-app #auth-panel .auth-error[hidden] {
+  display: none !important;
+}
+
+body.cubik-app #auth-panel form button[type="submit"] {
+  width: 100%;
+}
+
+body.cubik-app #auth-panel .auth-login-footer {
+  text-align: center;
+}
+
 body.cubik-app #auth-panel[hidden],
 body.cubik-app #change-password-panel[hidden] {
   display: none !important;

@@ -50,6 +50,37 @@
     <div id="admin-kyc-list" class="admin-kyc-list"></div>
   </section>
 
+  <section id="admin-ops-panel" class="admin-ops-panel card" hidden>
+    <h2>Operaciones — viajes y KPIs (admin)</h2>
+    <p class="muted">Resumen de marketplace para piloto M2. Solo visible con rol administrador.</p>
+    <div class="admin-ops-toolbar">
+      <label class="admin-ops-filter">
+        Corredor
+        <select id="admin-ops-corridor">
+          <option value="all">Todos</option>
+          <option value="pilot">Piloto RM ↔ V / San Antonio</option>
+        </select>
+      </label>
+      <label class="admin-ops-filter">
+        Estado viaje
+        <select id="admin-ops-status">
+          <option value="all">Todos</option>
+          <option value="proposed">Propuesto</option>
+          <option value="accepted">Aceptado</option>
+          <option value="in_progress">En ejecución</option>
+          <option value="completed">Completado</option>
+          <option value="cancelled">Cancelado</option>
+        </select>
+      </label>
+      <button type="button" class="btn-secondary" id="admin-ops-refresh">Actualizar métricas</button>
+    </div>
+    <div id="admin-ops-kpis" class="admin-ops-kpis" aria-live="polite"></div>
+    <div id="admin-ops-trips-wrap" class="admin-ops-trips-wrap">
+      <h3>Viajes recientes</h3>
+      <div id="admin-ops-trips" class="admin-ops-trips"></div>
+    </div>
+  </section>
+
   <section class="invite-tester card" id="invite-tester">
     <h2>Probar Uber Truck (sin instalar nada)</h2>
     <p class="muted">
@@ -748,7 +779,7 @@
   </div>
 
   <script src="/kyc-ui.js?v=0.0.33"></script>
-  <script src="/admin-ui.js?v=0.0.35"></script>
+  <script src="/admin-ui.js?v=0.0.58"></script>
   <script src="/realtime-ui.js?v=0.0.34"></script>
   <script src="/invite-ui.js?v=0.0.20"></script>
   <script src="/roles-ui.js?v=0.0.19"></script>

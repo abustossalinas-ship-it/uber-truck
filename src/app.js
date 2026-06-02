@@ -88,6 +88,7 @@ app.get('/health', async (_req, res) => {
       'proposal-compare-ranking',
       'penalty-block-overdue',
       'support-cases-moderator',
+      'admin-ops-dashboard',
     ],
     deploy_manifest: manifest,
     railway: {

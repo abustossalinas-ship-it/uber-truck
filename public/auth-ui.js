@@ -65,6 +65,7 @@ const Auth = {
     }
     if (typeof renderKycBanner === 'function') renderKycBanner();
     if (typeof refreshAdminKycPanel === 'function') refreshAdminKycPanel();
+    if (typeof refreshAdminOpsPanel === 'function') refreshAdminOpsPanel();
     if (typeof refreshCarrierPresencePanel === 'function') refreshCarrierPresencePanel();
     if (typeof applyRoleUi === 'function') applyRoleUi();
     if (typeof renderBoardActor === 'function') renderBoardActor();

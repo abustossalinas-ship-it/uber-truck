@@ -1717,6 +1717,94 @@ body.kyc-pending #btn-create-match {
   color: var(--text-muted);
 }
 
+.admin-ops-panel {
+  margin-top: 1rem;
+}
+
+.admin-ops-toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  align-items: flex-end;
+  margin: 0.75rem 0 1rem;
+}
+
+.admin-ops-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.admin-ops-filter select {
+  min-width: 12rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+}
+
+.admin-ops-kpis {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 0.65rem;
+  margin-bottom: 1.25rem;
+}
+
+.admin-kpi-card {
+  padding: 0.65rem 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--brand-gray-50);
+}
+
+.admin-kpi-card strong {
+  display: block;
+  font-size: 1.15rem;
+  color: var(--accent);
+}
+
+.admin-kpi-card span {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.25;
+}
+
+.admin-ops-trips {
+  overflow-x: auto;
+}
+
+.admin-ops-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+}
+
+.admin-ops-table th,
+.admin-ops-table td {
+  border: 1px solid var(--border);
+  padding: 0.4rem 0.5rem;
+  text-align: left;
+  vertical-align: top;
+}
+
+.admin-ops-table th {
+  background: var(--brand-gray-100);
+  font-weight: 600;
+}
+
+.admin-ops-table tr:nth-child(even) {
+  background: var(--brand-gray-50);
+}
+
+.pill-pilot {
+  background: #dbeafe;
+  color: #1e40af;
+  font-size: 0.65rem;
+  padding: 0.1rem 0.35rem;
+  border-radius: 4px;
+}
+
 .site-footer {
   text-align: center;
   padding: 1rem;

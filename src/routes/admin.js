@@ -5,6 +5,7 @@ const supabase = require('../services/supabase');
 const repo = require('../lib/repository');
 const { authMiddleware } = require('../lib/auth');
 const { normalizeOrgName } = require('../lib/ownership');
+const { buildAdminDashboard, listAdminTrips } = require('../lib/admin-metrics');
 
 const router = express.Router();
 
@@ -70,6 +71,34 @@ router.patch('/users/:id/kyc', authMiddleware, requireAdmin, async (req, res) =>
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al actualizar KYC' });
+  }
+});
+
+router.get('/dashboard', authMiddleware, requireAdmin, async (req, res) => {
+  if (!supabase.isConfigured()) {
+    return res.status(503).json({ ok: false, error: 'Requiere Supabase' });
+  }
+  try {
+    const result = await buildAdminDashboard(repo, req.query);
+    if (result.error) return res.status(400).json({ ok: false, error: result.error });
+    res.json(result);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al cargar panel operativo' });
+  }
+});
+
+router.get('/trips', authMiddleware, requireAdmin, async (req, res) => {
+  if (!supabase.isConfigured()) {
+    return res.status(503).json({ ok: false, error: 'Requiere Supabase' });
+  }
+  try {
+    const result = await listAdminTrips(repo, req.query);
+    if (result.error) return res.status(400).json({ ok: false, error: result.error });
+    res.json(result);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al listar viajes' });
   }
 });
 

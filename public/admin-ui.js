@@ -135,3 +135,145 @@ document.getElementById('admin-kyc-list')?.addEventListener('click', (e) => {
 });
 
 window.refreshAdminKycPanel = refreshAdminKycPanel;
+
+function formatAdminClp(n) {
+  const v = Number(n);
+  if (!Number.isFinite(v)) return '—';
+  return `$${Math.round(v).toLocaleString('es-CL')}`;
+}
+
+function adminOpsQuery() {
+  return {
+    corridor: document.getElementById('admin-ops-corridor')?.value || 'all',
+    status: document.getElementById('admin-ops-status')?.value || 'all',
+  };
+}
+
+function renderAdminKpiCards(summary, liquidity) {
+  const c = summary.counts || {};
+  const liq = summary.liquidity_week || liquidity || {};
+  const targets = liq.targets || { loads_min: 3, offers_min: 2 };
+  const cards = [
+    { label: 'Viajes (filtro)', value: c.total ?? 0 },
+    { label: 'En curso / propuestos', value: (c.active ?? 0) + (c.proposed ?? 0) },
+    { label: 'Completados', value: c.completed ?? 0 },
+    { label: 'Cancelados', value: c.cancelled ?? 0 },
+    { label: 'GMV completados', value: formatAdminClp(summary.gmv_clp) },
+    {
+      label: `Ingreso est. (${summary.take_rate_percent || 13.5}%)`,
+      value: formatAdminClp(summary.revenue_estimated_clp),
+    },
+    {
+      label: 'Match rate',
+      value: summary.match_rate_percent != null ? `${summary.match_rate_percent}%` : '—',
+    },
+    {
+      label: 'Cancel. post-asignación',
+      value:
+        summary.cancel_post_accepted_percent != null
+          ? `${summary.cancel_post_accepted_percent}%`
+          : '—',
+    },
+    {
+      label: 'Mediana h → match',
+      value:
+        summary.median_hours_to_match != null ? `${summary.median_hours_to_match} h` : '—',
+    },
+    {
+      label: '★ embarcador → transp.',
+      value: summary.avg_stars_shipper_rates_carrier ?? '—',
+    },
+    {
+      label: '★ transportista → emb.',
+      value: summary.avg_stars_carrier_rates_shipper ?? '—',
+    },
+    { label: 'KYC pendientes', value: summary.pending_kyc ?? 0 },
+    {
+      label: 'Liquidez 7 d (cargas / ofertas)',
+      value: `${liq.published_loads ?? 0} / ${liq.published_offers ?? 0}`,
+      hint: `Meta semanal ≥${targets.loads_min} / ≥${targets.offers_min}`,
+    },
+  ];
+  return cards
+    .map(
+      (card) => `
+    <div class="admin-kpi-card">
+      <strong>${card.value}</strong>
+      <span>${card.label}${card.hint ? `<br />${card.hint}` : ''}</span>
+    </div>`
+    )
+    .join('');
+}
+
+function renderAdminTripsTable(rows) {
+  if (!rows.length) return '<p class="muted">No hay viajes con estos filtros.</p>';
+  const head = `
+    <thead><tr>
+      <th>Estado</th><th>Ruta</th><th>Embarcador</th><th>Transportista</th>
+      <th>Precio</th><th>★ E→T</th><th>★ T→E</th><th>Actualizado</th>
+    </tr></thead>`;
+  const body = rows
+    .map((t) => {
+      const dt = t.updated_at ? new Date(t.updated_at).toLocaleString('es-CL') : '—';
+      const pilot = t.pilot_corridor ? ' <span class="pill-pilot">piloto</span>' : '';
+      return `<tr>
+        <td>${t.status_label}${pilot}</td>
+        <td>${t.route}</td>
+        <td>${t.shipper}</td>
+        <td>${t.carrier}</td>
+        <td>${t.agreed_price_label}</td>
+        <td>${t.stars_shipper ?? '—'}</td>
+        <td>${t.stars_carrier ?? '—'}</td>
+        <td>${dt}</td>
+      </tr>`;
+    })
+    .join('');
+  return `<table class="admin-ops-table">${head}<tbody>${body}</tbody></table>`;
+}
+
+async function refreshAdminOpsPanel() {
+  const panel = document.getElementById('admin-ops-panel');
+  const kpisEl = document.getElementById('admin-ops-kpis');
+  const tripsEl = document.getElementById('admin-ops-trips');
+  if (!panel || !kpisEl || !tripsEl) return;
+  const user = typeof Auth !== 'undefined' ? Auth.user : null;
+  if (!user || user.role !== 'admin') {
+    panel.hidden = true;
+    return;
+  }
+  panel.hidden = false;
+  kpisEl.innerHTML = '<p class="muted">Cargando métricas…</p>';
+  tripsEl.innerHTML = '';
+  const q = adminOpsQuery();
+  const qs = new URLSearchParams();
+  if (q.corridor !== 'all') qs.set('corridor', q.corridor);
+  if (q.status !== 'all') qs.set('status', q.status);
+  try {
+    const headers = await adminHeaders();
+    const [dashRes, tripsRes] = await Promise.all([
+      fetch(`/api/admin/dashboard?${qs}`, { headers }),
+      fetch(`/api/admin/trips?${qs}&limit=80`, { headers }),
+    ]);
+    const dash = await dashRes.json();
+    const trips = await tripsRes.json();
+    if (!dashRes.ok) {
+      kpisEl.innerHTML = `<p class="muted">${dash.error || 'Error KPIs'}</p>`;
+      return;
+    }
+    kpisEl.innerHTML = renderAdminKpiCards(dash.summary, dash.liquidity);
+    if (!tripsRes.ok) {
+      tripsEl.innerHTML = `<p class="muted">${trips.error || 'Error viajes'}</p>`;
+      return;
+    }
+    tripsEl.innerHTML = renderAdminTripsTable(trips.data || []);
+  } catch (e) {
+    console.error(e);
+    kpisEl.innerHTML = '<p class="muted">No se pudo conectar.</p>';
+  }
+}
+
+document.getElementById('admin-ops-refresh')?.addEventListener('click', refreshAdminOpsPanel);
+document.getElementById('admin-ops-corridor')?.addEventListener('change', refreshAdminOpsPanel);
+document.getElementById('admin-ops-status')?.addEventListener('change', refreshAdminOpsPanel);
+
+window.refreshAdminOpsPanel = refreshAdminOpsPanel;

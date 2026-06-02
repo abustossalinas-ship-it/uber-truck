@@ -19,10 +19,9 @@
       "launchAutoHide": true,
       "backgroundColor": "#F4F7FB",
       "showSpinner": false,
+      "useDialog": true,
       "androidSplashResourceName": "splash",
-      "androidScaleType": "CENTER_INSIDE",
-      "splashFullScreen": true,
-      "splashImmersive": true
+      "androidScaleType": "CENTER_INSIDE"
     },
     "StatusBar": {
       "style": "DARK",

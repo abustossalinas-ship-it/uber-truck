@@ -9,9 +9,36 @@ const sharp = require('sharp');
 const LOGO = path.join(__dirname, '..', 'public', 'brand', 'logo.png');
 const RES = path.join(__dirname, '..', 'android', 'app', 'src', 'main', 'res');
 const BG = { r: 244, g: 247, b: 251, alpha: 1 };
-/** Solo el cubo 3D; más alto incluye restos del texto "Cubik" (líneas azules) */
-const ISOTIPO_CROP_RATIO = 0.42;
-const BRAND_TEXT_TOP_RATIO = 0.44;
+
+/** Detecta dónde empieza el texto "Cubik" para recortar solo el cubo 3D */
+async function detectCubeCropHeight() {
+  const meta = await sharp(LOGO).metadata();
+  const { data, info } = await sharp(LOGO).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  const T = 32;
+  for (let y = 380; y < info.height; y++) {
+    let n = 0;
+    let navy = 0;
+    for (let x = 0; x < info.width; x++) {
+      const i = (y * info.width + x) * 4;
+      const r = data[i];
+      const g = data[i + 1];
+      const b = data[i + 2];
+      if (r <= T && g <= T && b <= T) continue;
+      n++;
+      if (r < 55 && g < 100 && b > 55) navy++;
+    }
+    if (n > 100 && navy / n > 0.72) {
+      return Math.max(400, y - 14);
+    }
+  }
+  return Math.round(meta.height * 0.505);
+}
+
+async function detectBrandTextTop() {
+  const meta = await sharp(LOGO).metadata();
+  const cropH = await detectCubeCropHeight();
+  return Math.min(meta.height - 1, cropH + 8);
+}
 
 const LAUNCHER = {
   'mipmap-mdpi': { icon: 48, fg: 108 },
@@ -55,14 +82,21 @@ function stripBlackBackground(inputSharp) {
 
 async function loadIsotipo() {
   const meta = await sharp(LOGO).metadata();
-  const cropH = Math.max(1, Math.round(meta.height * ISOTIPO_CROP_RATIO));
+  const cropH = await detectCubeCropHeight();
   const cropped = sharp(LOGO).extract({
     left: 0,
     top: 0,
     width: meta.width,
     height: Math.min(cropH, meta.height),
   });
-  return stripBlackBackground(cropped);
+  const stripped = await stripBlackBackground(cropped);
+  return sharp(stripped)
+    .extend({
+      bottom: 8,
+      background: { r: 0, g: 0, b: 0, alpha: 0 },
+    })
+    .png()
+    .toBuffer();
 }
 
 async function loadFullBrand() {
@@ -71,7 +105,7 @@ async function loadFullBrand() {
 
 async function loadBrandText() {
   const meta = await sharp(LOGO).metadata();
-  const top = Math.max(0, Math.round(meta.height * BRAND_TEXT_TOP_RATIO));
+  const top = await detectBrandTextTop();
   const cropped = sharp(LOGO).extract({
     left: 0,
     top,
@@ -166,6 +200,8 @@ async function main() {
   const isotipo = await loadIsotipo();
   const fullBrand = await loadFullBrand();
   const brandText = await loadBrandText();
+  const cropH = await detectCubeCropHeight();
+  console.log('isotipo crop height px:', cropH);
 
   const markSize = 256;
   const mark = await sharp(isotipo)

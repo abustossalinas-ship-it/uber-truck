@@ -58,7 +58,11 @@ router.post('/login', async (req, res) => {
     res.json({ ok: true, ...result });
   } catch (e) {
     console.error(e);
-    res.status(e.status || 500).json({ ok: false, error: e.message || 'Error al iniciar sesión' });
+    res.status(e.status || 500).json({
+      ok: false,
+      error: e.message || 'Error al iniciar sesión',
+      code: e.code || undefined,
+    });
   }
 });
 

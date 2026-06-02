@@ -102,15 +102,23 @@ async function loginUser({ email, password }) {
     .eq('email', email.trim().toLowerCase())
     .maybeSingle();
   if (error) throw error;
-  if (!data?.password_hash) {
-    const e = new Error('Credenciales inválidas');
+  if (!data) {
+    const e = new Error('No existe una cuenta con ese email.');
     e.status = 401;
+    e.code = 'email_not_found';
+    throw e;
+  }
+  if (!data.password_hash) {
+    const e = new Error('Esta cuenta no tiene contraseña. Usa «Recuperar contraseña».');
+    e.status = 401;
+    e.code = 'no_password';
     throw e;
   }
   const ok = await bcrypt.compare(password, data.password_hash);
   if (!ok) {
-    const e = new Error('Credenciales inválidas');
+    const e = new Error('Contraseña incorrecta.');
     e.status = 401;
+    e.code = 'wrong_password';
     throw e;
   }
   const user = {

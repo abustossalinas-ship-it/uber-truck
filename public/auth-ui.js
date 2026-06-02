@@ -127,11 +127,21 @@ function clearAuthError() {
 }
 
 function authErrorMessage(res, json, register) {
+  const code = json?.code;
+  if (code === 'email_not_found') {
+    return 'No existe una cuenta con ese email. Pulsa «Crear cuenta» si es tu primera vez.';
+  }
+  if (code === 'wrong_password') {
+    return 'Contraseña incorrecta. Revisa mayúsculas o usa «¿Olvidaste tu contraseña?»';
+  }
+  if (code === 'no_password') {
+    return json?.error || 'Esta cuenta no tiene contraseña. Usa «¿Olvidaste tu contraseña?»';
+  }
   let msg = json?.error || 'Error de autenticación';
   if (res.status === 409 && register) {
     msg =
       'Ese email ya tiene cuenta. Pulsa «Ya tengo cuenta — iniciar sesión» e ingresa tu contraseña.';
-  } else if (res.status === 401 && !register) {
+  } else if (res.status === 401 && !register && !code) {
     msg = 'Email o contraseña incorrectos. Revisa mayúsculas y que sean al menos 6 caracteres.';
   } else if (res.status === 503) {
     msg = 'El servidor no puede conectar con la base de datos. Intenta en unos minutos.';

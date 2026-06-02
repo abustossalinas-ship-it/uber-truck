@@ -159,6 +159,38 @@ Ver [CARGO-TRUST.md](./CARGO-TRUST.md) y [Terminos-Confianza-Carga-Uber-Truck.ht
 
 ---
 
+## 022 – 025 — Multas, soporte moderador y comprobante (IMPORTANTE)
+
+**Un solo script** (copiar y Run en SQL Editor):
+
+→ [`supabase/migrations/RUN_022_025_SUPABASE.sql`](../supabase/migrations/RUN_022_025_SUPABASE.sql)
+
+[Abrir SQL Editor Supabase](https://supabase.com/dashboard/project/ljinhegtywixtbzjgjfn/sql/new)
+
+| # | Contenido |
+|---|-----------|
+| **022** | Tablas `support_cases`, `support_messages` (ayuda / moderador) |
+| **023** | `penalty_paid_at`, nota cierre moderador |
+| **024** | `penalty_payment_status`, declarar pago, confirmar acreedor 24 h |
+| **025** | `penalty_payment_proof_*` (comprobante transferencia) |
+
+Al final del script: `NOTIFY pgrst, 'reload schema'` + consultas de verificación.
+
+Archivos sueltos (mismo contenido): `RUN_022_023_SUPABASE.sql`, `RUN_024_SUPABASE.sql`, `RUN_025_SUPABASE.sql`.
+
+### Aprobar cuentas KYC (después del SQL)
+
+En la app, ingresa como **admin** → barra **Panel administrador** → **Cuentas KYC — N pendientes** → Aprobar.
+
+O en SQL:
+
+```sql
+UPDATE users SET kyc_status = 'approved' WHERE role IN ('shipper', 'carrier') AND kyc_status = 'pending';
+NOTIFY pgrst, 'reload schema';
+```
+
+---
+
 ## Referencias
 
 - [01-MEMORIA-TECNICA.md](./01-MEMORIA-TECNICA.md)

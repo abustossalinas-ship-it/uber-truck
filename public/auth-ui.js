@@ -65,7 +65,15 @@ const Auth = {
     }
     if (typeof renderKycBanner === 'function') renderKycBanner();
     if (typeof refreshAdminKycPanel === 'function') refreshAdminKycPanel();
+    if (typeof refreshAdminHubNav === 'function') refreshAdminHubNav();
     if (typeof refreshAdminOpsPanel === 'function') refreshAdminOpsPanel();
+    if (this.user?.role === 'admin' && typeof scrollToAdminSection === 'function') {
+      const goKyc = sessionStorage.getItem('ut_admin_focus') === 'kyc';
+      if (goKyc) {
+        sessionStorage.removeItem('ut_admin_focus');
+        setTimeout(() => scrollToAdminSection('kyc'), 400);
+      }
+    }
     if (typeof refreshCarrierPresencePanel === 'function') refreshCarrierPresencePanel();
     if (typeof applyRoleUi === 'function') applyRoleUi();
     if (typeof renderBoardActor === 'function') renderBoardActor();

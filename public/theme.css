@@ -1698,6 +1698,34 @@ body.kyc-pending #btn-create-match {
   margin-top: 0.5rem;
 }
 
+.admin-hub-nav {
+  margin-top: 0.75rem;
+  border: 2px solid var(--accent);
+  background: var(--accent-soft);
+}
+
+.admin-hub-title {
+  margin: 0 0 0.5rem;
+}
+
+.admin-hub-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.35rem;
+}
+
+.admin-hub-hint {
+  margin: 0;
+  font-size: 0.8rem;
+}
+
+.admin-kyc-panel:target,
+.admin-ops-panel:target {
+  outline: 2px solid var(--accent);
+  outline-offset: 4px;
+}
+
 .admin-kyc-tabs {
   display: flex;
   gap: 0.5rem;

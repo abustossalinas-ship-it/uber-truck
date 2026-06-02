@@ -36,6 +36,19 @@
 
   <section id="kyc-banner" class="kyc-banner card" hidden aria-live="polite"></section>
 
+  <section id="admin-hub-nav" class="admin-hub-nav card" hidden aria-label="Accesos administrador">
+    <p class="admin-hub-title"><strong>Panel administrador</strong></p>
+    <div class="admin-hub-actions">
+      <button type="button" class="tab tab-sm btn-admin-goto-kyc" id="admin-goto-kyc">
+        Cuentas KYC — aprobar
+      </button>
+      <button type="button" class="tab tab-sm tab-outline" id="admin-goto-ops">
+        Operaciones · KPIs
+      </button>
+    </div>
+    <p class="muted admin-hub-hint">Aprueba embarcadores y transportistas antes del piloto. Multas y comprobantes requieren SQL 022–025 en Supabase.</p>
+  </section>
+
   <section id="admin-kyc-panel" class="admin-kyc-panel card" hidden>
     <h2>Aprobación de cuentas (admin)</h2>
     <p class="muted">Marketplace semi-curado: solo cuentas <strong>aprobadas</strong> pueden publicar y emparejar.</p>
@@ -779,7 +792,7 @@
   </div>
 
   <script src="/kyc-ui.js?v=0.0.33"></script>
-  <script src="/admin-ui.js?v=0.0.58"></script>
+  <script src="/admin-ui.js?v=0.0.59"></script>
   <script src="/realtime-ui.js?v=0.0.34"></script>
   <script src="/invite-ui.js?v=0.0.20"></script>
   <script src="/roles-ui.js?v=0.0.19"></script>

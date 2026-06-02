@@ -1,4 +1,45 @@
-/** Panel admin — aprobar cuentas del piloto */
+/** Panel admin — aprobar cuentas del piloto + operaciones */
+
+function scrollToAdminSection(section) {
+  const id = section === 'ops' ? 'admin-ops-panel' : 'admin-kyc-panel';
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.hidden = false;
+  if (section === 'kyc') {
+    setAdminKycTab('pending');
+  }
+  el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (section === 'kyc') refreshAdminKycPanel();
+  else if (section === 'ops') refreshAdminOpsPanel();
+}
+
+async function refreshAdminHubNav() {
+  const nav = document.getElementById('admin-hub-nav');
+  const btnKyc = document.getElementById('admin-goto-kyc');
+  if (!nav) return;
+  const user = typeof Auth !== 'undefined' ? Auth.user : null;
+  if (!user || user.role !== 'admin') {
+    nav.hidden = true;
+    return;
+  }
+  nav.hidden = false;
+  if (!btnKyc) return;
+  btnKyc.textContent = 'Cuentas KYC — aprobar';
+  try {
+    const res = await fetch('/api/admin/users?status=pending', { headers: await adminHeaders() });
+    const json = await res.json();
+    if (res.ok) {
+      const n = (json.data || []).length;
+      btnKyc.textContent =
+        n > 0 ? `Cuentas KYC — ${n} pendiente${n === 1 ? '' : 's'}` : 'Cuentas KYC — sin pendientes';
+    }
+  } catch (_e) {
+    /* ignore */
+  }
+}
+
+document.getElementById('admin-goto-kyc')?.addEventListener('click', () => scrollToAdminSection('kyc'));
+document.getElementById('admin-goto-ops')?.addEventListener('click', () => scrollToAdminSection('ops'));
 
 let adminKycTab = 'pending';
 
@@ -100,6 +141,7 @@ async function patchKyc(userId, kyc_status) {
   }
   alert(json.message || 'Actualizado');
   refreshAdminKycPanel();
+  refreshAdminHubNav();
 }
 
 document.getElementById('admin-kyc-tabs')?.addEventListener('click', (e) => {
@@ -135,6 +177,8 @@ document.getElementById('admin-kyc-list')?.addEventListener('click', (e) => {
 });
 
 window.refreshAdminKycPanel = refreshAdminKycPanel;
+window.refreshAdminHubNav = refreshAdminHubNav;
+window.scrollToAdminSection = scrollToAdminSection;
 
 function formatAdminClp(n) {
   const v = Number(n);

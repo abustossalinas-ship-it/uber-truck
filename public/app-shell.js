@@ -286,6 +286,8 @@ const AppShell = {
     const titleEl = document.getElementById('app-top-title');
     if (titleEl) titleEl.textContent = cfg.title;
     document.querySelectorAll('.app-view').forEach((v) => v.classList.remove('active'));
+    const mainEl = document.querySelector('main');
+    if (mainEl) mainEl.scrollTop = 0;
     window.scrollTo(0, 0);
   },
 

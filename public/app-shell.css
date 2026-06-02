@@ -54,7 +54,7 @@ body.cubik-app.app-authed[data-app-tab="account"] #app-account-kyc-slot #kyc-ban
 body.cubik-app.app-authed.app-main-visible main {
   display: block !important;
   position: fixed;
-  z-index: 90;
+  z-index: 210;
   top: calc(var(--app-safe-top) + var(--app-top-h));
   left: 0;
   right: 0;
@@ -62,10 +62,23 @@ body.cubik-app.app-authed.app-main-visible main {
   overflow-x: hidden;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  touch-action: pan-y;
   background: var(--bg);
   margin: 0;
   padding: 0.65rem 0.85rem 1rem;
   max-width: none;
+  pointer-events: auto;
+}
+
+body.cubik-app.app-authed.app-main-visible .app-scroll {
+  pointer-events: none;
+}
+
+body.cubik-app.app-authed.app-main-visible .app-top-bar,
+body.cubik-app.app-authed.app-main-visible .app-bottom-nav {
+  pointer-events: auto;
+  z-index: 220;
+  position: relative;
 }
 
 body.cubik-app.app-authed.app-main-visible main .panel {
@@ -127,33 +140,27 @@ body.cubik-app.app-main-visible main .panel.active {
   z-index: 300;
   display: flex;
   flex-direction: column;
+  align-items: center;
+  justify-content: center;
   box-sizing: border-box;
   width: 100%;
   height: 100dvh;
   max-height: 100dvh;
   background: var(--bg);
-  padding:
-    calc(var(--app-safe-top) + 0.5rem)
-    max(1rem, env(safe-area-inset-right, 0px))
-    max(0.75rem, env(safe-area-inset-bottom, 0px))
-    max(1rem, env(safe-area-inset-left, 0px));
+  padding-top: calc(var(--app-safe-top) + 0.5rem);
+  padding-bottom: calc(var(--app-safe-bottom) + 0.75rem);
+  padding-left: max(1rem, env(safe-area-inset-left, 0px));
+  padding-right: max(1rem, env(safe-area-inset-right, 0px));
   overflow: hidden;
 }
 
-body.cubik-app.app-authed .app-gate {
-  display: none;
-}
-
 .app-gate-screen {
-  flex: 1 1 auto;
-  display: grid;
-  grid-template-rows: minmax(0, 1fr) auto;
-  align-content: stretch;
-  width: 100%;
-  max-width: 26rem;
-  height: 100%;
+  flex: 0 1 auto;
+  display: flex;
+  flex-direction: column;
+  width: min(100%, 24rem);
+  max-height: 100%;
   min-height: 0;
-  margin: 0 auto;
   box-sizing: border-box;
 }
 
@@ -163,9 +170,19 @@ body.cubik-app.app-authed .app-gate {
   align-items: center;
   justify-content: center;
   text-align: center;
+  flex: 1 1 auto;
   min-height: 0;
   padding: 0.75rem 0.5rem;
   gap: 0.35rem;
+}
+
+.app-gate-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  width: 100%;
+  flex-shrink: 0;
+  padding: 0.75rem 0 0.25rem;
 }
 
 .app-gate-logo {
@@ -202,12 +219,8 @@ body.cubik-app.app-authed .app-gate {
   overflow-wrap: break-word;
 }
 
-.app-gate-actions {
-  display: flex;
-  flex-direction: column;
-  gap: 0.6rem;
-  width: 100%;
-  padding: 0.75rem 0 0.25rem;
+body.cubik-app.app-authed .app-gate {
+  display: none;
 }
 
 .app-gate-actions .btn-primary-app {
@@ -243,14 +256,16 @@ body.cubik-app #change-password-panel {
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  width: 100%;
   max-width: none;
   margin: 0;
   border-radius: 0;
   border: none;
   padding:
     calc(var(--app-safe-top) + 0.75rem)
-    1.25rem
-    calc(var(--app-safe-bottom) + 0.75rem);
+    max(1rem, env(safe-area-inset-left, 0px))
+    calc(var(--app-safe-bottom) + 0.75rem)
+    max(1rem, env(safe-area-inset-right, 0px));
   overflow-y: auto;
   background: var(--bg);
   box-sizing: border-box;

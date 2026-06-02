@@ -52,7 +52,8 @@ function stripBlackBackground(inputSharp) {
 
 async function loadIsotipo() {
   const meta = await sharp(LOGO).metadata();
-  const cropH = Math.max(1, Math.round(meta.height * 0.4));
+  // Cubo completo (misma zona que logo-mark en bienvenida)
+  const cropH = Math.max(1, Math.round(meta.height * 0.52));
   const cropped = sharp(LOGO).extract({
     left: 0,
     top: 0,
@@ -78,8 +79,9 @@ async function loadBrandText() {
   return stripBlackBackground(cropped);
 }
 
+/** Android 12: icono visible en círculo ~240dp sobre lienzo 432dp → ~52% máx */
 async function splashIcon(isotipo, size = 432) {
-  const inner = Math.round(size * 0.72);
+  const inner = Math.round(size * 0.5);
   return sharp(isotipo)
     .resize(inner, inner, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .extend({

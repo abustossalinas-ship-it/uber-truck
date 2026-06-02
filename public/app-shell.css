@@ -10,7 +10,8 @@ body.cubik-app {
   width: 100%;
   max-width: 100vw;
   min-height: 100dvh;
-  overflow-x: hidden;
+  height: 100dvh;
+  overflow: hidden;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
 }
@@ -24,11 +25,68 @@ body.cubik-app #main-nav {
   display: none !important;
 }
 
-body.cubik-app #admin-hub-nav,
-body.cubik-app #admin-kyc-panel,
-body.cubik-app #admin-ops-panel {
-  margin-left: 0;
-  margin-right: 0;
+/* Ocultar web legacy cuando el shell app está activo (evita scroll infinito / admin en Inicio) */
+body.cubik-app.app-authed #app-panels-home-anchor,
+body.cubik-app.app-authed #penalty-block-banner,
+body.cubik-app.app-authed #account-penalties-panel,
+body.cubik-app.app-authed #kyc-banner,
+body.cubik-app.app-authed #admin-hub-nav,
+body.cubik-app.app-authed #admin-kyc-panel,
+body.cubik-app.app-authed #admin-ops-panel,
+body.cubik-app.app-authed #active-trip-banner,
+body.cubik-app.app-authed main,
+body.cubik-app.app-authed .site-footer {
+  display: none !important;
+}
+
+body.cubik-app.app-authed #app-home-active-slot #active-trip-banner:not([hidden]) {
+  display: block !important;
+}
+
+body.cubik-app.app-authed[data-app-tab="account"] #app-account-admin-slot #admin-hub-nav:not([hidden]),
+body.cubik-app.app-authed[data-app-tab="account"] #app-account-admin-slot #admin-kyc-panel:not([hidden]),
+body.cubik-app.app-authed[data-app-tab="account"] #app-account-admin-slot #admin-ops-panel:not([hidden]),
+body.cubik-app.app-authed[data-app-tab="account"] #app-account-penalties-slot #account-penalties-panel:not([hidden]),
+body.cubik-app.app-authed[data-app-tab="account"] #app-account-kyc-slot #kyc-banner:not([hidden]) {
+  display: block !important;
+}
+
+body.cubik-app.app-authed.app-main-visible main {
+  display: block !important;
+  position: fixed;
+  z-index: 90;
+  top: calc(var(--app-safe-top) + var(--app-top-h));
+  left: 0;
+  right: 0;
+  bottom: calc(var(--app-nav-h) + var(--app-safe-bottom));
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  background: var(--bg);
+  margin: 0;
+  padding: 0.65rem 0.85rem 1rem;
+  max-width: none;
+}
+
+body.cubik-app.app-authed.app-main-visible main .panel {
+  display: none;
+  padding: 0;
+}
+
+body.cubik-app.app-authed.app-main-visible main .panel.active {
+  display: block;
+}
+
+body.cubik-app.app-authed.app-main-visible main .card,
+body.cubik-app.app-authed.app-main-visible main form {
+  padding: 0.85rem;
+  margin-bottom: 0.65rem;
+}
+
+body.cubik-app.app-authed .app-chrome {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
 }
 
 body.cubik-app main {
@@ -180,19 +238,58 @@ body.cubik-app #auth-panel,
 body.cubik-app #change-password-panel {
   position: fixed;
   inset: 0;
-  z-index: 310;
+  z-index: 320;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   max-width: none;
   margin: 0;
   border-radius: 0;
   border: none;
-  padding: calc(var(--app-safe-top) + 1rem) 1.25rem calc(var(--app-safe-bottom) + 1rem);
+  padding:
+    calc(var(--app-safe-top) + 0.75rem)
+    1.25rem
+    calc(var(--app-safe-bottom) + 0.75rem);
   overflow-y: auto;
   background: var(--bg);
+  box-sizing: border-box;
+}
+
+body.cubik-app #auth-panel::before,
+body.cubik-app #change-password-panel::before {
+  content: '';
+  display: block;
+  width: clamp(72px, 22vw, 96px);
+  height: clamp(72px, 22vw, 96px);
+  margin: 0 auto 0.75rem;
+  background: url('/brand/logo-mark.png') center / contain no-repeat;
+}
+
+body.cubik-app #auth-panel > h2,
+body.cubik-app #change-password-panel > h2 {
+  text-align: center;
+  width: 100%;
+  max-width: 22rem;
+}
+
+body.cubik-app #auth-panel form,
+body.cubik-app #change-password-panel form,
+body.cubik-app #auth-panel .auth-login-footer {
+  width: 100%;
+  max-width: 22rem;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 body.cubik-app #auth-panel[hidden],
 body.cubik-app #change-password-panel[hidden] {
   display: none !important;
+}
+
+body.cubik-app #auth-panel.is-register,
+body.cubik-app #auth-panel.is-forgot {
+  justify-content: flex-start;
 }
 
 /* —— Chrome (logueado) —— */
@@ -273,7 +370,7 @@ body.cubik-app.app-deep .app-top-back {
 
 .app-view {
   display: none;
-  padding: 1rem;
+  padding: 0.75rem 0.85rem;
   animation: app-view-in 0.22s ease-out;
 }
 
@@ -291,31 +388,31 @@ body.cubik-app.app-main-visible .app-scroll > .app-view.app-view-pass-through {
 
 /* Inicio */
 .app-home-greeting {
-  margin: 0 0 0.35rem;
-  font-size: 1.2rem;
+  margin: 0 0 0.25rem;
+  font-size: 1.1rem;
   font-weight: 800;
   color: var(--brand-navy);
 }
 
 .app-home-sub {
-  margin: 0 0 1rem;
-  font-size: 0.88rem;
+  margin: 0 0 0.65rem;
+  font-size: 0.84rem;
   color: var(--text-muted);
 }
 
 .app-quick-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 0.65rem;
-  margin-bottom: 1rem;
+  gap: 0.5rem;
+  margin-bottom: 0.65rem;
 }
 
 .app-quick-card {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  gap: 0.35rem;
-  padding: 0.85rem;
+  gap: 0.25rem;
+  padding: 0.7rem;
   border: 1px solid var(--border);
   border-radius: 14px;
   background: var(--surface);
@@ -327,16 +424,16 @@ body.cubik-app.app-main-visible .app-scroll > .app-view.app-view-pass-through {
 }
 
 .app-quick-card strong {
-  font-size: 0.92rem;
+  font-size: 0.88rem;
 }
 
 .app-quick-card span {
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-muted);
 }
 
 .app-quick-card .app-quick-icon {
-  font-size: 1.5rem;
+  font-size: 1.35rem;
   line-height: 1;
 }
 
@@ -361,9 +458,9 @@ body.cubik-app.app-main-visible .app-scroll > .app-view.app-view-pass-through {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
-  min-height: 6.5rem;
-  padding: 0.75rem;
+  gap: 0.4rem;
+  min-height: 5.5rem;
+  padding: 0.65rem;
   border: 1px solid var(--border);
   border-radius: 16px;
   background: var(--surface);
@@ -424,6 +521,21 @@ body.cubik-app.app-main-visible .app-scroll > .app-view.app-view-pass-through {
 .app-account-actions a {
   width: 100%;
   text-align: center;
+}
+
+.app-account-admin-slot {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.25rem;
+}
+
+body.cubik-app .app-account-admin-slot .admin-hub-nav,
+body.cubik-app .app-account-admin-slot .admin-kyc-panel,
+body.cubik-app .app-account-admin-slot .admin-ops-panel,
+body.cubik-app .app-account-kyc-slot .kyc-banner,
+body.cubik-app .app-account-penalties-slot #account-penalties-panel {
+  margin: 0 0 0.65rem;
 }
 
 .app-account-admin {
@@ -505,10 +617,6 @@ body.cubik-app #account-penalties-panel {
   margin: 0.5rem 1rem;
   max-width: none;
   padding: 0;
-}
-
-body.cubik-app.app-authed #account-penalties-panel:not([hidden]) {
-  display: block;
 }
 
 body.cubik-app #account-penalties-panel .card,

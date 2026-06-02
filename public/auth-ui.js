@@ -181,13 +181,27 @@ function setAuthMode(register, forgot = false) {
   }
 }
 
+function closeAuthPanel() {
+  const panel = document.getElementById('auth-panel');
+  if (panel) panel.hidden = true;
+  if (document.body.classList.contains('cubik-app') && !Auth.user) {
+    const welcome = document.getElementById('app-welcome');
+    if (welcome) welcome.hidden = false;
+  }
+}
+
 function openAuthPanel(register = false, forgot = false) {
   const panel = document.getElementById('auth-panel');
   if (!panel) return;
   setAuthMode(register, forgot);
   panel.hidden = false;
   document.getElementById('change-password-panel')?.setAttribute('hidden', '');
-  panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  if (document.body.classList.contains('cubik-app')) {
+    const welcome = document.getElementById('app-welcome');
+    if (welcome) welcome.hidden = true;
+  } else {
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
 }
 
 document.getElementById('auth-role')?.addEventListener('change', updateRegisterLabels);
@@ -195,12 +209,12 @@ document.getElementById('auth-role')?.addEventListener('change', updateRegisterL
 document.getElementById('btn-auth')?.addEventListener('click', () => {
   if (Auth.user) {
     Auth.logout();
-    document.getElementById('auth-panel').hidden = true;
+    closeAuthPanel();
     return;
   }
   const panel = document.getElementById('auth-panel');
   if (!panel.hidden && !authRegisterMode) {
-    panel.hidden = true;
+    closeAuthPanel();
     return;
   }
   openAuthPanel(false);
@@ -277,7 +291,9 @@ document.getElementById('btn-change-password')?.addEventListener('click', () => 
   if (panel) {
     panel.hidden = false;
     panel.removeAttribute('hidden');
-    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (!document.body.classList.contains('cubik-app')) {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }
 });
 

@@ -69,7 +69,8 @@ const AppShell = {
           return;
         }
         if (document.getElementById('auth-panel')?.hidden === false) {
-          document.getElementById('auth-panel').hidden = true;
+          if (typeof closeAuthPanel === 'function') closeAuthPanel();
+          else document.getElementById('auth-panel').hidden = true;
           return;
         }
         if (!canGoBack) Cap.Plugins.App?.exitApp?.();
@@ -140,15 +141,6 @@ const AppShell = {
     document.getElementById('app-btn-change-pw')?.addEventListener('click', () => {
       document.getElementById('btn-change-password')?.click();
     });
-    document.getElementById('app-btn-admin-kyc')?.addEventListener('click', () => {
-      sessionStorage.setItem('ut_admin_focus', 'kyc');
-      this.setTab('account');
-      document.getElementById('admin-goto-kyc')?.click();
-    });
-    document.getElementById('app-btn-admin-ops')?.addEventListener('click', () => {
-      this.setTab('account');
-      document.getElementById('admin-goto-ops')?.click();
-    });
   },
 
   bindAuthHooks() {
@@ -201,20 +193,37 @@ const AppShell = {
       this.deep = null;
       document.body.classList.remove('app-deep', 'app-main-visible');
       document.getElementById('auth-panel')?.setAttribute('hidden', '');
+      const welcome = document.getElementById('app-welcome');
+      if (welcome) welcome.hidden = false;
       this.restorePanelsHome();
     }
   },
 
   restorePanelsHome() {
     const anchor = document.getElementById('app-panels-home-anchor');
-    const penalties = document.getElementById('account-penalties-panel');
-    const kyc = document.getElementById('kyc-banner');
-    if (anchor && penalties && penalties.parentElement?.id === 'app-account-penalties-slot') {
-      anchor.after(penalties);
-    }
-    if (anchor && kyc && kyc.parentElement?.id === 'app-account-kyc-slot') {
-      anchor.after(kyc);
-    }
+    if (!anchor) return;
+    const ids = [
+      'account-penalties-panel',
+      'kyc-banner',
+      'admin-hub-nav',
+      'admin-kyc-panel',
+      'admin-ops-panel',
+    ];
+    let after = anchor;
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el) return;
+      if (el.parentElement?.id?.startsWith('app-account') || el.parentElement?.id === 'app-account-admin-slot') {
+        after.insertAdjacentElement('afterend', el);
+        after = el;
+      }
+    });
+  },
+
+  mountPanelInSlot(elementId, slotId) {
+    const el = document.getElementById(elementId);
+    const slot = document.getElementById(slotId);
+    if (el && slot && !slot.contains(el)) slot.appendChild(el);
   },
 
   setTab(tab) {
@@ -249,6 +258,12 @@ const AppShell = {
       if (typeof showTab === 'function') showTab('trips');
     }
     if (tab === 'home') this.renderHome();
+    if (tab === 'account') {
+      this.renderAccount();
+      if (typeof refreshAdminHubNav === 'function') refreshAdminHubNav();
+      if (typeof refreshAdminKycPanel === 'function') refreshAdminKycPanel();
+      if (typeof refreshAdminOpsPanel === 'function') refreshAdminOpsPanel();
+    }
   },
 
   openAction(action) {
@@ -333,17 +348,24 @@ const AppShell = {
       <p class="muted">${role} · ${user.company_name || '—'}</p>
       <p class="muted">KYC: <strong>${user.kyc_status || 'pending'}</strong></p>
     `;
-    const adminBlock = document.getElementById('app-account-admin');
-    if (adminBlock) adminBlock.hidden = user.role !== 'admin';
-    const penaltiesSlot = document.getElementById('app-account-penalties-slot');
-    const panel = document.getElementById('account-penalties-panel');
-    if (penaltiesSlot && panel && !penaltiesSlot.contains(panel)) {
-      penaltiesSlot.appendChild(panel);
+    const adminSlot = document.getElementById('app-account-admin-slot');
+    if (adminSlot) {
+      if (user.role === 'admin') {
+        adminSlot.hidden = false;
+        this.mountPanelInSlot('admin-hub-nav', 'app-account-admin-slot');
+        this.mountPanelInSlot('admin-kyc-panel', 'app-account-admin-slot');
+        this.mountPanelInSlot('admin-ops-panel', 'app-account-admin-slot');
+      } else {
+        adminSlot.hidden = true;
+      }
     }
-    const kycBanner = document.getElementById('kyc-banner');
-    const kycSlot = document.getElementById('app-account-kyc-slot');
-    if (kycSlot && kycBanner && !kycSlot.contains(kycBanner)) {
-      kycSlot.appendChild(kycBanner);
+    this.mountPanelInSlot('account-penalties-panel', 'app-account-penalties-slot');
+    this.mountPanelInSlot('kyc-banner', 'app-account-kyc-slot');
+    const notifSrc = document.getElementById('notif-count');
+    const notifDst = document.getElementById('app-notif-count');
+    if (notifSrc && notifDst) {
+      notifDst.textContent = notifSrc.textContent;
+      notifDst.hidden = notifSrc.hidden;
     }
   },
 

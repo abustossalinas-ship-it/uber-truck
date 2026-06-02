@@ -80,6 +80,15 @@ async function main() {
 
   const isotipo = await loadIsotipo();
 
+  const markSize = 256;
+  const mark = await sharp(isotipo)
+    .resize(markSize, markSize, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+    .png()
+    .toBuffer();
+  const markPath = path.join(__dirname, '..', 'public', 'brand', 'logo-mark.png');
+  await sharp(mark).toFile(markPath);
+  console.log('wrote public/brand/logo-mark.png');
+
   for (const [folder, { icon, fg }] of Object.entries(LAUNCHER)) {
     const dir = path.join(RES, folder);
     fs.mkdirSync(dir, { recursive: true });
@@ -93,7 +102,7 @@ async function main() {
     console.log('wrote', folder);
   }
 
-  const splash = await iconOnBg(isotipo, 512, 0.1);
+  const splash = await iconOnBg(isotipo, 512, 0.22);
   const splashDir = path.join(RES, 'drawable');
   fs.mkdirSync(splashDir, { recursive: true });
   await sharp(splash).toFile(path.join(splashDir, 'splash.png'));

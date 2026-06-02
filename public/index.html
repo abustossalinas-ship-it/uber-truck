@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <meta name="theme-color" content="#0f2744" />
   <meta name="application-name" content="Cubik" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -11,10 +11,124 @@
   <link rel="icon" href="/brand/logo.png" type="image/png" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" href="/brand/logo.png" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.63" />
-  <script src="/brand-config.js?v=0.0.63"></script>
+  <link rel="stylesheet" href="/theme.css?v=0.0.64" />
+  <link rel="stylesheet" href="/app-shell.css?v=0.0.64" />
+  <script src="/brand-config.js?v=0.0.64"></script>
+  <script src="/api-base.js?v=0.0.64"></script>
 </head>
 <body>
+  <div id="app-gate" class="app-gate">
+    <div id="app-welcome" class="app-gate-screen">
+      <img class="app-gate-logo" src="/brand/logo.png" width="220" height="auto" alt="Cubik" />
+      <p class="app-gate-tagline">Optimiza tus envíos</p>
+      <p class="app-gate-lead">Cubicación y emparejamiento en tiempo real para tu operación logística.</p>
+      <div class="app-gate-actions">
+        <button type="button" class="btn-primary-app" id="btn-welcome-login">Ingresar</button>
+        <button type="button" class="btn-outline-app" id="btn-welcome-register">Crear cuenta</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="app-chrome" class="app-chrome">
+    <header class="app-top-bar">
+      <button type="button" class="app-top-back" id="app-top-back" aria-label="Volver">←</button>
+      <h1 id="app-top-title">Inicio</h1>
+      <button type="button" class="notif-bell" id="app-top-notif" title="Notificaciones" aria-label="Notificaciones">
+        🔔 <span id="app-notif-count" class="notif-count" hidden>0</span>
+      </button>
+    </header>
+    <div id="app-scroll" class="app-scroll">
+      <div id="app-ptr-indicator" class="app-ptr-indicator">Suelta para actualizar</div>
+      <section id="app-view-home" class="app-view active" data-app-view="home">
+        <p id="app-home-greeting" class="app-home-greeting">Cubik</p>
+        <p id="app-home-sub" class="app-home-sub"></p>
+        <div class="app-quick-grid">
+          <button type="button" class="app-quick-card accent" id="app-quick-board" data-app-quick="board">
+            <span class="app-quick-icon">⚡</span>
+            <strong>Emparejar</strong>
+            <span>Tablero y propuestas</span>
+          </button>
+          <button type="button" class="app-quick-card" id="app-quick-shipper" data-app-quick="shipper" hidden>
+            <span class="app-quick-icon">📦</span>
+            <strong>Publicar carga</strong>
+            <span>Nueva necesidad</span>
+          </button>
+          <button type="button" class="app-quick-card" id="app-quick-carrier" data-app-quick="carrier" hidden>
+            <span class="app-quick-icon">🚛</span>
+            <strong>Ofertar ruta</strong>
+            <span>Capacidad disponible</span>
+          </button>
+          <button type="button" class="app-quick-card" data-app-quick="trips">
+            <span class="app-quick-icon">📋</span>
+            <strong>Mis viajes</strong>
+            <span>Estado y calificaciones</span>
+          </button>
+        </div>
+        <div id="app-home-active-slot" class="app-home-active card app-home-active"></div>
+      </section>
+      <section id="app-view-options" class="app-view" data-app-view="options">
+        <p class="muted" style="margin:0 0 1rem">Accesos rápidos según tu rol.</p>
+        <div class="app-options-grid">
+          <button type="button" class="app-option-tile tile-orange" data-app-action="shipper" id="app-opt-shipper">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#f7941d" stroke-width="2"><path d="M12 3v12m0 0l4-4m-4 4l-4-4M4 21h16"/></svg>
+            <span>Publicar carga</span>
+          </button>
+          <button type="button" class="app-option-tile tile-blue" data-app-action="carrier" id="app-opt-carrier">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#29abe2" stroke-width="2"><rect x="2" y="7" width="16" height="10" rx="1"/><path d="M18 10h2l2 3v4h-4"/></svg>
+            <span>Ofertar ruta</span>
+          </button>
+          <button type="button" class="app-option-tile tile-orange" data-app-action="board">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#0f2744" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h14"/></svg>
+            <span>Emparejar</span>
+          </button>
+          <button type="button" class="app-option-tile tile-blue" data-app-action="trips">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#29abe2" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+            <span>Mis viajes</span>
+          </button>
+          <button type="button" class="app-option-tile" data-app-action="notifications">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#6b7c92" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 7-3 7h18s-3 0-3-7"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg>
+            <span>Notificaciones</span>
+          </button>
+        </div>
+      </section>
+      <section id="app-view-account" class="app-view" data-app-view="account">
+        <div class="app-account-card">
+          <h2>Mi perfil</h2>
+          <div id="app-account-profile"></div>
+        </div>
+        <div id="app-account-kyc-slot"></div>
+        <div id="app-account-penalties-slot"></div>
+        <div class="app-account-card app-account-actions">
+          <button type="button" class="tab tab-sm" id="app-btn-change-pw">Cambiar contraseña</button>
+          <button type="button" class="tab tab-sm tab-outline" id="app-btn-logout">Cerrar sesión</button>
+        </div>
+        <div id="app-account-admin" class="app-account-card app-account-admin" hidden>
+          <h2>Administrador</h2>
+          <button type="button" class="tab tab-sm" id="app-btn-admin-kyc">Cuentas KYC</button>
+          <button type="button" class="tab tab-sm tab-outline" id="app-btn-admin-ops">Operaciones · KPIs</button>
+        </div>
+      </section>
+    </div>
+    <nav class="app-bottom-nav" aria-label="Navegación principal">
+      <button type="button" class="app-nav-item active" data-app-tab="home" aria-current="page">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 10l8-6 8 6v10a1 1 0 01-1 1h-5v-6H10v6H5a1 1 0 01-1-1V10z"/></svg>
+        Inicio
+      </button>
+      <button type="button" class="app-nav-item" data-app-tab="options">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>
+        Opciones
+      </button>
+      <button type="button" class="app-nav-item" data-app-tab="activity">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        Actividad
+      </button>
+      <button type="button" class="app-nav-item" data-app-tab="account">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-1a6 6 0 0112 0v1"/></svg>
+        Cuenta
+      </button>
+    </nav>
+  </div>
+
   <header class="site-header">
     <div class="brand-logo-wrap">
       <img class="brand-logo" src="/brand/logo.png" width="200" height="auto" alt="Cubik — Optimiza tus envíos" />
@@ -44,6 +158,7 @@
     <button type="button" class="tab tab-sm tab-outline" id="pwa-install-dismiss">Ahora no</button>
   </section>
 
+  <div id="app-panels-home-anchor" hidden aria-hidden="true"></div>
   <section id="penalty-block-banner" class="penalty-block-banner card" hidden aria-live="polite"></section>
   <section id="account-penalties-panel" class="account-penalties-panel card" hidden></section>
 
@@ -620,7 +735,7 @@
     </section>
   </main>
 
-  <footer class="site-footer">Uber Truck · Maps + cubicación · docs/MAPS.md</footer>
+  <footer class="site-footer">Cubik · Optimiza tus envíos</footer>
 
   <div id="notif-panel" class="notif-panel" hidden>
     <h3>Notificaciones</h3>
@@ -804,7 +919,8 @@
     </div>
   </div>
 
-  <script src="/pwa-ui.js?v=0.0.60"></script>
+  <script src="/app-shell.js?v=0.0.64"></script>
+  <script src="/pwa-ui.js?v=0.0.64"></script>
   <script src="/kyc-ui.js?v=0.0.33"></script>
   <script src="/admin-ui.js?v=0.0.59"></script>
   <script src="/realtime-ui.js?v=0.0.34"></script>
@@ -823,6 +939,6 @@
   <script src="/comms-ui.js?v=0.0.52"></script>
   <script src="/rating-tags.js?v=0.0.31"></script>
   <script src="/trips-ui.js?v=0.0.54"></script>
-  <script src="/app.js?v=0.0.50"></script>
+  <script src="/app.js?v=0.0.64"></script>
 </body>
 </html>

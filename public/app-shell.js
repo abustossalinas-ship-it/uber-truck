@@ -1,0 +1,394 @@
+/**
+ * Cubik — shell móvil (4 fases): bienvenida, bottom nav, Capacitor nativo.
+ */
+const AppShell = {
+  tab: 'home',
+  deep: null,
+
+  isNative() {
+    return Boolean(window.Capacitor?.isNativePlatform?.());
+  },
+
+  isAppMode() {
+    if (this.isNative()) return true;
+    if (localStorage.getItem('cubik_force_app') === '1') return true;
+    if (new URLSearchParams(location.search).get('app') === '1') return true;
+    return (
+      window.matchMedia('(display-mode: standalone)').matches &&
+      window.innerWidth < 900
+    );
+  },
+
+  init() {
+    if (!this.isAppMode()) return;
+    document.body.classList.add('cubik-app');
+    const gate = document.getElementById('app-gate');
+    if (gate) gate.hidden = false;
+    this.bindWelcome();
+    this.bindBottomNav();
+    this.bindTopBar();
+    this.bindOptionsGrid();
+    this.bindAccount();
+    this.bindAuthHooks();
+    this.bindBackButton();
+    this.initPullToRefresh();
+    this.initNativePlugins();
+    this.syncAuthState();
+    document.addEventListener('DOMContentLoaded', () => this.syncAuthState());
+  },
+
+  initNativePlugins() {
+    if (!this.isNative()) return;
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', () => this.runNativeSetup());
+    } else {
+      this.runNativeSetup();
+    }
+  },
+
+  async runNativeSetup() {
+    const Cap = window.Capacitor;
+    if (!Cap?.Plugins) {
+      setTimeout(() => this.runNativeSetup(), 80);
+      return;
+    }
+    try {
+      await Cap.Plugins.SplashScreen?.hide?.();
+    } catch (_) {}
+    try {
+      const StatusBar = Cap.Plugins.StatusBar;
+      if (StatusBar) {
+        await StatusBar.setBackgroundColor?.({ color: '#0f2744' });
+        await StatusBar.setStyle?.({ style: 'DARK' });
+      }
+    } catch (_) {}
+    try {
+      Cap.Plugins.App?.addListener?.('backButton', ({ canGoBack }) => {
+        if (this.deep) {
+          this.exitDeep();
+          return;
+        }
+        if (document.getElementById('auth-panel')?.hidden === false) {
+          document.getElementById('auth-panel').hidden = true;
+          return;
+        }
+        if (!canGoBack) Cap.Plugins.App?.exitApp?.();
+      });
+    } catch (_) {}
+    this.initPushStub();
+  },
+
+  async initPushStub() {
+    const Push = window.Capacitor?.Plugins?.PushNotifications;
+    if (!Push) return;
+    try {
+      const perm = await Push.checkPermissions?.();
+      if (perm?.receive === 'prompt') await Push.requestPermissions?.();
+      await Push.addListener?.('registration', () => {});
+      await Push.addListener?.('pushNotificationReceived', () => {});
+      await Push.register?.();
+    } catch (_) {
+      /* FCM/google-services.json pendiente en Play */
+    }
+  },
+
+  bindWelcome() {
+    document.getElementById('btn-welcome-login')?.addEventListener('click', () => {
+      if (typeof openAuthPanel === 'function') openAuthPanel(false);
+    });
+    document.getElementById('btn-welcome-register')?.addEventListener('click', () => {
+      if (typeof openAuthPanel === 'function') openAuthPanel(true);
+    });
+  },
+
+  bindBottomNav() {
+    document.querySelectorAll('.app-nav-item').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const tab = btn.dataset.appTab;
+        if (tab) this.setTab(tab);
+      });
+    });
+  },
+
+  bindTopBar() {
+    document.getElementById('app-top-back')?.addEventListener('click', () => this.exitDeep());
+    document.getElementById('app-top-notif')?.addEventListener('click', () => {
+      document.getElementById('btn-notifications')?.click();
+    });
+  },
+
+  bindOptionsGrid() {
+    document.querySelectorAll('[data-app-action]').forEach((el) => {
+      el.addEventListener('click', () => {
+        const action = el.dataset.appAction;
+        if (action) this.openAction(action);
+      });
+    });
+    document.querySelectorAll('[data-app-quick]').forEach((el) => {
+      el.addEventListener('click', () => {
+        const action = el.dataset.appQuick;
+        if (action === 'trips') this.setTab('activity');
+        else if (action) this.openAction(action);
+      });
+    });
+  },
+
+  bindAccount() {
+    document.getElementById('app-btn-logout')?.addEventListener('click', () => {
+      document.getElementById('btn-auth')?.click();
+    });
+    document.getElementById('app-btn-change-pw')?.addEventListener('click', () => {
+      document.getElementById('btn-change-password')?.click();
+    });
+    document.getElementById('app-btn-admin-kyc')?.addEventListener('click', () => {
+      sessionStorage.setItem('ut_admin_focus', 'kyc');
+      this.setTab('account');
+      document.getElementById('admin-goto-kyc')?.click();
+    });
+    document.getElementById('app-btn-admin-ops')?.addEventListener('click', () => {
+      this.setTab('account');
+      document.getElementById('admin-goto-ops')?.click();
+    });
+  },
+
+  bindAuthHooks() {
+    const wrapRender = () => {
+      if (typeof Auth === 'undefined' || !Auth.render) return;
+      const orig = Auth.render.bind(Auth);
+      Auth.render = () => {
+        orig();
+        this.syncAuthState();
+      };
+    };
+    if (typeof Auth !== 'undefined') wrapRender();
+    else document.addEventListener('DOMContentLoaded', wrapRender);
+
+    const form = document.getElementById('form-auth');
+    form?.addEventListener(
+      'submit',
+      () => {
+        setTimeout(() => this.syncAuthState(), 300);
+      },
+      true
+    );
+  },
+
+  bindBackButton() {
+    const origShowTab = window.showTab;
+    if (typeof origShowTab === 'function') {
+      window.showTab = (name) => {
+        origShowTab(name);
+        if (document.body.classList.contains('cubik-app') && this.deep) {
+          this.updateTopTitle();
+        }
+      };
+    }
+  },
+
+  syncAuthState() {
+    if (!document.body.classList.contains('cubik-app')) return;
+    const user = typeof Auth !== 'undefined' ? Auth.user : null;
+    document.body.classList.toggle('app-authed', Boolean(user));
+    const gate = document.getElementById('app-gate');
+    const chrome = document.getElementById('app-chrome');
+    if (gate) gate.hidden = Boolean(user);
+    if (chrome) chrome.hidden = !user;
+    if (user) {
+      this.renderHome();
+      this.renderAccount();
+      if (!this.deep) this.setTab(this.tab || 'home');
+    } else {
+      this.deep = null;
+      document.body.classList.remove('app-deep', 'app-main-visible');
+      document.getElementById('auth-panel')?.setAttribute('hidden', '');
+      this.restorePanelsHome();
+    }
+  },
+
+  restorePanelsHome() {
+    const anchor = document.getElementById('app-panels-home-anchor');
+    const penalties = document.getElementById('account-penalties-panel');
+    const kyc = document.getElementById('kyc-banner');
+    if (anchor && penalties && penalties.parentElement?.id === 'app-account-penalties-slot') {
+      anchor.after(penalties);
+    }
+    if (anchor && kyc && kyc.parentElement?.id === 'app-account-kyc-slot') {
+      anchor.after(kyc);
+    }
+  },
+
+  setTab(tab) {
+    this.tab = tab;
+    if (this.deep) this.exitDeep(false);
+    document.body.dataset.appTab = tab;
+    document.querySelectorAll('.app-nav-item').forEach((b) => {
+      b.classList.toggle('active', b.dataset.appTab === tab);
+    });
+    document.querySelectorAll('.app-view').forEach((v) => {
+      v.classList.remove('active');
+      v.hidden = true;
+    });
+    const view = document.getElementById(`app-view-${tab}`);
+    if (view) {
+      view.classList.add('active');
+      view.hidden = false;
+    }
+
+    const titles = {
+      home: 'Inicio',
+      options: 'Opciones',
+      activity: 'Actividad',
+      account: 'Cuenta',
+    };
+    const titleEl = document.getElementById('app-top-title');
+    if (titleEl) titleEl.textContent = titles[tab] || 'Cubik';
+
+    document.body.classList.remove('app-main-visible');
+    if (tab === 'activity') {
+      document.body.classList.add('app-main-visible');
+      if (typeof showTab === 'function') showTab('trips');
+    }
+    if (tab === 'home') this.renderHome();
+  },
+
+  openAction(action) {
+    const map = {
+      shipper: { tab: 'shipper', title: 'Publicar carga' },
+      carrier: { tab: 'carrier', title: 'Ofertar ruta' },
+      board: { tab: 'board', title: 'Emparejar' },
+      trips: { tab: 'trips', title: 'Mis viajes' },
+      notifications: { tab: null, title: 'Notificaciones' },
+    };
+    const cfg = map[action];
+    if (!cfg) return;
+    if (action === 'notifications') {
+      document.getElementById('btn-notifications')?.click();
+      return;
+    }
+    this.deep = cfg.tab;
+    document.body.classList.add('app-deep', 'app-main-visible');
+    if (typeof showTab === 'function') showTab(cfg.tab);
+    const titleEl = document.getElementById('app-top-title');
+    if (titleEl) titleEl.textContent = cfg.title;
+    document.querySelectorAll('.app-view').forEach((v) => v.classList.remove('active'));
+    window.scrollTo(0, 0);
+  },
+
+  exitDeep(resetTab = true) {
+    this.deep = null;
+    document.body.classList.remove('app-deep', 'app-main-visible');
+    if (resetTab) this.setTab(this.tab || 'home');
+  },
+
+  updateTopTitle() {
+    /* noop — titles set in openAction */
+  },
+
+  renderHome() {
+    const user = typeof Auth !== 'undefined' ? Auth.user : null;
+    if (!user) return;
+    const greet = document.getElementById('app-home-greeting');
+    const sub = document.getElementById('app-home-sub');
+    const role =
+      typeof roleLabel === 'function' ? roleLabel(user.role) : user.role;
+    if (greet) {
+      greet.textContent = `Hola, ${user.full_name || user.name || user.email}`;
+    }
+    if (sub) {
+      sub.textContent = `${role}${user.company_name ? ` · ${user.company_name}` : ''}`;
+    }
+    const quickShipper = document.getElementById('app-quick-shipper');
+    const quickCarrier = document.getElementById('app-quick-carrier');
+    const quickBoard = document.getElementById('app-quick-board');
+    if (quickShipper) quickShipper.hidden = user.role === 'carrier';
+    if (quickCarrier) quickCarrier.hidden = user.role === 'shipper';
+    if (quickBoard) quickBoard.hidden = false;
+    const optShipper = document.getElementById('app-opt-shipper');
+    const optCarrier = document.getElementById('app-opt-carrier');
+    if (optShipper) optShipper.hidden = user.role === 'carrier';
+    if (optCarrier) optCarrier.hidden = user.role === 'shipper';
+    const activeSlot = document.getElementById('app-home-active-slot');
+    if (activeSlot) {
+      const banner = document.getElementById('active-trip-banner');
+      if (banner && !banner.hidden) {
+        activeSlot.innerHTML = '';
+        activeSlot.appendChild(banner);
+        banner.hidden = false;
+      } else {
+        activeSlot.innerHTML =
+          '<p class="muted">Sin viaje activo. Usa Opciones para publicar o emparejar.</p>';
+      }
+    }
+  },
+
+  renderAccount() {
+    const user = typeof Auth !== 'undefined' ? Auth.user : null;
+    const el = document.getElementById('app-account-profile');
+    if (!el || !user) return;
+    const role =
+      typeof roleLabel === 'function' ? roleLabel(user.role) : user.role;
+    el.innerHTML = `
+      <p><strong>${user.full_name || user.name || '—'}</strong></p>
+      <p class="muted">${user.email}</p>
+      <p class="muted">${role} · ${user.company_name || '—'}</p>
+      <p class="muted">KYC: <strong>${user.kyc_status || 'pending'}</strong></p>
+    `;
+    const adminBlock = document.getElementById('app-account-admin');
+    if (adminBlock) adminBlock.hidden = user.role !== 'admin';
+    const penaltiesSlot = document.getElementById('app-account-penalties-slot');
+    const panel = document.getElementById('account-penalties-panel');
+    if (penaltiesSlot && panel && !penaltiesSlot.contains(panel)) {
+      penaltiesSlot.appendChild(panel);
+    }
+    const kycBanner = document.getElementById('kyc-banner');
+    const kycSlot = document.getElementById('app-account-kyc-slot');
+    if (kycSlot && kycBanner && !kycSlot.contains(kycBanner)) {
+      kycSlot.appendChild(kycBanner);
+    }
+  },
+
+  initPullToRefresh() {
+    const scroll = document.getElementById('app-scroll');
+    const indicator = document.getElementById('app-ptr-indicator');
+    if (!scroll || !indicator) return;
+    let startY = 0;
+    let pulling = false;
+    scroll.addEventListener(
+      'touchstart',
+      (e) => {
+        if (this.tab !== 'activity' || scroll.scrollTop > 0) return;
+        startY = e.touches[0].clientY;
+        pulling = true;
+      },
+      { passive: true }
+    );
+    scroll.addEventListener(
+      'touchmove',
+      (e) => {
+        if (!pulling || this.tab !== 'activity') return;
+        const dy = e.touches[0].clientY - startY;
+        if (dy > 50 && scroll.scrollTop <= 0) indicator.classList.add('visible');
+        else indicator.classList.remove('visible');
+      },
+      { passive: true }
+    );
+    scroll.addEventListener(
+      'touchend',
+      async () => {
+        if (!pulling) return;
+        pulling = false;
+        if (indicator.classList.contains('visible')) {
+          indicator.textContent = 'Actualizando…';
+          if (typeof refreshBoard === 'function') await refreshBoard();
+          if (typeof Comms !== 'undefined') Comms.refreshBell?.();
+          indicator.textContent = 'Suelta para actualizar';
+        }
+        indicator.classList.remove('visible');
+      },
+      { passive: true }
+    );
+  },
+};
+
+AppShell.init();
+window.AppShell = AppShell;

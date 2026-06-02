@@ -11,6 +11,7 @@ data/store.json
 
 # Capacitor / Android build
 android/.gradle/
+android/.idea/
 android/app/build/
 android/build/
 android/local.properties

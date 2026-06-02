@@ -237,7 +237,7 @@ document.getElementById('form-forgot')?.addEventListener('submit', async (e) => 
     btn.textContent = 'Enviando…';
   }
   try {
-    const res = await fetch('/api/auth/forgot-password', {
+    const res = await apiFetch('/api/auth/forgot-password', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email }),
@@ -301,7 +301,7 @@ document.getElementById('form-change-password')?.addEventListener('submit', asyn
   }
   if (errEl) errEl.hidden = true;
   try {
-    const res = await fetch('/api/auth/change-password', {
+    const res = await apiFetch('/api/auth/change-password', {
       method: 'POST',
       headers: Auth.headers(),
       body: JSON.stringify({ current_password: current, new_password: next }),
@@ -375,7 +375,7 @@ formAuth?.addEventListener('submit', async (e) => {
   }
   const url = authRegisterMode ? '/api/auth/register' : '/api/auth/login';
   try {
-    const res = await fetch(url, {
+    const res = await apiFetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -393,7 +393,7 @@ formAuth?.addEventListener('submit', async (e) => {
     }
     Auth.save(json.token, json.user);
     try {
-      const meRes = await fetch('/api/auth/me', { headers: Auth.headers() });
+      const meRes = await apiFetch('/api/auth/me', { headers: Auth.headers() });
       const meJson = await meRes.json();
       if (meRes.ok && meJson.user) Auth.save(json.token, meJson.user);
     } catch (_) {}

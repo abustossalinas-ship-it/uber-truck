@@ -1,0 +1,500 @@
+/* Cubik — shell móvil (Capacitor / PWA standalone) */
+
+body.cubik-app {
+  --app-top-h: 3.25rem;
+  --app-nav-h: 4.25rem;
+  --app-safe-top: env(safe-area-inset-top, 0px);
+  --app-safe-bottom: env(safe-area-inset-bottom, 0px);
+  padding: 0;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+body.cubik-app .site-header,
+body.cubik-app #invite-tester,
+body.cubik-app .demo-bar,
+body.cubik-app #pwa-install-banner,
+body.cubik-app .site-footer,
+body.cubik-app #main-nav {
+  display: none !important;
+}
+
+body.cubik-app #admin-hub-nav,
+body.cubik-app #admin-kyc-panel,
+body.cubik-app #admin-ops-panel {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+body.cubik-app main {
+  max-width: none;
+  margin: 0;
+  padding: 0.75rem 1rem calc(var(--app-nav-h) + var(--app-safe-bottom) + 0.75rem);
+}
+
+body.cubik-app main .panel {
+  display: none;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  background: transparent;
+}
+
+body.cubik-app main .panel.active,
+body.cubik-app.app-main-visible main .panel.active {
+  display: block;
+  animation: app-view-in 0.22s ease-out;
+}
+
+@keyframes app-view-in {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* —— Gate (bienvenida / auth) —— */
+.app-gate {
+  position: fixed;
+  inset: 0;
+  z-index: 300;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg);
+  padding: calc(var(--app-safe-top) + 1.5rem) 1.25rem calc(var(--app-safe-bottom) + 1.5rem);
+}
+
+body.cubik-app.app-authed .app-gate {
+  display: none;
+}
+
+.app-gate-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.75rem;
+}
+
+.app-gate-logo {
+  width: min(220px, 70vw);
+  height: auto;
+}
+
+.app-gate-tagline {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--brand-orange);
+}
+
+.app-gate-lead {
+  margin: 0 0 1rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  max-width: 20rem;
+}
+
+.app-gate-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  width: min(100%, 320px);
+}
+
+.app-gate-actions .btn-primary-app {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  font-weight: 800;
+  border: none;
+  border-radius: 12px;
+  background: var(--brand-orange);
+  color: var(--text-on-dark);
+  cursor: pointer;
+}
+
+.app-gate-actions .btn-outline-app {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 12px;
+  border: 2px solid var(--brand-navy-mid);
+  background: var(--surface);
+  color: var(--brand-navy);
+  cursor: pointer;
+}
+
+body.cubik-app #auth-panel,
+body.cubik-app #change-password-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 310;
+  max-width: none;
+  margin: 0;
+  border-radius: 0;
+  border: none;
+  padding: calc(var(--app-safe-top) + 1rem) 1.25rem calc(var(--app-safe-bottom) + 1rem);
+  overflow-y: auto;
+  background: var(--bg);
+}
+
+body.cubik-app #auth-panel[hidden],
+body.cubik-app #change-password-panel[hidden] {
+  display: none !important;
+}
+
+/* —— Chrome (logueado) —— */
+.app-chrome {
+  display: none;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-top: var(--app-safe-top);
+}
+
+body.cubik-app:not(.app-authed) .app-chrome {
+  display: none !important;
+}
+
+body.cubik-app.app-authed .app-chrome {
+  display: flex;
+}
+
+body.cubik-app.app-authed .app-gate {
+  display: none !important;
+}
+
+.app-top-bar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-height: var(--app-top-h);
+  padding: 0.35rem 1rem;
+  background: var(--brand-navy);
+  color: var(--text-on-dark);
+  box-shadow: 0 2px 12px rgba(15, 39, 68, 0.2);
+}
+
+.app-top-bar h1 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  flex: 1;
+}
+
+.app-top-bar .notif-bell {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: transparent;
+  color: var(--text-on-dark);
+}
+
+.app-top-back {
+  display: none;
+  background: transparent;
+  border: none;
+  color: var(--brand-orange-light);
+  font-size: 1.35rem;
+  line-height: 1;
+  padding: 0.25rem 0.5rem 0.25rem 0;
+  cursor: pointer;
+}
+
+body.cubik-app.app-deep .app-top-back {
+  display: block;
+}
+
+.app-scroll {
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-y: contain;
+}
+
+.app-view {
+  display: none;
+  padding: 1rem;
+  animation: app-view-in 0.22s ease-out;
+}
+
+.app-view.active {
+  display: block;
+}
+
+body.cubik-app.app-main-visible .app-scroll > .app-view:not(.app-view-pass-through) {
+  display: none;
+}
+
+body.cubik-app.app-main-visible .app-scroll > .app-view.app-view-pass-through {
+  display: none;
+}
+
+/* Inicio */
+.app-home-greeting {
+  margin: 0 0 0.35rem;
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--brand-navy);
+}
+
+.app-home-sub {
+  margin: 0 0 1rem;
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.app-quick-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+  margin-bottom: 1rem;
+}
+
+.app-quick-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  padding: 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+}
+
+.app-quick-card strong {
+  font-size: 0.92rem;
+}
+
+.app-quick-card span {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.app-quick-card .app-quick-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.app-quick-card.accent {
+  border-color: var(--brand-orange);
+  background: var(--surface-warm);
+}
+
+.app-home-active {
+  margin-top: 0.5rem;
+}
+
+/* Opciones — grilla */
+.app-options-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem;
+}
+
+.app-option-tile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  min-height: 6.5rem;
+  padding: 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  font: inherit;
+  color: var(--brand-navy);
+  transition: transform 0.15s ease, border-color 0.15s ease;
+}
+
+.app-option-tile:active {
+  transform: scale(0.97);
+}
+
+.app-option-tile svg {
+  width: 2rem;
+  height: 2rem;
+}
+
+.app-option-tile span {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.app-option-tile.tile-orange {
+  border-color: rgba(247, 148, 29, 0.45);
+  background: var(--surface-warm);
+}
+
+.app-option-tile.tile-blue {
+  border-color: rgba(41, 171, 226, 0.45);
+  background: var(--surface-cool);
+}
+
+/* Cuenta */
+.app-account-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1rem;
+  margin-bottom: 0.75rem;
+  box-shadow: var(--shadow);
+}
+
+.app-account-card h2 {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.app-account-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.app-account-actions button,
+.app-account-actions a {
+  width: 100%;
+  text-align: center;
+}
+
+.app-account-admin {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px dashed var(--border);
+}
+
+/* Bottom nav */
+.app-bottom-nav {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 120;
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  min-height: var(--app-nav-h);
+  padding-bottom: var(--app-safe-bottom);
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -4px 20px rgba(15, 39, 68, 0.08);
+}
+
+.app-nav-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.15rem;
+  padding: 0.35rem 0.25rem;
+  border: none;
+  background: transparent;
+  color: var(--brand-gray-500);
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: color 0.15s ease;
+}
+
+.app-nav-item svg {
+  width: 1.35rem;
+  height: 1.35rem;
+}
+
+.app-nav-item.active {
+  color: var(--brand-orange);
+}
+
+.app-nav-item.active svg {
+  stroke: var(--brand-orange);
+}
+
+/* Pull to refresh — Actividad */
+.app-ptr-indicator {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding: 0.5rem;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.app-ptr-indicator.visible {
+  opacity: 1;
+}
+
+/* Banners en app */
+body.cubik-app #active-trip-banner {
+  margin: 0;
+  border-radius: 0;
+}
+
+body.cubik-app #kyc-banner,
+body.cubik-app #penalty-block-banner,
+body.cubik-app #account-penalties-panel {
+  margin: 0.5rem 1rem;
+  max-width: none;
+  padding: 0;
+}
+
+body.cubik-app.app-authed #account-penalties-panel:not([hidden]) {
+  display: block;
+}
+
+body.cubik-app #account-penalties-panel .card,
+body.cubik-app #kyc-banner.card {
+  margin: 0;
+}
+
+/* Deep: formularios full width */
+body.cubik-app.app-deep main form.card,
+body.cubik-app.app-deep main .card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: var(--shadow);
+}
+
+@media (min-width: 900px) {
+  body.cubik-app .app-chrome,
+  body.cubik-app .app-gate {
+    display: none !important;
+  }
+
+  body.cubik-app .site-header,
+  body.cubik-app #main-nav,
+  body.cubik-app .site-footer {
+    display: flex !important;
+  }
+
+  body.cubik-app #main-nav {
+    display: flex !important;
+  }
+
+  body.cubik-app main {
+    display: block !important;
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 1.5rem;
+  }
+}

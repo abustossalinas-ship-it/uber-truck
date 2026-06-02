@@ -44,8 +44,12 @@ La app Android **no empaqueta** todo el JS: abre la web en producción (actualiz
 ```bash
 npm install
 npm run cap:icons          # iconos Cubik + sync assets
+npm run cap:sync:remote    # APK carga UI desde Railway (recomendado demo)
+# npm run cap:sync:bundle  # UI dentro del APK (ver docs/CUBIK-APP-UX.md)
 npm run cap:open:android   # abre Android Studio
 ```
+
+UX app (bottom nav, login): [CUBIK-APP-UX.md](./CUBIK-APP-UX.md)
 
 En Android Studio: **Build → Generate Signed Bundle / APK** → **Android App Bundle (.aab)** para Play.
 

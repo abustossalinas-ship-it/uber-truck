@@ -3,69 +3,77 @@ function apiHeaders() {
 }
 
 const API = {
-  loads: () => fetch('/api/load-requests?status=published', { headers: apiHeaders() }).then((r) => r.json()),
-  offers: () => fetch('/api/capacity-offers?status=published', { headers: apiHeaders() }).then((r) => r.json()),
-  allLoads: () => fetch('/api/load-requests', { headers: apiHeaders() }).then((r) => r.json()),
-  allOffers: () => fetch('/api/capacity-offers', { headers: apiHeaders() }).then((r) => r.json()),
-  matches: () => fetch('/api/matches', { headers: apiHeaders() }).then((r) => r.json()),
+  loads: () =>
+    apiFetch('/api/load-requests?status=published', { headers: apiHeaders() }).then((r) => r.json()),
+  offers: () =>
+    apiFetch('/api/capacity-offers?status=published', { headers: apiHeaders() }).then((r) => r.json()),
+  allLoads: () => apiFetch('/api/load-requests', { headers: apiHeaders() }).then((r) => r.json()),
+  allOffers: () => apiFetch('/api/capacity-offers', { headers: apiHeaders() }).then((r) => r.json()),
+  matches: () => apiFetch('/api/matches', { headers: apiHeaders() }).then((r) => r.json()),
   cancelOptions: (action, phase, agreedPriceClp, matchId) => {
     let url = `/api/matches/cancel-options?action=${encodeURIComponent(action)}&phase=${encodeURIComponent(phase)}&actor_role=${encodeURIComponent(getActorRole())}`;
     if (agreedPriceClp) url += `&agreed_price_clp=${encodeURIComponent(agreedPriceClp)}`;
     if (matchId) url += `&match_id=${encodeURIComponent(matchId)}`;
-    return fetch(url, { headers: apiHeaders() }).then((r) => r.json());
+    return apiFetch(url, { headers: apiHeaders() }).then((r) => r.json());
   },
   confirmMutualCancel: (matchId) =>
-    fetch(`/api/matches/${matchId}/mutual-cancel`, {
+    apiFetch(`/api/matches/${matchId}/mutual-cancel`, {
       method: 'POST',
       headers: apiHeaders(),
       body: JSON.stringify({ actor_role: getActorRole() }),
     }).then((r) => r.json()),
   suggestions: (loadId) =>
-    fetch(`/api/load-requests/${loadId}/match-suggestions`, { headers: apiHeaders() }).then((r) => r.json()),
+    apiFetch(`/api/load-requests/${loadId}/match-suggestions`, { headers: apiHeaders() }).then((r) =>
+      r.json()
+    ),
   postLoad: (body) =>
-    fetch('/api/load-requests', { method: 'POST', headers: apiHeaders(), body: JSON.stringify(body) }),
+    apiFetch('/api/load-requests', { method: 'POST', headers: apiHeaders(), body: JSON.stringify(body) }),
   postOffer: (body) =>
-    fetch('/api/capacity-offers', { method: 'POST', headers: apiHeaders(), body: JSON.stringify(body) }),
+    apiFetch('/api/capacity-offers', {
+      method: 'POST',
+      headers: apiHeaders(),
+      body: JSON.stringify(body),
+    }),
   postMatch: (body) =>
-    fetch('/api/matches', { method: 'POST', headers: apiHeaders(), body: JSON.stringify(body) }),
+    apiFetch('/api/matches', { method: 'POST', headers: apiHeaders(), body: JSON.stringify(body) }),
   patchMatch: (id, body) =>
-    fetch(`/api/matches/${id}/status`, {
+    apiFetch(`/api/matches/${id}/status`, {
       method: 'PATCH',
       headers: apiHeaders(),
       body: JSON.stringify({ actor_role: getActorRole(), ...body }),
     }),
   patchCarrierOffer: (id, carrier_offer_clp) =>
-    fetch(`/api/matches/${id}/carrier-offer`, {
+    apiFetch(`/api/matches/${id}/carrier-offer`, {
       method: 'PATCH',
       headers: apiHeaders(),
       body: JSON.stringify({ carrier_offer_clp, actor_role: getActorRole() }),
     }).then((r) => r.json()),
   patchAcceptOffer: (id) =>
-    fetch(`/api/matches/${id}/accept-offer`, {
+    apiFetch(`/api/matches/${id}/accept-offer`, {
       method: 'PATCH',
       headers: apiHeaders(),
       body: JSON.stringify({ actor_role: getActorRole() }),
     }).then((r) => r.json()),
   patchLoadBudget: (loadId, budget_min_clp, budget_max_clp) =>
-    fetch(`/api/load-requests/${loadId}/budget`, {
+    apiFetch(`/api/load-requests/${loadId}/budget`, {
       method: 'PATCH',
       headers: apiHeaders(),
       body: JSON.stringify({ budget_min_clp, budget_max_clp }),
     }).then((r) => r.json()),
   postIncident: (matchId, body) =>
-    fetch(`/api/matches/${matchId}/incidents`, {
+    apiFetch(`/api/matches/${matchId}/incidents`, {
       method: 'POST',
       headers: apiHeaders(),
       body: JSON.stringify(body),
     }).then((r) => r.json()),
   rateMatch: (matchId, body) =>
-    fetch(`/api/matches/${matchId}/rate`, {
+    apiFetch(`/api/matches/${matchId}/rate`, {
       method: 'POST',
       headers: apiHeaders(),
       body: JSON.stringify(body),
     }).then((r) => r.json()),
   seedDemo: (key) =>
-    fetch('/api/demo/seed', {
+    apiFetch('/api/demo/seed', {
       method: 'POST',
       headers: { ...apiHeaders(), 'X-Demo-Seed-Key': key || '' },
     }).then((r) => r.json()),
@@ -926,13 +934,15 @@ function showTab(name) {
   if (!name) return;
   const panel = $(`panel-${name}`);
   const tab = document.querySelector(`#main-nav [data-tab="${name}"]`);
-  if (!panel || !tab) return;
+  if (!panel) return;
   document.querySelectorAll('.panel').forEach((p) => p.classList.remove('active'));
   document.querySelectorAll('#main-nav .tab').forEach((t) => t.classList.remove('active'));
   panel.classList.add('active');
-  tab.classList.add('active');
+  if (tab) tab.classList.add('active');
   if (name === 'board' || name === 'trips') refreshBoard();
 }
+
+window.showTab = showTab;
 
 function routeLine(row) {
   const from = row.origin_commune

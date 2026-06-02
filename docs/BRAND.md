@@ -22,10 +22,13 @@
 | Rol | Color |
 |-----|--------|
 | Texto | Navy |
-| Botón primario | Naranja + borde navy medio |
-| Botón / pill secundario | Celeste suave |
-| Barra entorno | Degradado navy → celeste oscuro |
-| Fondo página | Gris azulado claro |
+| Fondos de página / cards | Blanco + gris azulado `#F4F7FB` |
+| Barra admin / demo / viaje activo | Degradado navy → celeste |
+| CTAs principales | Naranja sólido |
+| CTAs secundarios | Borde navy, hover celeste |
+| Info / hints | Fondo celeste suave + borde celeste |
+| Montos a cobrar («Te deben») | Celeste oscuro (no verde) |
+| Montos a pagar («Debes») | Naranja |
 
 ### CSS
 

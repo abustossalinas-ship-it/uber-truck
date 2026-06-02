@@ -1,6 +1,6 @@
 {
   "name": "uber-truck",
-  "version": "0.0.62",
+  "version": "0.0.63",
   "private": true,
   "description": "Cubik — marketplace cubicación logística (repo uber-truck)",
   "main": "src/server.js",
@@ -10,7 +10,8 @@
     "export:memoria-docx": "node scripts/export-memoria-docx.cjs",
     "export:all-docs": "node scripts/export-all-docs-docx.cjs",
     "cap:sync": "npx cap sync android",
-    "cap:open:android": "npx cap open android"
+    "cap:open:android": "npx cap open android",
+    "cap:icons": "node scripts/generate-android-icons.cjs && npm run cap:sync"
   },
   "engines": {
     "node": ">=20"
@@ -28,6 +29,7 @@
     "@capacitor/cli": "^7.2.0",
     "@capacitor/core": "^7.2.0",
     "html-to-docx": "^1.8.0",
-    "nodemon": "^3.1.0"
+    "nodemon": "^3.1.0",
+    "sharp": "^0.34.2"
   }
 }

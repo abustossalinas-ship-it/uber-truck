@@ -139,7 +139,12 @@ body.cubik-app.app-main-visible main .panel.active {
 }
 
 /* —— Gate (bienvenida / auth) —— */
-.app-gate {
+.app-gate,
+.app-chrome {
+  display: none;
+}
+
+body.cubik-app .app-gate {
   position: fixed;
   inset: 0;
   z-index: 400;
@@ -674,28 +679,4 @@ body.cubik-app.app-deep main .card {
   border-radius: var(--radius);
   padding: 1rem;
   box-shadow: var(--shadow);
-}
-
-@media (min-width: 900px) {
-  body.cubik-app .app-chrome,
-  body.cubik-app .app-gate {
-    display: none !important;
-  }
-
-  body.cubik-app .site-header,
-  body.cubik-app #main-nav,
-  body.cubik-app .site-footer {
-    display: flex !important;
-  }
-
-  body.cubik-app #main-nav {
-    display: flex !important;
-  }
-
-  body.cubik-app main {
-    display: block !important;
-    max-width: 1100px;
-    margin: 0 auto;
-    padding: 1.5rem;
-  }
 }

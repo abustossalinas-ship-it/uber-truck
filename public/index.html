@@ -14,12 +14,12 @@
   <link rel="preconnect" href="https://uber-truck-production.up.railway.app" crossorigin />
   <link rel="dns-prefetch" href="https://uber-truck-production.up.railway.app" />
   <link rel="stylesheet" href="/theme.css?v=0.0.76" />
-  <link rel="stylesheet" href="/app-shell.css?v=0.0.76" />
+  <link rel="stylesheet" href="/app-shell.css?v=0.0.79" />
   <script src="/brand-config.js?v=0.0.76" defer></script>
   <script src="/api-base.js?v=0.0.77" defer></script>
 </head>
 <body>
-  <div id="app-gate" class="app-gate">
+  <div id="app-gate" class="app-gate" hidden>
     <div id="app-welcome" class="app-gate-screen">
       <div class="app-gate-hero">
         <img class="app-gate-logo" src="/brand/logo-mark.png?v=0.0.76" width="120" height="120" alt="" />
@@ -33,6 +33,19 @@
       </div>
     </div>
   </div>
+  <script>
+  (function () {
+    try {
+      var q = new URLSearchParams(location.search);
+      if (q.get('app') === '1' || localStorage.getItem('cubik_force_app') === '1') {
+        document.documentElement.classList.add('cubik-app-root');
+        document.body.classList.add('cubik-app', 'cubik-app-strict');
+        var gate = document.getElementById('app-gate');
+        if (gate) gate.hidden = false;
+      }
+    } catch (_) {}
+  })();
+  </script>
 
   <div id="app-chrome" class="app-chrome">
     <header class="app-top-bar">
@@ -920,7 +933,7 @@
     </div>
   </div>
 
-  <script src="/app-shell.js?v=0.0.76" defer></script>
+  <script src="/app-shell.js?v=0.0.79" defer></script>
   <script src="/pwa-ui.js?v=0.0.64" defer></script>
   <script src="/kyc-ui.js?v=0.0.33" defer></script>
   <script src="/admin-ui.js?v=0.0.59" defer></script>

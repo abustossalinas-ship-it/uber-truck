@@ -20,10 +20,19 @@ const AppShell = {
     );
   },
 
+  isExplicitAppMode() {
+    if (this.isNative()) return true;
+    if (localStorage.getItem('cubik_force_app') === '1') return true;
+    return new URLSearchParams(location.search).get('app') === '1';
+  },
+
   init() {
     if (!this.isAppMode()) return;
     document.documentElement.classList.add('cubik-app-root');
     document.body.classList.add('cubik-app');
+    if (this.isExplicitAppMode()) {
+      document.body.classList.add('cubik-app-strict');
+    }
     const gate = document.getElementById('app-gate');
     if (gate) gate.hidden = false;
     this.hideNativeSplash();

@@ -1,5 +1,11 @@
 /* Cubik — shell móvil (Capacitor / PWA standalone) */
 
+html.cubik-app-root {
+  overflow: hidden;
+  height: 100%;
+  width: 100%;
+}
+
 body.cubik-app {
   --app-top-h: 3.25rem;
   --app-nav-h: 4.25rem;
@@ -25,17 +31,16 @@ body.cubik-app #main-nav {
   display: none !important;
 }
 
-/* Ocultar web legacy cuando el shell app está activo (evita scroll infinito / admin en Inicio) */
-body.cubik-app.app-authed #app-panels-home-anchor,
-body.cubik-app.app-authed #penalty-block-banner,
-body.cubik-app.app-authed #account-penalties-panel,
-body.cubik-app.app-authed #kyc-banner,
-body.cubik-app.app-authed #admin-hub-nav,
-body.cubik-app.app-authed #admin-kyc-panel,
-body.cubik-app.app-authed #admin-ops-panel,
-body.cubik-app.app-authed #active-trip-banner,
-body.cubik-app.app-authed main,
-body.cubik-app.app-authed .site-footer {
+/* Ocultar web legacy en app móvil (solo visible en deep / actividad / slots cuenta) */
+body.cubik-app #app-panels-home-anchor,
+body.cubik-app #penalty-block-banner,
+body.cubik-app #account-penalties-panel,
+body.cubik-app #kyc-banner,
+body.cubik-app #admin-hub-nav,
+body.cubik-app #admin-kyc-panel,
+body.cubik-app #admin-ops-panel,
+body.cubik-app #active-trip-banner,
+body.cubik-app main {
   display: none !important;
 }
 
@@ -137,14 +142,15 @@ body.cubik-app.app-main-visible main .panel.active {
 .app-gate {
   position: fixed;
   inset: 0;
-  z-index: 300;
+  z-index: 400;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   box-sizing: border-box;
   width: 100%;
-  height: 100dvh;
+  height: 100%;
+  min-height: 100dvh;
   max-height: 100dvh;
   background: var(--bg);
   padding-top: calc(var(--app-safe-top) + 0.5rem);
@@ -152,6 +158,7 @@ body.cubik-app.app-main-visible main .panel.active {
   padding-left: max(1rem, env(safe-area-inset-left, 0px));
   padding-right: max(1rem, env(safe-area-inset-right, 0px));
   overflow: hidden;
+  overscroll-behavior: none;
 }
 
 .app-gate-screen {
@@ -251,7 +258,7 @@ body.cubik-app #auth-panel,
 body.cubik-app #change-password-panel {
   position: fixed;
   inset: 0;
-  z-index: 320;
+  z-index: 420;
   display: flex;
   flex-direction: column;
   justify-content: center;

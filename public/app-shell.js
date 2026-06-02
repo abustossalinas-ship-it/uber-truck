@@ -21,6 +21,7 @@ const AppShell = {
 
   init() {
     if (!this.isAppMode()) return;
+    document.documentElement.classList.add('cubik-app-root');
     document.body.classList.add('cubik-app');
     const gate = document.getElementById('app-gate');
     if (gate) gate.hidden = false;

@@ -7,8 +7,12 @@ window.CUBIK_BRAND = {
     'El espacio disponible en tu ruta es el activo. Publica carga u oferta de cubicación en rutas ya planificadas.',
   colors: {
     navy: '#0f2744',
+    navyMid: '#1a3d66',
     orange: '#f7941d',
+    orangeLight: '#ffba42',
     blue: '#29abe2',
+    blueLight: '#5ec4ef',
+    background: '#f4f7fb',
   },
   packageId: 'cl.cubik.logistics',
   productionUrl: 'https://uber-truck-production.up.railway.app',

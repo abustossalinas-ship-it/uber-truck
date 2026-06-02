@@ -1,15 +1,14 @@
-/* Cubik — design tokens (docs/BRAND.md) */
+/* Cubik — design tokens (docs/BRAND.md) — sin negro puro */
 :root {
   --brand-navy: #0f2744;
   --brand-navy-mid: #1a3d66;
-  --brand-navy-dark: #09182a;
+  --brand-navy-dark: #0a1c32;
   --brand-orange: #f7941d;
   --brand-orange-dark: #d97a08;
-  --brand-orange-light: #ffb84d;
+  --brand-orange-light: #ffba42;
   --brand-blue: #29abe2;
   --brand-blue-dark: #1e8fbf;
   --brand-blue-light: #5ec4ef;
-  --brand-black: #000000;
   --brand-white: #ffffff;
   --brand-gray-50: #f4f7fb;
   --brand-gray-100: #e8eef5;
@@ -23,12 +22,13 @@
   --border: var(--brand-gray-200);
   --text: var(--brand-navy);
   --text-muted: var(--brand-gray-700);
+  --text-on-dark: var(--brand-white);
   --accent: var(--brand-orange);
   --accent-hover: var(--brand-orange-dark);
   --accent-secondary: var(--brand-blue);
   --accent-secondary-hover: var(--brand-blue-dark);
   --accent-soft: rgba(247, 148, 29, 0.14);
-  --accent-blue-soft: rgba(41, 171, 226, 0.14);
+  --accent-blue-soft: rgba(41, 171, 226, 0.16);
   --shadow: 0 4px 24px rgba(15, 39, 68, 0.1);
   --radius: 12px;
   --font: "Segoe UI", Inter, system-ui, sans-serif;
@@ -64,16 +64,18 @@ body {
   align-items: flex-start;
   flex-wrap: wrap;
   padding: 1.25rem 1.5rem;
-  border-bottom: 3px solid var(--brand-navy);
-  background: var(--surface);
+  border-bottom: 3px solid transparent;
+  background:
+    linear-gradient(var(--surface), var(--surface)) padding-box,
+    linear-gradient(90deg, var(--brand-orange) 0%, var(--brand-blue) 50%, var(--brand-navy) 100%) border-box;
   box-shadow: var(--shadow);
 }
 
 .brand-logo-wrap {
   flex-shrink: 0;
-  background: var(--brand-black);
-  border-radius: 14px;
-  padding: 0.35rem 0.5rem;
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
   line-height: 0;
 }
 
@@ -148,8 +150,8 @@ body {
   gap: 0.5rem;
   align-items: center;
   padding: 0.65rem 1.5rem;
-  background: var(--brand-navy-dark);
-  color: var(--brand-white);
+  background: linear-gradient(90deg, var(--brand-navy) 0%, var(--brand-navy-mid) 55%, var(--brand-blue-dark) 100%);
+  color: var(--text-on-dark);
   font-size: 0.85rem;
 }
 
@@ -255,7 +257,7 @@ body {
   border-radius: 10px;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(242, 101, 34, 0.35);
+  box-shadow: 0 4px 14px rgba(247, 148, 29, 0.35);
 }
 
 .btn-match-cta:hover {
@@ -316,9 +318,9 @@ nav {
 }
 
 .tab.active {
-  border-color: var(--accent);
-  background: var(--accent-soft);
-  color: var(--accent-hover);
+  border-color: var(--brand-blue);
+  background: var(--accent-blue-soft);
+  color: var(--brand-navy);
 }
 
 main {
@@ -605,7 +607,7 @@ button[type="submit"]:disabled {
   text-align: center;
   background: var(--accent);
   color: var(--brand-white);
-  border: 3px solid var(--brand-navy-dark);
+  border: 3px solid var(--brand-navy-mid);
   border-radius: 12px;
   cursor: pointer;
   box-shadow: 0 6px 22px rgba(247, 148, 29, 0.35);
@@ -707,7 +709,8 @@ button[type="submit"]:disabled {
 }
 
 .suggestion-item .match-suggestion-now {
-  background: var(--brand-black);
+  background: var(--brand-navy);
+  color: var(--text-on-dark);
 }
 
 select.offer-picked {
@@ -758,7 +761,7 @@ select.offer-picked {
   padding: 0.55rem 1rem;
   background: var(--accent);
   color: var(--brand-white);
-  border: 2px solid var(--brand-navy-dark);
+  border: 2px solid var(--brand-navy-mid);
 }
 
 .distance-box-eta {
@@ -925,7 +928,7 @@ select.offer-picked {
   padding: 0.5rem 0.9rem;
   background: var(--accent);
   color: var(--brand-white);
-  border: 2px solid var(--brand-navy-dark);
+  border: 2px solid var(--brand-navy-mid);
   border-radius: 8px;
   cursor: pointer;
 }
@@ -1118,7 +1121,7 @@ body.kyc-pending #btn-create-match {
   font-weight: 800;
   background: var(--accent);
   color: var(--brand-white);
-  border: 2px solid var(--brand-navy-dark);
+  border: 2px solid var(--brand-navy-mid);
   border-radius: 10px;
   cursor: pointer;
 }
@@ -1654,7 +1657,7 @@ body.kyc-pending #btn-create-match {
   border-radius: 10px;
   font-weight: 800;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(242, 101, 34, 0.35);
+  box-shadow: 0 4px 14px rgba(247, 148, 29, 0.35);
 }
 
 .btn-match-cta:hover {

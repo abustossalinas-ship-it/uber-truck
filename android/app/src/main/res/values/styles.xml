@@ -16,7 +16,7 @@
     </style>
 
 
-    <!-- Splash: fondo con logo + slogan (compatible con Capacitor y API 31+) -->
+    <!-- Splash API ≤30: imagen completa logo + slogan -->
     <style name="AppTheme.NoActionBarLaunch" parent="AppTheme.NoActionBar">
         <item name="android:windowBackground">@drawable/splash</item>
     </style>

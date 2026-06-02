@@ -52,7 +52,7 @@ function stripBlackBackground(inputSharp) {
 
 async function loadIsotipo() {
   const meta = await sharp(LOGO).metadata();
-  const cropH = Math.max(1, Math.round(meta.height * 0.52));
+  const cropH = Math.max(1, Math.round(meta.height * 0.4));
   const cropped = sharp(LOGO).extract({
     left: 0,
     top: 0,

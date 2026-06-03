@@ -19,8 +19,16 @@ function warnInvalidServiceAccount(reason) {
   );
 }
 
+function getServiceAccountEnvRaw() {
+  const b64 = process.env.FCM_SERVICE_ACCOUNT_B64?.trim();
+  if (b64) return { raw: b64, source: 'FCM_SERVICE_ACCOUNT_B64' };
+  const json = process.env.FCM_SERVICE_ACCOUNT_JSON?.trim();
+  if (json) return { raw: json, source: 'FCM_SERVICE_ACCOUNT_JSON' };
+  return { raw: null, source: null };
+}
+
 function normalizeServiceAccountRaw(raw) {
-  let t = raw.trim();
+  let t = raw.trim().replace(/^\uFEFF/, '');
   if (
     (t.startsWith('"') && t.endsWith('"')) ||
     (t.startsWith("'") && t.endsWith("'"))
@@ -28,6 +36,14 @@ function normalizeServiceAccountRaw(raw) {
     t = t.slice(1, -1).replace(/\\"/g, '"').replace(/\\n/g, '\n');
   }
   return t;
+}
+
+function looksLikeGoogleServicesJson(text) {
+  return (
+    text.includes('mobilesdk_app_id') ||
+    text.includes('"client_info"') ||
+    text.includes('oauth_client')
+  );
 }
 
 function tryParseServiceAccountJson(text) {
@@ -41,12 +57,20 @@ function tryParseServiceAccountJson(text) {
   return sa;
 }
 
-function decodeServiceAccountText(raw) {
+function decodeServiceAccountText(raw, forceBase64 = false) {
   const trimmed = normalizeServiceAccountRaw(raw);
-  if (trimmed.startsWith('{')) return trimmed;
+  if (looksLikeGoogleServicesJson(trimmed)) {
+    throw new Error(
+      'parece google-services.json (Android); usa Service Account → Generate new private key en Firebase'
+    );
+  }
+  if (!forceBase64 && trimmed.startsWith('{')) return trimmed;
   const b64 = trimmed.replace(/\s/g, '');
   if (!/^[A-Za-z0-9+/=]+$/.test(b64)) {
-    throw new Error('no empieza con { y no es base64 válido');
+    const preview = trimmed.slice(0, 12).replace(/[^\x20-\x7E]/g, '?');
+    throw new Error(
+      `no empieza con { y no es base64 válido (inicio: "${preview}…", ${trimmed.length} caracteres)`
+    );
   }
   const decoded = Buffer.from(b64, 'base64').toString('utf8');
   if (!decoded.trim().startsWith('{')) {
@@ -55,16 +79,31 @@ function decodeServiceAccountText(raw) {
   return decoded;
 }
 
+function fcmEnvDiagnostics() {
+  const { raw, source } = getServiceAccountEnvRaw();
+  if (!raw) {
+    return { env_set: false, env_source: null, env_length: 0, env_starts_with_brace: false };
+  }
+  const trimmed = normalizeServiceAccountRaw(raw);
+  return {
+    env_set: true,
+    env_source: source,
+    env_length: trimmed.length,
+    env_starts_with_brace: trimmed.startsWith('{'),
+    env_looks_like_google_services: looksLikeGoogleServicesJson(trimmed),
+  };
+}
+
 function parseServiceAccount() {
   if (cachedServiceAccount !== undefined) return cachedServiceAccount;
-  const raw = process.env.FCM_SERVICE_ACCOUNT_JSON;
-  if (!raw?.trim()) {
+  const { raw, source } = getServiceAccountEnvRaw();
+  if (!raw) {
     cachedServiceAccount = null;
     serviceAccountParseDetail = null;
     return null;
   }
   try {
-    const text = decodeServiceAccountText(raw);
+    const text = decodeServiceAccountText(raw, source === 'FCM_SERVICE_ACCOUNT_B64');
     const sa = tryParseServiceAccountJson(text);
     cachedServiceAccount = sa;
     serviceAccountInvalid = false;
@@ -80,7 +119,8 @@ function parseServiceAccount() {
 }
 
 function fcmMode() {
-  if (process.env.FCM_SERVICE_ACCOUNT_JSON) {
+  const { raw } = getServiceAccountEnvRaw();
+  if (raw) {
     if (serviceAccountInvalid) return 'off';
     const sa = parseServiceAccount();
     if (sa) return 'v1';
@@ -288,14 +328,23 @@ async function pushForNotification(repo, notification) {
 function statusPayload() {
   const sa = parseServiceAccount();
   const mode = fcmMode();
+  const diag = fcmEnvDiagnostics();
   return {
     configured: mode !== 'off',
     mode,
     project_id: sa?.project_id || null,
     service_account_error: serviceAccountInvalid
-      ? 'FCM_SERVICE_ACCOUNT_JSON inválido — corrige o elimina la variable en Railway'
+      ? 'Credencial FCM inválida — usa FCM_SERVICE_ACCOUNT_B64 (recomendado) o JSON en una línea'
       : null,
     service_account_parse_detail: serviceAccountParseDetail,
+    env: diag,
+    setup_hint: !diag.env_set
+      ? 'Sin FCM_SERVICE_ACCOUNT_B64 ni FCM_SERVICE_ACCOUNT_JSON'
+      : diag.env_looks_like_google_services
+        ? 'Pegaste google-services.json; genera Service Account key en Firebase'
+        : !diag.env_starts_with_brace && diag.env_source === 'FCM_SERVICE_ACCOUNT_JSON'
+          ? 'Usa FCM_SERVICE_ACCOUNT_B64: node scripts/encode-fcm-service-account.cjs tu-archivo.json'
+          : null,
   };
 }
 

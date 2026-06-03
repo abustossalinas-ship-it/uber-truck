@@ -39,7 +39,7 @@ router.post('/push-token', authMiddleware, async (req, res) => {
       id: row.id,
       message: fcm.isConfigured()
         ? 'Dispositivo registrado para notificaciones push.'
-        : 'Token guardado. Configura FCM_SERVICE_ACCOUNT_JSON o FCM_SERVER_KEY en Railway.',
+        : 'Token guardado. Configura FCM_SERVICE_ACCOUNT_B64 (o JSON/FCM_SERVER_KEY) en Railway.',
     });
   } catch (e) {
     const code = e.status || 500;
@@ -53,7 +53,7 @@ router.post('/push-test', authMiddleware, async (req, res) => {
   if (!fcm.isConfigured()) {
     return res.status(503).json({
       ok: false,
-      error: 'FCM no configurado en el servidor (FCM_SERVICE_ACCOUNT_JSON o FCM_SERVER_KEY).',
+      error: 'FCM no configurado en el servidor (FCM_SERVICE_ACCOUNT_B64, JSON o FCM_SERVER_KEY).',
     });
   }
   try {

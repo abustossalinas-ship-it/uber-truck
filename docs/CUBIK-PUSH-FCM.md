@@ -16,11 +16,23 @@
 
 ### Opción A — HTTP v1 (recomendado)
 
-1. Firebase Console → Project Settings → **Service accounts** → Generate new private key.
-2. Copia el JSON completo.
-3. Railway variable: `FCM_SERVICE_ACCOUNT_JSON` = JSON en una línea **o** base64 del JSON (sin comillas extra ni archivo `.json` renombrado a texto corrupto).
+1. Firebase Console → **Project settings** → pestaña **Service accounts** → **Generate new private key** (archivo `*-firebase-adminsdk-*.json`).
+2. **No** uses `google-services.json` de Android (ese es otro archivo).
+3. En tu PC, genera el valor para Railway:
 
-   Si ves en logs `Unexpected token 's'` o `no es JSON ni base64 válido`, la variable está mal pegada: bórrala y vuelve a pegar el JSON completo desde Firebase, o usa `FCM_SERVER_KEY` (legacy) y deja vacía `FCM_SERVICE_ACCOUNT_JSON`.
+```bash
+node scripts/encode-fcm-service-account.cjs "C:\ruta\al-firebase-adminsdk-xxxxx.json"
+```
+
+4. Railway → Variables:
+   - **Nombre:** `FCM_SERVICE_ACCOUNT_B64`
+   - **Valor:** la línea BASE64 que imprime el script (una sola línea, sin comillas)
+   - **Borra** `FCM_SERVICE_ACCOUNT_JSON` si la tenías mal (evita conflicto).
+5. **Redeploy** y revisa `/health` → `fcm.configured: true`, `fcm.env.env_source: "FCM_SERVICE_ACCOUNT_B64"`.
+
+Alternativa: `FCM_SERVICE_ACCOUNT_JSON` = el JSON **en una sola línea** (salida `JSON en una línea` del script).
+
+Si el log dice `no empieza con { y no es base64 válido`, el valor pegado no es el service account (suele ser texto corrupto o el archivo equivocado).
 
 ### Opción B — Legacy server key
 

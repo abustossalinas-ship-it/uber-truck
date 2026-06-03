@@ -11,12 +11,16 @@ body.cubik-app {
   --app-nav-h: 4.25rem;
   --app-safe-top: env(safe-area-inset-top, 0px);
   --app-safe-bottom: env(safe-area-inset-bottom, 0px);
+  --app-safe-left: env(safe-area-inset-left, 0px);
+  --app-safe-right: env(safe-area-inset-right, 0px);
   margin: 0;
   padding: 0;
   width: 100%;
   max-width: 100vw;
   min-height: 100dvh;
+  min-height: -webkit-fill-available;
   height: 100dvh;
+  height: -webkit-fill-available;
   overflow: hidden;
   -webkit-text-size-adjust: 100%;
   -webkit-tap-highlight-color: transparent;
@@ -151,29 +155,35 @@ body.cubik-app .app-gate {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   box-sizing: border-box;
   width: 100%;
   height: 100%;
   min-height: 100dvh;
+  min-height: -webkit-fill-available;
   max-height: 100dvh;
+  max-height: -webkit-fill-available;
   background: var(--bg);
-  padding-top: calc(var(--app-safe-top) + 0.5rem);
-  padding-bottom: calc(var(--app-safe-bottom) + 0.75rem);
-  padding-left: max(1rem, env(safe-area-inset-left, 0px));
-  padding-right: max(1rem, env(safe-area-inset-right, 0px));
-  overflow: hidden;
+  padding-top: calc(var(--app-safe-top) + 0.75rem);
+  padding-bottom: calc(var(--app-safe-bottom) + 1rem);
+  padding-left: max(1rem, var(--app-safe-left));
+  padding-right: max(1rem, var(--app-safe-right));
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   overscroll-behavior: none;
 }
 
 .app-gate-screen {
-  flex: 0 1 auto;
+  flex: 1 0 auto;
   display: flex;
   flex-direction: column;
   width: min(100%, 24rem);
-  max-height: 100%;
-  min-height: 0;
+  min-height: min(100%, calc(100dvh - var(--app-safe-top) - var(--app-safe-bottom) - 2rem));
+  min-height: min(100%, calc(-webkit-fill-available - var(--app-safe-top) - var(--app-safe-bottom) - 2rem));
   box-sizing: border-box;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
 .app-gate-hero {
@@ -346,9 +356,14 @@ body.cubik-app #auth-panel.is-forgot {
   width: 100%;
   max-width: 100vw;
   min-height: 100dvh;
-  min-height: 100dvh;
+  min-height: -webkit-fill-available;
+  height: 100dvh;
+  height: -webkit-fill-available;
   padding-top: var(--app-safe-top);
+  padding-left: var(--app-safe-left);
+  padding-right: var(--app-safe-right);
   box-sizing: border-box;
+  overflow: hidden;
 }
 
 body.cubik-app:not(.app-authed) .app-chrome {
@@ -413,6 +428,7 @@ body.cubik-app.app-deep .app-top-back {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   overscroll-behavior-y: contain;
+  padding-bottom: 0.35rem;
 }
 
 .app-view {
@@ -591,12 +607,10 @@ body.cubik-app .app-account-penalties-slot #account-penalties-panel {
   border-top: 1px dashed var(--border);
 }
 
-/* Bottom nav */
+/* Bottom nav — flex (no fixed) para iPhone Safari / PWA */
 .app-bottom-nav {
-  position: fixed;
-  left: 0;
-  right: 0;
-  bottom: 0;
+  position: relative;
+  flex-shrink: 0;
   z-index: 120;
   display: flex;
   justify-content: space-around;
@@ -679,4 +693,34 @@ body.cubik-app.app-deep main .card {
   border-radius: var(--radius);
   padding: 1rem;
   box-shadow: var(--shadow);
+}
+
+/* iPhone pantallas bajas (SE, mini) — bienvenida y auth */
+@media (max-height: 740px) {
+  .app-gate-logo {
+    width: clamp(72px, 22vw, 96px);
+    height: clamp(72px, 22vw, 96px);
+  }
+
+  .app-gate-brand {
+    font-size: 1.35rem;
+  }
+
+  .app-gate-lead {
+    font-size: 0.82rem;
+    margin-top: 0.35rem;
+  }
+}
+
+/* iOS Safari: notch y barra inferior del sistema */
+@supports (-webkit-touch-callout: none) {
+  body.cubik-app.app-authed .app-chrome {
+    padding-bottom: var(--app-safe-bottom);
+  }
+
+  body.cubik-app #auth-panel,
+  body.cubik-app #change-password-panel {
+    min-height: 100dvh;
+    min-height: -webkit-fill-available;
+  }
 }

@@ -1,6 +1,6 @@
 {
-  "version": "0.0.88",
-  "git_sha": "858ab28",
-  "ui": "maps-picker-v1",
-  "note": "Sugerencias Maps visibles en Publicar carga (sin tapar con Ofertar ruta)"
+  "version": "0.0.89",
+  "git_sha": "pending",
+  "ui": "role-app-shell-v1",
+  "note": "Accesos por rol; super admin solo admin@cubik.cl"
 }

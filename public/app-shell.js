@@ -365,6 +365,19 @@ const AppShell = {
   },
 
   openAction(action) {
+    const user = typeof Auth !== 'undefined' ? Auth.user : null;
+    const roleKey =
+      user && typeof normalizeAppRole === 'function'
+        ? normalizeAppRole(user.role)
+        : user?.role;
+    const superAdmin =
+      user && typeof isCubikSuperAdmin === 'function' && isCubikSuperAdmin(user);
+    if (!superAdmin) {
+      if (roleKey === 'shipper' && action === 'carrier') return;
+      if (roleKey === 'carrier' && action === 'shipper') return;
+      if (roleKey === 'admin' && (action === 'shipper' || action === 'carrier')) return;
+    }
+
     const map = {
       shipper: { tab: 'shipper', title: 'Publicar carga' },
       carrier: { tab: 'carrier', title: 'Ofertar ruta' },
@@ -407,24 +420,19 @@ const AppShell = {
     if (!user) return;
     const greet = document.getElementById('app-home-greeting');
     const sub = document.getElementById('app-home-sub');
-    const role =
+    const roleKey =
+      typeof normalizeAppRole === 'function' ? normalizeAppRole(user.role) : user.role;
+    const roleText =
       typeof roleLabel === 'function' ? roleLabel(user.role) : user.role;
     if (greet) {
       greet.textContent = `Hola, ${user.full_name || user.name || user.email}`;
     }
     if (sub) {
-      sub.textContent = `${role}${user.company_name ? ` · ${user.company_name}` : ''}`;
+      sub.textContent = `${roleText}${user.company_name ? ` · ${user.company_name}` : ''}`;
     }
-    const quickShipper = document.getElementById('app-quick-shipper');
-    const quickCarrier = document.getElementById('app-quick-carrier');
+    if (typeof applyAppShellRole === 'function') applyAppShellRole(user);
     const quickBoard = document.getElementById('app-quick-board');
-    if (quickShipper) quickShipper.hidden = user.role === 'carrier';
-    if (quickCarrier) quickCarrier.hidden = user.role === 'shipper';
     if (quickBoard) quickBoard.hidden = false;
-    const optShipper = document.getElementById('app-opt-shipper');
-    const optCarrier = document.getElementById('app-opt-carrier');
-    if (optShipper) optShipper.hidden = user.role === 'carrier';
-    if (optCarrier) optCarrier.hidden = user.role === 'shipper';
     const activeSlot = document.getElementById('app-home-active-slot');
     if (activeSlot) {
       const banner = document.getElementById('active-trip-banner');
@@ -433,8 +441,13 @@ const AppShell = {
         activeSlot.appendChild(banner);
         banner.hidden = false;
       } else {
-        activeSlot.innerHTML =
-          '<p class="muted">Sin viaje activo. Usa Opciones para publicar o emparejar.</p>';
+        let hint = 'Sin viaje activo. Usa Opciones para emparejar.';
+        if (roleKey === 'shipper') {
+          hint = 'Sin viaje activo. Publica una carga o ve a Emparejar.';
+        } else if (roleKey === 'carrier') {
+          hint = 'Sin viaje activo. Oferta una ruta o ve a Emparejar.';
+        }
+        activeSlot.innerHTML = `<p class="muted">${hint}</p>`;
       }
     }
   },

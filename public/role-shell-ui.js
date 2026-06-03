@@ -37,19 +37,25 @@ const BOARD_COPY = {
 
 function applyRoleUi() {
   const user = typeof Auth !== 'undefined' ? Auth.user : null;
-  const role = user?.role || 'guest';
+  const role =
+    typeof normalizeAppRole === 'function' ? normalizeAppRole(user?.role) : user?.role || 'guest';
   const copy = BOARD_COPY[role] || BOARD_COPY.guest;
+
+  if (typeof applyAppShellRole === 'function') applyAppShellRole(user);
+
+  const superAdmin =
+    typeof isCubikSuperAdmin === 'function' ? isCubikSuperAdmin(user) : false;
 
   const tabShipper = document.getElementById('tab-shipper');
   const tabCarrier = document.getElementById('tab-carrier');
   const tabTrips = document.getElementById('tab-trips');
   const tabBoard = document.getElementById('tab-board');
   if (tabShipper) {
-    tabShipper.hidden = role === 'carrier';
+    tabShipper.hidden = role === 'carrier' || (role === 'admin' && !superAdmin);
     if (copy.tabShipper) tabShipper.textContent = copy.tabShipper;
   }
   if (tabCarrier) {
-    tabCarrier.hidden = role === 'shipper';
+    tabCarrier.hidden = role === 'shipper' || (role === 'admin' && !superAdmin);
     if (copy.tabCarrier) tabCarrier.textContent = copy.tabCarrier;
   }
   if (tabTrips) {
@@ -65,8 +71,8 @@ function applyRoleUi() {
 
   const panelShipper = document.getElementById('panel-shipper');
   const panelCarrier = document.getElementById('panel-carrier');
-  if (panelShipper) panelShipper.hidden = role === 'carrier';
-  if (panelCarrier) panelCarrier.hidden = role === 'shipper';
+  if (panelShipper) panelShipper.hidden = role === 'carrier' || (role === 'admin' && !superAdmin);
+  if (panelCarrier) panelCarrier.hidden = role === 'shipper' || (role === 'admin' && !superAdmin);
 
   prefillOrgFields(role, user);
   if (typeof updateMatchPriceStep === 'function') updateMatchPriceStep();

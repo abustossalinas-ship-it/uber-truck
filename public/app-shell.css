@@ -463,6 +463,24 @@ body.cubik-app.app-main-visible .app-scroll > .app-view.app-view-pass-through {
   color: var(--text-muted);
 }
 
+/* Accesos según rol (app móvil). Super admin: admin@cubik.cl (data-app-super-admin). */
+body.cubik-app[data-app-role='shipper']:not([data-app-super-admin]) #app-quick-carrier,
+body.cubik-app[data-app-role='shipper']:not([data-app-super-admin]) #app-opt-carrier {
+  display: none !important;
+}
+
+body.cubik-app[data-app-role='carrier']:not([data-app-super-admin]) #app-quick-shipper,
+body.cubik-app[data-app-role='carrier']:not([data-app-super-admin]) #app-opt-shipper {
+  display: none !important;
+}
+
+body.cubik-app[data-app-role='admin']:not([data-app-super-admin]) #app-quick-shipper,
+body.cubik-app[data-app-role='admin']:not([data-app-super-admin]) #app-quick-carrier,
+body.cubik-app[data-app-role='admin']:not([data-app-super-admin]) #app-opt-shipper,
+body.cubik-app[data-app-role='admin']:not([data-app-super-admin]) #app-opt-carrier {
+  display: none !important;
+}
+
 .app-quick-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

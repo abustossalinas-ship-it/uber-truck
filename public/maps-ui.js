@@ -602,24 +602,30 @@ async function bindCubicacionPresets() {
     if (!j.ok) return;
     MapsUI.densityMap = Object.fromEntries((j.density_options || []).map((d) => [d.id, d]));
 
+    if (typeof LoadCapacityUI !== 'undefined') LoadCapacityUI.setPresets(j.load || []);
+
     const loadSel = document.getElementById('load-cubicacion-preset');
     if (loadSel) {
       loadSel.innerHTML =
         '<option value="">Elegir cubicación…</option>' +
         j.load.map((p) => `<option value="${p.id}">${p.label}</option>`).join('');
       loadSel.addEventListener('change', () => {
+        if (loadSel.dataset.presetSync === '1') return;
         const p = j.load.find((x) => x.id === loadSel.value);
         if (!p || p.id === 'custom') return;
         const form = document.getElementById('form-load');
-        if (p.volume_m3 != null) form.volume_m3.value = p.volume_m3;
+        if (!form) return;
         if (p.pallets != null) form.pallets.value = p.pallets;
+        if (p.volume_m3 != null) {
+          form.volume_m3.value = p.volume_m3;
+        } else if (p.pallets != null && typeof LoadCapacityUI !== 'undefined') {
+          form.volume_m3.value = LoadCapacityUI.volumeFromPallets(p.pallets);
+        }
         const w = form.querySelector('[name="weight_kg"]');
         if (w) {
           w.dataset.userEdited = '';
           if (p.weight_kg != null) w.value = p.weight_kg;
         }
-        form.querySelector('[name="volume_m3"]') && (form.querySelector('[name="volume_m3"]').dataset.userEdited = '');
-        form.querySelector('[name="pallets"]') && (form.querySelector('[name="pallets"]').dataset.userEdited = '');
         form.querySelector('[name="truck_type_preference"]') &&
           (form.querySelector('[name="truck_type_preference"]').dataset.userEdited = '');
         form._recalcWeight?.();

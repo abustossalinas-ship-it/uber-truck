@@ -2,6 +2,50 @@
 
 const LoadCapacityUI = {
   STANDARD_PALLET_M3: 1.2,
+  CUSTOM_PRESET_ID: 'custom',
+  presets: [],
+
+  setPresets(list) {
+    this.presets = Array.isArray(list) ? list : [];
+  },
+
+  volumeFromPallets(p) {
+    return Math.round(Number(p) * this.STANDARD_PALLET_M3 * 10) / 10;
+  },
+
+  palletsFromVolume(v) {
+    return Math.max(1, Math.ceil(Number(v) / this.STANDARD_PALLET_M3));
+  },
+
+  matchesPreset(preset, pallets, volume) {
+    if (!preset || preset.id === this.CUSTOM_PRESET_ID) return false;
+    const p = Number(preset.pallets);
+    const v = Number(preset.volume_m3);
+    if (!Number.isFinite(p) || Math.abs(pallets - p) > 0.001) return false;
+    const syncedVol = this.volumeFromPallets(p);
+    if (Math.abs(volume - v) <= 0.05) return true;
+    return Math.abs(volume - syncedVol) <= 0.05;
+  },
+
+  syncPresetFromFields(form) {
+    const sel = document.getElementById('load-cubicacion-preset');
+    if (!sel || sel.dataset.presetSync === '1') return;
+    const pallets = Number(form.querySelector('[name="pallets"]')?.value) || 0;
+    const volume = Number(form.querySelector('[name="volume_m3"]')?.value) || 0;
+    if (pallets <= 0 && volume <= 0) return;
+
+    let matchId = this.CUSTOM_PRESET_ID;
+    for (const p of this.presets) {
+      if (this.matchesPreset(p, pallets, volume)) {
+        matchId = p.id;
+        break;
+      }
+    }
+    if (sel.value === matchId) return;
+    sel.dataset.presetSync = '1';
+    sel.value = matchId;
+    delete sel.dataset.presetSync;
+  },
 
   TRUCK_TYPES: [
     { id: 'truck_34', label: 'Camión 3/4 (2 ejes)', europallet_max: 8, american_max: 6, weight_kg_max: 3500 },
@@ -90,19 +134,19 @@ const LoadCapacityUI = {
   syncVolumeFromPallets(form) {
     const pallets = form.querySelector('[name="pallets"]');
     const volume = form.querySelector('[name="volume_m3"]');
-    if (!pallets || !volume || volume.dataset.userEdited === '1') return;
+    if (!pallets || !volume) return;
     const p = Number(pallets.value) || 0;
     if (p <= 0) return;
-    volume.value = Math.round(p * this.STANDARD_PALLET_M3 * 10) / 10;
+    volume.value = this.volumeFromPallets(p);
   },
 
   syncPalletsFromVolume(form) {
     const pallets = form.querySelector('[name="pallets"]');
     const volume = form.querySelector('[name="volume_m3"]');
-    if (!pallets || !volume || pallets.dataset.userEdited === '1') return;
+    if (!pallets || !volume) return;
     const v = Number(volume.value) || 0;
     if (v <= 0) return;
-    pallets.value = Math.max(1, Math.ceil(v / this.STANDARD_PALLET_M3));
+    pallets.value = this.palletsFromVolume(v);
   },
 
   recalc(form) {
@@ -303,13 +347,13 @@ const LoadCapacityUI = {
     const truckSel = form.querySelector('[name="truck_type_preference"]');
 
     pallets?.addEventListener('input', () => {
-      pallets.dataset.userEdited = '1';
       this.syncVolumeFromPallets(form);
+      this.syncPresetFromFields(form);
       this.recalc(form);
     });
     volume?.addEventListener('input', () => {
-      volume.dataset.userEdited = '1';
       this.syncPalletsFromVolume(form);
+      this.syncPresetFromFields(form);
       this.recalc(form);
     });
     truckSel?.addEventListener('change', () => {

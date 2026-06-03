@@ -1,6 +1,7 @@
 const Penalties = {
   summary: null,
   paymentConfig: null,
+  chileBanks: null,
 
   headers() {
     return typeof apiHeaders === 'function' ? apiHeaders() : { 'Content-Type': 'application/json' };
@@ -578,15 +579,93 @@ const Penalties = {
     el.innerHTML = html;
   },
 
+  async loadChileBanks() {
+    if (this.chileBanks?.length) return this.chileBanks;
+    try {
+      const res = await fetch('/api/account/chile-banks');
+      const json = await res.json();
+      if (json.ok && Array.isArray(json.data)) {
+        this.chileBanks = json.data;
+        return this.chileBanks;
+      }
+    } catch (_) {}
+    this.chileBanks = [
+      'BancoEstado',
+      'Banco de Chile',
+      'Banco Santander-Chile',
+      'Banco de Crédito e Inversiones (BCI)',
+      'Scotiabank Chile',
+      'Itaú Chile',
+      'Banco Security',
+      'Banco Falabella',
+      'Banco Ripley',
+      'Banco Consorcio',
+      'Banco BICE',
+      'Banco Internacional',
+      'HSBC Bank (Chile)',
+      'Banco do Brasil (Chile)',
+      'Coopeuch',
+      'Mercado Pago',
+      'Tenpo',
+      'Mach',
+      'Prepago Los Héroes',
+    ];
+    return this.chileBanks;
+  },
+
+  populateBankSelect(savedName) {
+    const sel = document.getElementById('bank-name');
+    if (!sel) return;
+    const banks = this.chileBanks || [];
+    sel.innerHTML =
+      '<option value="">Elige banco…</option>' +
+      banks.map((b) => `<option value="${b.replace(/"/g, '&quot;')}">${b}</option>`).join('');
+    if (savedName) {
+      const hit = banks.find((b) => b.toLowerCase() === String(savedName).trim().toLowerCase());
+      if (hit) sel.value = hit;
+      else {
+        const opt = document.createElement('option');
+        opt.value = savedName;
+        opt.textContent = `${savedName} (registrado)`;
+        sel.appendChild(opt);
+        sel.value = savedName;
+      }
+    }
+  },
+
+  validateRutField(inputId, errorId) {
+    const input = document.getElementById(inputId);
+    const errEl = document.getElementById(errorId);
+    if (!input || typeof RutChileUI === 'undefined') {
+      return { ok: true, rut: input?.value?.trim() };
+    }
+    const v = RutChileUI.validate(input.value);
+    if (!v.ok) {
+      if (errEl) {
+        errEl.textContent = v.error;
+        errEl.hidden = false;
+      }
+      input.focus();
+      return v;
+    }
+    input.value = v.display;
+    if (errEl) errEl.hidden = true;
+    return v;
+  },
+
   openBankModal() {
     const modal = document.getElementById('bank-modal');
     if (!modal) return;
     const f = this.summary?.bank_account?.fields || {};
-    $('bank-holder-name').value = f.bank_holder_name || '';
-    $('bank-rut').value = f.bank_rut || '';
-    $('bank-name').value = f.bank_name || '';
-    $('bank-account-type').value = f.bank_account_type || 'corriente';
-    $('bank-account-number').value = f.bank_account_number || '';
+    this.loadChileBanks().then(() => {
+      this.populateBankSelect(f.bank_name || '');
+      $('bank-holder-name').value = f.bank_holder_name || '';
+      $('bank-rut').value = f.bank_rut || '';
+      $('bank-account-type').value = f.bank_account_type || 'corriente';
+      $('bank-account-number').value = f.bank_account_number || '';
+      const rutErr = document.getElementById('bank-rut-error');
+      if (rutErr) rutErr.hidden = true;
+    });
     modal.hidden = false;
     modal.setAttribute('aria-hidden', 'false');
   },
@@ -678,10 +757,12 @@ const Penalties = {
   async submitCard(e) {
     e.preventDefault();
     const errEl = document.getElementById('card-enroll-error');
+    const rutCheck = this.validateRutField('card-holder-rut', 'card-holder-rut-error');
+    if (!rutCheck.ok) return;
     const config = await this.fetchPaymentConfig();
     const body = {
       holder_name: $('card-holder-name').value,
-      holder_rut: $('card-holder-rut').value,
+      holder_rut: rutCheck.rut,
       card_number: $('card-number').value,
       exp_month: $('card-exp-month').value,
       exp_year: $('card-exp-year').value,
@@ -744,12 +825,20 @@ const Penalties = {
 
   async submitBank(e) {
     e.preventDefault();
+    const rutCheck = this.validateRutField('bank-rut', 'bank-rut-error');
+    if (!rutCheck.ok) return;
+    const bankSel = $('bank-name');
+    if (!bankSel?.value) {
+      alert('Elige un banco de la lista.');
+      bankSel?.focus();
+      return;
+    }
     const body = {
-      bank_holder_name: $('bank-holder-name').value,
-      bank_rut: $('bank-rut').value,
-      bank_name: $('bank-name').value,
+      bank_holder_name: $('bank-holder-name').value.trim(),
+      bank_rut: rutCheck.rut,
+      bank_name: bankSel.value,
       bank_account_type: $('bank-account-type').value,
-      bank_account_number: $('bank-account-number').value,
+      bank_account_number: $('bank-account-number').value.trim(),
     };
     const res = await fetch('/api/account/bank', {
       method: 'PATCH',
@@ -849,6 +938,9 @@ function $(id) {
   return document.getElementById(id);
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+  Penalties.loadChileBanks().then(() => Penalties.populateBankSelect());
+});
 document.getElementById('form-bank')?.addEventListener('submit', (e) => Penalties.submitBank(e));
 document.getElementById('form-card')?.addEventListener('submit', (e) => Penalties.submitCard(e));
 document.querySelectorAll('[data-close-bank]').forEach((el) => {

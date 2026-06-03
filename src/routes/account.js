@@ -9,6 +9,7 @@ const { getOperatingStatus } = require('../lib/penalty-gate');
 const { bankEnforced, fetchPaymentSetup } = require('../lib/bank-gate');
 const { paymentConfig } = require('../lib/payment-config');
 const { validateRut } = require('../lib/rut-chile');
+const { isValidChileBank, normalizeBankName } = require('../lib/chile-banks');
 const {
   listPaymentMethods,
   enrollPaymentMethod,
@@ -27,6 +28,11 @@ const router = express.Router();
 
 router.get('/payment-config', async (_req, res) => {
   res.json({ ok: true, ...paymentConfig() });
+});
+
+router.get('/chile-banks', (_req, res) => {
+  const { CHILE_BANKS } = require('../lib/chile-banks');
+  res.json({ ok: true, data: CHILE_BANKS });
 });
 
 router.get('/summary', authMiddleware, async (req, res) => {
@@ -111,6 +117,9 @@ router.patch('/bank', authMiddleware, async (req, res) => {
       error: 'Completa titular, RUT, banco, tipo y número de cuenta',
     });
   }
+  if (!isValidChileBank(bankName)) {
+    return res.status(400).json({ ok: false, error: 'Elige un banco de la lista' });
+  }
   const rutCheck = validateRut(rut);
   if (!rutCheck.ok) {
     return res.status(400).json({ ok: false, error: rutCheck.error });
@@ -122,7 +131,7 @@ router.patch('/bank', authMiddleware, async (req, res) => {
       .update({
         bank_holder_name: holder,
         bank_rut: rutCheck.rut,
-        bank_name: bankName,
+        bank_name: normalizeBankName(bankName),
         bank_account_type: accountType,
         bank_account_number: accountNumber,
         bank_registered_at: new Date().toISOString(),

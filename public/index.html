@@ -852,9 +852,12 @@
         <label>Titular</label>
         <input id="bank-holder-name" required />
         <label>RUT titular</label>
-        <input id="bank-rut" required placeholder="12.345.678-9" />
+        <input id="bank-rut" required placeholder="12.345.678-9" autocomplete="off" />
+        <p id="bank-rut-error" class="field-error auth-error" role="alert" hidden></p>
         <label>Banco</label>
-        <input id="bank-name" required placeholder="Ej. BancoEstado" />
+        <select id="bank-name" required>
+          <option value="">Elige banco…</option>
+        </select>
         <label>Tipo de cuenta</label>
         <select id="bank-account-type">
           <option value="corriente">Cuenta corriente</option>
@@ -881,6 +884,7 @@
         <input id="card-holder-name" required autocomplete="cc-name" />
         <label>RUT titular</label>
         <input id="card-holder-rut" required placeholder="12.345.678-9" autocomplete="off" />
+        <p id="card-holder-rut-error" class="field-error auth-error" role="alert" hidden></p>
         <label>Número de tarjeta</label>
         <input id="card-number" required inputmode="numeric" autocomplete="cc-number" maxlength="19" placeholder="4539 1488 0343 6467" />
         <div class="card-exp-row">
@@ -1042,17 +1046,18 @@
   <script src="/realtime-ui.js?v=0.0.34" defer></script>
   <script src="/invite-ui.js?v=0.0.20" defer></script>
   <script src="/role-shell-ui.js?v=0.0.89" defer></script>
-  <script src="/maps-ui.js?v=0.0.92" defer></script>
+  <script src="/maps-ui.js?v=0.0.93" defer></script>
   <script src="/load-budget-ui.js?v=0.0.43" defer></script>
   <script src="/trip-schedule-ui.js?v=0.0.86" defer></script>
   <script src="/load-timing-ui.js?v=0.0.92" defer></script>
-  <script src="/load-capacity-ui.js?v=0.0.90" defer></script>
+  <script src="/load-capacity-ui.js?v=0.0.93" defer></script>
   <script src="/legal-terms-ui.js?v=0.0.86" defer></script>
   <script src="/load-form-validation.js?v=0.0.86" defer></script>
   <script src="/proposal-compare-ui.js?v=0.0.47" defer></script>
   <script src="/auth-ui.js?v=0.0.76" defer></script>
   <script src="/tracking-ui.js?v=0.0.51" defer></script>
-  <script src="/penalties-ui.js?v=0.0.57" defer></script>
+  <script src="/rut-chile-ui.js?v=0.0.93" defer></script>
+  <script src="/penalties-ui.js?v=0.0.93" defer></script>
   <script src="/support-ui.js?v=0.0.56" defer></script>
   <script src="/comms-ui.js?v=0.0.52" defer></script>
   <script src="/rating-tags.js?v=0.0.31" defer></script>

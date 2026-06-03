@@ -1,7 +1,7 @@
 'use strict';
 
 const supabase = require('../services/supabase');
-const { validateRut } = require('./rut-chile');
+const { validateRut } = require('../lib/rut-chile');
 const {
   luhnCheck,
   detectBrand,
@@ -10,7 +10,7 @@ const {
   validateExpiry,
   validateCvv,
   digitsOnly,
-} = require('./card-validation');
+} = require('../lib/card-validation');
 
 const SANDBOX_MICROCHARGE_CLP = Number(process.env.PAYMENT_MICROCHARGE_CLP) || 990;
 

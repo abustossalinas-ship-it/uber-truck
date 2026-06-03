@@ -86,11 +86,26 @@ const MapsUI = {
     if (!anyOpen) document.body.classList.remove('maps-picker-open');
   },
 
+  resetFormScroll(form) {
+    const main =
+      document.querySelector('body.cubik-app.app-main-visible main') ||
+      document.querySelector('main');
+    if (main) {
+      main.scrollLeft = 0;
+      if (typeof main.scrollTo === 'function') main.scrollTo({ left: 0 });
+    }
+    document.documentElement.scrollLeft = 0;
+    document.body.scrollLeft = 0;
+  },
+
   bindForm(form) {
     form.querySelectorAll('[data-address]').forEach((wrap) => this.bindAddressField(form, wrap));
     form.addEventListener('maps:place-selected', () => {
       this.updateDistance(form);
       this.updateFormGate(form);
+      this.resetFormScroll(form);
+      document.body.classList.remove('keyboard-open', 'maps-picker-open');
+      this.closeAllSuggestions();
     });
     this.updateFormGate(form);
     this.bindWeightEstimate(form);
@@ -214,17 +229,15 @@ const MapsUI = {
     const vv = window.visualViewport;
     const pad = 12;
     const vw = vv?.width ?? window.innerWidth;
-    const vLeft = vv?.offsetLeft ?? 0;
-    const vTop = vv?.offsetTop ?? 0;
     const rect = input.getBoundingClientRect();
-    const left = Math.max(pad, rect.left + vLeft);
+    const left = Math.max(pad, rect.left);
     const maxW = vw - left - pad;
     const width = Math.max(160, Math.min(rect.width, maxW));
     const spaceBelow = (vv?.height ?? window.innerHeight) - rect.bottom;
     const maxH = Math.min(260, Math.max(120, spaceBelow - 12));
-    let top = rect.bottom + vTop + 4;
+    let top = rect.bottom + 4;
     if (spaceBelow < 140 && rect.top > 180) {
-      top = Math.max(vTop + pad, rect.top + vTop - Math.min(220, maxH) - 4);
+      top = Math.max(pad, rect.top - Math.min(220, maxH) - 4);
     }
     list.style.position = 'fixed';
     list.style.left = `${Math.round(left)}px`;

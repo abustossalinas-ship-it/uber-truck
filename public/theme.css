@@ -705,6 +705,15 @@ button[type="submit"]:disabled {
   font-size: 0.85rem;
   margin-bottom: 0.75rem;
   border-left: 3px solid var(--brand-blue);
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.distance-box-line {
+  display: block;
+  line-height: 1.4;
+  margin: 0.15rem 0;
 }
 
 .suggestions-box {

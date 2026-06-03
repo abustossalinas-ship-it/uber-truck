@@ -67,6 +67,9 @@ body.cubik-app.app-authed.app-main-visible main {
   top: calc(var(--app-safe-top) + var(--app-top-h));
   left: 0;
   right: 0;
+  width: 100%;
+  max-width: 100vw;
+  box-sizing: border-box;
   bottom: calc(var(--app-nav-h) + var(--app-safe-bottom));
   overflow-x: hidden;
   overflow-y: auto;
@@ -777,12 +780,12 @@ body.keyboard-open main {
     scroll-margin-bottom: min(42vh, 280px);
   }
 
-  /* Ocultar comuna/ciudad/región hasta elegir dirección (se muestra resumen) */
-  .address-geo-fields:not(.address-geo-ready) {
+  /* Mismo flujo que Ofertar ruta: resumen corto + campos readonly compactos */
+  .form-route-maps .address-geo-fields:not(.address-geo-ready) {
     display: none;
   }
 
-  .address-geo-summary {
+  .form-route-maps .address-geo-summary {
     margin: 0 0 0.65rem;
     padding: 0.5rem 0.65rem;
     background: var(--surface-cool);
@@ -790,6 +793,29 @@ body.keyboard-open main {
     font-size: 0.82rem;
     line-height: 1.35;
     word-break: break-word;
+    max-width: 100%;
+  }
+
+  body.cubik-app.app-authed.app-main-visible #panel-shipper > .card {
+    display: none;
+  }
+
+  body.cubik-app.app-authed.app-main-visible main form.form-route-maps,
+  body.cubik-app.app-authed.app-main-visible main #panel-shipper form#form-load {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+  }
+
+  .form-route-maps .grid.grid-2 {
+    grid-template-columns: 1fr;
+    gap: 0.65rem;
+  }
+
+  .form-route-maps fieldset,
+  .form-route-maps .maps-gated-section {
+    min-width: 0;
+    max-width: 100%;
   }
 
   .address-wrap.address-suggestions-open .address-suggestions:not(.address-suggestions-portal) {
@@ -813,8 +839,7 @@ body.keyboard-open main {
     padding-bottom: 1.25rem;
   }
 
-  body.cubik-app.app-authed.app-main-visible main .grid,
-  body.cubik-app.app-authed.app-main-visible main form {
+  body.cubik-app.app-authed.app-main-visible main form.form-route-maps {
     max-width: 100%;
     min-width: 0;
     overflow-x: hidden;

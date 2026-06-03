@@ -15,7 +15,7 @@
   <link rel="preconnect" href="https://uber-truck-production.up.railway.app" crossorigin />
   <link rel="dns-prefetch" href="https://uber-truck-production.up.railway.app" />
   <link rel="stylesheet" href="/theme.css?v=0.0.87" />
-  <link rel="stylesheet" href="/app-shell.css?v=0.0.89" />
+  <link rel="stylesheet" href="/app-shell.css?v=0.0.92" />
   <script src="/brand-config.js?v=0.0.76" defer></script>
   <script src="/api-base.js?v=0.0.83" defer></script>
 </head>
@@ -329,16 +329,14 @@
 
   <main>
     <section id="panel-shipper" class="panel active">
-      <div class="grid">
-        <form id="form-load" data-maps-form>
+        <form id="form-load" data-maps-form class="form-route-maps">
           <h2>Publicar necesidad de carga</h2>
           <p class="maps-banner muted" hidden>
             Maps no configurado: agrega <code>GOOGLE_MAPS_API_KEY</code> en <code>.env</code> y reinicia el servidor.
           </p>
-          <h3 class="form-section">Origen</h3>
-          <section class="address-route-block" data-address-block="origin">
+          <h3 class="form-section">Ruta — origen</h3>
           <div class="address-wrap" data-address="origin">
-            <label>Buscar dirección (Google Maps)</label>
+            <label>Buscar dirección origen</label>
             <input class="address-search" type="text" placeholder="Ej. Av. Bernardo O'Higgins, Santiago" autocomplete="off" inputmode="search" enterkeyhint="search" />
             <ul class="address-suggestions" hidden></ul>
           </div>
@@ -362,10 +360,8 @@
               <input class="maps-geo-readonly" name="origin_region" value="RM" maxlength="10" required title="Ej. RM, V, VIII" />
             </div>
           </div>
-          </section>
 
-          <h3 class="form-section">Destino</h3>
-          <section class="address-route-block" data-address-block="destination">
+          <h3 class="form-section">Ruta — destino</h3>
           <div class="address-wrap" data-address="destination">
             <label>Buscar dirección destino</label>
             <input class="address-search" type="text" placeholder="Ej. Puerto San Antonio" autocomplete="off" inputmode="search" enterkeyhint="search" />
@@ -391,7 +387,6 @@
               <input class="maps-geo-readonly" name="destination_region" value="V" maxlength="10" required />
             </div>
           </div>
-          </section>
 
           <p class="maps-gate-hint muted" hidden>
             Primero elige <strong>origen</strong> y <strong>destino</strong> desde la lista de Google Maps (dirección concreta: bodega, calle o puerto — no solo el nombre de la ciudad). Luego podrás completar empresa, cubicación y publicar.
@@ -584,7 +579,6 @@
             Con Maps se autocompletan comuna y región; la distancia en ruta ayuda a cotizar el flete incidental.
           </p>
         </div>
-      </div>
     </section>
 
     <section id="panel-carrier" class="panel">
@@ -608,7 +602,7 @@
         <button type="button" class="tab tab-sm tab-outline" id="btn-save-carrier-truck">Guardar camión</button>
         <p id="carrier-truck-save-status" class="muted" hidden></p>
       </section>
-      <form id="form-offer" data-maps-form>
+      <form id="form-offer" data-maps-form class="form-route-maps">
         <h2>Publicar capacidad disponible (backhaul)</h2>
         <p class="muted" style="margin-top:-0.5rem;margin-bottom:1rem">
           Paso previo al emparejamiento: sin oferta publicada, el tablero no puede crear un match.
@@ -1048,10 +1042,10 @@
   <script src="/realtime-ui.js?v=0.0.34" defer></script>
   <script src="/invite-ui.js?v=0.0.20" defer></script>
   <script src="/role-shell-ui.js?v=0.0.89" defer></script>
-  <script src="/maps-ui.js?v=0.0.91" defer></script>
+  <script src="/maps-ui.js?v=0.0.92" defer></script>
   <script src="/load-budget-ui.js?v=0.0.43" defer></script>
   <script src="/trip-schedule-ui.js?v=0.0.86" defer></script>
-  <script src="/load-timing-ui.js?v=0.0.86" defer></script>
+  <script src="/load-timing-ui.js?v=0.0.92" defer></script>
   <script src="/load-capacity-ui.js?v=0.0.90" defer></script>
   <script src="/legal-terms-ui.js?v=0.0.86" defer></script>
   <script src="/load-form-validation.js?v=0.0.86" defer></script>

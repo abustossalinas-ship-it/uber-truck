@@ -379,6 +379,9 @@ const AppShell = {
       return;
     }
     this.deep = cfg.tab;
+    if (typeof MapsUI !== 'undefined' && MapsUI.closeAllSuggestions) {
+      MapsUI.closeAllSuggestions();
+    }
     document.body.classList.add('app-deep', 'app-main-visible');
     if (typeof showTab === 'function') showTab(cfg.tab);
     const titleEl = document.getElementById('app-top-title');

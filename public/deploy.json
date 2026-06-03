@@ -1,6 +1,6 @@
 {
-  "version": "0.0.86",
-  "git_sha": "7328719",
-  "ui": "match-cancel-v2",
-  "note": "iPhone direcciones + validación form + chat presets"
+  "version": "0.0.88",
+  "git_sha": "pending",
+  "ui": "maps-picker-v1",
+  "note": "Sugerencias Maps visibles en Publicar carga (sin tapar con Ofertar ruta)"
 }

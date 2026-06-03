@@ -14,8 +14,8 @@
   <link rel="apple-touch-icon" href="/brand/logo.png" />
   <link rel="preconnect" href="https://uber-truck-production.up.railway.app" crossorigin />
   <link rel="dns-prefetch" href="https://uber-truck-production.up.railway.app" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.76" />
-  <link rel="stylesheet" href="/app-shell.css?v=0.0.86" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.87" />
+  <link rel="stylesheet" href="/app-shell.css?v=0.0.88" />
   <script src="/brand-config.js?v=0.0.76" defer></script>
   <script src="/api-base.js?v=0.0.83" defer></script>
 </head>
@@ -618,7 +618,8 @@
         <input type="hidden" name="origin_address" />
         <input type="hidden" name="origin_lat" />
         <input type="hidden" name="origin_lng" />
-        <div class="grid grid-2">
+        <input type="hidden" name="origin_place_types" />
+        <div class="grid grid-2 address-geo-fields" data-address-geo="origin">
           <div>
             <label>Comuna origen</label>
             <input class="maps-geo-readonly" name="origin_commune" />
@@ -636,14 +637,15 @@
         <h3 class="form-section">Ruta planificada — destino</h3>
         <div class="address-wrap" data-address="destination">
           <label>Buscar dirección destino</label>
-          <input class="address-search" type="text" placeholder="Hacia dónde vas" autocomplete="off" />
+          <input class="address-search" type="text" placeholder="Hacia dónde vas" autocomplete="off" inputmode="search" enterkeyhint="search" />
           <ul class="address-suggestions" hidden></ul>
         </div>
         <input type="hidden" name="destination_place_id" />
         <input type="hidden" name="destination_address" />
         <input type="hidden" name="destination_lat" />
         <input type="hidden" name="destination_lng" />
-        <div class="grid grid-2">
+        <input type="hidden" name="destination_place_types" />
+        <div class="grid grid-2 address-geo-fields" data-address-geo="destination">
           <div>
             <label>Comuna destino</label>
             <input class="maps-geo-readonly" name="destination_commune" />
@@ -1012,7 +1014,7 @@
     </div>
   </div>
 
-  <script src="/app-shell.js?v=0.0.86" defer></script>
+  <script src="/app-shell.js?v=0.0.88" defer></script>
   <script src="/pwa-ui.js?v=0.0.64" defer></script>
   <script src="/kyc-ui.js?v=0.0.33" defer></script>
   <script src="/admin-ui.js?v=0.0.59" defer></script>
@@ -1020,7 +1022,7 @@
   <script src="/invite-ui.js?v=0.0.20" defer></script>
   <script src="/roles-ui.js?v=0.0.19" defer></script>
   <script src="/role-shell-ui.js?v=0.0.27" defer></script>
-  <script src="/maps-ui.js?v=0.0.86" defer></script>
+  <script src="/maps-ui.js?v=0.0.88" defer></script>
   <script src="/load-budget-ui.js?v=0.0.43" defer></script>
   <script src="/trip-schedule-ui.js?v=0.0.86" defer></script>
   <script src="/load-timing-ui.js?v=0.0.86" defer></script>

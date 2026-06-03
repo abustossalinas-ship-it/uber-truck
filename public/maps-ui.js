@@ -53,6 +53,37 @@ const MapsUI = {
       el.hidden = this.configured;
     });
     document.querySelectorAll('form[data-maps-form]').forEach((form) => this.bindForm(form));
+    this.bindGlobalPickerDismiss();
+  },
+
+  bindGlobalPickerDismiss() {
+    if (this._globalDismissBound) return;
+    this._globalDismissBound = true;
+    document.addEventListener('click', (e) => {
+      if (e.target.closest('.address-suggestions') || e.target.closest('.address-wrap')) return;
+      this.closeAllSuggestions();
+    });
+  },
+
+  /** Cierra listas de ambos formularios (evita que Ofertar ruta tape Publicar carga). */
+  closeAllSuggestions(exceptWrap = null) {
+    let anyOpen = false;
+    document.querySelectorAll('form[data-maps-form]').forEach((form) => {
+      form.querySelectorAll('[data-address]').forEach((wrap) => {
+        if (exceptWrap && wrap === exceptWrap) return;
+        const list = wrap.querySelector('.address-suggestions');
+        if (!list) return;
+        wrap.classList.remove('address-suggestions-open');
+        list.hidden = true;
+        list.innerHTML = '';
+        this.unportalSuggestions(list, wrap);
+        this.setAddressStatus(wrap, '', false);
+      });
+    });
+    document.querySelectorAll('.address-suggestions-portal').forEach((list) => {
+      if (!list.hidden) anyOpen = true;
+    });
+    if (!anyOpen) document.body.classList.remove('maps-picker-open');
   },
 
   bindForm(form) {
@@ -142,6 +173,59 @@ const MapsUI = {
     }
   },
 
+  fetchApi(path, options) {
+    if (typeof apiFetch === 'function') return apiFetch(path, options);
+    return fetch(path, options);
+  },
+
+  ensureAddressStatus(wrap) {
+    let el = wrap.querySelector('.address-search-status');
+    if (!el) {
+      el = document.createElement('p');
+      el.className = 'address-search-status muted';
+      el.setAttribute('aria-live', 'polite');
+      wrap.querySelector('.address-search')?.insertAdjacentElement('afterend', el);
+    }
+    return el;
+  },
+
+  setAddressStatus(wrap, message, visible = true) {
+    const el = this.ensureAddressStatus(wrap);
+    if (!message || !visible) {
+      el.hidden = true;
+      el.textContent = '';
+      return;
+    }
+    el.hidden = false;
+    el.textContent = message;
+  },
+
+  isCubikApp() {
+    return document.body.classList.contains('cubik-app');
+  },
+
+  portalSuggestions(list, wrap) {
+    if (!this.isCubikApp()) return;
+    if (list.parentElement !== document.body) {
+      document.body.appendChild(list);
+    }
+    list.classList.add('address-suggestions-portal');
+    list.dataset.portalRole = wrap.dataset.address || '';
+    list.dataset.portalForm = wrap.closest('form')?.id || '';
+    document.body.classList.add('maps-picker-open');
+  },
+
+  unportalSuggestions(list, wrap) {
+    list.classList.remove('address-suggestions-portal');
+    delete list.dataset.portalRole;
+    if (wrap && list.parentElement === document.body) {
+      wrap.appendChild(list);
+    }
+    if (!document.querySelector('.address-suggestions-portal:not([hidden])')) {
+      document.body.classList.remove('maps-picker-open');
+    }
+  },
+
   scrollAddressIntoView(input) {
     if (!input) return;
     const scrollMain = () => {
@@ -192,71 +276,18 @@ const MapsUI = {
       wrap.classList.remove('address-suggestions-open');
       list.hidden = true;
       list.innerHTML = '';
+      this.unportalSuggestions(list, wrap);
+      this.setAddressStatus(wrap, '', false);
     };
 
-    input.addEventListener('focus', () => {
-      document.body.classList.add('keyboard-open');
-      this.scrollAddressIntoView(input);
-    });
-    input.addEventListener('blur', () => {
-      window.setTimeout(() => {
-        const active = document.activeElement;
-        if (!active?.closest('.address-wrap') && !active?.closest('.address-suggestions')) {
-          document.body.classList.remove('keyboard-open');
-          hide();
-        }
-      }, 150);
-    });
-
-    input.addEventListener('input', () => {
-      clearTimeout(this._debounce);
-      if (input.dataset.mapsValidated === '1') {
-        input.dataset.mapsValidated = '';
-        input.dataset.mapsLocked = '';
-        this.clearRole(form, role);
-        const dk = form.querySelector('[name="distance_km"]');
-        const dm = form.querySelector('[name="distance_duration_min"]');
-        if (dk) dk.value = '';
-        if (dm) dm.value = '';
-        this.updateFormGate(form);
-      }
-      const q = input.value.trim();
-      if (q.length < 3) {
-        hide();
-        return;
-      }
-      this._debounce = setTimeout(async () => {
-        try {
-          const r = await fetch(`/api/maps/autocomplete?input=${encodeURIComponent(q)}`);
-          const j = await r.json();
-          if (!j.ok || !j.data?.length) {
-            hide();
-            return;
-          }
-          wrap.classList.add('address-suggestions-open');
-          list.hidden = false;
-          list.innerHTML = j.data
-            .map(
-              (p) =>
-                `<li><button type="button" data-place-id="${p.place_id}">${p.description}</button></li>`
-            )
-            .join('');
-          this.scrollAddressIntoView(input);
-        } catch {
-          hide();
-        }
-      }, 280);
-    });
-
-    list.addEventListener('click', async (e) => {
-      const btn = e.target.closest('[data-place-id]');
+    const pickPlace = async (btn) => {
       if (!btn) return;
       hide();
       input.value = btn.textContent;
       input.dataset.mapsValidated = '1';
       input.dataset.mapsLocked = '1';
       try {
-        const r = await fetch(`/api/maps/place/${btn.dataset.placeId}`);
+        const r = await this.fetchApi(`/api/maps/place/${btn.dataset.placeId}`);
         const j = await r.json();
         if (!j.ok) return;
         if (j.data.types?.length && !this.isSpecificPlace(j.data.types.join(','))) {
@@ -277,10 +308,101 @@ const MapsUI = {
       } catch {
         alert('No se pudo cargar la dirección');
       }
+    };
+
+    input.addEventListener('focus', () => {
+      document.body.classList.add('keyboard-open');
+      this.scrollAddressIntoView(input);
+      if (!this.configured) {
+        this.setAddressStatus(
+          wrap,
+          'Google Maps no está disponible. Configura GOOGLE_MAPS_API_KEY en el servidor.'
+        );
+      }
+    });
+    input.addEventListener('blur', () => {
+      window.setTimeout(() => {
+        const active = document.activeElement;
+        if (
+          !active?.closest('.address-wrap') &&
+          !active?.closest('.address-suggestions') &&
+          !active?.closest('.address-suggestions-portal')
+        ) {
+          document.body.classList.remove('keyboard-open');
+          hide();
+        }
+      }, 200);
     });
 
-    document.addEventListener('click', (e) => {
-      if (!wrap.contains(e.target)) hide();
+    input.addEventListener('input', () => {
+      clearTimeout(this._debounce);
+      if (input.dataset.mapsValidated === '1') {
+        input.dataset.mapsValidated = '';
+        input.dataset.mapsLocked = '';
+        this.clearRole(form, role);
+        const dk = form.querySelector('[name="distance_km"]');
+        const dm = form.querySelector('[name="distance_duration_min"]');
+        if (dk) dk.value = '';
+        if (dm) dm.value = '';
+        this.updateFormGate(form);
+      }
+      const q = input.value.trim();
+      if (q.length < 3) {
+        hide();
+        if (q.length > 0) {
+          this.setAddressStatus(wrap, 'Escribe al menos 3 letras para buscar en Maps.');
+        }
+        return;
+      }
+      if (!this.configured) return;
+      this.closeAllSuggestions(wrap);
+      this.setAddressStatus(wrap, 'Buscando direcciones…');
+      this._debounce = setTimeout(async () => {
+        try {
+          const r = await this.fetchApi(`/api/maps/autocomplete?input=${encodeURIComponent(q)}`);
+          const j = await r.json();
+          if (!j.ok) {
+            hide();
+            this.setAddressStatus(
+              wrap,
+              j.error || 'No se pudo consultar Maps. Revisa conexión a internet.'
+            );
+            return;
+          }
+          if (!j.data?.length) {
+            hide();
+            this.setAddressStatus(wrap, 'Sin resultados. Prueba calle, bodega o puerto.');
+            return;
+          }
+          wrap.classList.add('address-suggestions-open');
+          list.hidden = false;
+          list.innerHTML = j.data
+            .map(
+              (p) =>
+                `<li><button type="button" data-place-id="${p.place_id}">${p.description}</button></li>`
+            )
+            .join('');
+          this.portalSuggestions(list, wrap);
+          this.setAddressStatus(wrap, 'Toca una sugerencia de la lista (no solo Enter).');
+          this.scrollAddressIntoView(input);
+        } catch {
+          hide();
+          this.setAddressStatus(
+            wrap,
+            'Sin conexión al servidor. En emulador: activa internet y reinstala la APK.'
+          );
+        }
+      }, 280);
+    });
+
+    list.addEventListener('mousedown', (e) => {
+      e.preventDefault();
+      const btn = e.target.closest('[data-place-id]');
+      if (btn) pickPlace(btn);
+    });
+    list.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-place-id]');
+      if (btn) pickPlace(btn);
     });
   },
 

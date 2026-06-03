@@ -35,6 +35,7 @@ function isSpecificAddress(placeTypes) {
   const types = parsePlaceTypes(placeTypes);
   if (!types.length) return false;
   if (types.some((t) => SPECIFIC_TYPES.has(t))) return true;
+  if (types.includes('locality') || types.includes('administrative_area_level_1')) return false;
   const nonVague = types.filter((t) => !VAGUE_ONLY_TYPES.has(t) && t !== 'geocode');
   return nonVague.length > 0;
 }

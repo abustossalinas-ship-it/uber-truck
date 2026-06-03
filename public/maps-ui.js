@@ -36,6 +36,7 @@ const MapsUI = {
     ]);
     if (!types.length) return false;
     if (types.some((t) => SPECIFIC.has(t))) return true;
+    if (types.includes('locality') || types.includes('administrative_area_level_1')) return false;
     return types.some((t) => !VAGUE.has(t) && t !== 'geocode');
   },
 

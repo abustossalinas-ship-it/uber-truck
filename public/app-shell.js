@@ -47,6 +47,7 @@ const AppShell = {
     this.bindBackButton();
     this.initPullToRefresh();
     this.initNativePlugins();
+    this.showBuildVersion();
     this.syncAuthState();
     document.addEventListener('DOMContentLoaded', () => this.syncAuthState());
   },
@@ -58,6 +59,19 @@ const AppShell = {
     } else {
       this.runNativeSetup();
     }
+  },
+
+  showBuildVersion() {
+    const el = document.getElementById('app-build-version');
+    if (!el) return;
+    fetch('/deploy.json')
+      .then((r) => (r.ok ? r.json() : null))
+      .then((j) => {
+        el.textContent = j?.version ? `App v${j.version}` : '';
+      })
+      .catch(() => {
+        el.textContent = '';
+      });
   },
 
   hideNativeSplash() {

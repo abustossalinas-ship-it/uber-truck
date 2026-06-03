@@ -109,6 +109,10 @@ function prefillOrgFields(role, user) {
       carrierInput.removeAttribute('title');
     }
   }
+  if (offerForm && typeof LoadCapacityUI !== 'undefined' && user?.default_truck_type_id) {
+    LoadCapacityUI.prefillOfferTruck(offerForm, user.default_truck_type_id);
+  }
+  if (typeof initCarrierTruckProfile === 'function') initCarrierTruckProfile();
 }
 
 window.applyRoleUi = applyRoleUi;

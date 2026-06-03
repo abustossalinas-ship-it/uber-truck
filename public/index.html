@@ -599,6 +599,14 @@
           <span id="carrier-available-label">No visible en tablero</span>
         </label>
         <p id="carrier-gps-status" class="muted"></p>
+        <h4 class="form-section">Tu camión habitual</h4>
+        <p class="muted">Se usa al ofertar ruta para validar pallets y hacer match con cargas.</p>
+        <label>Tipo de camión</label>
+        <select id="carrier-default-truck" name="default_truck_type_id">
+          <option value="">Elige tu camión…</option>
+        </select>
+        <button type="button" class="tab tab-sm tab-outline" id="btn-save-carrier-truck">Guardar camión</button>
+        <p id="carrier-truck-save-status" class="muted" hidden></p>
       </section>
       <form id="form-offer" data-maps-form>
         <h2>Publicar capacidad disponible (backhaul)</h2>
@@ -672,20 +680,38 @@
         <input type="hidden" name="distance_km" />
         <input type="hidden" name="distance_duration_min" />
 
-        <label>Espacio disponible (preset)</label>
-        <select id="offer-cubicacion-preset">
-          <option value="">Elegir espacio…</option>
+        <h3 class="form-section">Capacidad del viaje</h3>
+        <p class="muted">Primero pallets; el volumen (m³) se calcula solo (~1,2 m³/pallet). Debe caber en el camión que declaras.</p>
+        <label>Tipo de camión (con el que harás el viaje)</label>
+        <select name="truck_type_id" required>
+          <option value="">Elige tu camión…</option>
         </select>
+        <p class="muted" data-offer-truck-capacity hidden></p>
+        <label>Tipo de pallet</label>
+        <select name="pallet_type">
+          <option value="euro" selected>Europallet (1,20 × 0,80 m)</option>
+          <option value="american">Americana / estándar (1,20 × 1,00 m)</option>
+        </select>
+        <label class="legal-check">
+          <input type="checkbox" name="cargo_stackable" value="1" />
+          Carga remontable (apilable) — duplica capacidad estimada por camión
+        </label>
         <div class="grid grid-2">
           <div>
-            <label>Cubicación libre (m³)</label>
+            <label>Pallets disponibles</label>
+            <input name="available_pallets" type="number" min="1" required placeholder="8" />
+          </div>
+          <div>
+            <label>Volumen libre (m³)</label>
             <input name="free_volume_m3" type="number" step="0.1" min="0" />
+            <p class="muted">Se sincroniza con pallets. Edita uno y el otro se ajusta.</p>
           </div>
           <div>
             <label>Peso máx. (kg)</label>
             <input name="max_weight_kg" type="number" min="0" />
           </div>
         </div>
+        <p class="load-capacity-hint muted" data-offer-capacity-hint hidden></p>
         <label>Tipos de carga aceptados</label>
         <input name="cargo_types" placeholder="Alimentos, retail…" />
 
@@ -1026,7 +1052,7 @@
   <script src="/load-budget-ui.js?v=0.0.43" defer></script>
   <script src="/trip-schedule-ui.js?v=0.0.86" defer></script>
   <script src="/load-timing-ui.js?v=0.0.86" defer></script>
-  <script src="/load-capacity-ui.js?v=0.0.86" defer></script>
+  <script src="/load-capacity-ui.js?v=0.0.90" defer></script>
   <script src="/legal-terms-ui.js?v=0.0.86" defer></script>
   <script src="/load-form-validation.js?v=0.0.86" defer></script>
   <script src="/proposal-compare-ui.js?v=0.0.47" defer></script>
@@ -1037,6 +1063,6 @@
   <script src="/comms-ui.js?v=0.0.52" defer></script>
   <script src="/rating-tags.js?v=0.0.31" defer></script>
   <script src="/trips-ui.js?v=0.0.54" defer></script>
-  <script src="/app.js?v=0.0.86" defer></script>
+  <script src="/app.js?v=0.0.90" defer></script>
 </body>
 </html>

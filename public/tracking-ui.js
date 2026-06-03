@@ -125,6 +125,7 @@ async function refreshCarrierPresencePanel() {
       : `GPS activo en sesión${t ? ` · última: ${t}` : ''} · activa el interruptor para aparecer en el tablero`;
   }
   syncGpsWatch();
+  if (typeof initCarrierTruckProfile === 'function') initCarrierTruckProfile();
   if (user.role === 'carrier') {
     try {
       const pos = await readCurrentPosition();

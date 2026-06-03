@@ -1360,6 +1360,26 @@ $('form-offer').addEventListener('submit', async (e) => {
     alert('Completa transportista, ciudad de origen y ciudad de destino.');
     return;
   }
+  if (typeof LoadCapacityUI !== 'undefined') {
+    const cap = LoadCapacityUI.getOfferPayload(e.target);
+    Object.assign(body, cap);
+    const check = LoadCapacityUI.validateOfferCapacity(e.target);
+    if (!check.truck) {
+      alert(check.message || 'Elige el tipo de camión.');
+      return;
+    }
+    if (!check.pallets || check.pallets < 1) {
+      alert('Indica cuántos pallets puedes llevar en este viaje.');
+      return;
+    }
+    if (check.exceeds || check.weight_exceeds) {
+      alert(
+        check.message ||
+          'Los pallets superan la capacidad de tu camión. Reduce pallets o cambia el tipo de camión.'
+      );
+      return;
+    }
+  }
   if (typeof TripScheduleUI !== 'undefined') {
     Object.assign(body, TripScheduleUI.getPayload(e.target));
   }

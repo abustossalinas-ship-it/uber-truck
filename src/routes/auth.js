@@ -1,7 +1,14 @@
 'use strict';
 
 const express = require('express');
-const { registerUser, loginUser, authMiddleware } = require('../lib/auth');
+const {
+  registerUser,
+  loginUser,
+  authMiddleware,
+  fetchUserById,
+  updateUserProfile,
+} = require('../lib/auth');
+const { TRUCK_TYPES } = require('../lib/truck-capacity');
 const { fetchKycStatus } = require('../lib/kyc-gate');
 const { getUserPresence } = require('../lib/carrier-presence');
 const {
@@ -162,7 +169,27 @@ router.get('/me', authMiddleware, async (req, res) => {
   try {
     let user = { ...req.user };
     if (supabase.isConfigured() && req.user?.sub) {
-      user.kyc_status = await fetchKycStatus(req.user.sub);
+      const row = await fetchUserById(req.user.sub);
+      if (row) {
+        user = {
+          id: row.id,
+          sub: row.id,
+          email: row.email,
+          full_name: row.full_name,
+          name: row.full_name,
+          role: row.role,
+          company_name: row.company_name,
+          phone: row.phone,
+          kyc_status: row.kyc_status || 'pending',
+          is_available: Boolean(row.is_available),
+          last_lat: row.last_lat ?? null,
+          last_lng: row.last_lng ?? null,
+          location_updated_at: row.location_updated_at || null,
+          default_truck_type_id: row.default_truck_type_id || null,
+        };
+      } else {
+        user.kyc_status = await fetchKycStatus(req.user.sub);
+      }
       if (user.role === 'carrier') {
         const presence = await getUserPresence(req.user.sub);
         if (presence) Object.assign(user, presence);
@@ -172,6 +199,53 @@ router.get('/me', authMiddleware, async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al leer perfil' });
+  }
+});
+
+router.patch('/me', authMiddleware, async (req, res) => {
+  if (!supabase.isConfigured()) {
+    return res.status(503).json({ ok: false, error: 'Perfil requiere Supabase configurado' });
+  }
+  const body = req.body || {};
+  if (body.default_truck_type_id !== undefined && body.default_truck_type_id !== null && body.default_truck_type_id !== '') {
+    const ok = TRUCK_TYPES.some((t) => t.id === body.default_truck_type_id);
+    if (!ok) {
+      return res.status(400).json({ ok: false, error: 'Tipo de camión no válido' });
+    }
+    if (req.user.role !== 'carrier' && req.user.role !== 'admin') {
+      return res.status(403).json({
+        ok: false,
+        error: 'Solo transportistas pueden guardar el camión habitual',
+      });
+    }
+  }
+  try {
+    const row = await updateUserProfile(req.user.sub, {
+      default_truck_type_id:
+        body.default_truck_type_id === '' || body.default_truck_type_id == null
+          ? null
+          : body.default_truck_type_id,
+    });
+    const user = {
+      id: row.id,
+      sub: row.id,
+      email: row.email,
+      full_name: row.full_name,
+      name: row.full_name,
+      role: row.role,
+      company_name: row.company_name,
+      phone: row.phone,
+      kyc_status: row.kyc_status || 'pending',
+      is_available: Boolean(row.is_available),
+      last_lat: row.last_lat ?? null,
+      last_lng: row.last_lng ?? null,
+      location_updated_at: row.location_updated_at || null,
+      default_truck_type_id: row.default_truck_type_id || null,
+    };
+    res.json({ ok: true, user, message: 'Perfil actualizado' });
+  } catch (e) {
+    console.error(e);
+    res.status(e.status || 500).json({ ok: false, error: e.message || 'Error al actualizar perfil' });
   }
 });
 

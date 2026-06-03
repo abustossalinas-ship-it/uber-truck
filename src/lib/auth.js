@@ -75,7 +75,7 @@ async function registerUser({ email, password, full_name, role, company_name, ph
       kyc_status: resolvedRole === 'admin' ? 'approved' : 'pending',
     })
     .select(
-      'id, email, full_name, role, company_name, phone, kyc_status, is_available, last_lat, last_lng, location_updated_at'
+      'id, email, full_name, role, company_name, phone, kyc_status, is_available, last_lat, last_lng, location_updated_at, default_truck_type_id'
     )
     .single();
   if (error) {
@@ -98,7 +98,9 @@ async function loginUser({ email, password }) {
   const sb = supabase.getClient();
   const { data, error } = await sb
     .from('users')
-    .select('id, email, full_name, role, company_name, phone, password_hash, kyc_status')
+    .select(
+      'id, email, full_name, role, company_name, phone, password_hash, kyc_status, is_available, last_lat, last_lng, location_updated_at, default_truck_type_id'
+    )
     .eq('email', email.trim().toLowerCase())
     .maybeSingle();
   if (error) throw error;
@@ -133,8 +135,51 @@ async function loginUser({ email, password }) {
     last_lat: data.last_lat ?? null,
     last_lng: data.last_lng ?? null,
     location_updated_at: data.location_updated_at || null,
+    default_truck_type_id: data.default_truck_type_id || null,
   };
   return { user, token: signToken(user) };
+}
+
+async function fetchUserById(userId) {
+  if (!userId || !supabase.isConfigured()) return null;
+  const sb = supabase.getClient();
+  const { data, error } = await sb
+    .from('users')
+    .select(
+      'id, email, full_name, role, company_name, phone, kyc_status, is_available, last_lat, last_lng, location_updated_at, default_truck_type_id'
+    )
+    .eq('id', userId)
+    .maybeSingle();
+  if (error) throw error;
+  return data;
+}
+
+async function updateUserProfile(userId, fields) {
+  if (!userId || !supabase.isConfigured()) {
+    const err = new Error('Perfil requiere Supabase configurado');
+    err.status = 503;
+    throw err;
+  }
+  const patch = {};
+  if (fields.default_truck_type_id !== undefined) {
+    patch.default_truck_type_id = fields.default_truck_type_id || null;
+  }
+  if (!Object.keys(patch).length) {
+    const err = new Error('Sin cambios para guardar');
+    err.status = 400;
+    throw err;
+  }
+  const sb = supabase.getClient();
+  const { data, error } = await sb
+    .from('users')
+    .update(patch)
+    .eq('id', userId)
+    .select(
+      'id, email, full_name, role, company_name, phone, kyc_status, is_available, last_lat, last_lng, location_updated_at, default_truck_type_id'
+    )
+    .single();
+  if (error) throw error;
+  return data;
 }
 
 module.exports = {
@@ -143,4 +188,6 @@ module.exports = {
   authMiddleware,
   registerUser,
   loginUser,
+  fetchUserById,
+  updateUserProfile,
 };

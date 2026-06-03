@@ -458,10 +458,15 @@ const AppShell = {
     if (!el || !user) return;
     const role =
       typeof roleLabel === 'function' ? roleLabel(user.role) : user.role;
+    const truckLine =
+      user.role === 'carrier' && user.default_truck_type_id && typeof LoadCapacityUI !== 'undefined'
+        ? `<p class="muted">Camión: <strong>${LoadCapacityUI.truckById(user.default_truck_type_id)?.label || user.default_truck_type_id}</strong></p>`
+        : '';
     el.innerHTML = `
       <p><strong>${user.full_name || user.name || '—'}</strong></p>
       <p class="muted">${user.email}</p>
       <p class="muted">${role} · ${user.company_name || '—'}</p>
+      ${truckLine}
       <p class="muted">KYC: <strong>${user.kyc_status || 'pending'}</strong></p>
     `;
     const adminSlot = document.getElementById('app-account-admin-slot');

@@ -1,5 +1,7 @@
 'use strict';
 
+const { TRUCK_TYPES, capacityForTruck } = require('./truck-capacity');
+
 /** Puntaje 0–100 para emparejar carga con oferta */
 function scoreMatch(load, offer) {
   let score = 0;
@@ -35,6 +37,25 @@ function scoreMatch(load, offer) {
   if (needW > 0 && maxW > 0 && maxW >= needW) {
     score += 10;
     reasons.push('Peso dentro de capacidad');
+  }
+  const needP = Number(load.pallets) || 0;
+  const offerP = Number(offer.available_pallets) || 0;
+  if (needP > 0 && offerP >= needP) {
+    score += 15;
+    reasons.push('Pallets: espacio suficiente');
+  } else if (needP > 0 && offerP > 0 && offerP < needP) {
+    reasons.push(`Oferta con menos pallets (${offerP} < ${needP})`);
+  }
+  const offerTruck = TRUCK_TYPES.find((t) => t.id === offer.truck_type_id);
+  if (needP > 0 && offerTruck) {
+    const stackable = Boolean(offer.cargo_stackable);
+    const cap = capacityForTruck(offerTruck, offer.pallet_type || 'euro', stackable);
+    if (needP <= cap) {
+      score += 10;
+      reasons.push(`Camión ${offer.truck_type_label || offerTruck.label} cubre la carga`);
+    } else {
+      reasons.push('La carga supera pallets del camión ofertado');
+    }
   }
   if (load.origin_city && offer.origin_city &&
     load.origin_city.toLowerCase() === offer.origin_city.toLowerCase()) {

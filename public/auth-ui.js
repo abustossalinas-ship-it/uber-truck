@@ -21,6 +21,7 @@ const Auth = {
       last_lat: user.last_lat ?? null,
       last_lng: user.last_lng ?? null,
       location_updated_at: user.location_updated_at || null,
+      default_truck_type_id: user.default_truck_type_id || null,
     };
     localStorage.setItem('ut_token', token);
     localStorage.setItem('ut_user', JSON.stringify(this.user));

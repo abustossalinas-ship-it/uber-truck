@@ -17,6 +17,7 @@ const { requireApprovedOperator } = require('../lib/kyc-gate');
 const { requireBankAccount } = require('../lib/bank-gate');
 const { requirePenaltyClear } = require('../lib/penalty-gate');
 const { buildOfferScheduleFields } = require('../lib/trip-schedule');
+const { validateOfferCapacityBody, offerCapacityPayload } = require('../lib/offer-capacity');
 
 const router = express.Router();
 const operatorGate = [requireAuthIfDb, requireApprovedOperator, requireBankAccount, requirePenaltyClear];
@@ -64,10 +65,13 @@ router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
     () => requiredString(body.destination_region, 'destination_region', 10),
     () => optionalNumber(body.free_volume_m3, 'free_volume_m3'),
     () => optionalNumber(body.max_weight_kg, 'max_weight_kg'),
+    () => optionalNumber(body.available_pallets, 'available_pallets', { max: 500 }),
   ]);
+  const capacityErrors = validateOfferCapacityBody(body);
   const geoErrors = requireMapsAddresses(body);
   if (geoErrors.length) return res.status(400).json({ ok: false, errors: geoErrors });
   if (errors.length) return res.status(400).json({ ok: false, errors });
+  if (capacityErrors.length) return res.status(400).json({ ok: false, errors: capacityErrors });
 
   const carrierName =
     req.user?.role === 'carrier' && req.user.company_name
@@ -88,6 +92,7 @@ router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
       destination_region: body.destination_region.trim().toUpperCase(),
       free_volume_m3: body.free_volume_m3 != null ? Number(body.free_volume_m3) : null,
       max_weight_kg: body.max_weight_kg != null ? Number(body.max_weight_kg) : null,
+      ...offerCapacityPayload(body),
       cargo_types: body.cargo_types?.trim() || null,
       schedule_mode: schedule.schedule_mode,
       scheduled_depart_at: schedule.scheduled_depart_at,

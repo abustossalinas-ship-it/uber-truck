@@ -518,7 +518,6 @@ async function bindCubicacionPresets() {
     MapsUI.densityMap = Object.fromEntries((j.density_options || []).map((d) => [d.id, d]));
 
     const loadSel = document.getElementById('load-cubicacion-preset');
-    const offerSel = document.getElementById('offer-cubicacion-preset');
     if (loadSel) {
       loadSel.innerHTML =
         '<option value="">Elegir cubicación…</option>' +
@@ -540,18 +539,6 @@ async function bindCubicacionPresets() {
           (form.querySelector('[name="truck_type_preference"]').dataset.userEdited = '');
         form._recalcWeight?.();
         if (typeof LoadCapacityUI !== 'undefined') LoadCapacityUI.recalc(form);
-      });
-    }
-    if (offerSel) {
-      offerSel.innerHTML =
-        '<option value="">Elegir espacio disponible…</option>' +
-        j.offer.map((p) => `<option value="${p.id}">${p.label}</option>`).join('');
-      offerSel.addEventListener('change', () => {
-        const p = j.offer.find((x) => x.id === offerSel.value);
-        if (!p || p.id === 'custom') return;
-        const form = document.getElementById('form-offer');
-        if (p.free_volume_m3 != null) form.free_volume_m3.value = p.free_volume_m3;
-        if (p.max_weight_kg != null) form.max_weight_kg.value = p.max_weight_kg;
       });
     }
     const loadForm = document.getElementById('form-load');

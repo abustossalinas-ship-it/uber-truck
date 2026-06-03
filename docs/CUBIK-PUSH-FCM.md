@@ -18,7 +18,9 @@
 
 1. Firebase Console → Project Settings → **Service accounts** → Generate new private key.
 2. Copia el JSON completo.
-3. Railway variable: `FCM_SERVICE_ACCOUNT_JSON` = JSON en una línea **o** base64 del JSON.
+3. Railway variable: `FCM_SERVICE_ACCOUNT_JSON` = JSON en una línea **o** base64 del JSON (sin comillas extra ni archivo `.json` renombrado a texto corrupto).
+
+   Si ves en logs `Unexpected token 's'` o `no es JSON ni base64 válido`, la variable está mal pegada: bórrala y vuelve a pegar el JSON completo desde Firebase, o usa `FCM_SERVER_KEY` (legacy) y deja vacía `FCM_SERVICE_ACCOUNT_JSON`.
 
 ### Opción B — Legacy server key
 

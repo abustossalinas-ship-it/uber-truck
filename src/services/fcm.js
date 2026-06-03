@@ -5,27 +5,64 @@ const supabase = require('./supabase');
 
 let cachedV1Token = null;
 let cachedV1Exp = 0;
+let cachedServiceAccount = undefined;
+let serviceAccountInvalid = false;
+let serviceAccountWarned = false;
+
+function warnInvalidServiceAccount(reason) {
+  if (serviceAccountWarned) return;
+  serviceAccountWarned = true;
+  console.warn(
+    'FCM_SERVICE_ACCOUNT_JSON inválido o vacío — push desactivado hasta corregir la variable en Railway.',
+    reason
+  );
+}
+
+function parseServiceAccount() {
+  if (cachedServiceAccount !== undefined) return cachedServiceAccount;
+  const raw = process.env.FCM_SERVICE_ACCOUNT_JSON;
+  if (!raw?.trim()) {
+    cachedServiceAccount = null;
+    return null;
+  }
+  try {
+    const trimmed = raw.trim();
+    let text = trimmed;
+    if (!trimmed.startsWith('{')) {
+      const b64 = trimmed.replace(/\s/g, '');
+      if (!/^[A-Za-z0-9+/=]+$/.test(b64)) {
+        throw new Error('no es JSON ni base64 válido del service account');
+      }
+      text = Buffer.from(b64, 'base64').toString('utf8');
+    }
+    const sa = JSON.parse(text);
+    if (!sa?.client_email || !sa?.private_key || !sa?.project_id) {
+      throw new Error('falta client_email, private_key o project_id');
+    }
+    cachedServiceAccount = sa;
+    serviceAccountInvalid = false;
+    return sa;
+  } catch (e) {
+    serviceAccountInvalid = true;
+    cachedServiceAccount = null;
+    warnInvalidServiceAccount(e.message);
+    return null;
+  }
+}
 
 function fcmMode() {
-  if (process.env.FCM_SERVICE_ACCOUNT_JSON) return 'v1';
+  if (process.env.FCM_SERVICE_ACCOUNT_JSON) {
+    if (serviceAccountInvalid) return 'off';
+    const sa = parseServiceAccount();
+    if (sa) return 'v1';
+    return 'off';
+  }
   if (process.env.FCM_SERVER_KEY || process.env.FCM_LEGACY_SERVER_KEY) return 'legacy';
   return 'off';
 }
 
 function isConfigured() {
   return fcmMode() !== 'off';
-}
-
-function parseServiceAccount() {
-  const raw = process.env.FCM_SERVICE_ACCOUNT_JSON;
-  if (!raw) return null;
-  try {
-    const text = raw.trim().startsWith('{') ? raw : Buffer.from(raw, 'base64').toString('utf8');
-    return JSON.parse(text);
-  } catch (e) {
-    console.error('FCM_SERVICE_ACCOUNT_JSON inválido', e.message);
-    return null;
-  }
 }
 
 async function getV1AccessToken() {
@@ -220,10 +257,15 @@ async function pushForNotification(repo, notification) {
 }
 
 function statusPayload() {
+  const sa = parseServiceAccount();
+  const mode = fcmMode();
   return {
-    configured: isConfigured(),
-    mode: fcmMode(),
-    project_id: parseServiceAccount()?.project_id || null,
+    configured: mode !== 'off',
+    mode,
+    project_id: sa?.project_id || null,
+    service_account_error: serviceAccountInvalid
+      ? 'FCM_SERVICE_ACCOUNT_JSON inválido — corrige o elimina la variable en Railway'
+      : null,
   };
 }
 

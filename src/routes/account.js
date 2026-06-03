@@ -4,18 +4,26 @@ const express = require('express');
 const supabase = require('../services/supabase');
 const repo = require('../lib/repository');
 const { authMiddleware } = require('../lib/auth');
-const { buildPenaltySummary, bankAccountFromUser } = require('../lib/penalty-ledger');
+const { buildPenaltySummary } = require('../lib/penalty-ledger');
 const { getOperatingStatus } = require('../lib/penalty-gate');
 const { bankEnforced, fetchPaymentSetup } = require('../lib/bank-gate');
 const { paymentConfig } = require('../lib/payment-config');
-const { validateRut } = require('../lib/rut-chile');
-const { isValidChileBank, normalizeBankName } = require('../lib/chile-banks');
 const {
   listPaymentMethods,
   enrollPaymentMethod,
   deletePaymentMethod,
   paymentMethodsSummary,
 } = require('../lib/payment-methods');
+const {
+  listBankAccounts,
+  createBankAccount,
+  updateBankAccount,
+  setDefaultBankAccount,
+  deleteBankAccount,
+  upsertDefaultBankAccount,
+  bankAccountsSummary,
+  rowToBankAccount,
+} = require('../lib/bank-accounts');
 const {
   markPenaltyPaid,
   claimPenaltyPaid,
@@ -71,6 +79,8 @@ router.get('/summary', authMiddleware, async (req, res) => {
       can_operate: false,
     };
     const bank = setup.bank;
+    const bankAccounts = setup.bank_accounts || [];
+    const bankSummary = bankAccountsSummary(bankAccounts);
     const paymentSummary = paymentMethodsSummary(setup.payment_methods);
     const enforced = bankEnforced() && req.user?.role !== 'admin';
     const payment_required_for_operate = enforced && !setup.can_operate;
@@ -82,6 +92,8 @@ router.get('/summary', authMiddleware, async (req, res) => {
       penalties_error,
       operating_status: operating,
       bank_account: bank,
+      bank_accounts: bankAccounts,
+      bank_summary: bankSummary,
       payment_methods: setup.payment_methods,
       payment_summary: paymentSummary,
       bank_enforced: enforced,
@@ -98,6 +110,103 @@ router.get('/summary', authMiddleware, async (req, res) => {
   }
 });
 
+router.get('/bank-accounts', authMiddleware, async (req, res) => {
+  try {
+    const accounts = await listBankAccounts(req.user.sub);
+    res.json({ ok: true, bank_accounts: accounts, bank_summary: bankAccountsSummary(accounts) });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al listar cuentas bancarias' });
+  }
+});
+
+router.post('/bank-accounts', authMiddleware, async (req, res) => {
+  if (!supabase.isConfigured()) {
+    return res.status(503).json({ ok: false, error: 'Cuenta bancaria requiere Supabase configurado' });
+  }
+  try {
+    const account = await createBankAccount(req.user.sub, req.body || {}, {
+      setDefault: req.body?.is_default !== false,
+    });
+    const operating = await getOperatingStatus(req.user);
+    res.json({
+      ok: true,
+      bank_account: rowToBankAccount(account),
+      bank_accounts: await listBankAccounts(req.user.sub),
+      operating_status: operating,
+      message: 'Cuenta bancaria agregada a tu billetera.',
+    });
+  } catch (e) {
+    const code = e.status || 500;
+    if (code !== 500) return res.status(code).json({ ok: false, error: e.message });
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al guardar cuenta bancaria' });
+  }
+});
+
+router.patch('/bank-accounts/:id', authMiddleware, async (req, res) => {
+  if (!supabase.isConfigured()) {
+    return res.status(503).json({ ok: false, error: 'Cuenta bancaria requiere Supabase configurado' });
+  }
+  try {
+    const account = await updateBankAccount(req.user.sub, req.params.id, req.body || {});
+    const operating = await getOperatingStatus(req.user);
+    res.json({
+      ok: true,
+      bank_account: rowToBankAccount(account),
+      bank_accounts: await listBankAccounts(req.user.sub),
+      operating_status: operating,
+      message: 'Cuenta bancaria actualizada.',
+    });
+  } catch (e) {
+    const code = e.status || 500;
+    if (code !== 500) return res.status(code).json({ ok: false, error: e.message });
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al actualizar cuenta bancaria' });
+  }
+});
+
+router.post('/bank-accounts/:id/default', authMiddleware, async (req, res) => {
+  if (!supabase.isConfigured()) {
+    return res.status(503).json({ ok: false, error: 'Cuenta bancaria requiere Supabase configurado' });
+  }
+  try {
+    const account = await setDefaultBankAccount(req.user.sub, req.params.id);
+    res.json({
+      ok: true,
+      bank_account: rowToBankAccount(account),
+      bank_accounts: await listBankAccounts(req.user.sub),
+      message: 'Cuenta predeterminada actualizada.',
+    });
+  } catch (e) {
+    const code = e.status || 500;
+    if (code !== 500) return res.status(code).json({ ok: false, error: e.message });
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al cambiar cuenta predeterminada' });
+  }
+});
+
+router.delete('/bank-accounts/:id', authMiddleware, async (req, res) => {
+  if (!supabase.isConfigured()) {
+    return res.status(503).json({ ok: false, error: 'Cuenta bancaria requiere Supabase configurado' });
+  }
+  try {
+    await deleteBankAccount(req.user.sub, req.params.id);
+    const operating = await getOperatingStatus(req.user);
+    res.json({
+      ok: true,
+      bank_accounts: await listBankAccounts(req.user.sub),
+      operating_status: operating,
+      message: 'Cuenta bancaria eliminada.',
+    });
+  } catch (e) {
+    const code = e.status || 500;
+    if (code !== 500) return res.status(code).json({ ok: false, error: e.message });
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al eliminar cuenta bancaria' });
+  }
+});
+
 router.patch('/bank', authMiddleware, async (req, res) => {
   if (!supabase.isConfigured()) {
     return res.status(503).json({
@@ -105,50 +214,18 @@ router.patch('/bank', authMiddleware, async (req, res) => {
       error: 'Cuenta bancaria requiere Supabase configurado',
     });
   }
-  const body = req.body || {};
-  const holder = body.bank_holder_name?.trim();
-  const rut = body.bank_rut?.trim();
-  const bankName = body.bank_name?.trim();
-  const accountType = body.bank_account_type?.trim();
-  const accountNumber = body.bank_account_number?.trim();
-  if (!holder || !rut || !bankName || !accountType || !accountNumber) {
-    return res.status(400).json({
-      ok: false,
-      error: 'Completa titular, RUT, banco, tipo y número de cuenta',
-    });
-  }
-  if (!isValidChileBank(bankName)) {
-    return res.status(400).json({ ok: false, error: 'Elige un banco de la lista' });
-  }
-  const rutCheck = validateRut(rut);
-  if (!rutCheck.ok) {
-    return res.status(400).json({ ok: false, error: rutCheck.error });
-  }
   try {
-    const sb = supabase.getClient();
-    const { data, error } = await sb
-      .from('users')
-      .update({
-        bank_holder_name: holder,
-        bank_rut: rutCheck.rut,
-        bank_name: normalizeBankName(bankName),
-        bank_account_type: accountType,
-        bank_account_number: accountNumber,
-        bank_registered_at: new Date().toISOString(),
-      })
-      .eq('id', req.user.sub)
-      .select(
-        'bank_holder_name, bank_rut, bank_name, bank_account_type, bank_account_number, bank_registered_at'
-      )
-      .single();
-    if (error) throw error;
+    const account = await upsertDefaultBankAccount(req.user.sub, req.body || {});
     res.json({
       ok: true,
-      bank_account: bankAccountFromUser(data),
+      bank_account: rowToBankAccount(account),
+      bank_accounts: await listBankAccounts(req.user.sub),
       can_generate_charge: true,
       message: 'Cuenta bancaria guardada. Podrás generar cargos cuando esté habilitado el cobro.',
     });
   } catch (e) {
+    const code = e.status || 500;
+    if (code !== 500) return res.status(code).json({ ok: false, error: e.message });
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al guardar cuenta bancaria' });
   }

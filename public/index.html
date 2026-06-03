@@ -846,9 +846,10 @@
   <div id="bank-modal" class="cancel-modal" hidden aria-hidden="true">
     <div class="cancel-modal-backdrop" data-close-bank></div>
     <div class="cancel-modal-card" role="dialog">
-      <h3>Cuenta bancaria</h3>
+      <h3 id="bank-modal-title">Agregar cuenta bancaria</h3>
       <p class="muted">Alternativa: puedes <button type="button" class="link-btn" id="btn-bank-to-card">verificar tarjeta</button> (tipo Copec).</p>
       <form id="form-bank">
+        <input type="hidden" id="bank-edit-id" value="" />
         <label>Titular</label>
         <input id="bank-holder-name" required />
         <label>RUT titular</label>
@@ -868,7 +869,7 @@
         <input id="bank-account-number" required />
         <div class="cancel-modal-actions">
           <button type="button" class="btn-secondary" data-close-bank>Cerrar</button>
-          <button type="submit" class="btn-danger">Guardar cuenta</button>
+          <button type="submit" class="btn-danger" id="bank-submit-btn">Agregar cuenta</button>
         </div>
       </form>
     </div>
@@ -1057,7 +1058,7 @@
   <script src="/auth-ui.js?v=0.0.76" defer></script>
   <script src="/tracking-ui.js?v=0.0.51" defer></script>
   <script src="/rut-chile-ui.js?v=0.0.93" defer></script>
-  <script src="/penalties-ui.js?v=0.0.93" defer></script>
+  <script src="/penalties-ui.js?v=0.0.94" defer></script>
   <script src="/support-ui.js?v=0.0.56" defer></script>
   <script src="/comms-ui.js?v=0.0.52" defer></script>
   <script src="/rating-tags.js?v=0.0.31" defer></script>

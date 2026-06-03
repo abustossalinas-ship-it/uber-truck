@@ -2,6 +2,108 @@ const Penalties = {
   summary: null,
   paymentConfig: null,
   chileBanks: null,
+  editingBankId: null,
+
+  accountTypeLabel(type) {
+    const map = {
+      corriente: 'Cuenta corriente',
+      vista: 'Cuenta vista / RUT',
+      ahorro: 'Cuenta de ahorro',
+    };
+    return map[type] || type || '';
+  },
+
+  maskAccountLast4(num) {
+    const s = String(num || '').replace(/\s/g, '');
+    if (!s) return '****';
+    return s.length <= 4 ? s : s.slice(-4);
+  },
+
+  renderWallet(summary) {
+    let bankAccounts = summary?.bank_accounts || [];
+    if (!bankAccounts.length && summary?.bank_account?.complete) {
+      const f = summary.bank_account.fields || {};
+      bankAccounts = [
+        {
+          id: '',
+          holder_name: f.bank_holder_name,
+          holder_rut: f.bank_rut,
+          bank_name: f.bank_name,
+          account_type: f.bank_account_type,
+          account_number: f.bank_account_number,
+          is_default: true,
+          legacy: true,
+        },
+      ];
+    }
+    const cards = summary?.payment_methods || [];
+    const bankRows = bankAccounts
+      .map(
+        (a) => `
+      <li class="wallet-row">
+        <div class="wallet-row-main">
+          <strong>${a.bank_name}</strong>
+          ${a.is_default ? '<span class="pill pill-ok">Predeterminada</span>' : ''}
+          <p class="muted wallet-row-sub">${this.accountTypeLabel(a.account_type)} · ••••${this.maskAccountLast4(a.account_number || a.account_last4)} · ${a.holder_rut || ''}</p>
+          <p class="muted wallet-row-sub">${a.holder_name || ''}</p>
+        </div>
+        <div class="wallet-row-actions">
+          ${
+            !a.is_default
+              ? `<button type="button" class="link-btn" data-bank-default="${a.id}">Usar como predeterminada</button>`
+              : ''
+          }
+          <button type="button" class="link-btn" data-bank-edit="${a.id || 'legacy'}">Editar</button>
+          ${a.legacy ? '' : `<button type="button" class="link-btn" data-bank-delete="${a.id}">Eliminar</button>`}
+        </div>
+      </li>`
+      )
+      .join('');
+    const cardRows = cards
+      .map(
+        (m) => `
+      <div class="wallet-row wallet-row-card">
+        <div class="wallet-row-main">
+          <strong>${m.card_brand || 'Tarjeta'} •••• ${m.card_last4 || '****'}</strong>
+          ${m.is_default ? '<span class="pill pill-ok">Predeterminada</span>' : ''}
+          <p class="muted wallet-row-sub">${m.holder_name || ''} · ${m.holder_rut || ''}</p>
+        </div>
+        <div class="wallet-row-actions">
+          <button type="button" class="link-btn" data-card-delete="${m.id}">Eliminar</button>
+        </div>
+      </div>`
+      )
+      .join('');
+    return `
+      <section class="wallet-section">
+        <h3>Billetera</h3>
+        <p class="muted wallet-empty">Gestiona cuentas bancarias y tarjetas para cobros y multas (como Uber).</p>
+        <h4>Cuentas bancarias</h4>
+        ${bankAccounts.length ? `<ul class="wallet-list">${bankRows}</ul>` : '<p class="muted wallet-empty">Sin cuentas registradas.</p>'}
+        <button type="button" class="tab tab-sm tab-outline" id="btn-open-bank">+ Agregar cuenta bancaria</button>
+        <h4>Tarjetas verificadas</h4>
+        ${cards.length ? `<div class="wallet-list">${cardRows}</div>` : '<p class="muted wallet-empty">Sin tarjetas.</p>'}
+        <button type="button" class="tab tab-sm" id="btn-open-card">+ Agregar tarjeta (Copec)</button>
+      </section>`;
+  },
+
+  bindWalletActions(box) {
+    box.querySelectorAll('[data-bank-edit]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.dataset.bankEdit;
+        this.openBankModal(id && id !== 'legacy' ? id : null);
+      });
+    });
+    box.querySelectorAll('[data-bank-default]').forEach((btn) => {
+      btn.addEventListener('click', () => this.setDefaultBank(btn.dataset.bankDefault));
+    });
+    box.querySelectorAll('[data-bank-delete]').forEach((btn) => {
+      btn.addEventListener('click', () => this.deleteBank(btn.dataset.bankDelete));
+    });
+    box.querySelectorAll('[data-card-delete]').forEach((btn) => {
+      btn.addEventListener('click', () => this.removeCard(btn.dataset.cardDelete));
+    });
+  },
 
   headers() {
     return typeof apiHeaders === 'function' ? apiHeaders() : { 'Content-Type': 'application/json' };
@@ -497,13 +599,7 @@ const Penalties = {
       : s.bank_required_for_charges
         ? `<p class="penalty-bank-warn">Inscribe tarjeta o cuenta bancaria para multas y cobros.</p>`
         : '';
-    const pm = s.payment_summary?.default;
-    const cardOk = s.payment_summary?.verified
-      ? `<p class="muted">Tarjeta verificada · ${pm?.card_brand || 'card'} •••• ${pm?.card_last4 || '****'} (${pm?.holder_rut || ''})</p>`
-      : `<button type="button" class="tab tab-sm" id="btn-open-card">Agregar tarjeta (Copec)</button>`;
-    const bankOk = s.bank_account?.complete
-      ? '<p class="muted">Cuenta bancaria registrada.</p>'
-      : `<button type="button" class="tab tab-sm" id="btn-open-bank">Inscribir cuenta bancaria</button>`;
+    const walletBlock = this.renderWallet(s);
 
     const pendingBlock = p.pending_confirmations?.length
       ? `<section class="penalty-confirm-pending"><h3>Pagos por confirmar (${confirmH} h)</h3>
@@ -534,14 +630,14 @@ const Penalties = {
           ? `<section class="penalty-paid-history"><h3>Multas regularizadas</h3>${this.renderPenaltyLines(p.paid_history, 'historial')}</section>`
           : ''
       }
-      ${bankOk}
-      ${cardOk}
+      ${walletBlock}
       <p class="muted penalty-note">${s.note || ''}</p>
     `;
     document.getElementById('btn-open-bank')?.addEventListener('click', () => this.openBankModal());
     document.getElementById('btn-open-bank-inline')?.addEventListener('click', () => this.openBankModal());
     document.getElementById('btn-open-card')?.addEventListener('click', () => this.openCardModal());
     document.getElementById('btn-open-card-inline')?.addEventListener('click', () => this.openCardModal());
+    this.bindWalletActions(box);
     this.bindPenaltyActions(box);
   },
 
@@ -653,10 +749,26 @@ const Penalties = {
     return v;
   },
 
-  openBankModal() {
+  openBankModal(accountId) {
     const modal = document.getElementById('bank-modal');
     if (!modal) return;
-    const f = this.summary?.bank_account?.fields || {};
+    this.editingBankId = accountId || null;
+    const accounts = this.summary?.bank_accounts || [];
+    const account = accountId ? accounts.find((a) => a.id === accountId) : null;
+    const f = account
+      ? {
+          bank_holder_name: account.holder_name,
+          bank_rut: account.holder_rut,
+          bank_name: account.bank_name,
+          bank_account_type: account.account_type,
+          bank_account_number: account.account_number,
+        }
+      : this.summary?.bank_account?.fields || {};
+    const title = document.getElementById('bank-modal-title');
+    const submitBtn = document.getElementById('bank-submit-btn');
+    if (title) title.textContent = accountId ? 'Editar cuenta bancaria' : 'Agregar cuenta bancaria';
+    if (submitBtn) submitBtn.textContent = accountId ? 'Guardar cambios' : 'Agregar cuenta';
+    if ($('bank-edit-id')) $('bank-edit-id').value = accountId || '';
     this.loadChileBanks().then(() => {
       this.populateBankSelect(f.bank_name || '');
       $('bank-holder-name').value = f.bank_holder_name || '';
@@ -672,6 +784,8 @@ const Penalties = {
 
   closeBankModal() {
     const modal = document.getElementById('bank-modal');
+    this.editingBankId = null;
+    if ($('bank-edit-id')) $('bank-edit-id').value = '';
     if (modal) {
       modal.hidden = true;
       modal.setAttribute('aria-hidden', 'true');
@@ -823,6 +937,34 @@ const Penalties = {
     await this.refresh();
   },
 
+  async setDefaultBank(accountId) {
+    if (!accountId) return;
+    const res = await fetch(`/api/account/bank-accounts/${encodeURIComponent(accountId)}/default`, {
+      method: 'POST',
+      headers: this.headers(),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      alert(json.error || 'No se pudo cambiar la cuenta predeterminada');
+      return;
+    }
+    await this.refresh();
+  },
+
+  async deleteBank(accountId) {
+    if (!accountId || !confirm('¿Eliminar esta cuenta bancaria de tu billetera?')) return;
+    const res = await fetch(`/api/account/bank-accounts/${encodeURIComponent(accountId)}`, {
+      method: 'DELETE',
+      headers: this.headers(),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      alert(json.error || 'No se pudo eliminar');
+      return;
+    }
+    await this.refresh();
+  },
+
   async submitBank(e) {
     e.preventDefault();
     const rutCheck = this.validateRutField('bank-rut', 'bank-rut-error');
@@ -833,6 +975,7 @@ const Penalties = {
       bankSel?.focus();
       return;
     }
+    const editId = $('bank-edit-id')?.value?.trim();
     const body = {
       bank_holder_name: $('bank-holder-name').value.trim(),
       bank_rut: rutCheck.rut,
@@ -840,8 +983,22 @@ const Penalties = {
       bank_account_type: $('bank-account-type').value,
       bank_account_number: $('bank-account-number').value.trim(),
     };
-    const res = await fetch('/api/account/bank', {
-      method: 'PATCH',
+    const legacyOnly =
+      !editId && !(this.summary?.bank_accounts?.length) && this.summary?.bank_account?.complete;
+    let url;
+    let method;
+    if (editId) {
+      url = `/api/account/bank-accounts/${encodeURIComponent(editId)}`;
+      method = 'PATCH';
+    } else if (legacyOnly) {
+      url = '/api/account/bank';
+      method = 'PATCH';
+    } else {
+      url = '/api/account/bank-accounts';
+      method = 'POST';
+    }
+    const res = await fetch(url, {
+      method,
       headers: this.headers(),
       body: JSON.stringify(body),
     });
@@ -850,6 +1007,7 @@ const Penalties = {
       alert(json.error || 'No se pudo guardar');
       return;
     }
+    this.editingBankId = null;
     this.closeBankModal();
     await this.refresh();
     alert(json.message || 'Cuenta guardada');

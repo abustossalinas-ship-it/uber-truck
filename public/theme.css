@@ -1308,6 +1308,70 @@ body.kyc-pending #btn-create-match {
   margin: 0.25rem 0.35rem 0.25rem 0;
 }
 
+.wallet-section {
+  margin: 1rem 0 0.5rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--brand-gray-50);
+}
+
+.wallet-section h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1rem;
+}
+
+.wallet-section h4 {
+  margin: 0.75rem 0 0.35rem;
+  font-size: 0.88rem;
+  color: var(--brand-blue-dark);
+}
+
+.wallet-list {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+}
+
+.wallet-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.65rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.wallet-row:last-child {
+  border-bottom: none;
+}
+
+.wallet-row-main strong {
+  display: inline;
+  margin-right: 0.35rem;
+}
+
+.wallet-row-sub {
+  margin: 0.15rem 0 0;
+  font-size: 0.82rem;
+}
+
+.wallet-row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.65rem;
+}
+
+.wallet-empty {
+  margin: 0.35rem 0 0.65rem;
+  font-size: 0.88rem;
+}
+
+.pill-ok {
+  background: var(--status-ok-bg, #dcfce7);
+  color: var(--status-ok, #166534);
+  border: 1px solid var(--status-ok, #16a34a);
+}
+
 .claim-proof-preview-wrap {
   margin: 0.5rem 0;
 }

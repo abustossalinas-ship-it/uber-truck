@@ -1,7 +1,7 @@
 'use strict';
 
 const supabase = require('../services/supabase');
-const { bankAccountFromUser } = require('./penalty-ledger');
+const { fetchDefaultBankAccount, listBankAccounts } = require('./bank-accounts');
 const { hasVerifiedCard, listPaymentMethods } = require('./payment-methods');
 
 function bankEnforced() {
@@ -12,25 +12,19 @@ function bankEnforced() {
 }
 
 async function fetchBankAccount(userId) {
-  if (!userId || !supabase.isConfigured()) {
-    return { complete: false, fields: {} };
-  }
-  const sb = supabase.getClient();
-  const { data, error } = await sb
-    .from('users')
-    .select(
-      'bank_holder_name, bank_rut, bank_name, bank_account_type, bank_account_number, bank_registered_at'
-    )
-    .eq('id', userId)
-    .maybeSingle();
-  if (error) throw error;
-  return bankAccountFromUser(data);
+  return fetchDefaultBankAccount(userId);
 }
 
 async function fetchPaymentSetup(userId) {
   const bank = await fetchBankAccount(userId);
+  let bankAccounts = [];
   let methods = [];
   let cardVerified = false;
+  try {
+    bankAccounts = await listBankAccounts(userId);
+  } catch (e) {
+    if (!e.message?.includes('user_bank_accounts')) throw e;
+  }
   try {
     methods = await listPaymentMethods(userId);
     cardVerified = methods.length > 0;
@@ -38,7 +32,7 @@ async function fetchPaymentSetup(userId) {
     if (!e.message?.includes('user_payment_methods')) throw e;
   }
   const can_operate = bank.complete || cardVerified;
-  return { bank, payment_methods: methods, card_verified: cardVerified, can_operate };
+  return { bank, bank_accounts: bankAccounts, payment_methods: methods, card_verified: cardVerified, can_operate };
 }
 
 function bankBlockMessage() {
@@ -53,6 +47,7 @@ async function requireBankAccount(req, res, next) {
   try {
     const setup = await fetchPaymentSetup(req.user.sub);
     req.bank_account = setup.bank;
+    req.bank_accounts = setup.bank_accounts;
     req.payment_methods = setup.payment_methods;
     req.payment_setup = setup;
     if (setup.can_operate) return next();

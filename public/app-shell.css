@@ -792,7 +792,7 @@ body.keyboard-open main {
     word-break: break-word;
   }
 
-  .address-wrap.address-suggestions-open .address-suggestions {
+  .address-wrap.address-suggestions-open .address-suggestions:not(.address-suggestions-portal) {
     position: fixed;
     left: max(0.75rem, var(--app-safe-left, 0px));
     right: max(0.75rem, var(--app-safe-right, 0px));
@@ -802,8 +802,28 @@ body.keyboard-open main {
     box-shadow: 0 -8px 28px rgba(15, 39, 68, 0.18);
   }
 
+  .address-suggestions.address-suggestions-portal-aligned {
+    z-index: 900;
+    box-sizing: border-box;
+    box-shadow: 0 8px 28px rgba(15, 39, 68, 0.2);
+  }
+
   body.cubik-app.app-authed.app-main-visible main form#form-load,
   body.cubik-app.app-authed.app-main-visible main form#form-offer {
     padding-bottom: 1.25rem;
+  }
+
+  body.cubik-app.app-authed.app-main-visible main .grid,
+  body.cubik-app.app-authed.app-main-visible main form {
+    max-width: 100%;
+    min-width: 0;
+    overflow-x: hidden;
+  }
+
+  body.cubik-app.app-authed.app-main-visible main input,
+  body.cubik-app.app-authed.app-main-visible main select,
+  body.cubik-app.app-authed.app-main-visible main textarea {
+    max-width: 100%;
+    box-sizing: border-box;
   }
 }

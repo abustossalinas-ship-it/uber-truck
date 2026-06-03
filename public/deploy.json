@@ -1,6 +1,6 @@
 {
-  "version": "0.0.90",
-  "git_sha": "8c0947e",
-  "ui": "offer-pallets-truck-v1",
-  "note": "Oferta por pallets + camión transportista; match por capacidad"
+  "version": "0.0.91",
+  "git_sha": "",
+  "ui": "maps-suggestions-align-v1",
+  "note": "Sugerencias Maps alineadas al campo en móvil (Publicar carga)"
 }

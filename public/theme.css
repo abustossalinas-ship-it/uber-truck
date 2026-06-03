@@ -2227,13 +2227,22 @@ body.penalty-blocked #form-offer button[type="submit"] {
 }
 
 body.cubik-app .address-suggestions.address-suggestions-portal {
-  position: fixed;
+  z-index: 900;
+  margin: 0;
+  box-sizing: border-box;
+}
+
+body.cubik-app .address-suggestions.address-suggestions-portal-aligned {
+  /* top/left/width los fija maps-ui.js según el input */
+  max-height: min(260px, 42vh);
+  box-shadow: 0 8px 28px rgba(15, 39, 68, 0.2);
+}
+
+body.cubik-app .address-suggestions.address-suggestions-portal:not(.address-suggestions-portal-aligned) {
   left: max(0.75rem, var(--app-safe-left, 0px));
   right: max(0.75rem, var(--app-safe-right, 0px));
   bottom: calc(var(--app-nav-h, 4.25rem) + var(--app-safe-bottom, 0px) + var(--kb-inset, 0px) + 0.35rem);
   max-height: min(260px, 40vh);
-  z-index: 900;
-  margin: 0;
 }
 
 body.cubik-app.maps-picker-open .address-suggestions.address-suggestions-portal:not([hidden]) {

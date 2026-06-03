@@ -204,8 +204,73 @@ const MapsUI = {
     return document.body.classList.contains('cubik-app');
   },
 
+  shouldPortalSuggestions() {
+    return this.isCubikApp() || window.matchMedia('(max-width: 768px)').matches;
+  },
+
+  /** Alinea la lista al campo (evita desfase a la izquierda en móvil / visualViewport). */
+  positionPortalList(list, input) {
+    if (!list || !input) return;
+    const vv = window.visualViewport;
+    const pad = 12;
+    const vw = vv?.width ?? window.innerWidth;
+    const vLeft = vv?.offsetLeft ?? 0;
+    const vTop = vv?.offsetTop ?? 0;
+    const rect = input.getBoundingClientRect();
+    const left = Math.max(pad, rect.left + vLeft);
+    const maxW = vw - left - pad;
+    const width = Math.max(160, Math.min(rect.width, maxW));
+    const spaceBelow = (vv?.height ?? window.innerHeight) - rect.bottom;
+    const maxH = Math.min(260, Math.max(120, spaceBelow - 12));
+    let top = rect.bottom + vTop + 4;
+    if (spaceBelow < 140 && rect.top > 180) {
+      top = Math.max(vTop + pad, rect.top + vTop - Math.min(220, maxH) - 4);
+    }
+    list.style.position = 'fixed';
+    list.style.left = `${Math.round(left)}px`;
+    list.style.width = `${Math.round(width)}px`;
+    list.style.right = 'auto';
+    list.style.top = `${Math.round(top)}px`;
+    list.style.bottom = 'auto';
+    list.style.maxHeight = `${Math.round(maxH)}px`;
+    list.classList.add('address-suggestions-portal-aligned');
+  },
+
+  bindPortalReposition(list, input) {
+    if (!list || list._portalRepositionBound) return;
+    list._portalRepositionBound = true;
+    const tick = () => {
+      if (!list.hidden && list.classList.contains('address-suggestions-portal')) {
+        this.positionPortalList(list, input);
+      }
+    };
+    window.addEventListener('resize', tick);
+    window.addEventListener('scroll', tick, true);
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', tick);
+      window.visualViewport.addEventListener('scroll', tick);
+    }
+    list._portalRepositionTick = tick;
+  },
+
+  unbindPortalReposition(list) {
+    if (!list?._portalRepositionBound) return;
+    const tick = list._portalRepositionTick;
+    if (tick) {
+      window.removeEventListener('resize', tick);
+      window.removeEventListener('scroll', tick, true);
+      window.visualViewport?.removeEventListener('resize', tick);
+      window.visualViewport?.removeEventListener('scroll', tick);
+    }
+    delete list._portalRepositionBound;
+    delete list._portalRepositionTick;
+    list.style.cssText = '';
+    list.classList.remove('address-suggestions-portal-aligned');
+  },
+
   portalSuggestions(list, wrap) {
-    if (!this.isCubikApp()) return;
+    if (!this.shouldPortalSuggestions()) return;
+    const input = wrap.querySelector('.address-search');
     if (list.parentElement !== document.body) {
       document.body.appendChild(list);
     }
@@ -213,9 +278,14 @@ const MapsUI = {
     list.dataset.portalRole = wrap.dataset.address || '';
     list.dataset.portalForm = wrap.closest('form')?.id || '';
     document.body.classList.add('maps-picker-open');
+    if (input) {
+      this.positionPortalList(list, input);
+      this.bindPortalReposition(list, input);
+    }
   },
 
   unportalSuggestions(list, wrap) {
+    this.unbindPortalReposition(list);
     list.classList.remove('address-suggestions-portal');
     delete list.dataset.portalRole;
     if (wrap && list.parentElement === document.body) {
@@ -383,6 +453,8 @@ const MapsUI = {
             )
             .join('');
           this.portalSuggestions(list, wrap);
+          const inp = wrap.querySelector('.address-search');
+          if (inp) this.positionPortalList(list, inp);
           this.setAddressStatus(wrap, 'Toca una sugerencia de la lista (no solo Enter).');
           this.scrollAddressIntoView(input);
         } catch {

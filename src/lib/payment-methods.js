@@ -1,7 +1,8 @@
 'use strict';
 
 const supabase = require('../services/supabase');
-const { enrollCard, paymentProviderMode, providerLabel } = require('../services/payment-provider');
+const { paymentProviderMode, providerLabel, paymentConfig } = require('../lib/payment-config');
+const { enrollCard } = require('../services/payment-provider');
 
 function toApiRow(row) {
   if (!row) return null;
@@ -97,6 +98,7 @@ function paymentMethodsSummary(methods) {
     default: methods.find((m) => m.is_default) || methods[0] || null,
     provider_mode: paymentProviderMode(),
     provider_label: providerLabel(paymentProviderMode()),
+    config: paymentConfig(),
   };
 }
 

@@ -1,7 +1,7 @@
 'use strict';
 
-const supabase = require('../services/supabase');
 const { validateRut } = require('../lib/rut-chile');
+const { paymentProviderMode, providerLabel } = require('../lib/payment-config');
 const {
   luhnCheck,
   detectBrand,
@@ -13,19 +13,6 @@ const {
 } = require('../lib/card-validation');
 
 const SANDBOX_MICROCHARGE_CLP = Number(process.env.PAYMENT_MICROCHARGE_CLP) || 990;
-
-function paymentProviderMode() {
-  const p = (process.env.PAYMENT_PROVIDER || 'sandbox').toLowerCase();
-  if (p === 'off' || p === 'none') return 'off';
-  if (p === 'mercadopago' && process.env.MERCADOPAGO_ACCESS_TOKEN) return 'mercadopago';
-  return 'sandbox';
-}
-
-function providerLabel(mode) {
-  if (mode === 'mercadopago') return 'Mercado Pago';
-  if (mode === 'sandbox') return 'Cubik Sandbox (piloto)';
-  return 'desactivado';
-}
 
 async function enrollSandboxCard(userId, payload) {
   const holder = payload.holder_name?.trim();
@@ -118,16 +105,19 @@ async function enrollMercadoPagoCard(userId, email, payload) {
 
 async function enrollCard(userId, email, payload) {
   const mode = paymentProviderMode();
-  if (mode === 'off') {
-    throw Object.assign(new Error('Pasarela de pagos no configurada'), { status: 503 });
+  if (mode === 'off' || mode === 'unconfigured') {
+    throw Object.assign(
+      new Error(
+        'Pasarela de producción no configurada. Contacta soporte o usa cuenta bancaria.'
+      ),
+      { status: 503 }
+    );
   }
   if (mode === 'mercadopago') return enrollMercadoPagoCard(userId, email, payload);
   return enrollSandboxCard(userId, payload);
 }
 
 module.exports = {
-  paymentProviderMode,
-  providerLabel,
   enrollCard,
   SANDBOX_MICROCHARGE_CLP,
 };

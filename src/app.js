@@ -58,6 +58,8 @@ app.use('/docs', express.static(path.join(__dirname, '..', 'docs')));
 
 const supabaseService = require('./services/supabase');
 const googleMaps = require('./services/google-maps');
+const fcmService = require('./services/fcm');
+const { paymentConfig } = require('./lib/payment-config');
 const repo = require('./lib/repository');
 
 app.get('/health', async (_req, res) => {
@@ -155,6 +157,8 @@ app.get('/health', async (_req, res) => {
         : {}),
     },
     maps: { configured: googleMaps.isConfigured() },
+    fcm: fcmService.statusPayload(),
+    payment: paymentConfig(),
   });
 });
 

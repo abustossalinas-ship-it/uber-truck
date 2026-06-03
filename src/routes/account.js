@@ -7,6 +7,8 @@ const { authMiddleware } = require('../lib/auth');
 const { buildPenaltySummary, bankAccountFromUser } = require('../lib/penalty-ledger');
 const { getOperatingStatus } = require('../lib/penalty-gate');
 const { bankEnforced, fetchPaymentSetup } = require('../lib/bank-gate');
+const { paymentConfig } = require('../lib/payment-config');
+const { validateRut } = require('../lib/rut-chile');
 const {
   listPaymentMethods,
   enrollPaymentMethod,
@@ -22,6 +24,10 @@ const {
 } = require('../lib/penalty-payment');
 
 const router = express.Router();
+
+router.get('/payment-config', async (_req, res) => {
+  res.json({ ok: true, ...paymentConfig() });
+});
 
 router.get('/summary', authMiddleware, async (req, res) => {
   try {
@@ -105,13 +111,17 @@ router.patch('/bank', authMiddleware, async (req, res) => {
       error: 'Completa titular, RUT, banco, tipo y número de cuenta',
     });
   }
+  const rutCheck = validateRut(rut);
+  if (!rutCheck.ok) {
+    return res.status(400).json({ ok: false, error: rutCheck.error });
+  }
   try {
     const sb = supabase.getClient();
     const { data, error } = await sb
       .from('users')
       .update({
         bank_holder_name: holder,
-        bank_rut: rut,
+        bank_rut: rutCheck.rut,
         bank_name: bankName,
         bank_account_type: accountType,
         bank_account_number: accountNumber,

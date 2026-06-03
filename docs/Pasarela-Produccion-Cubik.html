@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pasarela producción — Cubik</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.45; max-width: 820px; margin: 2cm auto; color: #111; padding: 0 1rem; }
+    h1 { font-size: 17pt; }
+    h2 { font-size: 13pt; margin-top: 1.2em; }
+    table { border-collapse: collapse; width: 100%; margin: 0.8em 0; font-size: 10.5pt; }
+    th, td { border: 1px solid #ccc; padding: 8px; vertical-align: top; }
+    th { background: #f3f4f6; }
+    code { background: #f5f5f5; padding: 1px 4px; }
+    .warn { background: #fff4e6; border-left: 4px solid #f26522; padding: 0.75rem 1rem; margin: 1em 0; }
+  </style>
+</head>
+<body>
+  <p class="meta"><a href="/docs/">← Documentación</a> · <a href="Legal-Cubik-Revision-Web.html">Pack legal</a></p>
+  <h1>Pasarela producción — cuenta bancaria y tarjeta</h1>
+
+  <div class="warn">
+    <strong>Piloto actual:</strong> modo <code>sandbox</code> (RUT + Luhn + cargo simulado). Para validación real en producción, activar Mercado Pago o Webpay.
+  </div>
+
+  <h2>1. Cuenta bancaria (transferencia)</h2>
+  <ul>
+    <li>Campos: titular, RUT, banco, tipo, número.</li>
+    <li>Desde v0.0.81: <strong>RUT validado</strong> (módulo 11) al guardar.</li>
+    <li>No verifica titular contra el banco (requiere API bancaria o revisión manual admin).</li>
+  </ul>
+
+  <h2>2. Tarjeta — Mercado Pago (recomendado Chile)</h2>
+  <table>
+    <tr><th>Variable Railway</th><th>Uso</th></tr>
+    <tr><td><code>PAYMENT_PROVIDER=mercadopago</code></td><td>Activa pasarela real</td></tr>
+    <tr><td><code>MERCADOPAGO_PUBLIC_KEY</code></td><td>Frontend — tokeniza tarjeta (PCI en MP)</td></tr>
+    <tr><td><code>MERCADOPAGO_ACCESS_TOKEN</code></td><td>Backend — guarda tarjeta en customer</td></tr>
+    <tr><td><code>PAYMENT_MICROCHARGE_CLP</code></td><td>Opcional — monto verificación (ej. 990)</td></tr>
+  </table>
+  <p>Flujo: app → SDK Mercado Pago → <code>card_token</code> → <code>POST /api/account/payment-methods/enroll</code> → Supabase <code>user_payment_methods</code>.</p>
+  <p>Cuenta developers: <a href="https://www.mercadopago.cl/developers">mercadopago.cl/developers</a></p>
+
+  <h2>3. Tarjeta — Transbank Webpay (alternativa)</h2>
+  <p>Contrato comercial Transbank → Webpay Plus / Oneclick. Integración futura (bloque D). Mismo patrón: token en pasarela, nunca PAN en Cubik.</p>
+
+  <h2>4. Modo sandbox (piloto)</h2>
+  <p>Sin variables MP: <code>PAYMENT_PROVIDER=sandbox</code> o vacío en dev. En producción piloto sigue sandbox hasta configurar MP.</p>
+  <p><code>PAYMENT_ALLOW_SANDBOX=true</code> — fuerza sandbox aunque exista MP (solo pruebas).</p>
+
+  <h2>5. Verificar configuración</h2>
+  <p><code>GET /health</code> → objeto <code>payment</code> con <code>provider_mode</code>.</p>
+  <p><code>GET /api/account/payment-config</code> — modo y clave pública MP para la app.</p>
+
+  <h2>6. SQL requerido</h2>
+  <p><code>RUN_027_payment_methods_fcm.sql</code> — tabla <code>user_payment_methods</code>.</p>
+</body>
+</html>

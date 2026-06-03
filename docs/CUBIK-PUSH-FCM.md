@@ -1,65 +1,48 @@
 # Cubik — Push notifications (FCM)
 
-**Costo:** Firebase Cloud Messaging es **gratuito** (no hay licencia Google por push). Solo pagas tu backend (Railway) y Supabase.
+**Costo:** Firebase Cloud Messaging es **gratuito**.
 
-El código registra el token del dispositivo en `device_tokens` y envía push cuando hay notificaciones in-app (si `FCM_SERVER_KEY` está configurado en Railway).
+## Backend v0.0.81
 
-## Requisitos
+| Componente | Detalle |
+|------------|---------|
+| SQL 027 | Tabla `device_tokens` |
+| Registro | `POST /api/devices/push-token` (app Android al login) |
+| Estado | `GET /api/devices/push-status` |
+| Prueba | `POST /api/devices/push-test` (usuario logueado) |
+| Envío auto | Al crear notificación in-app (oferta, chat, etc.) |
 
-- Cuenta [Firebase](https://console.firebase.google.com/)
-- Mismo proyecto vinculado a Play Console
-- App Android `cl.cubik.logistics` registrada en Firebase
+## Configurar en Railway (elige una)
 
-## Pasos
+### Opción A — HTTP v1 (recomendado)
 
-### 1. Firebase
+1. Firebase Console → Project Settings → **Service accounts** → Generate new private key.
+2. Copia el JSON completo.
+3. Railway variable: `FCM_SERVICE_ACCOUNT_JSON` = JSON en una línea **o** base64 del JSON.
 
-1. Crear proyecto **Cubik** (o usar uno existente).
-2. **Agregar app** → Android.
-3. Package name: `cl.cubik.logistics` (exacto).
-4. Descargar **`google-services.json`**.
+### Opción B — Legacy server key
 
-### 2. Colocar en el repo Android
+1. Firebase → Cloud Messaging → **Server key** (si existe en tu proyecto).
+2. Railway: `FCM_SERVER_KEY=...`
 
-```
-android/app/google-services.json
-```
+## Android
 
-No commitear si el repo es público — usar variable/secreto en CI. En repo privado está bien.
+1. `google-services.json` en `android/app/` (package `cl.cubik.logistics`).
+2. Rebuild APK: `npm run cap:sync:bundle` + `npm run android:apk`.
+3. Abrir app → login → permiso notificaciones.
 
-### 3. Gradle (Android Studio)
-
-En `android/build.gradle` (proyecto), classpath de Google services si no está.
-
-En `android/app/build.gradle`, al final:
-
-```gradle
-apply plugin: 'com.google.gms.google-services'
-```
-
-(Capacitor ya intenta aplicarlo si existe el JSON.)
-
-### 4. Sync y rebuild
+## Probar push
 
 ```bash
-npm run cap:sync:remote
+# Con JWT de sesión
+curl -X POST https://uber-truck-production.up.railway.app/api/devices/push-test \
+  -H "Authorization: Bearer TU_JWT" \
+  -H "Content-Type: application/json" \
+  -d '{"title":"Cubik","body":"Prueba push"}'
 ```
 
-Android Studio → **Build → Clean** → **Run**.
+O desde la app: login en Android, luego llamar push-test (futuro botón admin).
 
-### 5. Probar token
+## Health
 
-1. Instalar en dispositivo físico (emulador a veces no recibe push).
-2. Logcat: buscar registro FCM / Capacitor Push.
-3. En Firebase → **Messaging** → enviar prueba al token del dispositivo.
-
-### 6. Backend (v0.0.80)
-
-- SQL **027**: tabla `device_tokens`.
-- `POST /api/devices/push-token` — la app Android envía el token al iniciar sesión.
-- Variable Railway: `FCM_SERVER_KEY` (Firebase → Cloud Messaging → Server key).
-- Al crear notificación in-app, el servidor intenta push FCM al usuario del match.
-
-## Si no configurás FCM
-
-La app **no falla**: el plugin hace `register` y falla en silencio. Todo lo demás (login, viajes) sigue funcionando.
+`GET /health` → `"fcm": { "configured": true, "mode": "v1", "project_id": "..." }`

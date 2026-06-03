@@ -26,6 +26,7 @@ const Auth = {
     localStorage.setItem('ut_user', JSON.stringify(this.user));
     clearAuthError();
     this.render();
+    if (typeof AppShell?.registerPushAfterAuth === 'function') AppShell.registerPushAfterAuth();
   },
 
   logout() {

@@ -5,6 +5,8 @@ const AppShell = {
   tab: 'home',
   deep: null,
   _splashHidden: false,
+  _pushPendingToken: null,
+  _pushListenersBound: false,
 
   isNative() {
     return Boolean(window.Capacitor?.isNativePlatform?.());
@@ -97,37 +99,77 @@ const AppShell = {
         if (!canGoBack) Cap.Plugins.App?.exitApp?.();
       });
     } catch (_) {}
-    setTimeout(() => this.initPushStub(), 8000);
+    setTimeout(() => this.setupPushNotifications(), 1500);
   },
 
-  async initPushStub() {
+  async sendPushTokenToServer(token) {
+    if (!token) return;
+    if (typeof Auth === 'undefined' || !Auth.token) {
+      this._pushPendingToken = token;
+      return;
+    }
+    try {
+      await fetch('/api/devices/push-token', {
+        method: 'POST',
+        headers: typeof apiHeaders === 'function' ? apiHeaders() : Auth.headers(),
+        body: JSON.stringify({ token, platform: 'android' }),
+      });
+    } catch (_) {}
+  },
+
+  registerPushAfterAuth() {
+    if (this._pushPendingToken) {
+      const t = this._pushPendingToken;
+      this._pushPendingToken = null;
+      this.sendPushTokenToServer(t);
+    }
+    if (!this.isNative()) return;
+    const Push = window.Capacitor?.Plugins?.PushNotifications;
+    Push?.register?.().catch(() => {});
+  },
+
+  handlePushTap(notification) {
+    const data = notification?.data || {};
+    if (data.match_id) {
+      this.setTab('activity');
+      document.getElementById('btn-notifications')?.click();
+    }
+  },
+
+  async setupPushNotifications() {
+    if (!this.isNative()) return;
     const Push = window.Capacitor?.Plugins?.PushNotifications;
     if (!Push) return;
     try {
       const perm = await Push.checkPermissions?.();
       if (perm?.receive === 'prompt') await Push.requestPermissions?.();
-      await Push.addListener?.('registration', (ev) => {
-        const token = ev?.value;
-        if (!token || typeof Auth === 'undefined' || !Auth.token) return;
-        const base = typeof apiUrl === 'function' ? apiUrl('') : '';
-        const prefix = base.replace(/\/$/, '');
-        fetch(`${prefix}/api/devices/push-token`, {
-          method: 'POST',
-          headers: typeof apiHeaders === 'function' ? apiHeaders() : { 'Content-Type': 'application/json', Authorization: `Bearer ${Auth.token}` },
-          body: JSON.stringify({ token, platform: 'android' }),
-        }).catch(() => {});
-      });
-      await Push.addListener?.('pushNotificationReceived', (ev) => {
-        if (ev?.notification?.title) {
-          try {
+      if (!this._pushListenersBound) {
+        this._pushListenersBound = true;
+        await Push.addListener?.('registration', (ev) => {
+          this.sendPushTokenToServer(ev?.value);
+        });
+        await Push.addListener?.('registrationError', (err) => {
+          console.warn('Push registration error', err);
+        });
+        await Push.addListener?.('pushNotificationReceived', (ev) => {
+          if (ev?.notification?.title) {
             window.dispatchEvent(new CustomEvent('cubik-push', { detail: ev.notification }));
-          } catch (_) {}
-        }
-      });
+          }
+        });
+        await Push.addListener?.('pushNotificationActionPerformed', (ev) => {
+          this.handlePushTap(ev?.notification);
+        });
+      }
       await Push.register?.();
-    } catch (_) {
-      /* google-services.json o permisos pendientes */
+      if (typeof Auth !== 'undefined' && Auth.token) this.registerPushAfterAuth();
+    } catch (e) {
+      console.warn('Push setup', e);
     }
+  },
+
+  /** @deprecated use setupPushNotifications */
+  async initPushStub() {
+    return this.setupPushNotifications();
   },
 
   bindWelcome() {

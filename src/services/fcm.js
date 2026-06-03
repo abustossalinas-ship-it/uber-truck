@@ -1,12 +1,104 @@
 'use strict';
 
+const jwt = require('jsonwebtoken');
 const supabase = require('./supabase');
 
-function isConfigured() {
-  return Boolean(process.env.FCM_SERVER_KEY || process.env.FCM_LEGACY_SERVER_KEY);
+let cachedV1Token = null;
+let cachedV1Exp = 0;
+
+function fcmMode() {
+  if (process.env.FCM_SERVICE_ACCOUNT_JSON) return 'v1';
+  if (process.env.FCM_SERVER_KEY || process.env.FCM_LEGACY_SERVER_KEY) return 'legacy';
+  return 'off';
 }
 
-async function sendToToken(token, { title, body, data = {} }) {
+function isConfigured() {
+  return fcmMode() !== 'off';
+}
+
+function parseServiceAccount() {
+  const raw = process.env.FCM_SERVICE_ACCOUNT_JSON;
+  if (!raw) return null;
+  try {
+    const text = raw.trim().startsWith('{') ? raw : Buffer.from(raw, 'base64').toString('utf8');
+    return JSON.parse(text);
+  } catch (e) {
+    console.error('FCM_SERVICE_ACCOUNT_JSON inválido', e.message);
+    return null;
+  }
+}
+
+async function getV1AccessToken() {
+  const now = Math.floor(Date.now() / 1000);
+  if (cachedV1Token && cachedV1Exp - 60 > now) return cachedV1Token;
+  const sa = parseServiceAccount();
+  if (!sa?.client_email || !sa?.private_key) return null;
+
+  const assertion = jwt.sign(
+    {
+      iss: sa.client_email,
+      sub: sa.client_email,
+      aud: 'https://oauth2.googleapis.com/token',
+      iat: now,
+      exp: now + 3600,
+      scope: 'https://www.googleapis.com/auth/firebase.messaging',
+    },
+    sa.private_key,
+    { algorithm: 'RS256' }
+  );
+
+  const res = await fetch('https://oauth2.googleapis.com/token', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({
+      grant_type: 'urn:ietf:params:oauth:grant-type:jwt-bearer',
+      assertion,
+    }),
+  });
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok || !json.access_token) {
+    console.error('FCM OAuth error', json.error || res.status);
+    return null;
+  }
+  cachedV1Token = json.access_token;
+  cachedV1Exp = now + Number(json.expires_in || 3600);
+  return cachedV1Token;
+}
+
+async function sendToTokenV1(token, { title, body, data = {} }) {
+  const sa = parseServiceAccount();
+  if (!sa?.project_id) return { ok: false, error: 'FCM project_id missing' };
+  const access = await getV1AccessToken();
+  if (!access) return { ok: false, error: 'FCM OAuth failed' };
+
+  const res = await fetch(
+    `https://fcm.googleapis.com/v1/projects/${sa.project_id}/messages:send`,
+    {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${access}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        message: {
+          token,
+          notification: { title, body },
+          data: Object.fromEntries(
+            Object.entries(data).map(([k, v]) => [k, v == null ? '' : String(v)])
+          ),
+          android: { priority: 'HIGH' },
+        },
+      }),
+    }
+  );
+  const json = await res.json().catch(() => ({}));
+  if (!res.ok) {
+    return { ok: false, error: json.error?.message || 'FCM v1 error' };
+  }
+  return { ok: true, message_id: json.name };
+}
+
+async function sendToTokenLegacy(token, { title, body, data = {} }) {
   const key = process.env.FCM_SERVER_KEY || process.env.FCM_LEGACY_SERVER_KEY;
   if (!key || !token) return { ok: false, skipped: true };
 
@@ -27,9 +119,17 @@ async function sendToToken(token, { title, body, data = {} }) {
   });
   const json = await res.json().catch(() => ({}));
   if (!res.ok || json.failure) {
-    return { ok: false, error: json.results?.[0]?.error || json.error || 'FCM error' };
+    return { ok: false, error: json.results?.[0]?.error || json.error || 'FCM legacy error' };
   }
   return { ok: true, message_id: json.message_id || json.multicast_id };
+}
+
+async function sendToToken(token, payload) {
+  if (!token) return { ok: false, skipped: true };
+  const mode = fcmMode();
+  if (mode === 'v1') return sendToTokenV1(token, payload);
+  if (mode === 'legacy') return sendToTokenLegacy(token, payload);
+  return { ok: false, skipped: true, reason: 'not_configured' };
 }
 
 async function listTokensForUser(userId) {
@@ -41,6 +141,11 @@ async function listTokensForUser(userId) {
     throw error;
   }
   return (data || []).map((r) => r.token);
+}
+
+async function countTokensForUser(userId) {
+  const tokens = await listTokensForUser(userId);
+  return tokens.length;
 }
 
 async function sendPushToUser(userId, payload) {
@@ -114,9 +219,21 @@ async function pushForNotification(repo, notification) {
   }).catch((e) => console.error('FCM push', e.message));
 }
 
+function statusPayload() {
+  return {
+    configured: isConfigured(),
+    mode: fcmMode(),
+    project_id: parseServiceAccount()?.project_id || null,
+  };
+}
+
 module.exports = {
+  fcmMode,
   isConfigured,
+  statusPayload,
   sendPushToUser,
+  sendToToken,
   upsertDeviceToken,
+  countTokensForUser,
   pushForNotification,
 };

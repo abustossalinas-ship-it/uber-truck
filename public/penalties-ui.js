@@ -1,5 +1,6 @@
 const Penalties = {
   summary: null,
+  paymentConfig: null,
 
   headers() {
     return typeof apiHeaders === 'function' ? apiHeaders() : { 'Content-Type': 'application/json' };
@@ -601,11 +602,16 @@ const Penalties = {
   openCardModal() {
     const modal = document.getElementById('card-modal');
     if (!modal) return;
-    const hint = document.getElementById('card-modal-hint');
-    const provider = this.summary?.payment_summary?.provider_label;
-    if (hint && provider) {
-      hint.textContent = `Pasarela: ${provider}. Validamos titular y RUT. Cargo simulado $990 CLP en piloto (reversado).`;
-    }
+    this.fetchPaymentConfig().then((cfg) => {
+      const hint = document.getElementById('card-modal-hint');
+      if (hint && cfg) {
+        if (cfg.card_entry === 'mercadopago_token') {
+          hint.textContent = `Pasarela: ${cfg.provider_label}. La tarjeta se valida con Mercado Pago (PCI). Microcargo ~$${cfg.microcharge_clp?.toLocaleString('es-CL') || 990} CLP.`;
+        } else {
+          hint.textContent = `Pasarela: ${cfg.provider_label || 'Sandbox'}. Validamos titular y RUT. Cargo simulado $${cfg.microcharge_clp?.toLocaleString('es-CL') || 990} CLP (reversado en piloto).`;
+        }
+      }
+    });
     const pm = this.summary?.payment_summary?.default;
     $('card-holder-name').value = pm?.holder_name || this.summary?.bank_account?.fields?.bank_holder_name || '';
     $('card-holder-rut').value = pm?.holder_rut || this.summary?.bank_account?.fields?.bank_rut || '';
@@ -619,6 +625,48 @@ const Penalties = {
     modal.setAttribute('aria-hidden', 'false');
   },
 
+  async fetchPaymentConfig() {
+    if (this.paymentConfig) return this.paymentConfig;
+    try {
+      const res = await fetch('/api/account/payment-config');
+      const json = await res.json();
+      if (json.ok) this.paymentConfig = json;
+    } catch (_) {}
+    return this.paymentConfig;
+  },
+
+  loadMpSdk() {
+    return new Promise((resolve, reject) => {
+      if (window.MercadoPago) return resolve();
+      const s = document.createElement('script');
+      s.src = 'https://sdk.mercadopago.com/js/v2';
+      s.onload = () => resolve();
+      s.onerror = () => reject(new Error('No se pudo cargar Mercado Pago'));
+      document.head.appendChild(s);
+    });
+  },
+
+  async createMpCardToken(publicKey, body) {
+    await this.loadMpSdk();
+    const mp = new MercadoPago(publicKey, { locale: 'es-CL' });
+    let expYear = String(body.exp_year || '').trim();
+    if (expYear.length <= 2) expYear = `20${expYear}`;
+    const rut = String(body.holder_rut || '')
+      .replace(/\./g, '')
+      .replace(/-/g, '');
+    const result = await mp.createCardToken({
+      cardNumber: String(body.card_number || '').replace(/\s/g, ''),
+      cardholderName: body.holder_name,
+      cardExpirationMonth: String(body.exp_month).padStart(2, '0'),
+      cardExpirationYear: expYear,
+      securityCode: body.cvv,
+      identificationType: 'RUT',
+      identificationNumber: rut.slice(0, -1),
+      identificationTypeId: 'RUT',
+    });
+    return result?.id;
+  },
+
   closeCardModal() {
     const modal = document.getElementById('card-modal');
     if (modal) {
@@ -630,6 +678,7 @@ const Penalties = {
   async submitCard(e) {
     e.preventDefault();
     const errEl = document.getElementById('card-enroll-error');
+    const config = await this.fetchPaymentConfig();
     const body = {
       holder_name: $('card-holder-name').value,
       holder_rut: $('card-holder-rut').value,
@@ -638,6 +687,29 @@ const Penalties = {
       exp_year: $('card-exp-year').value,
       cvv: $('card-cvv').value,
     };
+    if (config?.card_entry === 'mercadopago_token') {
+      if (!config.mercadopago_public_key) {
+        if (errEl) {
+          errEl.textContent = 'Mercado Pago no configurado (MERCADOPAGO_PUBLIC_KEY).';
+          errEl.hidden = false;
+        }
+        return;
+      }
+      try {
+        body.card_token = await this.createMpCardToken(config.mercadopago_public_key, body);
+        delete body.card_number;
+        delete body.exp_month;
+        delete body.exp_year;
+        delete body.cvv;
+      } catch (err) {
+        console.error(err);
+        if (errEl) {
+          errEl.textContent = err.message || 'Mercado Pago no pudo validar la tarjeta.';
+          errEl.hidden = false;
+        }
+        return;
+      }
+    }
     const res = await fetch('/api/account/payment-methods/enroll', {
       method: 'POST',
       headers: this.headers(),

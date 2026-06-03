@@ -2104,3 +2104,78 @@ body.penalty-blocked #form-offer button[type="submit"] {
   opacity: 0.55;
   pointer-events: none;
 }
+
+.legal-check-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem 0.75rem;
+  margin: 0.75rem 0;
+}
+
+.legal-check-row .legal-check {
+  margin: 0;
+  flex: 1 1 14rem;
+}
+
+.load-capacity-hint.load-capacity-warn {
+  color: var(--status-warn);
+  background: var(--status-warn-bg);
+  padding: 0.55rem 0.75rem;
+  border-radius: 8px;
+  border-left: 3px solid var(--brand-orange);
+}
+
+.schedule-eta-info {
+  margin-top: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  background: var(--surface-cool);
+  border-radius: 8px;
+  font-size: 0.92rem;
+}
+
+.terms-modal-frame {
+  width: 100%;
+  min-height: 50vh;
+  height: 55vh;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.form-errors-panel {
+  margin: 0.75rem 0;
+  padding: 0.75rem 1rem;
+  background: var(--status-warn-bg);
+  border-left: 4px solid var(--brand-orange);
+  border-radius: 8px;
+  font-size: 0.92rem;
+}
+
+.form-errors-panel ul {
+  margin: 0.35rem 0 0;
+  padding-left: 1.1rem;
+}
+
+.field-missing-flash {
+  outline: 2px solid var(--brand-orange);
+  outline-offset: 2px;
+  transition: outline 0.2s ease;
+}
+
+.chat-mode-hint {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.65rem;
+  background: var(--surface-cool);
+  border-radius: 8px;
+  font-size: 0.88rem;
+}
+
+.chat-mode-hint.chat-mode-free {
+  background: var(--status-ok-bg);
+}
+
+.chat-bubble.moderator {
+  border-left: 3px solid var(--brand-blue);
+  background: var(--surface-cool);
+}

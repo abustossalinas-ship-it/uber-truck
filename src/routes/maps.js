@@ -7,6 +7,7 @@ const { buildMatchTracking } = require('../lib/match-tracking');
 const { LOAD_PRESETS, OFFER_PRESETS } = require('../lib/cubicacion-presets');
 const { densityOptions, STANDARD_PALLET_M3 } = require('../lib/cubicacion-estimate');
 const { suggestReferenceBudget } = require('../lib/match-price');
+const { TRUCK_TYPES, suggestTruckCapacity } = require('../lib/truck-capacity');
 
 const router = express.Router();
 
@@ -35,10 +36,15 @@ router.get('/cubicacion-presets', (_req, res) => {
     load: LOAD_PRESETS,
     offer: OFFER_PRESETS,
     density_options: densityOptions(),
+    truck_types: TRUCK_TYPES,
     weight_formula:
       'Peso sugerido = max(pallets × kg/pallet, m³ × kg/m³) según densidad. El volumen no implica el mismo peso (ej. papas vs pañales).',
     standard_pallet_m3: STANDARD_PALLET_M3,
   });
+});
+
+router.post('/truck-suggest', (req, res) => {
+  res.json({ ok: true, data: suggestTruckCapacity(req.body || {}) });
 });
 
 router.get('/autocomplete', async (req, res) => {

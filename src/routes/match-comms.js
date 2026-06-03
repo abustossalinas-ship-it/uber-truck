@@ -8,6 +8,8 @@ const { CHAT_PRESETS, otherRole, presetByCode } = require('../lib/match-comms');
 const { optionalAuth } = require('../lib/optional-auth');
 const { normalizeRole } = require('../lib/match-cancel');
 const { getMatchParties } = require('../lib/match-parties');
+const { isMatchChatFree, enableMatchFreeChat } = require('../lib/match-chat');
+const support = require('../lib/support-cases');
 
 const router = express.Router();
 
@@ -17,7 +19,15 @@ function resolveActorRole(req) {
 }
 
 router.get('/presets', (_req, res) => {
-  res.json({ ok: true, data: CHAT_PRESETS });
+  res.json({
+    ok: true,
+    data: CHAT_PRESETS.map(({ code, label, body, opens_support }) => ({
+      code,
+      label,
+      body,
+      opens_support: Boolean(opens_support),
+    })),
+  });
 });
 
 router.get('/:matchId/messages', async (req, res) => {
@@ -25,7 +35,8 @@ router.get('/:matchId/messages', async (req, res) => {
     const match = await repo.getById('matches', req.params.matchId);
     if (!match) return res.status(404).json({ ok: false, error: 'Emparejamiento no encontrado' });
     const data = await comms.listMessages(match.id);
-    res.json({ ok: true, data });
+    const chat_free = await isMatchChatFree(match);
+    res.json({ ok: true, data, chat_free, chat_mode: chat_free ? 'free' : 'presets_only' });
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al leer mensajes' });
@@ -37,14 +48,52 @@ router.post('/:matchId/messages', optionalAuth, async (req, res) => {
     const match = await repo.getById('matches', req.params.matchId);
     if (!match) return res.status(404).json({ ok: false, error: 'Emparejamiento no encontrado' });
     const role = resolveActorRole(req);
-    let body = (req.body?.body || '').trim();
     const preset = presetByCode(req.body?.preset_code);
+    let body = (req.body?.body || '').trim();
     if (preset) body = preset.body;
+
     if (!body) return res.status(400).json({ ok: false, error: 'Mensaje vacío' });
+
+    const chatFree = await isMatchChatFree(match);
+    const isAdmin = req.user?.role === 'admin';
+
+    if (!preset && !chatFree && !isAdmin) {
+      return res.status(403).json({
+        ok: false,
+        error:
+          'Solo puedes usar los mensajes rápidos del pedido. Para texto libre, usa «Solicitar agente Cubik» y espera atención humana.',
+        chat_mode: 'presets_only',
+      });
+    }
+
+    if (preset?.opens_support && req.user?.sub) {
+      try {
+        await support.createCase({
+          match_id: match.id,
+          user: req.user,
+          subject: 'Solicitud agente humano — chat emparejamiento',
+          initial_message: body,
+          auto: false,
+        });
+        await comms.addNotification({
+          match_id: match.id,
+          for_role: 'shipper',
+          type: 'support',
+          title: 'Solicitud de agente registrada',
+          body: 'Un moderador Cubik revisará el caso. Cuando atienda, podrás escribir libremente en el chat.',
+        });
+      } catch (err) {
+        console.error('support case from chat preset', err);
+      }
+    }
+
+    if (isAdmin && !preset) {
+      await enableMatchFreeChat(match.id);
+    }
 
     const msg = await comms.addMessage({
       match_id: match.id,
-      sender_role: role,
+      sender_role: isAdmin && !preset ? 'moderator' : role,
       body,
       preset_code: preset?.code || null,
     });
@@ -62,7 +111,8 @@ router.post('/:matchId/messages', optionalAuth, async (req, res) => {
       body: `${pairLine}${senderName}: ${body.slice(0, 100)}`,
     });
 
-    res.status(201).json({ ok: true, data: msg });
+    const chat_free = isAdmin ? true : await isMatchChatFree(match);
+    res.status(201).json({ ok: true, data: msg, chat_free, chat_mode: chat_free ? 'free' : 'presets_only' });
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al enviar mensaje' });

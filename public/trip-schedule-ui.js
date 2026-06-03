@@ -53,10 +53,10 @@ const TripScheduleUI = {
     const out = { schedule_mode: mode };
     if (form.id === 'form-load') {
       const pickup = root.querySelector('[name="scheduled_pickup_at"]')?.value;
-      const needed = root.querySelector('[name="needed_by_at"]')?.value;
-      if (mode === 'scheduled' && pickup) out.scheduled_pickup_at = pickup;
-      if (needed) out.needed_by_at = needed;
-      if (mode === 'scheduled' && pickup) out.cargo_ready_at = pickup;
+      if (mode === 'scheduled' && pickup) {
+        out.scheduled_pickup_at = pickup;
+        out.cargo_ready_at = pickup;
+      }
     } else if (form.id === 'form-offer') {
       const depart = root.querySelector('[name="scheduled_depart_at"]')?.value;
       if (mode === 'scheduled' && depart) out.scheduled_depart_at = depart;
@@ -70,20 +70,31 @@ function formatTripScheduleHtml(row, kind = 'load') {
   const mode = row.schedule_mode || 'now';
   const at =
     kind === 'offer' ? row.scheduled_depart_at : row.scheduled_pickup_at || row.cargo_ready_at;
-  const needed = kind === 'load' && row.needed_by_at ? row.needed_by_at : null;
+  const etaDest =
+    kind === 'load' && row.needed_by_at && row.status === 'in_transit'
+      ? row.needed_by_at
+      : null;
 
   if (mode === 'scheduled' && at) {
     const when =
       typeof formatDateTime === 'function' ? formatDateTime(at) : new Date(at).toLocaleString('es-CL');
-    const deadline = needed && typeof formatDateTime === 'function' ? formatDateTime(needed) : '';
     const label = kind === 'offer' ? 'Salida programada' : 'Retiro programado';
     let html = `<p class="trip-schedule-line"><span class="pill pill-scheduled">Programado</span> ${label}: <strong>${when}</strong>`;
-    if (deadline) html += ` · Entrega antes de <strong>${deadline}</strong>`;
+    if (etaDest) {
+      const eta =
+        typeof formatDateTime === 'function' ? formatDateTime(etaDest) : new Date(etaDest).toLocaleString('es-CL');
+      html += ` · ETA destino (en ruta): <strong>${eta}</strong>`;
+    }
     html += '</p>';
     return html;
   }
   if (mode === 'now') {
     const txt = kind === 'offer' ? 'Disponible ya' : 'Retiro lo antes posible';
+    if (etaDest) {
+      const eta =
+        typeof formatDateTime === 'function' ? formatDateTime(etaDest) : new Date(etaDest).toLocaleString('es-CL');
+      return `<p class="muted trip-schedule-line">${txt} · ETA destino (en ruta): <strong>${eta}</strong></p>`;
+    }
     return `<p class="muted trip-schedule-line">${txt}</p>`;
   }
   return '';

@@ -235,6 +235,12 @@ router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
       cargo_ready_at: schedule.cargo_ready_at || body.cargo_ready_at,
       distance_duration_min: body.distance_duration_min,
     });
+    const noteParts = [];
+    if (body.notes?.trim()) noteParts.push(body.notes.trim());
+    if (body.truck_type_label) noteParts.push(`Camión: ${body.truck_type_label}`);
+    if (Number(body.trips_required) > 1) {
+      noteParts.push(`~${body.trips_required} viajes sugeridos`);
+    }
     const row = await repo.insert('load_requests', {
       shipper_user_id: req.user?.sub || null,
       company_name: companyName,
@@ -260,7 +266,7 @@ router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
       eta_total_min: timing.eta_total_min,
       prep_checklist: timing.prep_checklist,
       status: 'published',
-      notes: body.notes?.trim() || null,
+      notes: noteParts.length ? noteParts.join(' · ') : null,
       budget_min_clp: body.budget_min_clp != null ? Number(body.budget_min_clp) : null,
       budget_max_clp: body.budget_max_clp != null ? Number(body.budget_max_clp) : null,
       ...addressPayload(body),

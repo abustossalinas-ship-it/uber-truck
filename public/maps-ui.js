@@ -9,6 +9,36 @@ const MapsUI = {
     heavy: { kg_per_pallet: 1200, kg_per_m3: 1000 },
   },
 
+  isSpecificPlace(typesValue) {
+    const types = String(typesValue || '')
+      .split(',')
+      .map((t) => t.trim())
+      .filter(Boolean);
+    const SPECIFIC = new Set([
+      'street_address',
+      'route',
+      'premise',
+      'subpremise',
+      'establishment',
+      'point_of_interest',
+      'store',
+      'storage',
+      'warehouse',
+      'transit_station',
+    ]);
+    const VAGUE = new Set([
+      'locality',
+      'administrative_area_level_1',
+      'administrative_area_level_2',
+      'administrative_area_level_3',
+      'political',
+      'country',
+    ]);
+    if (!types.length) return false;
+    if (types.some((t) => SPECIFIC.has(t))) return true;
+    return types.some((t) => !VAGUE.has(t) && t !== 'geocode');
+  },
+
   async init() {
     try {
       const r = await fetch('/api/maps/status');
@@ -17,6 +47,7 @@ const MapsUI = {
     } catch {
       this.configured = false;
     }
+    this.bindIosKeyboard();
     document.querySelectorAll('.maps-banner').forEach((el) => {
       el.hidden = this.configured;
     });
@@ -47,11 +78,12 @@ const MapsUI = {
   },
 
   clearRole(form, role) {
-    const fields = ['address', 'commune', 'city', 'region', 'lat', 'lng', 'place_id'];
+    const fields = ['address', 'commune', 'city', 'region', 'lat', 'lng', 'place_id', 'place_types'];
     fields.forEach((suffix) => {
       const el = form.querySelector(`[name="${role}_${suffix}"]`);
       if (el) el.value = '';
     });
+    this.updateGeoUi(form, role);
   },
 
   updateFormGate(form) {
@@ -75,13 +107,78 @@ const MapsUI = {
 
   assertFormReady(form) {
     if (!this.configured) return null;
-    if (!this.isRoleValidated(form, 'origin')) {
-      return 'Selecciona el origen desde la lista de Google Maps (no solo escribas texto).';
-    }
-    if (!this.isRoleValidated(form, 'destination')) {
-      return 'Selecciona el destino desde la lista de Google Maps (no solo escribas texto).';
+    for (const role of ['origin', 'destination']) {
+      const label = role === 'origin' ? 'Origen' : 'Destino';
+      const wrap = form.querySelector(`[data-address="${role}"]`);
+      const input = wrap?.querySelector('.address-search');
+      if (input?.value.trim() && input.dataset.mapsValidated !== '1') {
+        return `${label}: elige una dirección de la lista de Google Maps (no escribas solo «${input.value.trim()}»).`;
+      }
+      if (!this.isRoleValidated(form, role)) {
+        return `${label}: selecciona la dirección desde la lista de Google Maps (un clic en la sugerencia).`;
+      }
+      const types = form.querySelector(`[name="${role}_place_types"]`)?.value;
+      if (types && !this.isSpecificPlace(types)) {
+        return `${label}: la dirección es muy genérica. Indica calle, bodega, planta o puerto concreto (no solo ciudad o región).`;
+      }
     }
     return null;
+  },
+
+  bindIosKeyboard() {
+    if (this._iosKbBound) return;
+    this._iosKbBound = true;
+    const apply = () => {
+      const vv = window.visualViewport;
+      if (!vv) return;
+      const kb = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+      document.documentElement.style.setProperty('--kb-inset', `${Math.round(kb)}px`);
+    };
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', apply);
+      window.visualViewport.addEventListener('scroll', apply);
+      apply();
+    }
+  },
+
+  scrollAddressIntoView(input) {
+    if (!input) return;
+    const scrollMain = () => {
+      const main =
+        document.querySelector('body.cubik-app.app-main-visible main') ||
+        document.querySelector('main') ||
+        document.scrollingElement;
+      if (main && typeof main.scrollTo === 'function') {
+        const rect = input.getBoundingClientRect();
+        const top = rect.top + (main.scrollTop || window.scrollY) - 72;
+        main.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+      } else {
+        input.scrollIntoView({ block: 'start', behavior: 'smooth' });
+      }
+    };
+    setTimeout(scrollMain, 80);
+    setTimeout(scrollMain, 320);
+  },
+
+  updateGeoUi(form, role) {
+    const validated = this.isRoleValidated(form, role);
+    const geo = form.querySelector(`[data-address-geo="${role}"]`);
+    const summary = form.querySelector(`[data-address-summary="${role}"]`);
+    const block = form.querySelector(`[data-address-block="${role}"]`);
+    if (block) block.classList.toggle('address-validated', validated);
+    if (geo) geo.classList.toggle('address-geo-ready', validated);
+    if (summary) {
+      if (validated) {
+        const addr = form.querySelector(`[name="${role}_address"]`)?.value;
+        const commune = form.querySelector(`[name="${role}_commune"]`)?.value;
+        const region = form.querySelector(`[name="${role}_region"]`)?.value;
+        summary.hidden = false;
+        summary.textContent = [addr, commune, region].filter(Boolean).join(' · ');
+      } else {
+        summary.hidden = true;
+        summary.textContent = '';
+      }
+    }
   },
 
   bindAddressField(form, wrap) {
@@ -91,9 +188,24 @@ const MapsUI = {
     if (!input || !list) return;
 
     const hide = () => {
+      wrap.classList.remove('address-suggestions-open');
       list.hidden = true;
       list.innerHTML = '';
     };
+
+    input.addEventListener('focus', () => {
+      document.body.classList.add('keyboard-open');
+      this.scrollAddressIntoView(input);
+    });
+    input.addEventListener('blur', () => {
+      window.setTimeout(() => {
+        const active = document.activeElement;
+        if (!active?.closest('.address-wrap') && !active?.closest('.address-suggestions')) {
+          document.body.classList.remove('keyboard-open');
+          hide();
+        }
+      }, 150);
+    });
 
     input.addEventListener('input', () => {
       clearTimeout(this._debounce);
@@ -120,6 +232,7 @@ const MapsUI = {
             hide();
             return;
           }
+          wrap.classList.add('address-suggestions-open');
           list.hidden = false;
           list.innerHTML = j.data
             .map(
@@ -127,6 +240,7 @@ const MapsUI = {
                 `<li><button type="button" data-place-id="${p.place_id}">${p.description}</button></li>`
             )
             .join('');
+          this.scrollAddressIntoView(input);
         } catch {
           hide();
         }
@@ -144,7 +258,20 @@ const MapsUI = {
         const r = await fetch(`/api/maps/place/${btn.dataset.placeId}`);
         const j = await r.json();
         if (!j.ok) return;
+        if (j.data.types?.length && !this.isSpecificPlace(j.data.types.join(','))) {
+          input.dataset.mapsValidated = '';
+          input.dataset.mapsLocked = '';
+          this.clearRole(form, role);
+          alert(
+            role === 'origin'
+              ? 'Origen demasiado genérico. Busca una dirección concreta: calle, bodega o planta (no solo el nombre de la ciudad).'
+              : 'Destino demasiado genérico. Busca puerto, bodega o dirección exacta (no solo «Arica» o una comuna).'
+          );
+          return;
+        }
         this.applyPlace(form, role, j.data);
+        document.body.classList.remove('keyboard-open');
+        hide();
         form.dispatchEvent(new Event('maps:place-selected'));
       } catch {
         alert('No se pudo cargar la dirección');
@@ -168,6 +295,10 @@ const MapsUI = {
     set('lat', place.lat);
     set('lng', place.lng);
     set('place_id', place.place_id);
+    set('place_types', Array.isArray(place.types) ? place.types.join(',') : '');
+    const search = form.querySelector(`[data-address="${role}"] .address-search`);
+    if (search) search.dataset.mapsValidated = '1';
+    this.updateGeoUi(form, role);
   },
 
   async updateDistance(form) {
@@ -280,7 +411,12 @@ async function bindCubicacionPresets() {
           w.dataset.userEdited = '';
           if (p.weight_kg != null) w.value = p.weight_kg;
         }
+        form.querySelector('[name="volume_m3"]') && (form.querySelector('[name="volume_m3"]').dataset.userEdited = '');
+        form.querySelector('[name="pallets"]') && (form.querySelector('[name="pallets"]').dataset.userEdited = '');
+        form.querySelector('[name="truck_type_preference"]') &&
+          (form.querySelector('[name="truck_type_preference"]').dataset.userEdited = '');
         form._recalcWeight?.();
+        if (typeof LoadCapacityUI !== 'undefined') LoadCapacityUI.recalc(form);
       });
     }
     if (offerSel) {

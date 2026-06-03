@@ -2,6 +2,12 @@
 
 const CHAT_PRESETS = [
   {
+    code: 'request_human',
+    label: 'Solicitar agente Cubik',
+    body: 'Solicito que un agente humano de Cubik revise este emparejamiento y nos ayude a coordinar.',
+    opens_support: true,
+  },
+  {
     code: 'delay_traffic',
     label: 'Retraso — tráfico / restricción',
     body: 'Informo retraso por tráfico o restricción vial. Nueva ETA en cuanto confirme.',

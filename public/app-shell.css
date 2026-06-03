@@ -723,4 +723,69 @@ body.cubik-app.app-deep main .card {
     min-height: 100dvh;
     min-height: -webkit-fill-available;
   }
+
+  /* Evita zoom al enfocar inputs (<16px) */
+  input,
+  select,
+  textarea,
+  .address-search {
+    font-size: 16px;
+  }
+}
+
+/* Teclado iOS: ajustar área scroll del formulario */
+:root {
+  --kb-inset: 0px;
+}
+
+body.keyboard-open.cubik-app.app-authed.app-main-visible main {
+  bottom: calc(var(--app-nav-h) + var(--app-safe-bottom) + var(--kb-inset, 0px));
+  scroll-padding-bottom: calc(var(--kb-inset, 0px) + 1rem);
+}
+
+body.keyboard-open main {
+  scroll-padding-bottom: calc(var(--kb-inset, 0px) + 12rem);
+}
+
+/* Direcciones en móvil — menos scroll, sugerencias sobre teclado */
+@media (max-width: 768px) {
+  .address-route-block {
+    margin-bottom: 0.85rem;
+    padding-bottom: 0.25rem;
+  }
+
+  .address-search {
+    scroll-margin-top: 4.5rem;
+    scroll-margin-bottom: min(42vh, 280px);
+  }
+
+  /* Ocultar comuna/ciudad/región hasta elegir dirección (se muestra resumen) */
+  .address-geo-fields:not(.address-geo-ready) {
+    display: none;
+  }
+
+  .address-geo-summary {
+    margin: 0 0 0.65rem;
+    padding: 0.5rem 0.65rem;
+    background: var(--surface-cool);
+    border-radius: 8px;
+    font-size: 0.82rem;
+    line-height: 1.35;
+    word-break: break-word;
+  }
+
+  .address-wrap.address-suggestions-open .address-suggestions {
+    position: fixed;
+    left: max(0.75rem, var(--app-safe-left, 0px));
+    right: max(0.75rem, var(--app-safe-right, 0px));
+    bottom: calc(var(--kb-inset, 0px) + max(0.5rem, env(safe-area-inset-bottom, 0px)));
+    max-height: min(240px, 38vh);
+    z-index: 600;
+    box-shadow: 0 -8px 28px rgba(15, 39, 68, 0.18);
+  }
+
+  body.cubik-app.app-authed.app-main-visible main form#form-load,
+  body.cubik-app.app-authed.app-main-visible main form#form-offer {
+    padding-bottom: 1.25rem;
+  }
 }

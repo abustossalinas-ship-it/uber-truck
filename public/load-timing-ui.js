@@ -69,6 +69,7 @@ const LoadTimingUI = {
     );
     lines.push(`Descarga destino: ${timing.unload_min} min`);
     lines.push(`Tiempo total estimado: ~${timing.eta_total_min} min`);
+    lines.push('ETA en destino: al marcar «En ruta» (tráfico en vivo)');
     box.textContent = lines.join(' · ');
     box.classList.add('distance-box-eta');
   },

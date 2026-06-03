@@ -1,6 +1,6 @@
 {
-  "version": "0.0.82",
+  "version": "0.0.85",
   "git_sha": "7328719",
   "ui": "match-cancel-v2",
-  "note": "Arranque app bundle local; API en Railway"
+  "note": "iPhone direcciones + validación form + chat presets"
 }

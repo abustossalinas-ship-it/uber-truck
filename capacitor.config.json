@@ -2,14 +2,6 @@
   "appId": "cl.cubik.logistics",
   "appName": "Cubik",
   "webDir": "public",
-  "server": {
-    "url": "https://uber-truck-production.up.railway.app",
-    "androidScheme": "https",
-    "allowNavigation": [
-      "uber-truck-production.up.railway.app",
-      "*.up.railway.app"
-    ]
-  },
   "android": {
     "allowMixedContent": false
   },
@@ -18,10 +10,7 @@
       "launchShowDuration": 500,
       "launchAutoHide": true,
       "backgroundColor": "#F4F7FB",
-      "showSpinner": false,
-      "useDialog": true,
-      "androidSplashResourceName": "splash",
-      "androidScaleType": "CENTER_INSIDE"
+      "showSpinner": false
     },
     "StatusBar": {
       "style": "DARK",

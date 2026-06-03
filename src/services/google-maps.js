@@ -44,7 +44,7 @@ async function autocomplete(input) {
 async function placeDetails(placeId) {
   const data = await googleGet('place/details/json', {
     place_id: placeId,
-    fields: 'address_component,geometry,formatted_address,name',
+    fields: 'address_component,geometry,formatted_address,name,types',
   });
   const r = data.result;
   if (!r) return null;
@@ -54,6 +54,7 @@ async function placeDetails(placeId) {
     place_id: placeId,
     formatted_address: r.formatted_address,
     name: r.name,
+    types: r.types || [],
     lat: loc?.lat ?? null,
     lng: loc?.lng ?? null,
     commune: parsed.commune,
@@ -63,25 +64,29 @@ async function placeDetails(placeId) {
   };
 }
 
-async function distanceKm(origin, destination) {
+async function distanceKm(origin, destination, opts = {}) {
   const o = `${origin.lat},${origin.lng}`;
   const d = `${destination.lat},${destination.lng}`;
-  const data = await googleGet('distancematrix/json', {
+  const params = {
     origins: o,
     destinations: d,
     mode: 'driving',
     units: 'metric',
-  });
+  };
+  if (opts.traffic) params.departure_time = 'now';
+  const data = await googleGet('distancematrix/json', params);
   const el = data.rows?.[0]?.elements?.[0];
   if (!el || el.status !== 'OK') {
     return { ok: false, error: el?.status || 'NO_ROUTE' };
   }
+  const durationSec = el.duration_in_traffic?.value ?? el.duration.value;
   return {
     ok: true,
     distance_km: Math.round((el.distance.value / 1000) * 10) / 10,
-    duration_min: Math.round(el.duration.value / 60),
+    duration_min: Math.round(durationSec / 60),
     distance_text: el.distance.text,
-    duration_text: el.duration.text,
+    duration_text: el.duration_in_traffic?.text || el.duration.text,
+    duration_in_traffic: Boolean(el.duration_in_traffic),
   };
 }
 

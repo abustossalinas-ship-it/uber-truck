@@ -47,6 +47,8 @@ const { openCaseForCancelledMatch } = require('../lib/support-cases');
 const { logMatchTrip } = require('../lib/match-trip-log');
 const { listTripEvents } = require('../lib/trip-events');
 const { buildMatchTracking } = require('../lib/match-tracking');
+const maps = require('../services/google-maps');
+const { computeDestinationEtaFromRoute } = require('../lib/load-time-estimate');
 
 const router = express.Router();
 const operatorGate = [requireAuthIfDb, requireApprovedOperator, requireBankAccount, requirePenaltyClear];
@@ -647,7 +649,22 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
           error: 'Solo el transportista marca que el camión salió / está en ruta',
         });
       }
-      await repo.update('load_requests', match.load_request_id, { status: 'in_transit' });
+      const load = await repo.getById('load_requests', match.load_request_id);
+      let loadPatch = { status: 'in_transit' };
+      if (load?.origin_lat != null && load?.destination_lat != null && maps.isConfigured()) {
+        try {
+          const route = await maps.distanceKm(
+            { lat: load.origin_lat, lng: load.origin_lng },
+            { lat: load.destination_lat, lng: load.destination_lng },
+            { traffic: true }
+          );
+          const etaFields = computeDestinationEtaFromRoute(route, load);
+          if (etaFields) loadPatch = { ...loadPatch, ...etaFields };
+        } catch (err) {
+          console.error('ETA destino al iniciar viaje', err);
+        }
+      }
+      await repo.update('load_requests', match.load_request_id, loadPatch);
     }
 
     res.json({ ok: true, data: updated });

@@ -92,8 +92,24 @@ function buildLoadTimingPayload(body) {
     ...timing,
     prep_checklist: timing.prep_checklist,
     cargo_ready_at: parseIsoDatetime(body.cargo_ready_at),
-    needed_by_at: parseIsoDatetime(body.needed_by_at),
-    needed_by: body.needed_by_at ? body.needed_by_at.slice(0, 10) : body.needed_by || null,
+    /** ETA destino: se calcula al marcar «En ruta» (tráfico en vivo), no al publicar. */
+    needed_by_at: null,
+    needed_by: null,
+  };
+}
+
+/** ETA destino al iniciar viaje (origen → destino + descarga). */
+function computeDestinationEtaFromRoute(route, load) {
+  if (!route?.ok) return null;
+  const unload = Number(load?.unload_min) || 30;
+  const drive = Number(route.duration_min) || 0;
+  const etaMs = Date.now() + (drive + unload) * 60 * 1000;
+  const eta = new Date(etaMs);
+  return {
+    needed_by_at: eta.toISOString(),
+    needed_by: eta.toISOString().slice(0, 10),
+    distance_duration_min: drive,
+    eta_total_min: drive + unload,
   };
 }
 
@@ -125,6 +141,7 @@ module.exports = {
   DEFAULTS,
   suggestMinutes,
   buildLoadTimingPayload,
+  computeDestinationEtaFromRoute,
   formatTimingSummary,
   checklistLabel,
   parseChecklist,

@@ -1,6 +1,7 @@
 'use strict';
 
 const maps = require('../services/google-maps');
+const { addressQualityError, isSpecificAddress, parsePlaceTypes } = require('./geo-address-quality');
 
 function hasValidatedAddress(body, role) {
   const lat = body[`${role}_lat`];
@@ -21,17 +22,23 @@ function hasValidatedAddress(body, role) {
   );
 }
 
-/** Si Maps está configurado, origen y destino deben venir de una sugerencia elegida. */
+/** Si Maps está configurado, origen y destino deben venir de una sugerencia elegida y ser puntuales. */
 function requireMapsAddresses(body) {
   if (!maps.isConfigured()) return [];
   const errors = [];
   if (!hasValidatedAddress(body, 'origin')) {
     errors.push('Origen: elige una dirección real desde «Buscar dirección» (lista de Google Maps).');
+  } else {
+    const q = addressQualityError('origin', body.origin_place_types);
+    if (q) errors.push(q);
   }
   if (!hasValidatedAddress(body, 'destination')) {
     errors.push('Destino: elige una dirección real desde «Buscar dirección» (lista de Google Maps).');
+  } else {
+    const q = addressQualityError('destination', body.destination_place_types);
+    if (q) errors.push(q);
   }
   return errors;
 }
 
-module.exports = { hasValidatedAddress, requireMapsAddresses };
+module.exports = { hasValidatedAddress, requireMapsAddresses, isSpecificAddress, parsePlaceTypes };

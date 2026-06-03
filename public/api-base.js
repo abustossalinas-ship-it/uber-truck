@@ -27,9 +27,17 @@
   };
 
   const nativeFetch = window.fetch.bind(window);
+  window.docUrl = function docUrl(path) {
+    return resolveUrl(path);
+  };
+
   window.fetch = function patchedFetch(input, init) {
     if (typeof input === 'string') {
-      if (input.startsWith('/api') || input.startsWith('/health')) {
+      if (
+        input.startsWith('/api') ||
+        input.startsWith('/health') ||
+        input.startsWith('/docs/')
+      ) {
         return nativeFetch(resolveUrl(input), init);
       }
     }

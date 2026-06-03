@@ -1234,6 +1234,14 @@ document.body.addEventListener('click', (e) => {
 
 $('form-load').addEventListener('submit', async (e) => {
   e.preventDefault();
+  if (typeof LoadFormValidation !== 'undefined') {
+    const missing = LoadFormValidation.check(e.target);
+    if (missing.length) {
+      LoadFormValidation.show(missing);
+      return;
+    }
+    LoadFormValidation.clear();
+  }
   if (typeof assertCanOperate === 'function' && !assertCanOperate()) return;
   if (typeof Auth !== 'undefined' && Auth.user?.role === 'carrier') {
     alert('Tu cuenta es transportista. Publica en «Mis ofertas».');
@@ -1249,12 +1257,22 @@ $('form-load').addEventListener('submit', async (e) => {
   }
   const mapsErr = typeof MapsUI !== 'undefined' ? MapsUI.assertFormReady(e.target) : null;
   if (mapsErr) {
-    alert(mapsErr);
+    if (typeof LoadFormValidation !== 'undefined') {
+      LoadFormValidation.show([{ label: mapsErr, el: e.target.querySelector('.address-search') }]);
+    } else {
+      alert(mapsErr);
+    }
     return;
   }
   const fd = new FormData(e.target);
   if (!fd.get('terms_cargo_accepted')) {
-    alert('Debes aceptar los términos de confianza y carga para publicar.');
+    if (typeof LoadFormValidation !== 'undefined') {
+      LoadFormValidation.show([
+        { label: 'Aceptar términos de confianza y carga', el: document.getElementById('terms_cargo_accepted') },
+      ]);
+    } else {
+      alert('Debes aceptar los términos de confianza y carga para publicar.');
+    }
     return;
   }
   const body = cleanFormBody(fd);
@@ -1265,8 +1283,27 @@ $('form-load').addEventListener('submit', async (e) => {
   if (typeof TripScheduleUI !== 'undefined') {
     Object.assign(body, TripScheduleUI.getPayload(e.target));
   }
+  if (typeof LoadCapacityUI !== 'undefined') {
+    const cap = LoadCapacityUI.getPayload(e.target);
+    Object.assign(body, cap);
+    if (cap.trips_required > 1) {
+      const ok = confirm(
+        `${cap.message || 'La carga supera un camión.'}\n\n¿Publicar igual? (puede requerir dividir la carga o varios viajes).`
+      );
+      if (!ok) return;
+    }
+  }
   if (body.schedule_mode === 'scheduled' && !body.scheduled_pickup_at) {
-    alert('Al programar el viaje, indica fecha y hora de retiro.');
+    if (typeof LoadFormValidation !== 'undefined') {
+      LoadFormValidation.show([
+        {
+          label: 'Fecha y hora de retiro programado',
+          el: e.target.querySelector('[name="scheduled_pickup_at"]'),
+        },
+      ]);
+    } else {
+      alert('Al programar el viaje, indica fecha y hora de retiro.');
+    }
     return;
   }
   body.terms_cargo_accepted = true;
@@ -1275,9 +1312,15 @@ $('form-load').addEventListener('submit', async (e) => {
   const json = await res.json();
   if (!res.ok) {
     if (typeof handleApiKycError === 'function' && handleApiKycError(res, json)) return;
-    alert(json.errors?.join('\n') || json.error || 'Error');
+    const errLines = json.errors?.length ? json.errors : json.error ? [json.error] : ['Error al publicar'];
+    if (typeof LoadFormValidation !== 'undefined') {
+      LoadFormValidation.show(errLines.map((label) => ({ label, el: null })));
+    } else {
+      alert(errLines.join('\n'));
+    }
     return;
   }
+  if (typeof LoadFormValidation !== 'undefined') LoadFormValidation.clear();
   e.target.reset();
   const loadId = json.data?.id;
   if (loadId) {

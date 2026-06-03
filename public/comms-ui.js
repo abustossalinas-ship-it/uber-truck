@@ -1,6 +1,7 @@
 const Comms = {
   activeMatchId: null,
   presets: [],
+  chatFree: false,
 
   headers() {
     return typeof apiHeaders === 'function' ? apiHeaders() : { 'Content-Type': 'application/json' };
@@ -154,6 +155,7 @@ const Comms = {
     await this.loadPresets();
     await this.renderPresets();
     await this.loadMessages();
+    this.syncChatComposer();
   },
 
   closeChat() {
@@ -163,6 +165,32 @@ const Comms = {
       drawer.setAttribute('aria-hidden', 'true');
     }
     this.activeMatchId = null;
+    this.chatFree = false;
+    this.syncChatComposer();
+  },
+
+  syncChatComposer() {
+    const input = document.getElementById('chat-input');
+    const form = document.getElementById('form-chat');
+    const hint = document.getElementById('chat-mode-hint');
+    const locked = !this.chatFree;
+    if (input) {
+      input.disabled = locked;
+      input.placeholder = locked
+        ? 'Texto libre cuando un agente Cubik atienda…'
+        : 'Escribe un mensaje…';
+    }
+    if (form) {
+      const btn = form.querySelector('button[type="submit"]');
+      if (btn) btn.disabled = locked;
+    }
+    if (hint) {
+      hint.hidden = false;
+      hint.textContent = locked
+        ? 'Usa solo los mensajes rápidos del pedido. Para escribir libremente, pulsa «Solicitar agente Cubik» y espera atención humana.'
+        : 'Agente humano activo: ya puedes escribir libremente.';
+      hint.classList.toggle('chat-mode-free', !locked);
+    }
   },
 
   async renderPresets() {
@@ -182,20 +210,22 @@ const Comms = {
     const json = await fetch(`/api/comms/${this.activeMatchId}/messages`, {
       headers: this.headers(),
     }).then((r) => r.json());
+    this.chatFree = Boolean(json.chat_free);
     const rows = json.data || [];
     box.innerHTML =
       rows.length === 0
-        ? '<p class="muted">Sin mensajes. Usa un mensaje rápido o escribe abajo.</p>'
+        ? '<p class="muted">Sin mensajes. Usa un mensaje rápido abajo.</p>'
         : rows
             .map(
               (m) => `
-      <div class="chat-bubble ${m.sender_role === this.actorRole() ? 'mine' : 'theirs'}">
-        <span class="chat-role">${typeof roleLabel === 'function' ? roleLabel(m.sender_role) : m.sender_role}</span>
+      <div class="chat-bubble ${m.sender_role === this.actorRole() ? 'mine' : 'theirs'} ${m.sender_role === 'moderator' ? 'moderator' : ''}">
+        <span class="chat-role">${m.sender_role === 'moderator' ? 'Cubik' : typeof roleLabel === 'function' ? roleLabel(m.sender_role) : m.sender_role}</span>
         <p>${m.body}</p>
       </div>`
             )
             .join('');
     box.scrollTop = box.scrollHeight;
+    this.syncChatComposer();
   },
 
   async sendMessage(body, presetCode) {
@@ -214,6 +244,7 @@ const Comms = {
       alert(json.error || 'No se pudo enviar');
       return;
     }
+    if (json.chat_free != null) this.chatFree = Boolean(json.chat_free);
     document.getElementById('chat-input').value = '';
     await this.loadMessages();
     await this.refreshBell();
@@ -268,6 +299,10 @@ document.getElementById('chat-presets')?.addEventListener('click', (e) => {
 });
 document.getElementById('form-chat')?.addEventListener('submit', (e) => {
   e.preventDefault();
+  if (!Comms.chatFree) {
+    alert('Solo mensajes rápidos hasta que un agente Cubik atienda. Usa «Solicitar agente Cubik» si necesitas ayuda.');
+    return;
+  }
   const text = document.getElementById('chat-input')?.value?.trim();
   if (text) Comms.sendMessage(text);
 });

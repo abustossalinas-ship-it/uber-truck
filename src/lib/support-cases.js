@@ -2,6 +2,7 @@
 
 const repo = require('./repository');
 const { getMatchParties } = require('./match-parties');
+const { enableMatchFreeChat } = require('./match-chat');
 
 const STATUSES = ['open', 'in_review', 'resolved', 'closed'];
 
@@ -89,6 +90,9 @@ async function addMessage({ case_id, user, body, as_moderator }) {
     status: isMod && supportCase.status === 'open' ? 'in_review' : supportCase.status,
     updated_at: new Date().toISOString(),
   });
+  if (isMod && match?.id) {
+    await enableMatchFreeChat(match.id);
+  }
   return msg;
 }
 
@@ -110,10 +114,15 @@ async function updateCaseStatus(case_id, user, status) {
   if (!STATUSES.includes(status)) {
     throw Object.assign(new Error('Estado inválido'), { statusCode: 400 });
   }
-  return repo.update('support_cases', case_id, {
+  const updated = await repo.update('support_cases', case_id, {
     status,
     updated_at: new Date().toISOString(),
   });
+  if (status === 'in_review') {
+    const supportCase = await repo.getById('support_cases', case_id);
+    if (supportCase?.match_id) await enableMatchFreeChat(supportCase.match_id);
+  }
+  return updated;
 }
 
 async function openCaseForCancelledMatch(match, actorRole, penalty) {

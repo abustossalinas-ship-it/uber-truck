@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Revisión legal — Cubik (piloto)</title>
+  <style>
+    body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.45; max-width: 860px; margin: 2cm auto; color: #111; padding: 0 1rem; }
+    h1 { font-size: 18pt; border-bottom: 2px solid #f26522; padding-bottom: 0.4rem; }
+    h2 { font-size: 13pt; margin-top: 1.4em; color: #333; }
+    p, li { text-align: justify; }
+    .meta { font-size: 10pt; color: #555; }
+    .warn { background: #fff4e6; border-left: 4px solid #f26522; padding: 0.75rem 1rem; margin: 1em 0; }
+    .ok { background: #f0fdf4; border-left: 4px solid #16a34a; padding: 0.75rem 1rem; margin: 1em 0; }
+    table { border-collapse: collapse; width: 100%; margin: 0.8em 0; font-size: 10.5pt; }
+    th, td { border: 1px solid #ccc; padding: 8px 10px; vertical-align: top; text-align: left; }
+    th { background: #f3f4f6; }
+    a { color: #d95418; }
+    .doc-link { font-weight: 600; }
+  </style>
+</head>
+<body>
+  <p class="meta"><a href="/">← App Cubik</a> · <a href="/docs/">Documentación</a> · Versión app <strong>0.0.80</strong></p>
+
+  <h1>Pack legal para revisión web — Cubik</h1>
+
+  <div class="warn">
+    <strong>Borrador operativo.</strong> Material preparado para revisión por abogado en Chile. No constituye asesoría jurídica. El equipo Cubik mantiene la contratación del abogado externo.
+  </div>
+
+  <div class="ok">
+    <strong>Cómo revisar:</strong> abre cada enlace en una pestaña. Los documentos HTML son los mismos que verán usuarios y testers en producción bajo <code>/docs/</code>.
+  </div>
+
+  <h2>1. Confianza, carga e intermediación</h2>
+  <table>
+    <tr><th>Documento</th><th>Contenido</th><th>Enlace</th></tr>
+    <tr>
+      <td class="doc-link">Términos confianza y carga</td>
+      <td>Rol intermediario, declaración embarcador, incidentes, limitación responsabilidad, aceptación en app, <strong>§9 checklist abogado</strong>.</td>
+      <td><a href="Terminos-Confianza-Carga-Uber-Truck.html">Abrir HTML</a></td>
+    </tr>
+    <tr>
+      <td>Piloto M2 — riesgos y cobertura</td>
+      <td>Tabla ampliada quién responde; KPIs corredor RM ↔ San Antonio.</td>
+      <td><a href="Piloto-M2-Corredor-KPIs-Riesgos.html">Abrir HTML</a></td>
+    </tr>
+    <tr>
+      <td>Política de cancelación</td>
+      <td>Motivos, multas sugeridas, acuerdo mutuo.</td>
+      <td><a href="Politica-Cancelacion-Uber-Truck.html">Abrir HTML</a></td>
+    </tr>
+  </table>
+
+  <h2>2. Pagos, multas y medios de verificación</h2>
+  <table>
+    <tr><th>Documento</th><th>Contenido</th><th>Enlace</th></tr>
+    <tr>
+      <td>Multas y cuenta</td>
+      <td>Flujo declarar pago, comprobante, confirmación 24 h, cuenta bancaria.</td>
+      <td><a href="Multas-Cuenta-Uber-Truck.html">Abrir HTML</a></td>
+    </tr>
+    <tr>
+      <td>Pasarela tarjeta (tipo Copec)</td>
+      <td>Verificación titular + RUT + tarjeta; sandbox piloto o Mercado Pago en producción.</td>
+      <td><a href="PENALTY-AND-SUPPORT.md">PENALTY-AND-SUPPORT.md</a></td>
+    </tr>
+  </table>
+  <p class="meta">En app v0.0.80: Cuenta → <em>Agregar tarjeta</em> o cuenta bancaria. Operar requiere uno de los dos en producción.</p>
+
+  <h2>3. Datos personales y operación</h2>
+  <ul>
+    <li><strong>RUT, KYC, geolocalización:</strong> tratamiento en contexto marketplace transporte — revisar Ley 19.628 y Ley 21.719 (cuando entre en vigencia plena).</li>
+    <li><strong>Registro de aceptación:</strong> checkbox al publicar carga con versión <code>cargo-trust-v1</code> y timestamp en BD.</li>
+    <li><strong>Push FCM (Android):</strong> notificaciones fuera de app; token dispositivo ligado a usuario; servicio Firebase <strong>sin costo</strong> de licencia (solo infra Railway/Supabase).</li>
+  </ul>
+
+  <h2>4. Checklist abogado (resumen)</h2>
+  <ol>
+    <li>Confirmar que Cubik no es transportista ni custodio de mercadería.</li>
+    <li>Alcance responsabilidad embarcador (veracidad carga, licitud, valor referencial).</li>
+    <li>Seguros por viaje vs reembolso plataforma (hoy: no indemnización automática).</li>
+    <li>Procedimiento incidentes y cooperación con antecedentes.</li>
+    <li>Multas, medios de pago (transferencia, tarjeta verificada, futuro cobro integrado).</li>
+    <li>Privacidad: RUT, banco, tarjeta tokenizada, GPS, KYC.</li>
+    <li>Consumidor vs B2B; jurisdicción Chile.</li>
+    <li>Marca comercial Cubik vs nombre técnico repo.</li>
+  </ol>
+  <p>Detalle completo en <a href="Terminos-Confianza-Carga-Uber-Truck.html#">Términos §9</a>.</p>
+
+  <h2>5. Otros documentos de contexto</h2>
+  <ul>
+    <li><a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica</a></li>
+    <li><a href="Modelo-Negocio-Uber-Truck.html">Modelo de negocio</a></li>
+    <li><a href="Journey-Usuario-Uber-Truck.html">Journey usuario</a></li>
+    <li><a href="Probar-Uber-Truck.html">Guía testers</a></li>
+  </ul>
+
+  <p class="meta"><em>Última actualización pack legal: mayo 2026 · Cubik Envíos Chile · contacto operativo: admin@cubik.cl</em></p>
+</body>
+</html>

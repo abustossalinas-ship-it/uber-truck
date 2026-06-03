@@ -1,6 +1,8 @@
-# Cubik — Push notifications (Fase 4)
+# Cubik — Push notifications (FCM)
 
-El código ya incluye `@capacitor/push-notifications` (registro al abrir la app). Para que **lleguen notificaciones reales** hace falta Firebase (FCM) y Play Console.
+**Costo:** Firebase Cloud Messaging es **gratuito** (no hay licencia Google por push). Solo pagas tu backend (Railway) y Supabase.
+
+El código registra el token del dispositivo en `device_tokens` y envía push cuando hay notificaciones in-app (si `FCM_SERVER_KEY` está configurado en Railway).
 
 ## Requisitos
 
@@ -51,14 +53,12 @@ Android Studio → **Build → Clean** → **Run**.
 2. Logcat: buscar registro FCM / Capacitor Push.
 3. En Firebase → **Messaging** → enviar prueba al token del dispositivo.
 
-### 6. Backend (pendiente producto)
+### 6. Backend (v0.0.80)
 
-Hoy las notificaciones in-app son **campana + polling/WebSocket**. Para push desde servidor:
-
-- Guardar `device_token` por usuario en Supabase.
-- Endpoint o job que llame a FCM HTTP v1 al crear notificación.
-
-Eso es una tarea aparte del shell móvil.
+- SQL **027**: tabla `device_tokens`.
+- `POST /api/devices/push-token` — la app Android envía el token al iniciar sesión.
+- Variable Railway: `FCM_SERVER_KEY` (Firebase → Cloud Messaging → Server key).
+- Al crear notificación in-app, el servidor intenta push FCM al usuario del match.
 
 ## Si no configurás FCM
 

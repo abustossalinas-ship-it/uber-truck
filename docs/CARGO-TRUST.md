@@ -26,7 +26,7 @@ Ejecutar `supabase/migrations/011_cargo_trust.sql` en Supabase (o bloque en `RUN
 
 ## Términos legales
 
-Documento para usuarios: [Terminos-Confianza-Carga-Uber-Truck.html](./Terminos-Confianza-Carga-Uber-Truck.html). Revisión por abogado Chile antes de escala comercial.
+Documento para usuarios: [Terminos-Confianza-Carga-Uber-Truck.html](./Terminos-Confianza-Carga-Uber-Truck.html) (incluye **§9 checklist abogado** para piloto). Revisión legal externa antes de escala comercial.
 
 ## Próximas fases
 

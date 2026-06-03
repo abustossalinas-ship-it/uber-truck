@@ -794,7 +794,7 @@
     <div class="cancel-modal-backdrop" data-close-bank></div>
     <div class="cancel-modal-card" role="dialog">
       <h3>Cuenta bancaria</h3>
-      <p class="muted">Obligatoria en producción antes de publicar, ofertar o emparejar (como Uber).</p>
+      <p class="muted">Alternativa: puedes <button type="button" class="link-btn" id="btn-bank-to-card">verificar tarjeta</button> (tipo Copec).</p>
       <form id="form-bank">
         <label>Titular</label>
         <input id="bank-holder-name" required />
@@ -813,6 +813,42 @@
         <div class="cancel-modal-actions">
           <button type="button" class="btn-secondary" data-close-bank>Cerrar</button>
           <button type="submit" class="btn-danger">Guardar cuenta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="card-modal" class="cancel-modal" hidden aria-hidden="true">
+    <div class="cancel-modal-backdrop" data-close-card></div>
+    <div class="cancel-modal-card" role="dialog">
+      <h3>Agregar tarjeta</h3>
+      <p class="muted" id="card-modal-hint">Validamos titular y RUT. Cargo simulado de $990 CLP en piloto (reversado).</p>
+      <form id="form-card">
+        <label>Nombre titular (como en la tarjeta)</label>
+        <input id="card-holder-name" required autocomplete="cc-name" />
+        <label>RUT titular</label>
+        <input id="card-holder-rut" required placeholder="12.345.678-9" autocomplete="off" />
+        <label>Número de tarjeta</label>
+        <input id="card-number" required inputmode="numeric" autocomplete="cc-number" maxlength="19" placeholder="4539 1488 0343 6467" />
+        <div class="card-exp-row">
+          <div>
+            <label>Mes</label>
+            <input id="card-exp-month" required inputmode="numeric" maxlength="2" placeholder="12" autocomplete="cc-exp-month" />
+          </div>
+          <div>
+            <label>Año</label>
+            <input id="card-exp-year" required inputmode="numeric" maxlength="4" placeholder="28" autocomplete="cc-exp-year" />
+          </div>
+          <div>
+            <label>CVV</label>
+            <input id="card-cvv" required inputmode="numeric" maxlength="4" autocomplete="cc-csc" />
+          </div>
+        </div>
+        <p id="card-enroll-error" class="auth-error" role="alert" hidden></p>
+        <div class="cancel-modal-actions">
+          <button type="button" class="btn-secondary" data-close-card>Cerrar</button>
+          <button type="button" class="link-btn" id="btn-card-to-bank">Usar cuenta bancaria</button>
+          <button type="submit" class="btn-danger">Verificar tarjeta</button>
         </div>
       </form>
     </div>

@@ -106,11 +106,27 @@ const AppShell = {
     try {
       const perm = await Push.checkPermissions?.();
       if (perm?.receive === 'prompt') await Push.requestPermissions?.();
-      await Push.addListener?.('registration', () => {});
-      await Push.addListener?.('pushNotificationReceived', () => {});
+      await Push.addListener?.('registration', (ev) => {
+        const token = ev?.value;
+        if (!token || typeof Auth === 'undefined' || !Auth.token) return;
+        const base = typeof apiUrl === 'function' ? apiUrl('') : '';
+        const prefix = base.replace(/\/$/, '');
+        fetch(`${prefix}/api/devices/push-token`, {
+          method: 'POST',
+          headers: typeof apiHeaders === 'function' ? apiHeaders() : { 'Content-Type': 'application/json', Authorization: `Bearer ${Auth.token}` },
+          body: JSON.stringify({ token, platform: 'android' }),
+        }).catch(() => {});
+      });
+      await Push.addListener?.('pushNotificationReceived', (ev) => {
+        if (ev?.notification?.title) {
+          try {
+            window.dispatchEvent(new CustomEvent('cubik-push', { detail: ev.notification }));
+          } catch (_) {}
+        }
+      });
       await Push.register?.();
     } catch (_) {
-      /* FCM/google-services.json pendiente en Play */
+      /* google-services.json o permisos pendientes */
     }
   },
 

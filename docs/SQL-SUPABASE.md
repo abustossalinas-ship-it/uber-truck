@@ -178,6 +178,12 @@ Al final del script: `NOTIFY pgrst, 'reload schema'` + consultas de verificació
 
 Archivos sueltos (mismo contenido): `RUN_022_023_SUPABASE.sql`, `RUN_024_SUPABASE.sql`, `RUN_025_SUPABASE.sql`.
 
+### Tarjeta verificada + push FCM (027)
+
+→ [`docs/RUN_027_payment_methods_fcm.sql`](./RUN_027_payment_methods_fcm.sql)
+
+Tablas `user_payment_methods` (pasarela tipo Copec) y `device_tokens` (FCM).
+
 ### Aprobar cuentas KYC (después del SQL)
 
 En la app, ingresa como **admin** → barra **Panel administrador** → **Cuentas KYC — N pendientes** → Aprobar.

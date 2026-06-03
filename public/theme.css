@@ -1281,6 +1281,24 @@ body.kyc-pending #btn-create-match {
   margin: 0.5rem 0;
 }
 
+.card-exp-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 0.5rem;
+  margin: 0.35rem 0 0.5rem;
+}
+
+.payment-method-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.55rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  font-size: 0.85rem;
+  margin: 0.25rem 0.35rem 0.25rem 0;
+}
+
 .claim-proof-preview-wrap {
   margin: 0.5rem 0;
 }

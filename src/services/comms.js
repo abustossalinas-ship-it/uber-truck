@@ -451,7 +451,15 @@ async function addNotification({
   const sb = supabase.getClient();
   const { data, error } = await sb.from('match_notifications').insert(row).select().single();
   if (error) throw error;
-  return rowToApi(data);
+  const apiRow = rowToApi(data);
+  setImmediate(() => {
+    try {
+      const repo = require('../lib/repository');
+      const fcm = require('./fcm');
+      fcm.pushForNotification(repo, apiRow).catch(() => {});
+    } catch (_) {}
+  });
+  return apiRow;
 }
 
 async function markNotificationRead(id) {

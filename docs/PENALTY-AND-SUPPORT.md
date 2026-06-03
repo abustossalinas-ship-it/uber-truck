@@ -70,3 +70,27 @@ El GPS del transportista sigue activo con sesión. El interruptor solo controla 
 - Desbloqueo automático al pagar por pasarela (hoy solo `confirmed` por acreedor o `settled_moderator`).
 
 Referencia de diseño: [PENALTIES-AND-ACCOUNTS.md](./PENALTIES-AND-ACCOUNTS.md) fase C · [PROXIMOS-PASOS-ESTRATEGIA.md](./PROXIMOS-PASOS-ESTRATEGIA.md).
+
+## Validación tipo Copec (tarjeta + identidad) — piloto M2
+
+Hoy la app **no procesa tarjetas**: solo pide datos bancarios (transferencia) y valida presencia de campos con `BANK_ENFORCE`. **No hay validación real de PAN ni cruce RUT↔titular** con el emisor.
+
+Para acercarse al flujo Copec (medio de pago verificado antes de operar):
+
+| Paso | Qué hace | Proveedor típico Chile |
+|------|----------|-------------------------|
+| 1 | Usuario ingresa tarjeta en **formulario hospedado** (PCI) | Transbank Webpay Plus, Mercado Pago, Flow |
+| 2 | Pasarela devuelve **token** (nunca guardar PAN en Cubik) | API del proveedor |
+| 3 | **Microcargo** o autorización ($50–$990 CLP, luego reversa) | Webpay Oneclick / MP preapproval |
+| 4 | Guardar `payment_method_verified_at` + últimos 4 dígitos | Tabla `user_payment_methods` (futuro) |
+| 5 | RUT | Validación **módulo 11** en app + nombre titular declarado; cruce estricto RUT↔tarjeta solo con KYC del proveedor o manual en piloto |
+
+**Importante:** validar que la tarjeta existe y puede cobrarse **solo** la puede hacer una pasarela certificada. Cubik no debe recibir ni almacenar el número completo de tarjeta.
+
+### Camino recomendado para piloto
+
+1. **Corto plazo (sin contrato Transbank aún):** mantener cuenta bancaria + comprobante en multas; opcional validar RUT con algoritmo en UI y revisión manual admin para cuentas nuevas.
+2. **Mediano (bloque D):** contrato **Transbank Webpay Plus** o **Mercado Pago Checkout Pro / Customers** → endpoint `POST /api/account/payment-methods/enroll` → webhook confirma token → desbloquear `operating_status` igual que hoy con banco.
+3. **Multas:** reutilizar el mismo token para botón «Pagar multa» (cargo único) y desbloqueo automático al `approved` del webhook.
+
+Estimación implementación mínima pasarela: backend + webview/form redirect + webhook + migración SQL (~1–2 sprints según contrato comercial del proveedor).

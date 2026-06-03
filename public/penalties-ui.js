@@ -490,11 +490,15 @@ const Penalties = {
         : !hasAnyPenalty
           ? '<p class="muted">Sin multas en tus emparejamientos cancelados.</p>'
           : '';
-    const bankOperate = s.bank_required_for_operate
-      ? `<p class="penalty-bank-warn"><strong>Cuenta bancaria obligatoria</strong> para operar en producción (publicar, ofertar, emparejar). <button type="button" class="link-btn" id="btn-open-bank-inline">Inscribir ahora</button></p>`
+    const bankOperate = s.payment_required_for_operate || s.bank_required_for_operate
+      ? `<p class="penalty-bank-warn"><strong>Medio de pago obligatorio</strong> para operar (tarjeta verificada o cuenta bancaria). <button type="button" class="link-btn" id="btn-open-card-inline">Agregar tarjeta</button> · <button type="button" class="link-btn" id="btn-open-bank-inline">Cuenta bancaria</button></p>`
       : s.bank_required_for_charges
-        ? `<p class="penalty-bank-warn">Inscribe cuenta bancaria para multas y cobros.</p>`
+        ? `<p class="penalty-bank-warn">Inscribe tarjeta o cuenta bancaria para multas y cobros.</p>`
         : '';
+    const pm = s.payment_summary?.default;
+    const cardOk = s.payment_summary?.verified
+      ? `<p class="muted">Tarjeta verificada · ${pm?.card_brand || 'card'} •••• ${pm?.card_last4 || '****'} (${pm?.holder_rut || ''})</p>`
+      : `<button type="button" class="tab tab-sm" id="btn-open-card">Agregar tarjeta (Copec)</button>`;
     const bankOk = s.bank_account?.complete
       ? '<p class="muted">Cuenta bancaria registrada.</p>'
       : `<button type="button" class="tab tab-sm" id="btn-open-bank">Inscribir cuenta bancaria</button>`;
@@ -529,10 +533,13 @@ const Penalties = {
           : ''
       }
       ${bankOk}
+      ${cardOk}
       <p class="muted penalty-note">${s.note || ''}</p>
     `;
     document.getElementById('btn-open-bank')?.addEventListener('click', () => this.openBankModal());
     document.getElementById('btn-open-bank-inline')?.addEventListener('click', () => this.openBankModal());
+    document.getElementById('btn-open-card')?.addEventListener('click', () => this.openCardModal());
+    document.getElementById('btn-open-card-inline')?.addEventListener('click', () => this.openCardModal());
     this.bindPenaltyActions(box);
   },
 
@@ -589,6 +596,78 @@ const Penalties = {
       modal.hidden = true;
       modal.setAttribute('aria-hidden', 'true');
     }
+  },
+
+  openCardModal() {
+    const modal = document.getElementById('card-modal');
+    if (!modal) return;
+    const hint = document.getElementById('card-modal-hint');
+    const provider = this.summary?.payment_summary?.provider_label;
+    if (hint && provider) {
+      hint.textContent = `Pasarela: ${provider}. Validamos titular y RUT. Cargo simulado $990 CLP en piloto (reversado).`;
+    }
+    const pm = this.summary?.payment_summary?.default;
+    $('card-holder-name').value = pm?.holder_name || this.summary?.bank_account?.fields?.bank_holder_name || '';
+    $('card-holder-rut').value = pm?.holder_rut || this.summary?.bank_account?.fields?.bank_rut || '';
+    $('card-number').value = '';
+    $('card-exp-month').value = '';
+    $('card-exp-year').value = '';
+    $('card-cvv').value = '';
+    const err = document.getElementById('card-enroll-error');
+    if (err) err.hidden = true;
+    modal.hidden = false;
+    modal.setAttribute('aria-hidden', 'false');
+  },
+
+  closeCardModal() {
+    const modal = document.getElementById('card-modal');
+    if (modal) {
+      modal.hidden = true;
+      modal.setAttribute('aria-hidden', 'true');
+    }
+  },
+
+  async submitCard(e) {
+    e.preventDefault();
+    const errEl = document.getElementById('card-enroll-error');
+    const body = {
+      holder_name: $('card-holder-name').value,
+      holder_rut: $('card-holder-rut').value,
+      card_number: $('card-number').value,
+      exp_month: $('card-exp-month').value,
+      exp_year: $('card-exp-year').value,
+      cvv: $('card-cvv').value,
+    };
+    const res = await fetch('/api/account/payment-methods/enroll', {
+      method: 'POST',
+      headers: this.headers(),
+      body: JSON.stringify(body),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      if (errEl) {
+        errEl.textContent = json.error || 'No se pudo verificar la tarjeta';
+        errEl.hidden = false;
+      } else alert(json.error || 'No se pudo verificar');
+      return;
+    }
+    this.closeCardModal();
+    await this.refresh();
+    alert(json.message || 'Tarjeta verificada');
+  },
+
+  async removeCard(methodId) {
+    if (!methodId || !confirm('¿Eliminar esta tarjeta?')) return;
+    const res = await fetch(`/api/account/payment-methods/${encodeURIComponent(methodId)}`, {
+      method: 'DELETE',
+      headers: this.headers(),
+    });
+    const json = await res.json();
+    if (!res.ok) {
+      alert(json.error || 'No se pudo eliminar');
+      return;
+    }
+    await this.refresh();
   },
 
   async submitBank(e) {
@@ -653,8 +732,8 @@ const Penalties = {
     el.hidden = false;
     if (op?.blocked) document.body.classList.add('penalty-blocked');
     else document.body.classList.remove('penalty-blocked');
-    const title = this.summary?.bank_required_for_operate
-      ? 'Cuenta bancaria requerida'
+    const title = this.summary?.payment_required_for_operate || this.summary?.bank_required_for_operate
+      ? 'Medio de pago requerido'
       : op?.blocked
         ? op.block_reason === 'awaiting_confirm'
           ? 'Esperando confirmación del acreedor'
@@ -662,8 +741,8 @@ const Penalties = {
         : p?.pending_confirmations?.length
           ? 'Pagos por confirmar'
           : 'Multas pendientes';
-    const detail = this.summary?.bank_required_for_operate
-      ? 'Inscribe tu cuenta bancaria para publicar, ofertar y emparejar.'
+    const detail = this.summary?.payment_required_for_operate || this.summary?.bank_required_for_operate
+      ? 'Agrega tarjeta verificada o cuenta bancaria para publicar, ofertar y emparejar.'
       : op?.blocked
         ? op.message
         : p?.pending_confirmations?.length
@@ -690,6 +769,7 @@ const Penalties = {
       el.hidden = true;
     }
     this.closeBankModal();
+    this.closeCardModal();
   },
 };
 
@@ -698,8 +778,20 @@ function $(id) {
 }
 
 document.getElementById('form-bank')?.addEventListener('submit', (e) => Penalties.submitBank(e));
+document.getElementById('form-card')?.addEventListener('submit', (e) => Penalties.submitCard(e));
 document.querySelectorAll('[data-close-bank]').forEach((el) => {
   el.addEventListener('click', () => Penalties.closeBankModal());
+});
+document.querySelectorAll('[data-close-card]').forEach((el) => {
+  el.addEventListener('click', () => Penalties.closeCardModal());
+});
+document.getElementById('btn-bank-to-card')?.addEventListener('click', () => {
+  Penalties.closeBankModal();
+  Penalties.openCardModal();
+});
+document.getElementById('btn-card-to-bank')?.addEventListener('click', () => {
+  Penalties.closeCardModal();
+  Penalties.openBankModal();
 });
 document.getElementById('form-claim-payment')?.addEventListener('submit', (e) =>
   Penalties.submitClaimPayment(e)

@@ -6,7 +6,13 @@ const repo = require('../lib/repository');
 const { authMiddleware } = require('../lib/auth');
 const { buildPenaltySummary, bankAccountFromUser } = require('../lib/penalty-ledger');
 const { getOperatingStatus } = require('../lib/penalty-gate');
-const { bankEnforced, fetchBankAccount } = require('../lib/bank-gate');
+const { bankEnforced, fetchPaymentSetup } = require('../lib/bank-gate');
+const {
+  listPaymentMethods,
+  enrollPaymentMethod,
+  deletePaymentMethod,
+  paymentMethodsSummary,
+} = require('../lib/payment-methods');
 const {
   markPenaltyPaid,
   claimPenaltyPaid,
@@ -46,10 +52,17 @@ router.get('/summary', authMiddleware, async (req, res) => {
     }
     const operating = await getOperatingStatus(req.user);
 
-    const bank = req.user?.sub ? await fetchBankAccount(req.user.sub) : { complete: false, fields: {} };
+    const setup = req.user?.sub ? await fetchPaymentSetup(req.user.sub) : {
+      bank: { complete: false, fields: {} },
+      payment_methods: [],
+      card_verified: false,
+      can_operate: false,
+    };
+    const bank = setup.bank;
+    const paymentSummary = paymentMethodsSummary(setup.payment_methods);
     const enforced = bankEnforced() && req.user?.role !== 'admin';
-    const bank_required_for_operate = enforced && !bank.complete;
-    const needsBank = bank_required_for_operate || (penalties.total_owed_clp > 0 && !bank.complete);
+    const payment_required_for_operate = enforced && !setup.can_operate;
+    const needsBank = payment_required_for_operate || (penalties.total_owed_clp > 0 && !setup.can_operate);
 
     res.json({
       ok: true,
@@ -57,9 +70,12 @@ router.get('/summary', authMiddleware, async (req, res) => {
       penalties_error,
       operating_status: operating,
       bank_account: bank,
+      payment_methods: setup.payment_methods,
+      payment_summary: paymentSummary,
       bank_enforced: enforced,
-      can_generate_charge: bank.complete,
-      bank_required_for_operate,
+      can_generate_charge: setup.can_operate,
+      bank_required_for_operate: payment_required_for_operate,
+      payment_required_for_operate,
       bank_required_for_charges: needsBank,
       note:
         'Declara el pago; el acreedor tiene 24 h para confirmar. Sin confirmación se escala a moderador. Admin puede cerrar el caso.',
@@ -116,6 +132,59 @@ router.patch('/bank', authMiddleware, async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al guardar cuenta bancaria' });
+  }
+});
+
+router.get('/payment-methods', authMiddleware, async (req, res) => {
+  try {
+    const methods = await listPaymentMethods(req.user.sub);
+    res.json({
+      ok: true,
+      payment_methods: methods,
+      payment_summary: paymentMethodsSummary(methods),
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al listar medios de pago' });
+  }
+});
+
+router.post('/payment-methods/enroll', authMiddleware, async (req, res) => {
+  try {
+    const { method, message } = await enrollPaymentMethod(
+      req.user.sub,
+      req.user.email,
+      req.body || {}
+    );
+    const operating = await getOperatingStatus(req.user);
+    res.json({
+      ok: true,
+      payment_method: method,
+      message,
+      operating_status: operating,
+    });
+  } catch (e) {
+    const code = e.status || 500;
+    if (code !== 500) return res.status(code).json({ ok: false, error: e.message });
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'No se pudo verificar la tarjeta' });
+  }
+});
+
+router.delete('/payment-methods/:id', authMiddleware, async (req, res) => {
+  try {
+    await deletePaymentMethod(req.user.sub, req.params.id);
+    const operating = await getOperatingStatus(req.user);
+    res.json({
+      ok: true,
+      message: 'Tarjeta eliminada.',
+      operating_status: operating,
+    });
+  } catch (e) {
+    const code = e.status || 500;
+    if (code !== 500) return res.status(code).json({ ok: false, error: e.message });
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al eliminar tarjeta' });
   }
 });
 

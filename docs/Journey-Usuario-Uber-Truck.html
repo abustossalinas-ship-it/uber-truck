@@ -28,7 +28,7 @@
   <div class="doc-title-wrap">
     <h1>Journey de usuario — Uber Truck</h1>
     <p class="meta"><strong>Producto:</strong> App tipo Uber para carga por camión (backhaul).<br />
-    <strong>Versión:</strong> 2.6 · 2 jun 2026 · Software app <strong>0.0.78</strong> · Canal: <strong>app Cubik</strong> (web PWA + APK Android)</p>
+    <strong>Versión:</strong> 2.7 · 3 jun 2026 · Software app <strong>0.0.94</strong> · Canal: <strong>app Cubik</strong> (web PWA + APK Android)</p>
   </div>
 </div>
 
@@ -62,7 +62,7 @@
   <tr><th>Etapa</th><th>Acción</th><th>En la app</th><th>Emoción</th><th>Éxito</th></tr>
   <tr><td>1. Descubrimiento</td><td>Referido en ruta / nodo industrial</td><td>Link <a href="https://uber-truck-production.up.railway.app/probar">/probar</a> o APK</td><td>«¿Me pagan el espacio vacío?»</td><td>Abre Cubik</td></tr>
   <tr><td>2. Registro</td><td>Email + contraseña, rol transportista, empresa (<strong>Gmail/Apple: pendiente</strong>)</td><td>Registro / JWT</td><td>Desconfianza si es largo</td><td>Cuenta activa (KYC si piloto curado)</td></tr>
-  <tr><td>3. Publicar capacidad</td><td>Origen, destino, m³, tipo carga, ventana</td><td>Formulario transportista</td><td>«Que sea rápido»</td><td>Oferta publicada (&lt; 3 min)</td></tr>
+  <tr><td>3. Publicar capacidad</td><td>Origen, destino, pallets/m³, tipo camión, ventana (paridad con publicar carga)</td><td>Formulario transportista</td><td>«Que sea rápido»</td><td>Oferta publicada (&lt; 3 min)</td></tr>
   <tr><td>4. Propuesta + precio</td><td>Elige carga, envía <strong>oferta en CLP</strong> (puede estar fuera del rango del embarcador)</td><td>Tablero paso 3</td><td>«¿Me pagan bien el desvío?»</td><td>Oferta visible al embarcador</td></tr>
   <tr><td>5. Match</td><td>Embarcador <strong>acepta precio</strong> → match confirmado</td><td>Emparejamientos</td><td>«¿Cierra el trato?»</td><td>Aceptado en &lt; 30 min</td></tr>
   <tr><td>6. Viaje activo</td><td>Estados: aceptado → en ejecución; ve valor ref. mercadería declarado por embarcador</td><td><strong>Mis viajes → En curso</strong> o Emparejar</td><td>Espera en planta</td><td>Estado actualizado</td></tr>
@@ -79,7 +79,7 @@
   <tr><th>Etapa</th><th>Acción</th><th>En la app</th><th>Emoción</th><th>Éxito</th></tr>
   <tr><td>1. Necesidad</td><td>Carga urgente (ej. 2 pallets mañana)</td><td>Link <a href="https://uber-truck-production.up.railway.app/probar">/probar</a></td><td>«No hay camión»</td><td>Entra a Cubik</td></tr>
   <tr><td>2. Registro</td><td>Email + contraseña, rol embarcador (<strong>Gmail/Apple: pendiente</strong>)</td><td>Registro / JWT</td><td>«¿Es confiable?»</td><td>Cuenta activa</td></tr>
-  <tr><td>3. Publicar carga</td><td>Maps, peso/volumen, <strong>declaración mercadería</strong> (descripción + valor ref. CLP), guía/folio, <strong>términos</strong>, rango flete («Ver rango sugerido»)</td><td>Formulario embarcador</td><td>«¿Me cubren si pasa algo?»</td><td>Carga publicada con términos aceptados</td></tr>
+  <tr><td>3. Publicar carga</td><td>Maps (móvil OK), pallets ↔ m³ sync, preset cubicación, tipo camión, <strong>declaración mercadería</strong>, guía/folio, <strong>términos</strong>, rango flete</td><td>Formulario embarcador</td><td>«¿Me cubren si pasa algo?»</td><td>Carga publicada con términos aceptados</td></tr>
   <tr><td>4. Propuesta</td><td>Ve ofertas; transportista envía precio</td><td>Tablero + sugerencias</td><td>«¿Es justo?»</td><td>Compara ofertas</td></tr>
   <tr><td>5. Aceptar precio</td><td><strong>Aceptar precio y confirmar match</strong> (o ampliar rango si la oferta venía fuera)</td><td>Emparejamientos</td><td>«¿Cierro?»</td><td>Match aceptado</td></tr>
   <tr><td>6. Viaje activo</td><td>Sigue estados, chat y datos de carga declarados</td><td><strong>Mis viajes → En curso</strong> + notificaciones</td><td>Ansiedad SLA</td><td>Visibilidad sin llamar</td></tr>
@@ -103,7 +103,7 @@
   <tr><td>Calificar al otro</td><td>Mutuo post-<code>completed</code>; chips por rol; una nota por viaje y por rol</td></tr>
   <tr><td>Reputación ★</td><td>Promedio histórico en Completados (tablero Emparejar: pendiente M3)</td></tr>
   <tr><td>Pago en app</td><td>Pasarela + tarjeta validada (pendiente producción); hoy transferencia + comprobante</td></tr>
-  <tr><td>Cuenta y multas</td><td>Panel fijo con sesión; banco obligatorio en prod para operar</td></tr>
+  <tr><td>Cuenta y multas</td><td><strong>Billetera</strong>: varias cuentas bancarias (predeterminada, editar, eliminar) + tarjetas listadas; multas y comprobantes</td></tr>
   <tr><td>Entrar con Gmail / Apple</td><td>OAuth (pendiente); hoy email + contraseña</td></tr>
   <tr><td>Tarifa / oferta</td><td>Rango embarcador + oferta transportista + aceptación</td></tr>
   <tr><td>Seguro / garantía de viaje</td><td>Valor ref. mercadería + términos (seguro integrado: fase 3)</td></tr>
@@ -145,8 +145,15 @@
 </ol>
 <p class="meta">Técnico: migraciones SQL 012–014 · <a href="SQL-SUPABASE.md">SQL-SUPABASE.md</a> · <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica § bitácora</a>.</p>
 
-<h2 id="cuenta-multas">9. Cuenta, banco y multas (tipo Uber)</h2>
-<p>Con sesión, el recuadro <strong>Cuenta y multas</strong> queda visible (pestaña Cuenta). Antes de publicar u ofertar en <strong>producción</strong>, cada usuario debe completar datos bancarios chilenos (titular, RUT, banco, tipo, número).</p>
+<h2 id="cuenta-multas">9. Cuenta, billetera y multas (tipo Uber)</h2>
+<p>Con sesión, la pestaña <strong>Cuenta</strong> muestra <strong>Cuenta y multas</strong> y la sección <strong>Billetera</strong> (v0.0.94):</p>
+<ul>
+  <li><strong>Varias cuentas bancarias</strong> chilenas: agregar, editar, eliminar y marcar <strong>predeterminada</strong> (estilo Uber).</li>
+  <li>Validación de <strong>RUT</strong> y selector de <strong>banco</strong> desde lista oficial (v0.0.93).</li>
+  <li><strong>Tarjetas</strong> listadas (cobro integrado pendiente pasarela).</li>
+  <li>Antes de publicar u ofertar en <strong>producción</strong>, debe existir al menos una cuenta bancaria válida.</li>
+  <li>Web y APK comparten la misma billetera server-side; al refrescar Cuenta se sincroniza.</li>
+</ul>
 <h3>Flujo de multa tras cancelación</h3>
 <ol>
   <li>Al cancelar, la app sugiere monto y motivo; según el motivo, el <strong>deudor</strong> es embarcador o transportista.</li>
@@ -155,7 +162,7 @@
   <li>El <strong>acreedor</strong> (la contraparte: embarcador o transportista) entra a <strong>Pagos por confirmar (24 h)</strong>, abre el comprobante y <strong>confirma</strong> que recibió el pago o indica <strong>no recibí</strong>.</li>
   <li>Si no hay respuesta en 24 h o hay disputa, un <strong>moderador</strong> (admin) revisa el caso en soporte; no hay desbloqueo automático.</li>
 </ol>
-<p class="meta">Detalle técnico y API: <a href="PENALTY-AND-SUPPORT.md">PENALTY-AND-SUPPORT.md</a> · <a href="Multas-Cuenta-Uber-Truck.html">Multas y cuenta (HTML)</a> · Memoria: <a href="Memoria-tecnica-Uber-Truck.html">§ bitácora 29 may</a>.</p>
+<p class="meta">Detalle técnico y API: <a href="PENALTY-AND-SUPPORT.md">PENALTY-AND-SUPPORT.md</a> · <a href="Multas-Cuenta-Uber-Truck.html">Multas y cuenta (HTML)</a> · SQL 030 · Memoria: <a href="Memoria-tecnica-Uber-Truck.html">§ bitácora 3 jun</a>.</p>
 <p><strong>Futuro producción:</strong> validación de tarjeta y cobro integrado dentro de la app (como Uber); hoy no está implementado.</p>
 
 <h2 id="auth-email">9b. Acceso y correo (pendiente)</h2>
@@ -167,6 +174,19 @@
   <li><strong>Recuperar contraseña</strong> por enlace enviado al correo (Resend + dominio propio).</li>
 </ul>
 <p class="meta">Detalle: <a href="AUTH-AND-EMAIL-ROADMAP.md">AUTH-AND-EMAIL-ROADMAP.md</a> · <a href="Probar-Uber-Truck.html">Probar la app</a>.</p>
+
+<h2 id="cubicacion">9c. Cubicación al publicar carga (jun 2026)</h2>
+<ol>
+  <li>El embarcador indica <strong>pallets</strong> y/o <strong>volumen (m³)</strong>; la app sincroniza ambos (~1,2 m³ por pallet).</li>
+  <li>Elige un <strong>preset de cubicación</strong> (ej. 1 pallet, 2 pallets…); si excede el preset, pasa a <strong>Personalizado</strong>.</li>
+  <li>Sugerencia de <strong>tipo de camión</strong> y aviso de <strong>multi-viaje</strong> si la carga supera capacidad típica.</li>
+  <li>En móvil, el formulario Maps ya no desplaza el layout (v0.0.92).</li>
+</ol>
+<p class="meta">Técnico: <code>load-capacity-ui.js</code> · Memoria: <a href="Memoria-tecnica-Uber-Truck.html">bitácora 3 jun</a>.</p>
+
+<h2 id="push-fcm">9d. Notificaciones push (parcial)</h2>
+<p>Backend FCM configurado en Railway; la app Android registra token en <code>device_tokens</code>. Validación de recepción con <code>push-test</code> pendiente en <strong>dispositivo físico</strong> (emulador poco fiable).</p>
+<p class="meta">Guía: <a href="CUBIK-PUSH-FCM.md">CUBIK-PUSH-FCM.md</a>.</p>
 
 <h2>10. Estados en la app</h2>
 <p><strong>Oferta capacidad:</strong> draft · published · reserved · expired · cancelled</p>
@@ -211,6 +231,6 @@
 
 <p class="meta">Modelo de negocio: <a href="Modelo-Negocio-Uber-Truck.html">Modelo-Negocio-Uber-Truck.html</a> · Gantt y backlog: <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica v3.6</a> · Multas: <a href="PENALTY-AND-SUPPORT.md">PENALTY-AND-SUPPORT.md</a> · Auth/correo: <a href="AUTH-AND-EMAIL-ROADMAP.md">AUTH-AND-EMAIL-ROADMAP.md</a> · Probar: <a href="Probar-Uber-Truck.html">Probar-Uber-Truck.html</a></p>
 
-<p class="meta"><em>Fin del documento — v2.6 (2 jun 2026): acceso testers /probar + APK Android; app Cubik v0.0.78.</em></p>
+<p class="meta"><em>Fin del documento — v2.7 (3 jun 2026): billetera multi-cuenta, RUT/bancos, cubicación pallets↔m³, FCM backend OK; app Cubik v0.0.94.</em></p>
 </body>
 </html>

@@ -39,7 +39,7 @@
     <h1>Memoria técnica del proyecto</h1>
     <p class="meta"><strong>Producto:</strong> Uber Truck — marketplace de capacidad logística ociosa (backhaul), Chile.<br />
     <strong>Documento:</strong> memoria técnica viva del repositorio y del despliegue Railway.<br />
-    <strong>Versión documento:</strong> 3.7 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.78 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 2 jun 2026</p>
+    <strong>Versión documento:</strong> 3.8 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.94 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 3 jun 2026</p>
   </div>
 </div>
 
@@ -81,9 +81,11 @@
   <tr><td>Mapa en vivo / seguimiento GPS</td><td>Ubicación transportista + mapa en viaje activo</td><td class="g-done">Hecho (v0.0.34+)</td></tr>
   <tr><td>Pago en app</td><td>Pasarela + validar tarjeta (tipo Uber)</td><td class="g-todo">Pendiente producción — ver <a href="PENALTY-AND-SUPPORT.md">bloque D</a></td></tr>
   <tr><td>Calificación ★</td><td>Mutua 1–5 + chips por rol (embarcador/transportista), reputación histórica en <strong>Mis viajes</strong></td><td class="g-done">Hecho (012–014, v0.0.28–0.0.31)</td></tr>
-  <tr><td>Perfil y cuenta</td><td>Login, empresa, <strong>banco obligatorio</strong> (prod), multas, comprobante, confirmación acreedor, soporte moderador</td><td class="g-done">Hecho MVP (v0.0.50–0.0.57); pasarela futura</td></tr>
-  <tr><td>Reputación en tablero</td><td>Promedio ★ en cargas, ofertas, emparejamientos y sugerencias (M3)</td><td class="g-done">Hecho (v0.0.32)</td></tr>
-  <tr><td>App móvil Cubik (Android)</td><td>Capacitor + shell UX (bienvenida, bottom nav, bundle local)</td><td class="g-done">Hecho v0.0.75–0.0.78</td></tr>
+  <tr><td>Perfil y cuenta</td><td>Login, empresa, <strong>billetera</strong> (varias cuentas bancarias + tarjetas), multas, comprobante</td><td class="g-done">Hecho v0.0.94; pasarela tarjeta piloto</td></tr>
+  <tr><td>Publicar carga (cubicación)</td><td>Pallets ↔ m³ sync, preset cubicación → Personalizado, tipo camión + multi-viaje</td><td class="g-done">Hecho v0.0.90–0.0.93</td></tr>
+  <tr><td>Ofertar ruta (transportista)</td><td>Pallets, camión habitual en perfil, validación capacidad</td><td class="g-done">Hecho v0.0.90</td></tr>
+  <tr><td>Push móvil (FCM)</td><td>Registro token Android + envío servidor; prueba manual pendiente en dispositivo físico</td><td class="g-doing">Backend OK (v0.0.91+); validación push-test pendiente</td></tr>
+  <tr><td>App móvil Cubik (Android)</td><td>Capacitor + shell UX (bienvenida, bottom nav, bundle local)</td><td class="g-done">Hecho v0.0.75–0.0.94</td></tr>
   <tr><td>Distribución testers sin tienda</td><td>Link <code>/probar</code> (PWA) + APK debug</td><td class="g-done">Hecho jun 2026</td></tr>
   <tr><td>App iOS nativa</td><td>TestFlight / App Store</td><td class="g-todo">Pendiente — hoy PWA Safari vía <code>/probar</code></td></tr>
 </table>
@@ -388,14 +390,27 @@
 </ul>
 <p><strong>Comandos:</strong> <code>npm run cap:sync:bundle</code> · <code>npm run android:apk</code> · <code>npm run cap:open:android</code></p>
 
+<h2>Bitácora de avance — 3 junio 2026 (Cubik v0.0.90–0.0.94)</h2>
+<table>
+  <tr><th>Área</th><th>Entregado</th><th>Notas</th></tr>
+  <tr><td>Oferta transportista</td><td>Paridad con publicar carga: pallets, m³, tipo camión, camión habitual en perfil</td><td>SQL 029; <code>load-capacity-ui.js</code>; commits v0.0.90</td></tr>
+  <tr><td>Maps móvil embarcador</td><td>Publicar carga sin layout corrido; sugerencias Maps alineadas al input</td><td><code>maps-ui.js</code>, <code>app-shell.css</code> v0.0.91–0.0.92</td></tr>
+  <tr><td>FCM Railway</td><td><code>FCM_SERVICE_ACCOUNT_B64</code>, health <code>fcm.configured: true</code>, <code>device_tokens</code></td><td>Doc: <a href="CUBIK-PUSH-FCM.md">CUBIK-PUSH-FCM.md</a>; push-test manual pendiente en teléfono</td></tr>
+  <tr><td>Cuenta bancaria</td><td>Validador RUT + selector bancos Chile (lista API)</td><td>v0.0.93; <code>rut-chile-ui.js</code>, <code>chile-banks.js</code></td></tr>
+  <tr><td>Cubicación carga</td><td>Sync pallets ↔ m³ (~1,2 m³/pallet); preset → <strong>Personalizado</strong> al exceder</td><td><code>load-capacity-ui.js</code> v0.0.93</td></tr>
+  <tr><td>Billetera (tipo Uber)</td><td>Varias cuentas bancarias: agregar, editar, eliminar, predeterminada; tarjetas listadas</td><td>SQL 030 <code>user_bank_accounts</code>; API CRUD; v0.0.94</td></tr>
+  <tr><td>Validado usuario</td><td>Publicar carga OK prod; billetera sincronizada web ↔ APK; 2 cuentas bancarias en prod</td><td>Jun 2026</td></tr>
+  <tr><td>Pendiente</td><td>Confirmar recepción push en dispositivo físico (<code>push-test</code>)</td><td><code>device_tokens</code> registrado; ver § FCM</td></tr>
+</table>
+<p><strong>SQL usuario:</strong> ejecutar <a href="RUN_030_user_bank_accounts.sql">RUN_030_user_bank_accounts.sql</a> en Supabase (migra cuenta legacy + multi-cuenta).</p>
+<p><strong>Deploy:</strong> commits <code>38dee51</code> (v0.0.93), <code>f816bbe</code> (v0.0.94) · Railway <code>main</code>.</p>
+
 <h2>Próxima etapa (jun 2026)</h2>
 <ol>
-  <li><strong>P0 — Prueba funcional profunda</strong> (mañana): publicar carga + oferta + emparejar + viaje completo + calificar en ambos roles (2 cuentas / 2 emuladores).</li>
-  <li><strong>P0 — Piloto M2</strong>: 20 viajes <code>completed</code> en corredor RM ↔ Valparaíso/San Antonio con testers reales.</li>
-  <li><strong>P1 — Distribución</strong>: seguir con APK + link <code>/probar</code>; Play Console prueba cerrada cuando quieran tienda (USD 25).</li>
-  <li><strong>P1 — iPhone</strong>: testers vía <code>/probar</code> (PWA); TestFlight solo con Apple Developer (USD 99/año + Mac).</li>
-  <li><strong>P1 — Política privacidad</strong> URL pública antes de Play Store.</li>
-  <li><strong>P2 — Push FCM</strong>, keystore release, OAuth Gmail/Apple (bloque E).</li>
+  <li><strong>P0 — Piloto M2</strong>: 20 viajes <code>completed</code> corredor RM ↔ Valparaíso/San Antonio.</li>
+  <li><strong>P1 — Push FCM</strong>: validar <code>push-test</code> en celular físico (backend ya OK).</li>
+  <li><strong>P1 — Play Console</strong> prueba cerrada cuando suban tienda (USD 25).</li>
+  <li><strong>P2 — Pasarela / tarjeta</strong> producción, OAuth Gmail/Apple (bloque E).</li>
 </ol>
 <p>Detalle estratégico: <a href="PROXIMOS-PASOS-ESTRATEGIA.md">PROXIMOS-PASOS-ESTRATEGIA.md</a> · UX app: <a href="CUBIK-APP-UX.md">CUBIK-APP-UX.md</a> · Play: <a href="CUBIK-PLAY-STORE.md">CUBIK-PLAY-STORE.md</a></p>
 
@@ -476,8 +491,11 @@
   <tr><td>POST</td><td>/api/matches/:id/mutual-cancel</td><td>Acuerdo mutuo</td></tr>
   <tr><td>GET</td><td>/api/matches/cancel-options</td><td>Motivos y multas</td></tr>
   <tr><td>GET/POST</td><td>/api/comms/…</td><td>Chat y notificaciones</td></tr>
-  <tr><td>GET</td><td>/api/account/summary</td><td>Multas, plazos, <code>pending_confirmations</code>, <code>bank_required_for_operate</code></td></tr>
-  <tr><td>PATCH</td><td>/api/account/bank</td><td>Cuenta bancaria Chile</td></tr>
+  <tr><td>GET</td><td>/api/account/summary</td><td>Multas, billetera (<code>bank_accounts[]</code>), tarjetas</td></tr>
+  <tr><td>GET/POST/PATCH/DELETE</td><td>/api/account/bank-accounts…</td><td>Billetera multi-cuenta (v0.0.94)</td></tr>
+  <tr><td>GET</td><td>/api/account/chile-banks</td><td>Lista bancos Chile (selector)</td></tr>
+  <tr><td>PATCH</td><td>/api/account/bank</td><td>Upsert cuenta predeterminada (compat legacy)</td></tr>
+  <tr><td>GET/POST</td><td>/api/devices/push-status · push-test · push-token</td><td>FCM Android (v0.0.81+)</td></tr>
   <tr><td>POST</td><td>/api/account/penalties/:matchId/claim-paid</td><td>Deudor declara pago + comprobante (base64)</td></tr>
   <tr><td>GET</td><td>/api/account/penalties/:matchId/payment-proof</td><td>Imagen comprobante (JWT participante)</td></tr>
   <tr><td>POST</td><td>/api/account/penalties/:matchId/confirm-payment</td><td>Acreedor confirma recepción</td></tr>
@@ -522,6 +540,6 @@
   docs/            ← memoria HTML (este archivo)
   canvases/        ← estado de avance (Cursor)</code>
 
-<p class="meta"><em>Fin del documento — v3.7 (2 jun 2026): Cubik app móvil v0.0.78, link /probar, APK bundle, CORS Capacitor; software 0.0.78.</em></p>
+<p class="meta"><em>Fin del documento — v3.8 (3 jun 2026): Cubik v0.0.94 billetera multi-cuenta, RUT/bancos, cubicación pallets↔m³, FCM backend OK; push-test pendiente en dispositivo físico.</em></p>
 </body>
 </html>

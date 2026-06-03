@@ -11,6 +11,10 @@ data/store.json
 
 public/downloads/*.apk
 
+# Secretos Firebase (nunca en git)
+*-firebase-adminsdk-*.json
+android/app/google-services.json
+
 # Capacitor / Android build
 android/.gradle/
 android/.idea/

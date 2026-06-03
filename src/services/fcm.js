@@ -8,6 +8,7 @@ let cachedV1Exp = 0;
 let cachedServiceAccount = undefined;
 let serviceAccountInvalid = false;
 let serviceAccountWarned = false;
+let serviceAccountParseDetail = null;
 
 function warnInvalidServiceAccount(reason) {
   if (serviceAccountWarned) return;
@@ -18,33 +19,61 @@ function warnInvalidServiceAccount(reason) {
   );
 }
 
+function normalizeServiceAccountRaw(raw) {
+  let t = raw.trim();
+  if (
+    (t.startsWith('"') && t.endsWith('"')) ||
+    (t.startsWith("'") && t.endsWith("'"))
+  ) {
+    t = t.slice(1, -1).replace(/\\"/g, '"').replace(/\\n/g, '\n');
+  }
+  return t;
+}
+
+function tryParseServiceAccountJson(text) {
+  const sa = JSON.parse(text);
+  if (!sa?.client_email || !sa?.private_key || !sa?.project_id) {
+    throw new Error('falta client_email, private_key o project_id');
+  }
+  if (typeof sa.private_key === 'string' && sa.private_key.includes('\\n')) {
+    sa.private_key = sa.private_key.replace(/\\n/g, '\n');
+  }
+  return sa;
+}
+
+function decodeServiceAccountText(raw) {
+  const trimmed = normalizeServiceAccountRaw(raw);
+  if (trimmed.startsWith('{')) return trimmed;
+  const b64 = trimmed.replace(/\s/g, '');
+  if (!/^[A-Za-z0-9+/=]+$/.test(b64)) {
+    throw new Error('no empieza con { y no es base64 válido');
+  }
+  const decoded = Buffer.from(b64, 'base64').toString('utf8');
+  if (!decoded.trim().startsWith('{')) {
+    throw new Error('base64 decodificado no es JSON de service account');
+  }
+  return decoded;
+}
+
 function parseServiceAccount() {
   if (cachedServiceAccount !== undefined) return cachedServiceAccount;
   const raw = process.env.FCM_SERVICE_ACCOUNT_JSON;
   if (!raw?.trim()) {
     cachedServiceAccount = null;
+    serviceAccountParseDetail = null;
     return null;
   }
   try {
-    const trimmed = raw.trim();
-    let text = trimmed;
-    if (!trimmed.startsWith('{')) {
-      const b64 = trimmed.replace(/\s/g, '');
-      if (!/^[A-Za-z0-9+/=]+$/.test(b64)) {
-        throw new Error('no es JSON ni base64 válido del service account');
-      }
-      text = Buffer.from(b64, 'base64').toString('utf8');
-    }
-    const sa = JSON.parse(text);
-    if (!sa?.client_email || !sa?.private_key || !sa?.project_id) {
-      throw new Error('falta client_email, private_key o project_id');
-    }
+    const text = decodeServiceAccountText(raw);
+    const sa = tryParseServiceAccountJson(text);
     cachedServiceAccount = sa;
     serviceAccountInvalid = false;
+    serviceAccountParseDetail = null;
     return sa;
   } catch (e) {
     serviceAccountInvalid = true;
     cachedServiceAccount = null;
+    serviceAccountParseDetail = e.message;
     warnInvalidServiceAccount(e.message);
     return null;
   }
@@ -266,6 +295,7 @@ function statusPayload() {
     service_account_error: serviceAccountInvalid
       ? 'FCM_SERVICE_ACCOUNT_JSON inválido — corrige o elimina la variable en Railway'
       : null,
+    service_account_parse_detail: serviceAccountParseDetail,
   };
 }
 

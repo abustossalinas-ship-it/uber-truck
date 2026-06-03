@@ -1,6 +1,6 @@
 {
-  "version": "0.0.89",
-  "git_sha": "4c5625c",
-  "ui": "role-app-shell-v1",
-  "note": "Accesos por rol; super admin solo admin@cubik.cl"
+  "version": "0.0.90",
+  "git_sha": "8c0947e",
+  "ui": "offer-pallets-truck-v1",
+  "note": "Oferta por pallets + camión transportista; match por capacidad"
 }

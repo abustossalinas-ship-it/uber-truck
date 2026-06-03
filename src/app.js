@@ -12,6 +12,23 @@ function readDeployManifest() {
   }
 }
 
+function versionParts(v) {
+  return String(v || '')
+    .split('.')
+    .map((n) => Number(n) || 0);
+}
+
+/** true si la versión del servidor va detrás del manifest empaquetado */
+function serverBehindManifest(serverVer, manifestVer) {
+  const s = versionParts(serverVer);
+  const m = versionParts(manifestVer);
+  for (let i = 0; i < Math.max(s.length, m.length); i++) {
+    if ((s[i] || 0) < (m[i] || 0)) return true;
+    if ((s[i] || 0) > (m[i] || 0)) return false;
+  }
+  return false;
+}
+
 const app = express();
 
 const CORS_ORIGINS = new Set([
@@ -130,10 +147,21 @@ app.get('/health', async (_req, res) => {
       git_branch: process.env.RAILWAY_GIT_BRANCH || null,
       replica: process.env.RAILWAY_REPLICA_ID || null,
     },
-    hint:
-      manifest && railwaySha && manifest.version && pkg.version !== manifest.version
-        ? 'Deploy desactualizado: version en servidor distinta al manifest. Haz Deploy del ultimo commit en Railway.'
-        : null,
+    hint: (() => {
+      if (!manifest) return null;
+      const shaShort = railwaySha.slice(0, 7);
+      const manifestSha = manifest.git_sha?.slice(0, 7);
+      if (shaShort && manifestSha && shaShort !== manifestSha) {
+        return `Commit en Railway (${shaShort}) distinto al manifest (${manifestSha}). Redeploy o actualiza public/deploy.json.`;
+      }
+      if (manifest.version && serverBehindManifest(pkg.version, manifest.version)) {
+        return 'Deploy desactualizado: el servidor va detrás del manifest. Haz Deploy del último commit en Railway.';
+      }
+      if (manifest.version && pkg.version !== manifest.version && !serverBehindManifest(pkg.version, manifest.version)) {
+        return 'Manifest en repo desactualizado (el servidor ya es más nuevo). Actualiza public/deploy.json en el próximo commit.';
+      }
+      return null;
+    })(),
     storage: repo.backend(),
     supabase: {
       project_ref: projectRef || 'ljinhegtywixtbzjgjfn',

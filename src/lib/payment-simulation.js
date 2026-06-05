@@ -57,7 +57,7 @@ function tripRowFromMatch(m, bd, role, loadById, offerById) {
   const paid = isPilotPaid(m);
   let status_label = 'Cobro simulado';
   if (role === 'carrier') {
-    status_label = paid ? 'Pago en gestión' : 'Esperando pago del embarcador';
+    status_label = paid ? 'Embarcador pagó · cobro en gestión' : 'Esperando pago del embarcador';
   } else if (!paid) {
     status_label = 'Pendiente de pago';
   }
@@ -201,9 +201,10 @@ function enrichMatchPaymentPilot(match, user) {
     ...match,
     ...base,
     payment_status: 'pilot_settlement',
+    payment_shipper_paid: true,
     payment_total_clp: bd.agreed_price_clp,
     payment_net_clp: bd.net_clp,
-    payment_status_label: 'Pago en gestión',
+    payment_status_label: 'Embarcador pagó · cobro en gestión',
   };
 }
 

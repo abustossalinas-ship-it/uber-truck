@@ -91,18 +91,25 @@ const Comms = {
         : rows
             .map((n) => {
               const mutual = n.type === 'mutual_cancel';
+              const tripsTypes = new Set(['pilot_payment', 'trip_completed']);
               const chatActions =
                 n.type === 'chat'
                   ? `<button type="button" class="link-btn" data-open-chat="${n.match_id}">Abrir chat</button>`
                   : n.type === 'incident'
                     ? `<button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver viaje</button>`
-                    : '';
+                    : tripsTypes.has(n.type)
+                      ? `<button type="button" class="link-btn" data-goto-trips="${n.match_id}">Ver en Mis viajes</button>`
+                      : '';
+              const boardLink =
+                n.type === 'chat' || n.type === 'incident' || tripsTypes.has(n.type)
+                  ? ''
+                  : `<button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en emparejamientos activos</button>`;
               const actions = mutual
                 ? `<div class="notif-actions">
           <button type="button" class="tab tab-sm notif-cta" data-open-cancel="${n.match_id}">Confirmar acuerdo mutuo</button>
           <button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en emparejamientos activos</button>
         </div>`
-                : `<div class="notif-actions">${chatActions}<button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en emparejamientos activos</button></div>`;
+                : `<div class="notif-actions">${chatActions}${boardLink}</div>`;
               const when = this.formatNotifDate(n.created_at);
               const offerBody =
                 n.type === 'price_offer' && Array.isArray(n.offer_lines) && n.offer_lines.length
@@ -337,6 +344,14 @@ document.getElementById('notif-list')?.addEventListener('click', async (e) => {
     document.getElementById('notif-panel').hidden = true;
     await Comms.markChatNotificationsRead(id);
     await Comms.openChat(id, '');
+    return;
+  }
+  const tripsBtn = e.target.closest('[data-goto-trips]');
+  if (tripsBtn) {
+    const id = tripsBtn.dataset.gotoTrips;
+    document.getElementById('notif-panel').hidden = true;
+    if (typeof scrollToTripCard === 'function') await scrollToTripCard(id);
+    else if (typeof showTab === 'function') showTab('trips');
     return;
   }
   const scrollBtn = e.target.closest('[data-scroll-match]');

@@ -719,8 +719,8 @@ router.post('/:id/pilot-pay', requireAuthIfDb, async (req, res) => {
         match_id: updated.id,
         for_role: 'carrier',
         type: 'pilot_payment',
-        title: 'Pago en gestión',
-        body: `${parties?.shipper_name || 'Embarcador'} pagó el flete (simulación Cubik Saldo). Neto $${Number(carrierBd?.net_clp || 0).toLocaleString('es-CL')} en gestión.`,
+        title: 'Embarcador pagó el flete',
+        body: `${parties?.shipper_name || 'Embarcador'} confirmó el pago (Cubik Saldo piloto). Neto $${Number(carrierBd?.net_clp || 0).toLocaleString('es-CL')} en gestión.`,
         amount_clp: shipperBd?.total_clp || null,
       });
     } catch (notifyErr) {

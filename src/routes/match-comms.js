@@ -151,7 +151,21 @@ router.post('/:matchId/messages', optionalAuth, async (req, res) => {
   }
 });
 
-const STALE_MATCH_STATUSES = new Set(['cancelled', 'completed']);
+const STALE_MATCH_STATUSES = new Set(['cancelled']);
+
+/** En viajes completados solo ocultamos chat/ofertas; pago y cierre siguen visibles */
+const COMPLETED_VISIBLE_NOTIF_TYPES = new Set([
+  'pilot_payment',
+  'trip_completed',
+  'support',
+]);
+
+function notificationVisibleForMatch(n, match) {
+  if (!match) return false;
+  if (STALE_MATCH_STATUSES.has(match.status)) return false;
+  if (match.status === 'completed' && !COMPLETED_VISIBLE_NOTIF_TYPES.has(n.type)) return false;
+  return true;
+}
 
 router.get('/notifications/list', optionalAuth, async (req, res) => {
   try {
@@ -174,8 +188,7 @@ router.get('/notifications/list', optionalAuth, async (req, res) => {
     }
     for (const n of raw) {
       const match = await repo.getById('matches', n.match_id);
-      const stale = !match || STALE_MATCH_STATUSES.has(match.status);
-      if (stale) {
+      if (!notificationVisibleForMatch(n, match)) {
         if (!n.read_at) await comms.markNotificationRead(n.id);
         continue;
       }

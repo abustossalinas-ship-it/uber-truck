@@ -252,7 +252,7 @@ const Penalties = {
     const statusHint =
       role === 'carrier'
         ? hasPaid
-          ? `<p class="cubik-status-hint"><span class="pill pill-warn">Pago en gestión</span> El embarcador pagó el flete simulado; tu neto se libera cuando activemos Cubik Saldo.</p>`
+          ? `<p class="cubik-status-hint"><span class="pill pill-ok">Embarcador pagó</span> <span class="pill pill-warn">Cobro en gestión</span> Tu neto se libera cuando activemos Cubik Saldo.</p>`
           : `<p class="cubik-status-hint">Cuando el embarcador pague, verás el monto en gestión aquí.</p>`
         : hasPending
           ? `<p class="cubik-status-hint">Confirma el pago en cada viaje para debitar tu Cubik Saldo simulado y liberar gestión al transportista.</p>`

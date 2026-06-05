@@ -167,7 +167,8 @@ function buildTripPaymentBadge(m, role) {
         net != null ? `$${Number(net).toLocaleString('es-CL')}` : '';
       return `<div class="trip-payment-badge trip-payment-settlement">
         <div class="trip-payment-settlement-head">
-          <span class="pill pill-warn trip-payment-pill">Pago en gestión</span>
+          <span class="pill pill-ok trip-payment-pill">Embarcador pagó</span>
+          <span class="pill pill-warn trip-payment-pill">Cobro en gestión</span>
           ${netFmt ? `<strong class="trip-payment-amount">${netFmt}</strong>` : ''}
         </div>
         ${
@@ -679,10 +680,28 @@ async function submitRateModal(e) {
   }
 }
 
+async function scrollToTripCard(matchId) {
+  if (!matchId) return;
+  if (typeof AppShell !== 'undefined' && AppShell.setTab) {
+    AppShell.setTab('activity');
+  } else if (typeof showTab === 'function') {
+    showTab('trips');
+  }
+  if (typeof renderTripsList === 'function') await renderTripsList();
+  requestAnimationFrame(() => {
+    const card = document.querySelector(`[data-trip-id="${matchId}"]`);
+    if (!card) return;
+    card.classList.add('match-highlight');
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    setTimeout(() => card.classList.remove('match-highlight'), 2500);
+  });
+}
+
 window.updateActiveTripBanner = updateActiveTripBanner;
 window.renderTripsList = renderTripsList;
 window.openRateModal = openRateModal;
 window.clearRatedMatchIds = clearRatedMatchIds;
+window.scrollToTripCard = scrollToTripCard;
 
 function initRateModalUi() {
   document.getElementById('rate-stars-picker')?.addEventListener('click', (e) => {

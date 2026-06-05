@@ -798,8 +798,39 @@ async function openCancelModalForMatch(matchId) {
 }
 
 async function scrollToActiveMatch(matchId) {
-  if (typeof showTab === 'function') showTab('board');
+  let match =
+    window._boardMatchesById?.[matchId] ||
+    window._tripsCache?.matchRows?.find((m) => m.id === matchId);
+
+  const goTrips = async () => {
+    if (typeof scrollToTripCard === 'function') {
+      await scrollToTripCard(matchId);
+      return { found: true, where: 'trips' };
+    }
+    return null;
+  };
+
+  if (match && ['accepted', 'in_progress', 'completed'].includes(match.status)) {
+    const r = await goTrips();
+    if (r) return r;
+  }
+
+  const inCubikApp = document.body.classList.contains('cubik-app');
+  if (inCubikApp && typeof AppShell !== 'undefined' && AppShell.openAction) {
+    AppShell.openAction('board');
+  } else if (typeof showTab === 'function') {
+    showTab('board');
+  }
   if (typeof refreshBoard === 'function') await refreshBoard();
+
+  match =
+    window._boardMatchesById?.[matchId] ||
+    window._tripsCache?.matchRows?.find((m) => m.id === matchId);
+  if (match && ['accepted', 'in_progress', 'completed'].includes(match.status)) {
+    const r = await goTrips();
+    if (r) return r;
+  }
+
   const heading = document.getElementById('matches-active-heading');
   const card = document.querySelector(`#list-matches [data-match-id="${matchId}"]`);
   if (card) {
@@ -984,7 +1015,9 @@ async function refreshBoard() {
   const keepLoad = stickyMatchLoadId || $('match-load')?.value || '';
   const keepOffer = stickyMatchOfferId || $('match-offer')?.value || '';
   const appTripsFocus =
-    document.body.classList.contains('cubik-app') && document.body.dataset.appTab === 'activity';
+    document.body.classList.contains('cubik-app') &&
+    document.body.dataset.appTab === 'activity' &&
+    !(typeof AppShell !== 'undefined' && AppShell.deep);
   const tripsEl = document.getElementById('list-trips');
 
   if (appTripsFocus && window._tripsCache && tripsEl && !tripsEl.dataset.loaded) {

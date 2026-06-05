@@ -253,7 +253,11 @@ function bindActiveTripBannerNav(matchId) {
   if (!btn || btn.dataset.bound === '1') return;
   btn.dataset.bound = '1';
   btn.addEventListener('click', () => {
-    if (typeof showTab === 'function') showTab('trips');
+    if (typeof AppShell !== 'undefined' && AppShell.setTab) {
+      AppShell.setTab('activity');
+    } else if (typeof showTab === 'function') {
+      showTab('trips');
+    }
     window.setTimeout(() => {
       const card = document.querySelector(`#list-trips [data-trip-id="${matchId}"]`);
       if (card) {
@@ -377,10 +381,16 @@ function renderTripsList(matches, loadById, offerById) {
             actions += `<button type="button" class="tab tab-sm" data-open-support="${m.id}" data-support-subject="Multa viaje cancelado">Multa / ayuda</button>`;
             actions += `<button type="button" class="tab tab-sm" data-scroll-penalties>Ir a Cuenta y multas</button>`;
           }
+        } else if (m.status === 'proposed') {
+          actions = `<button type="button" class="btn-secondary" data-trip-view="${m.id}">Ver propuesta</button>`;
+          actions += `<button type="button" class="btn-secondary" data-trip-chat="${m.id}" data-trip-title="${title.replace(/"/g, '')}">Chat</button>`;
+        } else if (['accepted', 'in_progress'].includes(m.status)) {
+          actions = `<button type="button" class="btn-match-cta" data-trip-chat="${m.id}" data-trip-title="${title.replace(/"/g, '')}">Chat</button>`;
+          if (m.status === 'in_progress' && role === 'carrier') {
+            actions += `<button type="button" class="btn-secondary" data-trip-incident="${m.id}" data-trip-title="${title.replace(/"/g, '')}">Reportar incidente</button>`;
+          }
         } else if (m.status !== 'completed') {
-          const openLabel =
-            m.status === 'proposed' ? 'Ver propuesta' : 'Gestionar viaje';
-          actions = `<button type="button" class="btn-secondary" data-trip-view="${m.id}">${openLabel}</button>`;
+          actions = `<button type="button" class="btn-secondary" data-trip-view="${m.id}">Ver detalle</button>`;
         }
         const alreadyRated = hasRatedMatchId(m.id, m);
         if (m.can_rate && !alreadyRated) {
@@ -392,9 +402,6 @@ function renderTripsList(matches, loadById, offerById) {
           }
         } else if (m.ratings_unavailable) {
           actions += `<span class="muted">Calificaciones no disponibles (revisa /health)</span>`;
-        }
-        if (['accepted', 'in_progress'].includes(m.status)) {
-          actions += `<button type="button" class="btn-secondary" data-trip-chat="${m.id}" data-trip-title="${title.replace(/"/g, '')}">Chat</button>`;
         }
         const mapSlot = ['accepted', 'in_progress'].includes(m.status)
           ? `<div class="trip-map-wrap" data-trip-map="${m.id}"></div>`
@@ -428,10 +435,9 @@ function renderTripsList(matches, loadById, offerById) {
   `;
 
   el.querySelectorAll('[data-trip-view]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', async () => {
       if (typeof scrollToActiveMatch === 'function') {
-        showTab('board');
-        scrollToActiveMatch(btn.dataset.tripView);
+        await scrollToActiveMatch(btn.dataset.tripView);
       }
     });
   });
@@ -450,6 +456,16 @@ function renderTripsList(matches, loadById, offerById) {
   el.querySelectorAll('[data-trip-call]').forEach((btn) => {
     btn.addEventListener('click', () => {
       if (typeof ContactUI !== 'undefined') ContactUI.callMatch(btn.dataset.tripCall);
+    });
+  });
+  el.querySelectorAll('[data-trip-incident]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const title = btn.dataset.tripTitle || 'Viaje en curso';
+      if (typeof IncidentUI !== 'undefined') {
+        IncidentUI.open(btn.dataset.tripIncident, title);
+      } else {
+        alert('Recarga la app (Ctrl+F5) e intenta de nuevo.');
+      }
     });
   });
   el.querySelectorAll('[data-scroll-penalties]').forEach((btn) => {
@@ -687,7 +703,7 @@ async function scrollToTripCard(matchId) {
   } else if (typeof showTab === 'function') {
     showTab('trips');
   }
-  if (typeof renderTripsList === 'function') await renderTripsList();
+  if (typeof refreshBoard === 'function') await refreshBoard();
   requestAnimationFrame(() => {
     const card = document.querySelector(`[data-trip-id="${matchId}"]`);
     if (!card) return;

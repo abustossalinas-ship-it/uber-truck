@@ -1,5 +1,5 @@
 -- Cubik / Uber Truck — verificar migraciones en Supabase prod
--- Pegar y Run en SQL Editor. Cada fila: OK = aplicado, FALTA = ejecutar script indicado.
+-- Pegar y Run (una sola consulta). OK = aplicado, FALTA = ejecutar script indicado.
 
 WITH checks AS (
   SELECT '001_init' AS mig, 'tabla matches' AS item,
@@ -7,10 +7,10 @@ WITH checks AS (
     'supabase/migrations/001_init.sql' AS script
   UNION ALL
   SELECT '007', 'tabla match_messages',
-    EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'match_messages'), '004–008 en docs/SQL-SUPABASE.md o 007_match_chat_notifications.sql'
+    EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'match_messages'), '004-008 en docs/SQL-SUPABASE.md o 007_match_chat_notifications.sql'
   UNION ALL
   SELECT '007', 'tabla match_notifications',
-    EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'match_notifications'), '004–008 en docs/SQL-SUPABASE.md o 007_match_chat_notifications.sql'
+    EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'match_notifications'), '004-008 en docs/SQL-SUPABASE.md o 007_match_chat_notifications.sql'
   UNION ALL
   SELECT '008', 'columnas users.bank_*',
     (SELECT COUNT(*) FROM information_schema.columns WHERE table_name = 'users' AND column_name LIKE 'bank_%') >= 6,
@@ -84,17 +84,30 @@ WITH checks AS (
   SELECT '030', 'tabla user_bank_accounts (billetera)',
     EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'user_bank_accounts'), 'docs/RUN_030_user_bank_accounts.sql'
 )
-SELECT
-  mig AS migracion,
-  item AS chequeo,
-  CASE WHEN ok THEN 'OK' ELSE 'FALTA' END AS estado,
-  script AS ejecutar_si_falta
-FROM checks
-ORDER BY mig, item;
-
--- Resumen rápido
-SELECT
-  COUNT(*) FILTER (WHERE ok) AS aplicados,
-  COUNT(*) FILTER (WHERE NOT ok) AS faltantes,
-  COUNT(*) AS total
-FROM checks;
+SELECT migracion, chequeo, estado, ejecutar_si_falta
+FROM (
+  SELECT
+    mig AS migracion,
+    item AS chequeo,
+    CASE WHEN ok THEN 'OK' ELSE 'FALTA' END AS estado,
+    script AS ejecutar_si_falta,
+    0 AS sort_group,
+    mig AS sort_mig,
+    item AS sort_item
+  FROM checks
+  UNION ALL
+  SELECT
+    'RESUMEN',
+    (SELECT COUNT(*) FILTER (WHERE ok)::text FROM checks) || ' OK / '
+      || (SELECT COUNT(*) FILTER (WHERE NOT ok)::text FROM checks) || ' FALTA / '
+      || (SELECT COUNT(*)::text FROM checks) || ' total',
+    CASE
+      WHEN (SELECT COUNT(*) FROM checks WHERE NOT ok) = 0 THEN 'TODO OK'
+      ELSE 'REVISAR FILAS FALTA'
+    END,
+    '',
+    1,
+    'zzz',
+    ''
+) AS report
+ORDER BY sort_group, sort_mig, sort_item;

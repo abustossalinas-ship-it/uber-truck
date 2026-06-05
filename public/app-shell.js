@@ -225,6 +225,12 @@ const AppShell = {
         else if (action) this.openAction(action);
       });
     });
+    document.querySelectorAll('[data-app-tab-link]').forEach((el) => {
+      el.addEventListener('click', () => {
+        const tab = el.dataset.appTabLink;
+        if (tab) this.setTab(tab);
+      });
+    });
   },
 
   bindAccount() {
@@ -353,7 +359,15 @@ const AppShell = {
     document.body.classList.remove('app-main-visible');
     if (tab === 'activity') {
       document.body.classList.add('app-main-visible');
+      const actView = document.getElementById('app-view-activity');
+      if (actView) {
+        actView.classList.add('active', 'app-view-pass-through');
+        actView.hidden = false;
+      }
       if (typeof showTab === 'function') showTab('trips');
+    } else {
+      const actView = document.getElementById('app-view-activity');
+      if (actView) actView.classList.remove('app-view-pass-through');
     }
     if (tab === 'home') this.renderHome();
     if (tab === 'account') {
@@ -384,11 +398,20 @@ const AppShell = {
       board: { tab: 'board', title: 'Emparejar' },
       trips: { tab: 'trips', title: 'Mis viajes' },
       notifications: { tab: null, title: 'Notificaciones' },
+      help: { tab: null, title: 'Ayuda' },
     };
     const cfg = map[action];
     if (!cfg) return;
     if (action === 'notifications') {
       document.getElementById('btn-notifications')?.click();
+      return;
+    }
+    if (action === 'help') {
+      this.setTab('account');
+      document.getElementById('account-penalties-panel')?.scrollIntoView({ behavior: 'smooth' });
+      alert(
+        'Ayuda Cubik: usa «Reportar incidente» en un viaje en ruta, emergencias en el chat, o multas en esta sección.'
+      );
       return;
     }
     this.deep = cfg.tab;
@@ -454,21 +477,91 @@ const AppShell = {
 
   renderAccount() {
     const user = typeof Auth !== 'undefined' ? Auth.user : null;
-    const el = document.getElementById('app-account-profile');
-    if (!el || !user) return;
+    const hero = document.getElementById('app-profile-hero');
+    const quick = document.getElementById('app-profile-quick');
+    const menu = document.getElementById('app-profile-menu');
+    if (!user || !hero) return;
     const role =
       typeof roleLabel === 'function' ? roleLabel(user.role) : user.role;
-    const truckLine =
+    const initial = (user.full_name || user.name || user.email || '?').charAt(0).toUpperCase();
+    const truckLabel =
       user.role === 'carrier' && user.default_truck_type_id && typeof LoadCapacityUI !== 'undefined'
-        ? `<p class="muted">Camión: <strong>${LoadCapacityUI.truckById(user.default_truck_type_id)?.label || user.default_truck_type_id}</strong></p>`
-        : '';
-    el.innerHTML = `
-      <p><strong>${user.full_name || user.name || '—'}</strong></p>
-      <p class="muted">${user.email}</p>
-      <p class="muted">${role} · ${user.company_name || '—'}</p>
-      ${truckLine}
-      <p class="muted">KYC: <strong>${user.kyc_status || 'pending'}</strong></p>
-    `;
+        ? LoadCapacityUI.truckById(user.default_truck_type_id)?.label || user.default_truck_type_id
+        : null;
+    hero.innerHTML = `
+      <div class="app-profile-avatar" aria-hidden="true">${initial}</div>
+      <div class="app-profile-ident">
+        <p class="app-profile-name">${user.full_name || user.name || '—'}</p>
+        <p class="app-profile-email">${user.email || ''}</p>
+        <p class="app-profile-meta">${role}${user.company_name ? ` · ${user.company_name}` : ''}</p>
+        ${truckLabel ? `<p class="app-profile-meta">Camión: <strong>${truckLabel}</strong></p>` : ''}
+      </div>`;
+    if (quick) {
+      const tiles =
+        user.role === 'carrier'
+          ? [
+              { action: 'trips', icon: '📋', label: 'Mis viajes' },
+              { action: 'board', icon: '⚡', label: 'Emparejar' },
+              { action: 'carrier', icon: '🚛', label: 'Ofertar' },
+            ]
+          : [
+              { action: 'trips', icon: '📋', label: 'Mis viajes' },
+              { action: 'board', icon: '⚡', label: 'Emparejar' },
+              { action: 'shipper', icon: '📦', label: 'Publicar' },
+            ];
+      quick.innerHTML = tiles
+        .map(
+          (t) =>
+            `<button type="button" class="app-profile-tile" data-app-quick="${t.action}">
+          <span class="app-profile-tile-icon">${t.icon}</span>
+          <span>${t.label}</span>
+        </button>`
+        )
+        .join('');
+      quick.querySelectorAll('[data-app-quick]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const a = btn.dataset.appQuick;
+          if (a === 'trips') this.setTab('activity');
+          else this.openAction(a);
+        });
+      });
+    }
+    if (menu) {
+      const kyc = user.kyc_status || 'pending';
+      menu.innerHTML = `
+        <button type="button" class="app-profile-row" data-profile-action="kyc">
+          <span>Verificación KYC</span>
+          <span class="app-profile-row-meta">${kyc}</span>
+        </button>
+        <button type="button" class="app-profile-row" id="app-btn-change-pw">
+          <span>Seguridad · cambiar clave</span>
+        </button>
+        <button type="button" class="app-profile-row" data-profile-action="penalties">
+          <span>Multas y pagos</span>
+        </button>
+        <button type="button" class="app-profile-row" data-profile-action="notifications">
+          <span>Notificaciones</span>
+        </button>
+        <button type="button" class="app-profile-row" data-profile-action="help">
+          <span>Ayuda con un viaje</span>
+        </button>`;
+      menu.querySelector('#app-btn-change-pw')?.addEventListener('click', () => {
+        document.getElementById('btn-change-password')?.click();
+      });
+      menu.querySelector('[data-profile-action="kyc"]')?.addEventListener('click', () => {
+        document.getElementById('kyc-banner')?.scrollIntoView({ behavior: 'smooth' });
+      });
+      menu.querySelector('[data-profile-action="penalties"]')?.addEventListener('click', () => {
+        document.getElementById('account-penalties-panel')?.scrollIntoView({ behavior: 'smooth' });
+        if (typeof Penalties !== 'undefined') Penalties.refresh();
+      });
+      menu.querySelector('[data-profile-action="notifications"]')?.addEventListener('click', () => {
+        document.getElementById('btn-notifications')?.click();
+      });
+      menu.querySelector('[data-profile-action="help"]')?.addEventListener('click', () => {
+        this.openAction('help');
+      });
+    }
     const adminSlot = document.getElementById('app-account-admin-slot');
     if (adminSlot) {
       if (user.role === 'admin') {

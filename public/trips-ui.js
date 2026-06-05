@@ -64,6 +64,42 @@ function formatReputation(rep) {
   return `${avg} ★ · ${n} viaje${n === 1 ? '' : 's'}`;
 }
 
+function tripCounterpartyFromMatch(m, role, load, offer) {
+  if (m.counterparty?.display) return m.counterparty;
+  const display =
+    role === 'carrier'
+      ? load?.company_name || 'Embarcador'
+      : offer?.carrier_name || 'Transportista';
+  return {
+    display,
+    role_label: role === 'carrier' ? 'Embarcador' : 'Transportista',
+    person: display,
+  };
+}
+
+function buildTripPartyHeader(m, role, load, offer) {
+  const cp = tripCounterpartyFromMatch(m, role, load, offer);
+  const initial = (cp.person || cp.display || '?').charAt(0).toUpperCase();
+  const status = TRIP_STATUS_LABEL[m.status] || m.status;
+  const showCall = ['accepted', 'in_progress'].includes(m.status);
+  return `
+    <div class="trip-party-row">
+      <span class="trip-party-avatar" aria-hidden="true">${initial}</span>
+      <div class="trip-party-meta">
+        <span class="trip-party-name">${cp.display}</span>
+        <span class="trip-party-sub">${cp.role_label}</span>
+      </div>
+      <span class="pill trip-status-pill">${status}</span>
+    </div>
+    ${
+      showCall
+        ? `<div class="trip-contact-bar">
+      <button type="button" class="tab tab-sm trip-call-btn" data-trip-call="${m.id}" title="Llamada enmascarada Cubik">📞 Llamar</button>
+    </div>`
+        : ''
+    }`;
+}
+
 function formatRatingTags(role, rating) {
   if (!rating?.tags?.length || typeof RatingTags === 'undefined' || !RatingTags.catalog) {
     return '';
@@ -219,6 +255,7 @@ function renderTripsList(matches, loadById, offerById) {
           role === 'carrier'
             ? load?.company_name || 'Embarcador'
             : offer?.carrier_name || 'Transportista';
+        const partyHeader = buildTripPartyHeader(m, role, load, offer);
         const route = load ? window.routeLine?.(load) || '' : '';
         const price =
           m.agreed_price_clp != null
@@ -267,9 +304,8 @@ function renderTripsList(matches, loadById, offerById) {
           : '';
         return `
         <article class="item trip-card" data-trip-id="${m.id}">
-          <strong>${title}</strong>
-          <span class="pill">${TRIP_STATUS_LABEL[m.status] || m.status}</span>
-          <p>${route}</p>
+          ${partyHeader}
+          <p class="trip-route-line">${route}</p>
           ${price ? `<p class="muted">${price}</p>` : ''}
           ${m.delivery_note ? `<p class="muted">Entrega: ${m.delivery_note}</p>` : ''}
           ${cancelDetail}
@@ -311,6 +347,11 @@ function renderTripsList(matches, loadById, offerById) {
       if (typeof Comms !== 'undefined') {
         Comms.openChat(btn.dataset.tripChat, btn.dataset.tripTitle || '');
       }
+    });
+  });
+  el.querySelectorAll('[data-trip-call]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      if (typeof ContactUI !== 'undefined') ContactUI.callMatch(btn.dataset.tripCall);
     });
   });
   el.querySelectorAll('[data-scroll-penalties]').forEach((btn) => {

@@ -7,6 +7,17 @@ const { requireAuthIfDb } = require('../lib/require-auth');
 const { normalizeRole } = require('../lib/match-cancel');
 const { validateIncident, INCIDENT_TYPES } = require('../lib/cargo-trust');
 const { requireApprovedOperator } = require('../lib/kyc-gate');
+const comms = require('../services/comms');
+const { otherRole } = require('../lib/match-comms');
+const { getMatchParties } = require('../lib/match-parties');
+
+const INCIDENT_LABELS = {
+  theft: 'Robo o extravío',
+  damage: 'Daño a la mercadería',
+  shortage: 'Faltante',
+  delay: 'Atraso grave',
+  other: 'Otro incidente',
+};
 
 const router = express.Router({ mergeParams: true });
 const operatorGate = [requireAuthIfDb, requireApprovedOperator];
@@ -43,6 +54,28 @@ router.post('/:id/incidents', optionalAuth, ...operatorGate, async (req, res) =>
       description: req.body.description.trim(),
       declared_value_clp_at_report: load?.declared_cargo_value_clp ?? null,
       status: 'open',
+    });
+    const parties = await getMatchParties(repo, match);
+    const reporterRole = normalizeRole(req.user.role);
+    const reporterName =
+      reporterRole === 'shipper'
+        ? parties?.shipper_name || 'Embarcador'
+        : parties?.carrier_name || 'Transportista';
+    const label = INCIDENT_LABELS[req.body.incident_type] || 'Incidente';
+    const snippet = req.body.description.trim().slice(0, 100);
+    await comms.addNotification({
+      match_id: match.id,
+      for_role: otherRole(reporterRole),
+      type: 'incident',
+      title: `Incidente — ${label}`,
+      body: `${reporterName}: ${snippet}`,
+    });
+    await comms.addNotification({
+      match_id: match.id,
+      for_role: reporterRole,
+      type: 'support',
+      title: 'Reporte registrado',
+      body: `Registramos tu reporte (${label}). Un agente Cubik puede revisar el caso si es necesario.`,
     });
     res.status(201).json({
       ok: true,

@@ -281,6 +281,28 @@ const LiveMap = {
     }
   },
 
+  _openNavUrl(href) {
+    if (!href) return;
+    if (window.Capacitor?.isNativePlatform?.()) {
+      window.location.href = href;
+      return;
+    }
+    window.open(href, '_blank', 'noopener,noreferrer');
+  },
+
+  openNavigationPicker(tracking) {
+    const modal = document.getElementById('nav-picker-modal');
+    if (!modal || !tracking?.navigation_url) return;
+    modal.hidden = false;
+    modal.setAttribute('aria-hidden', 'false');
+    modal.dataset.tracking = JSON.stringify({
+      navigation_url: tracking.navigation_url,
+      navigation_android_intent: tracking.navigation_android_intent,
+      navigation_waze_url: tracking.navigation_waze_url,
+      navigation_waze_intent: tracking.navigation_waze_intent,
+    });
+  },
+
   _bindNavButton(inst, tracking) {
     const url = tracking.navigation_url;
     if (!inst.navBtn) return;
@@ -289,16 +311,7 @@ const LiveMap = {
       return;
     }
     inst.navBtn.hidden = false;
-    inst.navBtn.onclick = () => {
-      const isCarrier =
-        typeof Auth !== 'undefined' && Auth.user?.role === 'carrier';
-      const androidIntent = tracking.navigation_android_intent;
-      if (isCarrier && androidIntent && window.Capacitor?.isNativePlatform?.()) {
-        window.location.href = androidIntent;
-        return;
-      }
-      window.open(url, '_blank', 'noopener,noreferrer');
-    };
+    inst.navBtn.onclick = () => this.openNavigationPicker(tracking);
   },
 
   _updateEta(inst, tracking) {
@@ -395,5 +408,46 @@ const LiveMap = {
     container.hidden = true;
   },
 };
+
+function bindNavPickerModal() {
+  const modal = document.getElementById('nav-picker-modal');
+  if (!modal || modal.dataset.bound === '1') return;
+  modal.dataset.bound = '1';
+  modal.querySelector('[data-nav-close]')?.addEventListener('click', () => {
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
+  });
+  modal.querySelector('[data-nav-backdrop]')?.addEventListener('click', () => {
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
+  });
+  modal.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-nav-app]');
+    if (!btn) return;
+    let tracking = {};
+    try {
+      tracking = JSON.parse(modal.dataset.tracking || '{}');
+    } catch (_) {}
+    const app = btn.dataset.navApp;
+    const isNative = window.Capacitor?.isNativePlatform?.();
+    if (app === 'google') {
+      if (isNative && tracking.navigation_android_intent) {
+        LiveMap._openNavUrl(tracking.navigation_android_intent);
+      } else {
+        LiveMap._openNavUrl(tracking.navigation_url);
+      }
+    } else if (app === 'waze') {
+      LiveMap._openNavUrl(tracking.navigation_waze_url || tracking.navigation_waze_intent);
+    }
+    modal.hidden = true;
+    modal.setAttribute('aria-hidden', 'true');
+  });
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', bindNavPickerModal);
+} else {
+  bindNavPickerModal();
+}
 
 window.LiveMap = LiveMap;

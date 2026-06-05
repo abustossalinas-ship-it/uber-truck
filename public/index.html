@@ -14,8 +14,8 @@
   <link rel="apple-touch-icon" href="/brand/logo.png" />
   <link rel="preconnect" href="https://uber-truck-production.up.railway.app" crossorigin />
   <link rel="dns-prefetch" href="https://uber-truck-production.up.railway.app" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.97" />
-  <link rel="stylesheet" href="/app-shell.css?v=0.0.92" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.98" />
+  <link rel="stylesheet" href="/app-shell.css?v=0.0.98" />
   <script src="/brand-config.js?v=0.0.76" defer></script>
   <script src="/api-base.js?v=0.0.83" defer></script>
 </head>
@@ -85,8 +85,15 @@
         </div>
         <div id="app-home-active-slot" class="app-home-active card app-home-active"></div>
       </section>
+      <section id="app-view-activity" class="app-view" data-app-view="activity">
+        <h2 class="app-section-title">Actividad</h2>
+        <p class="muted app-section-lead">Viajes en curso, propuestas e historial.</p>
+        <p class="muted app-activity-hint">Desliza hacia abajo para ver el detalle completo.</p>
+      </section>
       <section id="app-view-options" class="app-view" data-app-view="options">
-        <p class="muted" style="margin:0 0 1rem">Accesos rápidos según tu rol.</p>
+        <h2 class="app-section-title">Opciones</h2>
+        <p class="muted app-section-lead">Operación según tu rol en Cubik.</p>
+        <h3 class="app-options-heading">Emparejar y viajes</h3>
         <div class="app-options-grid">
           <button type="button" class="app-option-tile tile-orange" data-app-action="shipper" id="app-opt-shipper">
             <svg viewBox="0 0 24 24" fill="none" stroke="#f7941d" stroke-width="2"><path d="M12 3v12m0 0l4-4m-4 4l-4-4M4 21h16"/></svg>
@@ -109,15 +116,24 @@
             <span>Notificaciones</span>
           </button>
         </div>
+        <h3 class="app-options-heading">Cuenta y ayuda</h3>
+        <div class="app-options-grid app-options-grid-secondary">
+          <button type="button" class="app-option-tile" data-app-tab-link="account">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#0f2744" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M6 20v-1a6 6 0 0112 0v1"/></svg>
+            <span>Mi perfil</span>
+          </button>
+          <button type="button" class="app-option-tile" data-app-action="help">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#29abe2" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 115 0c0 2-2.5 2-2.5 4"/><circle cx="12" cy="17" r="0.5" fill="currentColor"/></svg>
+            <span>Ayuda</span>
+          </button>
+        </div>
       </section>
       <section id="app-view-account" class="app-view" data-app-view="account">
-        <div class="app-account-card">
-          <h2>Mi perfil</h2>
-          <div id="app-account-profile"></div>
-          <p id="app-build-version" class="muted app-build-version"></p>
-        </div>
+        <div class="app-profile-hero" id="app-profile-hero"></div>
+        <div class="app-profile-quick" id="app-profile-quick"></div>
+        <nav class="app-profile-menu" id="app-profile-menu" aria-label="Menú de cuenta"></nav>
+        <p id="app-build-version" class="muted app-build-version"></p>
         <div class="app-account-card app-account-actions">
-          <button type="button" class="tab tab-sm" id="app-btn-change-pw">Cambiar contraseña</button>
           <button type="button" class="tab tab-sm tab-outline" id="app-btn-logout">Cerrar sesión</button>
         </div>
         <div id="app-account-kyc-slot"></div>
@@ -135,7 +151,7 @@
         Opciones
       </button>
       <button type="button" class="app-nav-item" data-app-tab="activity">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 4h10a2 2 0 012 2v14l-4-2-4 2-4-2-4 2V6a2 2 0 012-2z"/></svg>
         Actividad
       </button>
       <button type="button" class="app-nav-item" data-app-tab="account">
@@ -835,14 +851,61 @@
     </div>
     <div id="chat-messages" class="chat-messages"></div>
     <p id="chat-mode-hint" class="muted chat-mode-hint"></p>
-    <p class="muted chat-presets-label">Mensajes rápidos</p>
-    <div id="chat-presets" class="chat-presets"></div>
-    <p class="muted chat-presets-label chat-emergency-label">Emergencias — agente Cubik</p>
-    <div id="chat-emergency-presets" class="chat-presets chat-emergency-presets"></div>
+    <div id="chat-presets-block">
+      <p class="muted chat-presets-label">Mensajes rápidos</p>
+      <div id="chat-presets" class="chat-presets chat-presets-carousel"></div>
+    </div>
+    <div id="chat-emergency-block">
+      <p class="muted chat-presets-label chat-emergency-label">Emergencias — agente Cubik</p>
+      <div id="chat-emergency-presets" class="chat-presets chat-presets-carousel chat-emergency-presets"></div>
+    </div>
     <form id="form-chat" class="chat-form">
       <input id="chat-input" type="text" placeholder="Escribe cuando el viaje esté en ruta…" maxlength="500" disabled />
       <button type="submit" disabled>Enviar</button>
     </form>
+  </div>
+
+  <div id="incident-drawer" class="chat-drawer help-drawer" hidden aria-hidden="true">
+    <div class="chat-drawer-header">
+      <button type="button" class="link-btn" id="incident-back">←</button>
+      <h3 id="incident-title">Ayuda con el viaje</h3>
+      <button type="button" class="link-btn" id="incident-close">Cerrar</button>
+    </div>
+    <div id="incident-trip-context" class="help-trip-context"></div>
+    <div id="incident-body" class="help-drawer-body"></div>
+    <form id="form-incident" class="help-detail-form" hidden>
+      <textarea id="incident-description" rows="4" maxlength="4000" placeholder="Describe lo ocurrido…" required></textarea>
+      <button type="submit" class="btn-match-cta">Enviar reporte</button>
+    </form>
+  </div>
+
+  <div id="call-modal" class="cancel-modal" hidden aria-hidden="true">
+    <div class="cancel-modal-backdrop" id="call-modal-backdrop"></div>
+    <div class="cancel-modal-card" role="dialog">
+      <h3 id="call-modal-title">Llamar</h3>
+      <div id="call-modal-body"></div>
+      <button type="button" class="btn-match-cta" id="call-modal-dial" hidden>Llamar ahora</button>
+      <button type="button" class="link-btn" id="call-modal-close">Cerrar</button>
+    </div>
+  </div>
+
+  <div id="nav-picker-modal" class="cancel-modal" hidden aria-hidden="true">
+    <div class="cancel-modal-backdrop" data-nav-backdrop></div>
+    <div class="cancel-modal-card nav-picker-card" role="dialog">
+      <h3>Abrir con</h3>
+      <p class="muted">Elige la app de navegación para este viaje.</p>
+      <div class="nav-picker-actions">
+        <button type="button" class="nav-picker-btn" data-nav-app="google">
+          <span class="nav-picker-icon">🗺️</span>
+          <span>Google Maps</span>
+        </button>
+        <button type="button" class="nav-picker-btn" data-nav-app="waze">
+          <span class="nav-picker-icon">🚗</span>
+          <span>Waze</span>
+        </button>
+      </div>
+      <button type="button" class="link-btn" data-nav-close>Cancelar</button>
+    </div>
   </div>
 
   <div id="bank-modal" class="cancel-modal" hidden aria-hidden="true">
@@ -1042,7 +1105,7 @@
   </div>
 
   <script src="/roles-ui.js?v=0.0.89" defer></script>
-  <script src="/app-shell.js?v=0.0.89" defer></script>
+  <script src="/app-shell.js?v=0.0.98" defer></script>
   <script src="/pwa-ui.js?v=0.0.64" defer></script>
   <script src="/kyc-ui.js?v=0.0.33" defer></script>
   <script src="/admin-ui.js?v=0.0.59" defer></script>
@@ -1058,14 +1121,16 @@
   <script src="/load-form-validation.js?v=0.0.86" defer></script>
   <script src="/proposal-compare-ui.js?v=0.0.47" defer></script>
   <script src="/auth-ui.js?v=0.0.76" defer></script>
-  <script src="/live-map-ui.js?v=0.0.96" defer></script>
+  <script src="/live-map-ui.js?v=0.0.98" defer></script>
   <script src="/tracking-ui.js?v=0.0.97" defer></script>
+  <script src="/incident-ui.js?v=0.0.98" defer></script>
+  <script src="/contact-ui.js?v=0.0.98" defer></script>
   <script src="/rut-chile-ui.js?v=0.0.93" defer></script>
   <script src="/penalties-ui.js?v=0.0.94" defer></script>
   <script src="/support-ui.js?v=0.0.56" defer></script>
-  <script src="/comms-ui.js?v=0.0.97" defer></script>
+  <script src="/comms-ui.js?v=0.0.98" defer></script>
   <script src="/rating-tags.js?v=0.0.31" defer></script>
-  <script src="/trips-ui.js?v=0.0.97" defer></script>
-  <script src="/app.js?v=0.0.97" defer></script>
+  <script src="/trips-ui.js?v=0.0.98" defer></script>
+  <script src="/app.js?v=0.0.98" defer></script>
 </body>
 </html>

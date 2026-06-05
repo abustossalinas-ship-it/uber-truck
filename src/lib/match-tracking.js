@@ -135,6 +135,8 @@ async function buildMatchTracking(matchId, user) {
     eta,
     navigation_url: navigation.navigation_url || null,
     navigation_android_intent: navigation.navigation_android_intent || null,
+    navigation_waze_url: navigation.navigation_waze_url || null,
+    navigation_waze_intent: navigation.navigation_waze_intent || null,
     static_map_url,
     maps_configured: maps.isConfigured(),
   };

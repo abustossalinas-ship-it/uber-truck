@@ -158,9 +158,12 @@ function buildNavigationUrls(origin, destination) {
   if (origin?.lat != null) {
     navigation_url += `&origin=${encodeURIComponent(`${origin.lat},${origin.lng}`)}`;
   }
+  const wazeLl = `${destination.lat},${destination.lng}`;
   return {
     navigation_url,
     navigation_android_intent: `google.navigation:q=${dest}`,
+    navigation_waze_url: `https://waze.com/ul?ll=${encodeURIComponent(wazeLl)}&navigate=yes`,
+    navigation_waze_intent: `waze://?ll=${wazeLl}&navigate=yes`,
   };
 }
 

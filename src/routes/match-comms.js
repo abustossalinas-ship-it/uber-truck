@@ -9,6 +9,7 @@ const { optionalAuth } = require('../lib/optional-auth');
 const { normalizeRole } = require('../lib/match-cancel');
 const { getMatchParties } = require('../lib/match-parties');
 const { isMatchChatFree, enableMatchFreeChat } = require('../lib/match-chat');
+const { textContainsPhone } = require('../lib/phone-guard');
 const support = require('../lib/support-cases');
 
 const router = express.Router();
@@ -71,6 +72,15 @@ router.post('/:matchId/messages', optionalAuth, async (req, res) => {
         error:
           'Solo mensajes rápidos hasta que el viaje esté en ruta. Para emergencias (pago, robo, daño grave), usa las opciones de agente Cubik.',
         chat_mode: 'presets_only',
+      });
+    }
+
+    if (!preset && !isAdmin && textContainsPhone(body)) {
+      return res.status(403).json({
+        ok: false,
+        error:
+          'Por seguridad no puedes compartir teléfonos en el chat. Usa el botón «Llamar» del viaje (número enmascarado Cubik).',
+        chat_mode: 'no_phone',
       });
     }
 

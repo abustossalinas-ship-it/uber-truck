@@ -1,6 +1,6 @@
 {
-  "version": "0.0.97",
+  "version": "0.0.98",
   "git_sha": "",
-  "ui": "chat-in-route-v1",
-  "note": "Chat libre en ruta, emergencias agente, mapa banner estable, CTA oferta"
+  "ui": "uber-parity-v1",
+  "note": "Uber-parity: ayuda, chat, Waze, perfil, contraparte visible, anti-teléfono chat"
 }

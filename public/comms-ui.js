@@ -94,7 +94,9 @@ const Comms = {
               const chatActions =
                 n.type === 'chat'
                   ? `<button type="button" class="link-btn" data-open-chat="${n.match_id}">Abrir chat</button>`
-                  : '';
+                  : n.type === 'incident'
+                    ? `<button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver viaje</button>`
+                    : '';
               const actions = mutual
                 ? `<div class="notif-actions">
           <button type="button" class="tab tab-sm notif-cta" data-open-cancel="${n.match_id}">Confirmar acuerdo mutuo</button>
@@ -191,18 +193,24 @@ const Comms = {
       const btn = form.querySelector('button[type="submit"]');
       if (btn) btn.disabled = locked;
     }
+    const presetsBlock = document.getElementById('chat-presets-block');
+    const emergencyBlock = document.getElementById('chat-emergency-block');
+    const hideQuick = this.chatFree && this.inRoute;
+    if (presetsBlock) presetsBlock.hidden = hideQuick;
+    if (emergencyBlock) emergencyBlock.hidden = hideQuick;
     if (hint) {
       hint.hidden = false;
-      if (this.chatFree && this.inRoute) {
-        hint.textContent =
-          'Viaje en ruta: escribe libremente o usa mensajes rápidos (como Uber Eats).';
+      if (hideQuick) {
+        hint.textContent = 'Viaje en ruta: escribe libremente. Para emergencias usa Ayuda en el viaje.';
+        hint.classList.add('chat-mode-free');
       } else if (this.chatFree) {
         hint.textContent = 'Agente Cubik activo: ya puedes escribir libremente.';
+        hint.classList.add('chat-mode-free');
       } else {
         hint.textContent =
-          'Usa mensajes rápidos para coordinar. Cuando el transportista marque «en ruta», podrás escribir libremente. Para pagos, robos o emergencias graves, usa las opciones de agente abajo.';
+          'Desliza los mensajes rápidos →. En ruta podrás escribir libremente. Emergencias: agente Cubik abajo.';
+        hint.classList.toggle('chat-mode-free', !locked);
       }
-      hint.classList.toggle('chat-mode-free', !locked);
     }
   },
 
@@ -251,8 +259,21 @@ const Comms = {
     this.syncChatComposer();
   },
 
+  containsPhone(text) {
+    if (typeof text !== 'string') return false;
+    return /(?:\+?56[\s.-]?)?(?:9[\s.-]?)?[9876][\s.-]?\d{4}[\s.-]?\d{4}|\b9\d{8}\b|whatsapp|wsp|wasap|ll[aá]mame|mi\s+n[uú]mero/i.test(
+      text
+    );
+  },
+
   async sendMessage(body, presetCode) {
     if (!this.activeMatchId) return;
+    if (!presetCode && this.containsPhone(body)) {
+      alert(
+        'Por seguridad no puedes compartir teléfonos en el chat. Usa el botón «Llamar» del viaje.'
+      );
+      return;
+    }
     const res = await fetch(`/api/comms/${this.activeMatchId}/messages`, {
       method: 'POST',
       headers: this.headers(),

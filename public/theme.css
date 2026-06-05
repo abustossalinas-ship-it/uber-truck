@@ -828,15 +828,244 @@ select.offer-picked {
   border-radius: 10px;
 }
 
-.chat-emergency-label {
-  margin-top: 0.65rem;
+.chat-presets-carousel {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 0.4rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
+  scroll-snap-type: x proximity;
+  padding: 0.15rem 0 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.chat-presets-carousel .tab {
+  flex: 0 0 auto;
+  scroll-snap-align: start;
+  font-size: 0.7rem;
   font-weight: 700;
+  padding: 0.35rem 0.65rem;
+  white-space: nowrap;
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chat-emergency-label {
+  margin-top: 0.35rem;
+  font-weight: 700;
+  font-size: 0.75rem;
   color: var(--status-warn);
+}
+
+.chat-presets-label {
+  font-size: 0.75rem;
+  margin-bottom: 0.2rem;
 }
 
 .chat-preset-emergency {
   border-color: var(--brand-orange) !important;
   font-weight: 700;
+}
+
+.help-drawer .help-trip-context {
+  margin: 0 0.85rem 0.65rem;
+  padding: 0.55rem 0.65rem;
+  background: var(--surface-cool);
+  border-left: 3px solid var(--brand-orange);
+  border-radius: 8px;
+  font-size: 0.85rem;
+}
+
+.help-drawer .help-trip-context span {
+  display: block;
+  font-size: 0.75rem;
+  margin-top: 0.15rem;
+}
+
+.help-drawer-body {
+  padding: 0 0.85rem 0.5rem;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.help-bot-bubble {
+  background: var(--surface-warm);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 0.65rem 0.75rem;
+  margin-bottom: 0.65rem;
+}
+
+.help-bot-bubble.help-bot-ok {
+  border-left: 3px solid var(--status-ok);
+}
+
+.help-bot-tag {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--brand-orange);
+  margin-bottom: 0.25rem;
+}
+
+.help-option-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.help-option-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.15rem;
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+
+.help-option-btn:active {
+  border-color: var(--brand-orange);
+  background: var(--surface-warm);
+}
+
+.help-option-label {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: var(--brand-navy);
+}
+
+.help-option-hint {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+.help-footnote {
+  font-size: 0.72rem;
+  margin-top: 0.5rem;
+}
+
+.help-detail-form {
+  padding: 0 0.85rem 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.help-detail-form textarea {
+  min-height: 5.5rem;
+  resize: vertical;
+}
+
+.help-done-btn {
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+.nav-picker-card .nav-picker-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.75rem 0;
+}
+
+.nav-picker-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--brand-navy);
+  cursor: pointer;
+}
+
+.nav-picker-btn:active {
+  border-color: var(--brand-orange);
+}
+
+.nav-picker-icon {
+  font-size: 1.35rem;
+}
+
+.trip-party-row,
+.match-party-row {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 0.45rem;
+  flex-wrap: wrap;
+}
+
+.trip-party-avatar {
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--brand-navy) 0%, var(--brand-blue) 100%);
+  color: var(--text-on-dark);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.trip-party-meta {
+  flex: 1;
+  min-width: 0;
+}
+
+.trip-party-name {
+  display: block;
+  font-size: 0.95rem;
+  font-weight: 800;
+  color: var(--brand-navy);
+  line-height: 1.2;
+}
+
+.trip-party-sub {
+  display: block;
+  font-size: 0.72rem;
+  color: var(--text-muted);
+}
+
+.trip-status-pill {
+  margin-left: auto;
+  flex-shrink: 0;
+}
+
+.trip-contact-bar {
+  margin: 0.15rem 0 0.45rem;
+}
+
+.trip-call-btn {
+  font-size: 0.75rem !important;
+}
+
+.trip-route-line {
+  margin: 0.15rem 0 0.35rem;
+  font-size: 0.88rem;
+}
+
+.call-modal-note {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  padding: 0.45rem 0.5rem;
+  background: var(--surface-cool);
+  border-radius: 8px;
 }
 
 .notif-actions {

@@ -415,6 +415,7 @@ function buildMatchActions(m) {
     const title = m._matchTitle || 'Emparejamiento';
     const titleEsc = title.replace(/"/g, '');
     html += `<button type="button" class="btn-secondary" data-action="chat" data-id="${m.id}" data-title="${titleEsc}">Chat</button>`;
+    html += `<button type="button" class="btn-secondary" data-action="call" data-id="${m.id}">Llamar</button>`;
     if (m.status === 'accepted') {
       if (role === 'carrier') {
         html += `<button type="button" class="btn-match-progress" data-action="progress" data-id="${m.id}">Marcar en ruta</button>`;
@@ -1059,10 +1060,19 @@ async function refreshBoard() {
         const proposedAt = m.created_at
           ? `<p class="muted match-meta">Propuesta ${formatDateTime(m.created_at)}${offer?.created_at ? ` · Oferta publicada ${formatDateTime(offer.created_at)}` : ''}</p>`
           : '';
+        const cpLine = m.counterparty
+          ? `<div class="match-party-row">
+        <span class="trip-party-avatar">${(m.counterparty.person || m.counterparty.display).charAt(0).toUpperCase()}</span>
+        <div class="trip-party-meta">
+          <span class="trip-party-name">${m.counterparty.display}</span>
+          <span class="trip-party-sub">Tratas con · ${m.counterparty.role_label}</span>
+        </div>
+        ${statusPillHtml(m.status, m.created_at)}
+      </div>`
+          : `<strong>${title}</strong>${statusPillHtml(m.status, m.created_at)}`;
         return `
       <article class="item match-item" data-match-id="${m.id}">
-        <strong>${title}</strong>
-        ${statusPillHtml(m.status, m.created_at)}
+        ${cpLine}
         ${proposedAt}
         ${scheduleLine}
         ${buildMatchReputationHtml(m, load, offer)}
@@ -1467,29 +1477,18 @@ $('panel-board')?.addEventListener('click', async (e) => {
     if (typeof Comms !== 'undefined') Comms.openChat(id, title);
     return;
   }
+  if (action === 'call') {
+    if (typeof ContactUI !== 'undefined') ContactUI.callMatch(id);
+    return;
+  }
   if (action === 'report_incident') {
-    const type = prompt(
-      'Tipo de incidente:\n1 theft (robo/extravío)\n2 damage (daño)\n3 shortage (faltante)\n4 delay (atraso grave)\n5 other\n\nEscribe el código:',
-      'theft'
-    );
-    if (!type) return;
-    const normalized = type.trim().toLowerCase();
-    const allowed = ['theft', 'damage', 'shortage', 'delay', 'other'];
-    if (!allowed.includes(normalized)) {
-      alert('Tipo no válido. Usa: theft, damage, shortage, delay, other');
-      return;
+    const card = btn.closest('[data-match-id]');
+    const title = card?.querySelector('strong')?.textContent?.trim() || 'Viaje en curso';
+    if (typeof IncidentUI !== 'undefined') {
+      IncidentUI.open(id, title);
+    } else {
+      alert('Recarga la app (Ctrl+F5) e intenta de nuevo.');
     }
-    const description = prompt('Describe qué ocurrió (mín. 10 caracteres):');
-    if (!description || description.trim().length < 10) {
-      alert('Descripción demasiado corta.');
-      return;
-    }
-    const json = await API.postIncident(id, {
-      incident_type: normalized,
-      description: description.trim(),
-    });
-    if (!json.ok) alert(json.error || json.errors?.join('\n') || 'No se pudo registrar');
-    else alert(json.message || 'Incidente registrado');
     return;
   }
   if (action === 'accept_offer') {

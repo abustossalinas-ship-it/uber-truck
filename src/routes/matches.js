@@ -47,6 +47,7 @@ const { openCaseForCancelledMatch } = require('../lib/support-cases');
 const { logMatchTrip } = require('../lib/match-trip-log');
 const { listTripEvents } = require('../lib/trip-events');
 const { buildMatchTracking } = require('../lib/match-tracking');
+const { enrichMatchesCounterparty, buildMatchContact } = require('../lib/match-contact');
 const maps = require('../services/google-maps');
 const { computeDestinationEtaFromRoute } = require('../lib/load-time-estimate');
 
@@ -111,10 +112,21 @@ router.get('/', optionalAuth, async (req, res) => {
     let rows = await repo.list('matches', {});
     rows = await filterMatchesForUser(rows, req.user);
     rows = await enrichMatchesWithRatings(repo, rows, req.user);
+    rows = await enrichMatchesCounterparty(repo, rows, req.user);
     res.json({ ok: true, data: rows });
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al listar matches' });
+  }
+});
+
+router.get('/:id/contact', optionalAuth, requireAuthIfDb, async (req, res) => {
+  try {
+    const data = await buildMatchContact(repo, req.params.id, req.user);
+    res.json({ ok: true, data });
+  } catch (e) {
+    console.error(e);
+    res.status(e.status || 500).json({ ok: false, error: e.message || 'Contacto no disponible' });
   }
 });
 

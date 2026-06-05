@@ -39,7 +39,7 @@ const HITOS = [
 ];
 
 const RELEASES = [
-  { ver: "0.0.105", foco: "Calibración tarifas sugerencia flete RM–V", commit: "—" },
+  { ver: "0.0.105", foco: "Calibración tarifas sugerencia flete RM–V", commit: "a4336d7" },
   { ver: "0.0.104", foco: "Notif pago al día + campana rápida", commit: "7f09d15" },
   { ver: "0.0.103", foco: "Badge embarcador pagó + notif visible", commit: "551c832" },
   { ver: "0.0.102", foco: "Botón Pagar + drawer Cubik Saldo", commit: "96947cf" },

@@ -28,7 +28,7 @@
   <div class="doc-title-wrap">
     <h1>Modelo de negocio — Uber Truck</h1>
     <p class="meta"><strong>Producto:</strong> Marketplace de capacidad logística ociosa (backhaul), Chile.<br />
-    <strong>Versión:</strong> 2.2 · 25 may 2026 · Complementa <a href="Memoria-tecnica-Uber-Truck.html">memoria técnica v3.9</a></p>
+    <strong>Versión:</strong> 2.3 · 25 may 2026 · Complementa <a href="Memoria-tecnica-Uber-Truck.html">memoria técnica v4.1</a></p>
   </div>
 </div>
 
@@ -63,7 +63,11 @@
 </table>
 <p><strong>Ejemplo</strong> flete $1.200.000: Cubik ingresa $180.000; embarcador paga $1.320.000 al salir en ruta; transportista recibe $1.140.000 al completar.</p>
 <p><strong>Cobro:</strong> <strong>Cubik Saldo</strong> (wallet tipo Uber Cash), sin efectivo. Publicar requiere 20% del presupuesto máximo en saldo; retención al <strong>Marcar en ruta</strong>; liberación al completar. Tier ≥ <strong>$1.000.000</strong>: factura + saldo/transferencia registrada.</p>
-<p>Implementación código: próxima semana. Hoy GMV = $0 ingreso real (solo estimación admin).</p>
+<p><strong>Piloto v0.0.100–0.0.105:</strong> comisiones 10/5 simuladas post-<code>completed</code>; sin wallet real aún. GMV piloto = simulación UI.</p>
+<h3>Sugerencia de presupuesto al publicar (v0.0.105)</h3>
+<p>La app propone un rango orientativo al embarcador (<code>POST /api/maps/budget-estimate</code>). Coeficientes calibrados corredor RM–Valparaíso (jun 2026): base <strong>$80.000</strong>, <strong>$450/km</strong>, <strong>$22/kg</strong>, urgente ×1,18; rango publicado 82%–125%. Ejemplo Renca–La Serena (~463 km, 12 t): ~$452k–$691k vs viaje acordado ~$570k. Configurable en Railway (<code>BUDGET_*</code>). No bloquea ofertas fuera de rango.</p>
+<p>Comparación con costo logístico por kg de informes internos (red masiva, tramos «Recepción»): no es comparable 1:1 con flete spot dedicado; ver canvas <code>comparacion-costos-transporte</code>.</p>
+<p>Implementación wallet/escrow producción: siguiente etapa. Tarifario por corredor/tipo camión: futuro.</p>
 <h3>Fase B — Cubik Plus Empresa (tipo Uber One)</h3>
 <p>Suscripción mensual para embarcadores de alto volumen → descuento en fee embarcador (ej. 10% → 7%). Banner de ahorro en checkout. Plan transportista opcional post-M2.</p>
 <h3>Fase C — Datos y add-on B2B</h3>

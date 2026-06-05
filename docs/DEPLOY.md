@@ -38,6 +38,12 @@ SUPABASE_SERVICE_ROLE_KEY=eyJ...
 | `PORT` | `3001` (Railway suele inyectar `PORT`; si falla health, usa la que asigne Railway) |
 | `SUPABASE_URL` | URL del proyecto Supabase **uber-truck** |
 | `SUPABASE_SERVICE_ROLE_KEY` | service role del mismo proyecto |
+| `BUDGET_BASE_CLP` | `80000` — base sugerencia flete (opcional; default en código) |
+| `BUDGET_RATE_KM_CLP` | `450` — $/km sugerencia |
+| `BUDGET_RATE_KG_CLP` | `22` — $/kg sugerencia |
+| `BUDGET_URGENT_MULT` | `1.18` — multiplicador urgente |
+| `BUDGET_MIN_RATIO` | `0.82` — piso rango publicado |
+| `BUDGET_MAX_RATIO` | `1.25` — techo rango publicado |
 
 5. El repo ya incluye `railway.json`:
 

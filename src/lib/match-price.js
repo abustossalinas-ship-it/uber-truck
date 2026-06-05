@@ -52,6 +52,22 @@ function outsideRangeMessages(offer, min, max) {
 /** Múltiplo usado en formulario (step=1000) y ofertas. */
 const BUDGET_CLP_STEP = 1000;
 
+/** Coeficientes sugerencia flete — calibrados corredor RM–V (jun 2026). Ver .env.example */
+function budgetRates() {
+  const num = (key, fallback) => {
+    const v = Number(process.env[key]);
+    return Number.isFinite(v) && v >= 0 ? v : fallback;
+  };
+  return {
+    baseClp: num('BUDGET_BASE_CLP', 80_000),
+    rateKm: num('BUDGET_RATE_KM_CLP', 450),
+    rateKg: num('BUDGET_RATE_KG_CLP', 22),
+    urgentMult: num('BUDGET_URGENT_MULT', 1.18),
+    minRatio: num('BUDGET_MIN_RATIO', 0.82),
+    maxRatio: num('BUDGET_MAX_RATIO', 1.25),
+  };
+}
+
 /**
  * Redondea montos CLP a números “cerrados” (miles) para inputs type=number step=1000.
  * @param {'nearest'|'down'|'up'} mode
@@ -65,18 +81,20 @@ function roundBudgetClp(n, mode = 'nearest') {
 }
 
 /**
- * Referencia futura (no bloquea): peso, urgencia, distancia.
- * Sustituir por tarifario real cuando exista data de mercado.
+ * Referencia de presupuesto: peso, urgencia, distancia.
+ * Defaults calibrados vs piloto (ej. Renca–La Serena ~463 km → ~$550k–570k con 10–12 t).
+ * No bloquea ofertas fuera de rango; el mercado fija agreed_price_clp.
  */
 function suggestReferenceBudget(load) {
+  const { baseClp, rateKm, rateKg, urgentMult, minRatio, maxRatio } = budgetRates();
   const km = Number(load.distance_km) || 0;
   const kg = Number(load.weight_kg) || 0;
-  let base = 120000;
-  if (km > 0) base += km * 750;
-  if (kg > 0) base += kg * 45;
-  if (load.urgency === 'urgent') base = Math.round(base * 1.18);
-  let budget_min_clp = roundBudgetClp(base * 0.82, 'down');
-  let budget_max_clp = roundBudgetClp(base * 1.25, 'up');
+  let base = baseClp;
+  if (km > 0) base += km * rateKm;
+  if (kg > 0) base += kg * rateKg;
+  if (load.urgency === 'urgent') base = Math.round(base * urgentMult);
+  let budget_min_clp = roundBudgetClp(base * minRatio, 'down');
+  let budget_max_clp = roundBudgetClp(base * maxRatio, 'up');
   if (budget_min_clp < BUDGET_CLP_STEP) budget_min_clp = BUDGET_CLP_STEP;
   if (budget_max_clp <= budget_min_clp) {
     budget_max_clp = budget_min_clp + roundBudgetClp(base * 0.15, 'up') || 10000;
@@ -84,7 +102,7 @@ function suggestReferenceBudget(load) {
   return {
     budget_min_clp,
     budget_max_clp,
-    note: 'Sugerencia referencial (peso, urgencia, km), redondeada a miles de pesos.',
+    note: `Sugerencia referencial (base $${baseClp.toLocaleString('es-CL')}, $${rateKm}/km, $${rateKg}/kg), redondeada a miles.`,
   };
 }
 
@@ -111,6 +129,7 @@ async function assertCanAdjustLoadBudget(repo, loadId) {
 
 module.exports = {
   BUDGET_CLP_STEP,
+  budgetRates,
   roundBudgetClp,
   copyBudgetFromLoad,
   validateLoadBudget,

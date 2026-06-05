@@ -39,7 +39,7 @@
     <h1>Memoria técnica del proyecto</h1>
     <p class="meta"><strong>Producto:</strong> Uber Truck — marketplace de capacidad logística ociosa (backhaul), Chile.<br />
     <strong>Documento:</strong> memoria técnica viva del repositorio y del despliegue Railway.<br />
-    <strong>Versión documento:</strong> 4.0 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.104 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 5 jun 2026</p>
+    <strong>Versión documento:</strong> 4.1 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.105 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 25 may 2026</p>
   </div>
 </div>
 
@@ -449,6 +449,17 @@
 <p><strong>Deploy:</strong> commits <code>96947cf</code> (v0.0.102) → <code>7f09d15</code> (v0.0.104) · Railway <code>main</code> · APK <code>cubik-android.apk</code>.</p>
 <p><strong>Limitación piloto:</strong> sin movimiento real de dinero; label «Simulación piloto»; <code>completed</code> ≠ pagado hasta que el embarcador pulsa Pagar.</p>
 
+<h2>Bitácora de avance — 25 mayo 2026 (v0.0.105 — calibración tarifas)</h2>
+<table>
+  <tr><th>Área</th><th>Entregado</th><th>Notas</th></tr>
+  <tr><td>Sugerencia flete</td><td>Coeficientes calibrados corredor RM–V vs piloto real e informe logístico</td><td><code>match-price.js</code> · defaults: $80k + $450/km + $22/kg (antes $120k + $750 + $45)</td></tr>
+  <tr><td>Ejemplo Renca–La Serena</td><td>463 km, 12 t → rango sugerido ~$452k–$691k (centro ~$552k vs viaje ~$570k)</td><td><code>POST /api/maps/budget-estimate</code></td></tr>
+  <tr><td>Config producción</td><td>Variables <code>BUDGET_*</code> en Railway / <code>.env</code></td><td>Ver <code>.env.example</code> y <a href="DEPLOY.md">DEPLOY.md</a></td></tr>
+  <tr><td>Comparación costos</td><td>Canvas Cursor + brecha ~1,9–2,5× vs informe PDF (no comparable 1:1)</td><td><code>canvases/comparacion-costos-transporte.canvas.tsx</code></td></tr>
+  <tr><td>Comisiones</td><td>Sin cambio: 10% embarcador + 5% transportista</td><td><code>payment-simulation.js</code></td></tr>
+</table>
+<p><strong>Deploy:</strong> v0.0.105 · Railway <code>main</code> · comisiones piloto sin cambio.</p>
+
 <h2>Modelo de monetización, Cubik Saldo y checkout (diseño may 2026)</h2>
 <p><strong>Estado jun 2026:</strong> <strong>piloto operativo</strong> (v0.0.100–0.0.104) con comisiones 10/5 y flujo pago post-completado simulado. <strong>Pendiente producción:</strong> wallet real, ledger, retención al «En ruta», recarga pasarela. GMV piloto no genera ingreso real (solo simulación en UI).</p>
 
@@ -613,7 +624,7 @@
 <ul>
   <li>Match: corredor origen–destino, cubicación, peso; sugerencias automáticas en UI.</li>
   <li><strong>Precio:</strong> embarcador publica rango orientativo; transportista <strong>oferta CLP</strong> (puede estar fuera del rango); embarcador <strong>acepta</strong> para confirmar. Puede <strong>ampliar rango</strong> salvo que ya exista precio acordado con otro transportista en la misma carga.</li>
-  <li><strong>Rango sugerido:</strong> <code>POST /api/maps/budget-estimate</code> — referencia por distancia, peso y urgencia; no bloquea ofertas (futuro: tarifario completo).</li>
+  <li><strong>Rango sugerido:</strong> <code>POST /api/maps/budget-estimate</code> — referencia por distancia, peso y urgencia (defaults calibrados jun 2026: base <strong>$80.000</strong>, <strong>$450/km</strong>, <strong>$22/kg</strong>; configurable vía <code>BUDGET_*</code> en Railway); no bloquea ofertas.</li>
   <li>Dirección: con Maps configurado, origen/destino deben elegirse de la lista Google.</li>
   <li>Cancelación: motivos; multas sugeridas; acuerdo mutuo bilateral.</li>
   <li>Roles: shipper ve sus cargas + mercado de ofertas; carrier ve mercado de cargas + sus ofertas; admin ve todo.</li>
@@ -644,6 +655,6 @@
   docs/            ← memoria HTML (este archivo)
   canvases/        ← estado de avance (Cursor)</code>
 
-<p class="meta"><em>Fin del documento — v3.9 (25 may 2026): Cubik v0.0.98 paridad Uber (incidentes, chat ruta, Waze, anti-teléfono, perfil); diseño monetización 10%+5%, Cubik Saldo, retención en ruta, tier $1M sin cash; implementación pagos semana siguiente.</em></p>
+<p class="meta"><em>Fin del documento — v4.1 (25 may 2026): v0.0.105 calibración sugerencia flete (80k + 450/km + 22/kg); Cubik Saldo piloto 10/5 operativo; wallet real siguiente.</em></p>
 </body>
 </html>

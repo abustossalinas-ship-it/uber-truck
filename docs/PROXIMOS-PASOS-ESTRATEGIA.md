@@ -1,6 +1,6 @@
 # Próximos pasos estratégicos — Cubik / Uber Truck
 
-Alineado al estado del repo (**5 jun 2026**, software **0.0.104**).
+Alineado al estado del repo (**25 may 2026**, software **0.0.105**).
 
 ## Principio
 
@@ -26,7 +26,8 @@ No perseguir la app perfecta en web: construir **operación tipo Uber** con mark
 | G2 | Distribución testers sin tienda (`/probar` + APK) | **Hecho jun 2026** |
 | G5 | Billetera multi-cuenta + RUT/bancos + cubicación carga | **Hecho v0.0.93–0.0.94** |
 | G6 | Push FCM backend + registro token Android | **Backend OK** — validación `push-test` en teléfono pendiente |
-| **D0** | **Cubik Saldo piloto** — comisiones 10/5, botón Pagar, notificación transportista | **Hecho v0.0.100–0.0.104** — simulación sin wallet real |
+| **D0** | **Cubik Saldo piloto** — comisiones 10/5, botón Pagar, notificación transportista | **Hecho v0.0.100–0.0.105** — simulación sin wallet real |
+| **D0b** | **Calibración tarifas sugerencia flete** (RM–V) | **Hecho v0.0.105** — `match-price.js` + `BUDGET_*` Railway |
 | G3 | Play Store prueba cerrada «Cubik Envíos Chile» | **Siguiente opcional** — USD 25 |
 | G4 | iOS TestFlight | **Futuro** — USD 99/año + Mac; hoy PWA |
 | H | Piloto curado (5 carriers + 3 embarcadores) | Al final |

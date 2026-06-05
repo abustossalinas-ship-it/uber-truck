@@ -214,6 +214,7 @@ NOTIFY pgrst, 'reload schema';
 ## Referencias
 
 - [01-MEMORIA-TECNICA.md](./01-MEMORIA-TECNICA.md)
+- [DEPLOY.md](./DEPLOY.md) — variables Railway incl. `BUDGET_*` (sugerencia flete v0.0.105)
 - [PENALTIES-AND-ACCOUNTS.md](./PENALTIES-AND-ACCOUNTS.md)
 - [MATCH-CANCEL-POLICY.md](./MATCH-CANCEL-POLICY.md)
 - [CARGO-TRUST.md](./CARGO-TRUST.md)

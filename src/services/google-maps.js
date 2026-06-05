@@ -104,6 +104,66 @@ async function distanceKm(origin, destination, opts = {}) {
   };
 }
 
+function decodePolyline(encoded) {
+  if (!encoded) return [];
+  const points = [];
+  let index = 0;
+  let lat = 0;
+  let lng = 0;
+  while (index < encoded.length) {
+    let b;
+    let shift = 0;
+    let result = 0;
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    lat += result & 1 ? ~(result >> 1) : result >> 1;
+    shift = 0;
+    result = 0;
+    do {
+      b = encoded.charCodeAt(index++) - 63;
+      result |= (b & 0x1f) << shift;
+      shift += 5;
+    } while (b >= 0x20);
+    lng += result & 1 ? ~(result >> 1) : result >> 1;
+    points.push({ lat: lat / 1e5, lng: lng / 1e5 });
+  }
+  return points;
+}
+
+/** Ruta por calles (Directions API) — overview polyline. */
+async function drivingRoutePath(origin, destination) {
+  if (!origin?.lat || !destination?.lat) return { ok: false, path: [] };
+  try {
+    const data = await googleGet('directions/json', {
+      origin: `${origin.lat},${origin.lng}`,
+      destination: `${destination.lat},${destination.lng}`,
+      mode: 'driving',
+    });
+    const route = data.routes?.[0];
+    if (!route) return { ok: false, path: [] };
+    const encoded = route.overview_polyline?.points;
+    return { ok: true, path: decodePolyline(encoded) };
+  } catch {
+    return { ok: false, path: [] };
+  }
+}
+
+function buildNavigationUrls(origin, destination) {
+  if (!destination?.lat) return {};
+  const dest = `${destination.lat},${destination.lng}`;
+  let navigation_url = `https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(dest)}&travelmode=driving`;
+  if (origin?.lat != null) {
+    navigation_url += `&origin=${encodeURIComponent(`${origin.lat},${origin.lng}`)}`;
+  }
+  return {
+    navigation_url,
+    navigation_android_intent: `google.navigation:q=${dest}`,
+  };
+}
+
 /** Mapa estático para embarcador / seguimiento (origen, destino, camión). */
 function staticMapUrl({ origin, destination, carrier, size = '640x280' }) {
   if (!isConfigured()) return null;
@@ -145,5 +205,7 @@ module.exports = {
   autocomplete,
   placeDetails,
   distanceKm,
+  drivingRoutePath,
+  buildNavigationUrls,
   staticMapUrl,
 };

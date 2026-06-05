@@ -3,7 +3,12 @@
 let gpsWatchId = null;
 let lastGpsSentAt = 0;
 let activeTrackMatchId = null;
+let screenWakeLock = null;
 const trackingFetchByMatch = new Map();
+
+function gpsPostIntervalMs() {
+  return activeTrackMatchId ? 10000 : 25000;
+}
 
 function trackingHeaders() {
   return typeof Auth !== 'undefined' ? Auth.headers() : { 'Content-Type': 'application/json' };
@@ -48,9 +53,29 @@ function shouldShareGps() {
   return Boolean(user && user.role === 'carrier');
 }
 
+async function releaseWakeLock() {
+  if (screenWakeLock) {
+    try {
+      await screenWakeLock.release();
+    } catch (_) {}
+    screenWakeLock = null;
+  }
+}
+
+async function ensureWakeLock() {
+  if (!activeTrackMatchId || !shouldShareGps() || !('wakeLock' in navigator)) return;
+  if (screenWakeLock) return;
+  try {
+    screenWakeLock = await navigator.wakeLock.request('screen');
+    screenWakeLock.addEventListener('release', () => {
+      screenWakeLock = null;
+    });
+  } catch (_) {}
+}
+
 async function postCarrierLocation(lat, lng) {
   const now = Date.now();
-  if (now - lastGpsSentAt < 25000) return;
+  if (now - lastGpsSentAt < gpsPostIntervalMs()) return;
   lastGpsSentAt = now;
   try {
     const res = await fetch('/api/carrier/location', {
@@ -78,9 +103,20 @@ function startGpsWatch() {
       const status = document.getElementById('carrier-gps-status');
       if (status) status.textContent = `GPS: ${err.message || 'sin señal'}`;
     },
-    { enableHighAccuracy: true, maximumAge: 30000, timeout: 25000 }
+    {
+      enableHighAccuracy: true,
+      maximumAge: activeTrackMatchId ? 8000 : 30000,
+      timeout: 25000,
+    }
   );
 }
+
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible' && activeTrackMatchId && shouldShareGps()) {
+    ensureWakeLock();
+    syncGpsWatch();
+  }
+});
 
 function syncGpsWatch() {
   if (shouldShareGps()) startGpsWatch();
@@ -279,11 +315,19 @@ async function refreshActiveTripMap(matchId, opts = {}) {
       }
     }
 
-    await Promise.all(targets.map((el) => renderTripMapEl(el, tracking)));
+    await Promise.all(
+      targets.map(async (el) => {
+        await renderTripMapEl(el, tracking);
+        if (typeof LiveMap !== 'undefined' && LiveMap.startPoll) {
+          LiveMap.startPoll(el, matchId, fetchTracking);
+        }
+      })
+    );
 
     if (tracking?.tracking_active && Auth.user?.role === 'carrier') {
       activeTrackMatchId = matchId;
       syncGpsWatch();
+      ensureWakeLock();
       try {
         const pos = await readCurrentPosition();
         await postCarrierLocation(pos.lat, pos.lng);
@@ -304,6 +348,7 @@ function onBoardMatchesUpdated(matches) {
   if (active) refreshActiveTripMap(active.id);
   else {
     activeTrackMatchId = null;
+    releaseWakeLock();
     syncGpsWatch();
     const bannerMap = document.getElementById('active-trip-map');
     if (bannerMap && typeof LiveMap !== 'undefined') LiveMap.destroy(bannerMap);

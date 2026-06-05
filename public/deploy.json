@@ -1,6 +1,6 @@
 {
-  "version": "0.0.95",
+  "version": "0.0.96",
   "git_sha": "",
-  "ui": "live-trip-map-v1",
-  "note": "Mapa interactivo Google Maps JS en viaje activo (piloto M2)"
+  "ui": "live-trip-map-v2",
+  "note": "Mapa vivo: ruta GPS, ETA, navegación Google Maps, seguimiento fluido"
 }

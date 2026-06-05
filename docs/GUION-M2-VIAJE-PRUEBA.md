@@ -84,8 +84,13 @@
 
 ---
 
-## Mapa interactivo en vivo (v0.0.95)
+## Mapa en vivo v0.0.96 (tipo Uber)
 
-Mapa **Google Maps JS**: zoom, pan, marcador naranja animado al moverte. Requiere **Maps JavaScript API** en Google Cloud (misma clave o `GOOGLE_MAPS_BROWSER_KEY` en Railway).
+- Mapa **Google Maps JS** interactivo (zoom/pan)
+- **Línea azul** = recorrido GPS real del transportista
+- **Línea naranja** = ruta por calles (Directions API)
+- **ETA en vivo** («Llegada ~X min») en viaje en ejecución
+- Botón **Navegar** → Google Maps (turn-by-turn en app Google)
+- GPS cada ~10 s en viaje activo; pantalla activa en APK (wake lock)
 
-Si falla, la app usa mapa estático como respaldo.
+APIs Google: Maps JavaScript, Directions, Distance Matrix (tráfico).

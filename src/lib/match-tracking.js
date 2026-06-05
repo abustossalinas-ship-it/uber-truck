@@ -3,6 +3,29 @@
 const repo = require('./repository');
 const maps = require('../services/google-maps');
 const { filterMatchesForUser } = require('./access-scope');
+const { listTripEvents } = require('./trip-events');
+
+async function buildLocationTrail(matchId, carrier) {
+  const events = await listTripEvents(matchId);
+  const trail = events
+    .filter((e) => e.event_type === 'location_update' && e.payload?.lat != null)
+    .map((e) => ({
+      lat: Number(e.payload.lat),
+      lng: Number(e.payload.lng),
+      at: e.created_at,
+    }));
+  if (carrier?.lat != null && carrier?.lng != null) {
+    const last = trail[trail.length - 1];
+    if (!last || last.lat !== carrier.lat || last.lng !== carrier.lng) {
+      trail.push({
+        lat: carrier.lat,
+        lng: carrier.lng,
+        at: carrier.updated_at || new Date().toISOString(),
+      });
+    }
+  }
+  return trail;
+}
 
 async function buildMatchTracking(matchId, user) {
   const match = await repo.getById('matches', matchId);
@@ -62,6 +85,40 @@ async function buildMatchTracking(matchId, user) {
       ? maps.staticMapUrl({ origin, destination, carrier })
       : null;
 
+  const trail = trackingActive ? await buildLocationTrail(matchId, carrier) : [];
+
+  let driving_path = [];
+  if (trackingActive && maps.isConfigured() && origin && destination) {
+    const route = await maps.drivingRoutePath(origin, destination);
+    if (route.ok) driving_path = route.path;
+  }
+
+  let eta = null;
+  if (
+    trackingActive &&
+    match.status === 'in_progress' &&
+    carrier &&
+    destination &&
+    maps.isConfigured()
+  ) {
+    const dm = await maps.distanceKm(
+      { lat: carrier.lat, lng: carrier.lng },
+      { lat: destination.lat, lng: destination.lng },
+      { traffic: true }
+    );
+    if (dm.ok) {
+      eta = {
+        duration_min: dm.duration_min,
+        duration_text: dm.duration_text,
+        distance_km: dm.distance_km,
+        distance_text: dm.distance_text,
+      };
+    }
+  }
+
+  const navFrom = carrier || origin;
+  const navigation = maps.buildNavigationUrls(navFrom, destination);
+
   return {
     match_id: match.id,
     status: match.status,
@@ -71,8 +128,13 @@ async function buildMatchTracking(matchId, user) {
       destination,
       distance_km: load?.distance_km ?? null,
       duration_min: load?.distance_duration_min ?? null,
+      driving_path,
     },
     carrier_position: carrier,
+    location_trail: trail,
+    eta,
+    navigation_url: navigation.navigation_url || null,
+    navigation_android_intent: navigation.navigation_android_intent || null,
     static_map_url,
     maps_configured: maps.isConfigured(),
   };

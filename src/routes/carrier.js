@@ -13,7 +13,6 @@ const {
 
 const router = express.Router();
 const lastLocationLog = new Map();
-const LOCATION_LOG_MS = 45000;
 
 function requireCarrier(req, res, next) {
   if (req.user?.role !== 'carrier') {
@@ -78,13 +77,10 @@ router.post(
   async (req, res) => {
     const { lat, lng } = req.body || {};
     try {
-      const shouldLog =
-        !lastLocationLog.has(req.user.sub) ||
-        Date.now() - lastLocationLog.get(req.user.sub) > LOCATION_LOG_MS;
       const result = await updateCarrierLocation(req.user.sub, lat, lng, {
-        logTrip: shouldLog,
+        logTrip: true,
       });
-      if (shouldLog) lastLocationLog.set(req.user.sub, Date.now());
+      lastLocationLog.set(req.user.sub, Date.now());
       res.json({ ok: true, data: result });
     } catch (e) {
       console.error(e);

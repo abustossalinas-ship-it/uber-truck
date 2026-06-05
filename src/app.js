@@ -133,6 +133,8 @@ app.get('/health', async (_req, res) => {
       'trip-events-realtime',
       'gps-tracking',
       'live-trip-map',
+      'live-trip-eta-trail',
+      'google-maps-navigation',
       'carrier-available',
       'password-reset',
       'buscando-camiones',

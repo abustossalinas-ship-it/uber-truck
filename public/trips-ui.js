@@ -110,6 +110,27 @@ function buildTripRatingsBlock(m, role, counterpartyName) {
     </div>`;
 }
 
+let _bannerActiveMatchId = null;
+
+function bindActiveTripBannerNav(matchId) {
+  const banner = document.getElementById('active-trip-banner');
+  const btn = banner?.querySelector('[data-goto-trip]');
+  if (!btn || btn.dataset.bound === '1') return;
+  btn.dataset.bound = '1';
+  btn.addEventListener('click', () => {
+    if (typeof showTab === 'function') showTab('trips');
+    window.setTimeout(() => {
+      const card = document.querySelector(`#list-trips [data-trip-id="${matchId}"]`);
+      if (card) {
+        card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        card.classList.add('match-highlight');
+        window.setTimeout(() => card.classList.remove('match-highlight'), 2800);
+      }
+      if (typeof refreshActiveTripMap === 'function') refreshActiveTripMap(matchId);
+    }, 200);
+  });
+}
+
 function updateActiveTripBanner(matches, loadById, offerById) {
   const banner = document.getElementById('active-trip-banner');
   if (!banner) return;
@@ -118,6 +139,9 @@ function updateActiveTripBanner(matches, loadById, offerById) {
   );
   if (!active) {
     banner.hidden = true;
+    _bannerActiveMatchId = null;
+    const mapEl = document.getElementById('active-trip-map');
+    if (mapEl && typeof LiveMap !== 'undefined') LiveMap.destroy(mapEl);
     return;
   }
   const load = loadById[active.load_request_id];
@@ -132,19 +156,41 @@ function updateActiveTripBanner(matches, loadById, offerById) {
     active.agreed_price_clp != null
       ? `$${Number(active.agreed_price_clp).toLocaleString('es-CL')}`
       : '';
+  const counterparty = role === 'shipper' ? carrier : shipper;
   banner.hidden = false;
+
+  const sameMatch = _bannerActiveMatchId === active.id && banner.querySelector('#active-trip-map');
+  if (sameMatch) {
+    const tag = banner.querySelector('.active-trip-tag');
+    const routeEl = banner.querySelector('.active-trip-route');
+    const priceEl = banner.querySelector('.active-trip-price');
+    if (tag) tag.textContent = statusText;
+    if (routeEl) routeEl.innerHTML = `<strong>${counterparty}</strong> · ${route}`;
+    if (price) {
+      if (priceEl) priceEl.textContent = `${price} CLP acordados`;
+      else {
+        const mapWrap = banner.querySelector('#active-trip-map');
+        const p = document.createElement('p');
+        p.className = 'active-trip-price';
+        p.textContent = `${price} CLP acordados`;
+        mapWrap?.before(p);
+      }
+    } else if (priceEl) priceEl.remove();
+    bindActiveTripBannerNav(active.id);
+    if (typeof refreshActiveTripMap === 'function') refreshActiveTripMap(active.id, { soft: true });
+    return;
+  }
+
+  _bannerActiveMatchId = active.id;
   banner.innerHTML = `
     <div class="active-trip-inner">
       <p class="active-trip-tag">${statusText}</p>
-      <p class="active-trip-route"><strong>${role === 'shipper' ? carrier : shipper}</strong> · ${route}</p>
+      <p class="active-trip-route"><strong>${counterparty}</strong> · ${route}</p>
       ${price ? `<p class="active-trip-price">${price} CLP acordados</p>` : ''}
       <div id="active-trip-map" class="trip-map-wrap"></div>
       <button type="button" class="btn-secondary" data-goto-trip="${active.id}">Ver viaje</button>
     </div>`;
-  banner.querySelector('[data-goto-trip]')?.addEventListener('click', () => {
-    if (typeof showTab === 'function') showTab('trips');
-    if (typeof scrollToActiveMatch === 'function') scrollToActiveMatch(active.id);
-  });
+  bindActiveTripBannerNav(active.id);
   if (typeof refreshActiveTripMap === 'function') refreshActiveTripMap(active.id);
 }
 

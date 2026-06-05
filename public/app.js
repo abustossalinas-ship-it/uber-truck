@@ -326,7 +326,7 @@ function buildMatchPriceBox(m) {
     }
   } else if (role === 'carrier') {
     html += `<input type="number" class="match-offer-input" data-id="${m.id}" min="1" step="1000" placeholder="Tu oferta CLP" />`;
-    html += `<button type="button" data-action="offer_price" data-id="${m.id}">Enviar oferta al embarcador</button>`;
+    html += `<div class="match-price-cta"><button type="button" class="btn-match-cta" data-action="offer_price" data-id="${m.id}">Enviar oferta al embarcador</button></div>`;
   } else {
     html += `<p class="muted">Esperando oferta de precio del transportista.</p>`;
   }
@@ -408,7 +408,7 @@ function buildMatchActions(m) {
       if (m.carrier_offer_clp) {
         html += `<button type="button" class="btn-secondary" data-action="fix_offer" data-id="${m.id}" data-offer="${m.carrier_offer_clp}">Corregir oferta</button>`;
       }
-      html += `<button type="button" class="btn-secondary" data-action="reject" data-id="${m.id}" data-phase="proposed" data-price="${m.agreed_price_clp || ''}">Rechazar propuesta</button>`;
+      html += `<button type="button" class="btn-match-cta" data-action="reject" data-id="${m.id}" data-phase="proposed" data-price="${m.agreed_price_clp || ''}">Rechazar propuesta</button>`;
     }
   }
   if (m.status === 'accepted' || m.status === 'in_progress') {
@@ -1500,7 +1500,9 @@ $('panel-board')?.addEventListener('click', async (e) => {
       if (!json.ok) alert(json.error || 'Error');
       else {
         alert(json.message || 'Precio aceptado');
+        if (typeof Comms !== 'undefined') await Comms.dismissMatchNotifications(id);
         await refreshBoard();
+        if (typeof Comms !== 'undefined') await Comms.refreshBell();
       }
     } finally {
       endMatchAction(btn);

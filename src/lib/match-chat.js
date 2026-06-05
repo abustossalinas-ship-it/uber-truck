@@ -13,6 +13,7 @@ async function hasModeratorOnSupportCase(matchId) {
 
 async function isMatchChatFree(match) {
   if (!match) return false;
+  if (match.status === 'in_progress') return true;
   if (match.chat_human_at) return true;
   return hasModeratorOnSupportCase(match.id);
 }

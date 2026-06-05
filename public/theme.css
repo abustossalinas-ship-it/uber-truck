@@ -802,6 +802,50 @@ select.offer-picked {
   border: 2px solid var(--brand-navy-mid);
 }
 
+.btn-match-cta,
+.match-actions .btn-match-cta {
+  font-size: 0.8rem;
+  font-weight: 800;
+  padding: 0.55rem 1rem;
+  background: var(--accent);
+  color: var(--brand-white);
+  border: 2px solid var(--brand-navy-mid);
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.btn-match-cta:hover,
+.match-actions .btn-match-cta:hover {
+  background: var(--accent-hover);
+}
+
+.match-price-box .btn-match-cta {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  border-radius: 10px;
+}
+
+.chat-emergency-label {
+  margin-top: 0.65rem;
+  font-weight: 700;
+  color: var(--status-warn);
+}
+
+.chat-preset-emergency {
+  border-color: var(--brand-orange) !important;
+  font-weight: 700;
+}
+
+.notif-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.75rem;
+  margin-top: 0.35rem;
+}
+
 .distance-box-eta {
   line-height: 1.45;
 }

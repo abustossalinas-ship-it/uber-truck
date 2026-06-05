@@ -1,6 +1,6 @@
 {
-  "version": "0.0.96",
+  "version": "0.0.97",
   "git_sha": "",
-  "ui": "live-trip-map-v2",
-  "note": "Mapa vivo: ruta GPS, ETA, navegación Google Maps, seguimiento fluido"
+  "ui": "chat-in-route-v1",
+  "note": "Chat libre en ruta, emergencias agente, mapa banner estable, CTA oferta"
 }

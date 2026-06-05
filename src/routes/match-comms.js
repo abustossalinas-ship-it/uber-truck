@@ -21,10 +21,11 @@ function resolveActorRole(req) {
 router.get('/presets', (_req, res) => {
   res.json({
     ok: true,
-    data: CHAT_PRESETS.map(({ code, label, body, opens_support }) => ({
+    data: CHAT_PRESETS.map(({ code, label, body, opens_support, category }) => ({
       code,
       label,
       body,
+      category: category || 'coordination',
       opens_support: Boolean(opens_support),
     })),
   });
@@ -36,7 +37,14 @@ router.get('/:matchId/messages', async (req, res) => {
     if (!match) return res.status(404).json({ ok: false, error: 'Emparejamiento no encontrado' });
     const data = await comms.listMessages(match.id);
     const chat_free = await isMatchChatFree(match);
-    res.json({ ok: true, data, chat_free, chat_mode: chat_free ? 'free' : 'presets_only' });
+    const in_route = match.status === 'in_progress';
+    res.json({
+      ok: true,
+      data,
+      chat_free,
+      in_route,
+      chat_mode: chat_free ? 'free' : 'presets_only',
+    });
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al leer mensajes' });
@@ -61,7 +69,7 @@ router.post('/:matchId/messages', optionalAuth, async (req, res) => {
       return res.status(403).json({
         ok: false,
         error:
-          'Solo puedes usar los mensajes rápidos del pedido. Para texto libre, usa «Solicitar agente Cubik» y espera atención humana.',
+          'Solo mensajes rápidos hasta que el viaje esté en ruta. Para emergencias (pago, robo, daño grave), usa las opciones de agente Cubik.',
         chat_mode: 'presets_only',
       });
     }
@@ -71,13 +79,20 @@ router.post('/:matchId/messages', optionalAuth, async (req, res) => {
         await support.createCase({
           match_id: match.id,
           user: req.user,
-          subject: 'Solicitud agente humano — chat emparejamiento',
+          subject: 'Emergencia — chat emparejamiento',
           initial_message: body,
           auto: false,
         });
         await comms.addNotification({
           match_id: match.id,
-          for_role: 'shipper',
+          for_role: otherRole(role),
+          type: 'support',
+          title: 'Emergencia reportada',
+          body: 'Se registró una emergencia en el viaje. Un agente Cubik revisará el caso.',
+        });
+        await comms.addNotification({
+          match_id: match.id,
+          for_role: role,
           type: 'support',
           title: 'Solicitud de agente registrada',
           body: 'Un moderador Cubik revisará el caso. Cuando atienda, podrás escribir libremente en el chat.',
@@ -111,8 +126,15 @@ router.post('/:matchId/messages', optionalAuth, async (req, res) => {
       body: `${pairLine}${senderName}: ${body.slice(0, 100)}`,
     });
 
-    const chat_free = isAdmin ? true : await isMatchChatFree(match);
-    res.status(201).json({ ok: true, data: msg, chat_free, chat_mode: chat_free ? 'free' : 'presets_only' });
+    const refreshed = await repo.getById('matches', match.id);
+    const chat_free = isAdmin ? true : await isMatchChatFree(refreshed || match);
+    res.status(201).json({
+      ok: true,
+      data: msg,
+      chat_free,
+      in_route: (refreshed || match).status === 'in_progress',
+      chat_mode: chat_free ? 'free' : 'presets_only',
+    });
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al enviar mensaje' });

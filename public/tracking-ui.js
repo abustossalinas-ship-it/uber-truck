@@ -294,10 +294,9 @@ async function refreshActiveTripMap(matchId, opts = {}) {
 
   if (!soft) {
     targets.forEach((el) => {
-      if (!el.querySelector('.trip-map-live') && !el.querySelector('.trip-map-img')) {
-        el.hidden = false;
-        el.innerHTML = '<p class="muted">Cargando mapa…</p>';
-      }
+      if (el.querySelector('.trip-map-live') || el.querySelector('.trip-map-img')) return;
+      el.hidden = false;
+      el.innerHTML = '<p class="muted">Cargando mapa…</p>';
     });
   }
 

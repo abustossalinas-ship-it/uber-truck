@@ -481,6 +481,39 @@ async function markNotificationRead(id) {
   return rowToApi(data);
 }
 
+async function markReadForMatchTypes(forRole, matchId, types) {
+  const allowed = new Set(types || []);
+  const now = new Date().toISOString();
+  if (useJson()) {
+    const store = readJsonComms();
+    let marked = 0;
+    for (const n of store.match_notifications) {
+      if (
+        n.for_role === forRole &&
+        n.match_id === matchId &&
+        !n.read_at &&
+        allowed.has(n.type)
+      ) {
+        n.read_at = now;
+        marked += 1;
+      }
+    }
+    if (marked) writeJsonComms(store);
+    return marked;
+  }
+  const sb = supabase.getClient();
+  const { data, error } = await sb
+    .from('match_notifications')
+    .update({ read_at: now })
+    .eq('for_role', forRole)
+    .eq('match_id', matchId)
+    .is('read_at', null)
+    .in('type', [...allowed])
+    .select('id');
+  if (error) throw error;
+  return (data || []).length;
+}
+
 async function markAllReadForMatch(forRole, matchId) {
   const now = new Date().toISOString();
   if (useJson()) {
@@ -523,6 +556,7 @@ module.exports = {
   buildPriceOfferDisplay,
   enrichPriceOfferNotification,
   markNotificationRead,
+  markReadForMatchTypes,
   markAllReadForMatch,
   unreadCount,
 };

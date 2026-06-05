@@ -1,6 +1,6 @@
 {
   "name": "uber-truck",
-  "version": "0.0.96",
+  "version": "0.0.97",
   "private": true,
   "description": "Cubik — marketplace cubicación logística (repo uber-truck)",
   "main": "src/server.js",

@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="/brand/logo.png" />
   <link rel="preconnect" href="https://uber-truck-production.up.railway.app" crossorigin />
   <link rel="dns-prefetch" href="https://uber-truck-production.up.railway.app" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.96" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.97" />
   <link rel="stylesheet" href="/app-shell.css?v=0.0.92" />
   <script src="/brand-config.js?v=0.0.76" defer></script>
   <script src="/api-base.js?v=0.0.83" defer></script>
@@ -835,10 +835,12 @@
     </div>
     <div id="chat-messages" class="chat-messages"></div>
     <p id="chat-mode-hint" class="muted chat-mode-hint"></p>
-    <p class="muted chat-presets-label">Mensajes rápidos (coordinación del pedido)</p>
+    <p class="muted chat-presets-label">Mensajes rápidos</p>
     <div id="chat-presets" class="chat-presets"></div>
+    <p class="muted chat-presets-label chat-emergency-label">Emergencias — agente Cubik</p>
+    <div id="chat-emergency-presets" class="chat-presets chat-emergency-presets"></div>
     <form id="form-chat" class="chat-form">
-      <input id="chat-input" type="text" placeholder="Texto libre cuando un agente Cubik atienda…" maxlength="500" disabled />
+      <input id="chat-input" type="text" placeholder="Escribe cuando el viaje esté en ruta…" maxlength="500" disabled />
       <button type="submit" disabled>Enviar</button>
     </form>
   </div>
@@ -1057,13 +1059,13 @@
   <script src="/proposal-compare-ui.js?v=0.0.47" defer></script>
   <script src="/auth-ui.js?v=0.0.76" defer></script>
   <script src="/live-map-ui.js?v=0.0.96" defer></script>
-  <script src="/tracking-ui.js?v=0.0.96" defer></script>
+  <script src="/tracking-ui.js?v=0.0.97" defer></script>
   <script src="/rut-chile-ui.js?v=0.0.93" defer></script>
   <script src="/penalties-ui.js?v=0.0.94" defer></script>
   <script src="/support-ui.js?v=0.0.56" defer></script>
-  <script src="/comms-ui.js?v=0.0.52" defer></script>
+  <script src="/comms-ui.js?v=0.0.97" defer></script>
   <script src="/rating-tags.js?v=0.0.31" defer></script>
-  <script src="/trips-ui.js?v=0.0.54" defer></script>
-  <script src="/app.js?v=0.0.90" defer></script>
+  <script src="/trips-ui.js?v=0.0.97" defer></script>
+  <script src="/app.js?v=0.0.97" defer></script>
 </body>
 </html>

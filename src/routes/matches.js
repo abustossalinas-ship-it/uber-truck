@@ -434,6 +434,7 @@ router.patch('/:id/accept-offer', optionalAuth, ...operatorGate, async (req, res
     await repo.update('load_requests', match.load_request_id, { status: 'matched' });
     await repo.update('capacity_offers', match.capacity_offer_id, { status: 'reserved' });
     const parties = await getMatchParties(repo, match);
+    await comms.markReadForMatchTypes('shipper', match.id, ['price_offer']);
     await comms.addNotification({
       match_id: match.id,
       for_role: 'carrier',

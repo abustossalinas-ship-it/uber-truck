@@ -2,6 +2,7 @@ const Comms = {
   activeMatchId: null,
   presets: [],
   chatFree: false,
+  inRoute: false,
 
   headers() {
     return typeof apiHeaders === 'function' ? apiHeaders() : { 'Content-Type': 'application/json' };
@@ -90,12 +91,16 @@ const Comms = {
         : rows
             .map((n) => {
               const mutual = n.type === 'mutual_cancel';
+              const chatActions =
+                n.type === 'chat'
+                  ? `<button type="button" class="link-btn" data-open-chat="${n.match_id}">Abrir chat</button>`
+                  : '';
               const actions = mutual
                 ? `<div class="notif-actions">
           <button type="button" class="tab tab-sm notif-cta" data-open-cancel="${n.match_id}">Confirmar acuerdo mutuo</button>
           <button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en emparejamientos activos</button>
         </div>`
-                : `<button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en emparejamientos activos</button>`;
+                : `<div class="notif-actions">${chatActions}<button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en emparejamientos activos</button></div>`;
               const when = this.formatNotifDate(n.created_at);
               const offerBody =
                 n.type === 'price_offer' && Array.isArray(n.offer_lines) && n.offer_lines.length
@@ -155,6 +160,7 @@ const Comms = {
     await this.loadPresets();
     await this.renderPresets();
     await this.loadMessages();
+    await this.markChatNotificationsRead(matchId);
     this.syncChatComposer();
   },
 
@@ -166,6 +172,7 @@ const Comms = {
     }
     this.activeMatchId = null;
     this.chatFree = false;
+    this.inRoute = false;
     this.syncChatComposer();
   },
 
@@ -177,7 +184,7 @@ const Comms = {
     if (input) {
       input.disabled = locked;
       input.placeholder = locked
-        ? 'Texto libre cuando un agente Cubik atienda…'
+        ? 'Mensajes rápidos hasta que el viaje esté en ruta…'
         : 'Escribe un mensaje…';
     }
     if (form) {
@@ -186,22 +193,37 @@ const Comms = {
     }
     if (hint) {
       hint.hidden = false;
-      hint.textContent = locked
-        ? 'Usa solo los mensajes rápidos del pedido. Para escribir libremente, pulsa «Solicitar agente Cubik» y espera atención humana.'
-        : 'Agente humano activo: ya puedes escribir libremente.';
+      if (this.chatFree && this.inRoute) {
+        hint.textContent =
+          'Viaje en ruta: escribe libremente o usa mensajes rápidos (como Uber Eats).';
+      } else if (this.chatFree) {
+        hint.textContent = 'Agente Cubik activo: ya puedes escribir libremente.';
+      } else {
+        hint.textContent =
+          'Usa mensajes rápidos para coordinar. Cuando el transportista marque «en ruta», podrás escribir libremente. Para pagos, robos o emergencias graves, usa las opciones de agente abajo.';
+      }
       hint.classList.toggle('chat-mode-free', !locked);
     }
   },
 
-  async renderPresets() {
-    const box = document.getElementById('chat-presets');
-    if (!box) return;
-    box.innerHTML = this.presets
+  renderPresetButtons(presets, className) {
+    return presets
       .map(
         (p) =>
-          `<button type="button" class="tab tab-sm" data-preset="${p.code}">${p.label}</button>`
+          `<button type="button" class="tab tab-sm ${className || ''}" data-preset="${p.code}">${p.label}</button>`
       )
       .join('');
+  },
+
+  async renderPresets() {
+    const box = document.getElementById('chat-presets');
+    const emergencyBox = document.getElementById('chat-emergency-presets');
+    const coordination = this.presets.filter((p) => p.category !== 'emergency');
+    const emergency = this.presets.filter((p) => p.category === 'emergency');
+    if (box) box.innerHTML = this.renderPresetButtons(coordination);
+    if (emergencyBox) {
+      emergencyBox.innerHTML = this.renderPresetButtons(emergency, 'chat-preset-emergency');
+    }
   },
 
   async loadMessages() {
@@ -211,6 +233,7 @@ const Comms = {
       headers: this.headers(),
     }).then((r) => r.json());
     this.chatFree = Boolean(json.chat_free);
+    this.inRoute = Boolean(json.in_route);
     const rows = json.data || [];
     box.innerHTML =
       rows.length === 0
@@ -245,9 +268,21 @@ const Comms = {
       return;
     }
     if (json.chat_free != null) this.chatFree = Boolean(json.chat_free);
+    if (json.in_route != null) this.inRoute = Boolean(json.in_route);
     document.getElementById('chat-input').value = '';
     await this.loadMessages();
     await this.refreshBell();
+  },
+
+  async markChatNotificationsRead(matchId) {
+    if (!matchId) return;
+    const json = await fetch('/api/comms/notifications/list', {
+      headers: this.headers(),
+    }).then((r) => r.json());
+    const rows = (json.data || []).filter((n) => n.match_id === matchId && n.type === 'chat' && !n.read_at);
+    for (const n of rows) {
+      await this.markRead(n.id);
+    }
   },
 };
 
@@ -275,6 +310,14 @@ document.getElementById('notif-list')?.addEventListener('click', async (e) => {
     }
     return;
   }
+  const chatBtn = e.target.closest('[data-open-chat]');
+  if (chatBtn) {
+    const id = chatBtn.dataset.openChat;
+    document.getElementById('notif-panel').hidden = true;
+    await Comms.markChatNotificationsRead(id);
+    await Comms.openChat(id, '');
+    return;
+  }
   const scrollBtn = e.target.closest('[data-scroll-match]');
   if (scrollBtn) {
     const id = scrollBtn.dataset.scrollMatch;
@@ -291,16 +334,20 @@ document.getElementById('notif-list')?.addEventListener('click', async (e) => {
 });
 
 document.getElementById('chat-close')?.addEventListener('click', () => Comms.closeChat());
-document.getElementById('chat-presets')?.addEventListener('click', (e) => {
+function onChatPresetClick(e) {
   const btn = e.target.closest('[data-preset]');
   if (!btn) return;
   const preset = Comms.presets.find((p) => p.code === btn.dataset.preset);
   if (preset) Comms.sendMessage(preset.body, preset.code);
-});
+}
+document.getElementById('chat-presets')?.addEventListener('click', onChatPresetClick);
+document.getElementById('chat-emergency-presets')?.addEventListener('click', onChatPresetClick);
 document.getElementById('form-chat')?.addEventListener('submit', (e) => {
   e.preventDefault();
   if (!Comms.chatFree) {
-    alert('Solo mensajes rápidos hasta que un agente Cubik atienda. Usa «Solicitar agente Cubik» si necesitas ayuda.');
+    alert(
+      'Solo mensajes rápidos hasta que el viaje esté en ruta. Para emergencias (pago, robo, daño grave), usa las opciones de agente Cubik.'
+    );
     return;
   }
   const text = document.getElementById('chat-input')?.value?.trim();

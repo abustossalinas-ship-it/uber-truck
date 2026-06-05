@@ -1,6 +1,6 @@
 {
-  "version": "0.0.91",
+  "version": "0.0.95",
   "git_sha": "",
-  "ui": "maps-suggestions-align-v1",
-  "note": "Sugerencias Maps alineadas al campo en móvil (Publicar carga)"
+  "ui": "live-trip-map-v1",
+  "note": "Mapa interactivo Google Maps JS en viaje activo (piloto M2)"
 }

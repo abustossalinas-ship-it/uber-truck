@@ -12,7 +12,22 @@ const { TRUCK_TYPES, suggestTruckCapacity } = require('../lib/truck-capacity');
 const router = express.Router();
 
 router.get('/status', (_req, res) => {
-  res.json({ ok: true, configured: maps.isConfigured() });
+  res.json({
+    ok: true,
+    configured: maps.isConfigured(),
+    interactive: maps.interactiveMapsAvailable(),
+  });
+});
+
+/** Config para Maps JavaScript API (mapa en vivo en viaje). */
+router.get('/js-config', (_req, res) => {
+  const interactive = maps.interactiveMapsAvailable();
+  res.json({
+    ok: true,
+    configured: maps.isConfigured(),
+    interactive,
+    apiKey: interactive ? maps.browserApiKey() : null,
+  });
 });
 
 router.post('/budget-estimate', (req, res) => {

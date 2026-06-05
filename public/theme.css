@@ -1841,6 +1841,16 @@ body.kyc-pending #btn-create-match {
   margin: 0.65rem 0;
 }
 
+.trip-map-live {
+  width: 100%;
+  height: min(52vw, 320px);
+  min-height: 220px;
+  border-radius: 10px;
+  border: 2px solid var(--border);
+  overflow: hidden;
+  background: #e8eaed;
+}
+
 .trip-map-img {
   width: 100%;
   max-width: 100%;

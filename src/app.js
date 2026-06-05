@@ -132,6 +132,7 @@ app.get('/health', async (_req, res) => {
       'kyc-curated-marketplace',
       'trip-events-realtime',
       'gps-tracking',
+      'live-trip-map',
       'carrier-available',
       'password-reset',
       'buscando-camiones',
@@ -184,7 +185,7 @@ app.get('/health', async (_req, res) => {
           }
         : {}),
     },
-    maps: { configured: googleMaps.isConfigured() },
+    maps: { configured: googleMaps.isConfigured(), interactive: googleMaps.interactiveMapsAvailable() },
     fcm: fcmService.statusPayload(),
     payment: paymentConfig(),
   });

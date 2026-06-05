@@ -10,6 +10,20 @@ function apiKey() {
   return process.env.GOOGLE_MAPS_API_KEY || process.env.MAPS_API_KEY;
 }
 
+/** Clave para Maps JavaScript API en el navegador (APK/web). */
+function browserApiKey() {
+  return (
+    process.env.GOOGLE_MAPS_BROWSER_KEY ||
+    process.env.GOOGLE_MAPS_API_KEY ||
+    process.env.MAPS_API_KEY ||
+    null
+  );
+}
+
+function interactiveMapsAvailable() {
+  return isConfigured() && Boolean(browserApiKey());
+}
+
 async function googleGet(path, params) {
   const url = new URL(`https://maps.googleapis.com/maps/api/${path}`);
   url.searchParams.set('key', apiKey());
@@ -126,6 +140,8 @@ function staticMapUrl({ origin, destination, carrier, size = '640x280' }) {
 
 module.exports = {
   isConfigured,
+  browserApiKey,
+  interactiveMapsAvailable,
   autocomplete,
   placeDetails,
   distanceKm,

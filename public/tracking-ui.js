@@ -1,8 +1,9 @@
-/** GPS transportista — Disponible + mapa del viaje activo */
+/** GPS transportista — Disponible + mapa interactivo del viaje activo */
 
 let gpsWatchId = null;
 let lastGpsSentAt = 0;
 let activeTrackMatchId = null;
+const trackingFetchByMatch = new Map();
 
 function trackingHeaders() {
   return typeof Auth !== 'undefined' ? Auth.headers() : { 'Content-Type': 'application/json' };
@@ -42,7 +43,6 @@ function stopGpsWatch() {
   }
 }
 
-/** Transportista: GPS activo con sesión (mapa en viaje + última posición). El toggle solo es visibilidad en tablero. */
 function shouldShareGps() {
   const user = typeof Auth !== 'undefined' ? Auth.user : null;
   return Boolean(user && user.role === 'carrier');
@@ -60,7 +60,7 @@ async function postCarrierLocation(lat, lng) {
     });
     const json = await res.json();
     if (res.ok && json.data?.active_match_id && typeof refreshActiveTripMap === 'function') {
-      refreshActiveTripMap(json.data.active_match_id);
+      refreshActiveTripMap(json.data.active_match_id, { soft: true });
     }
   } catch (e) {
     console.error('gps post', e);
@@ -181,32 +181,26 @@ document.getElementById('carrier-available-toggle')?.addEventListener('change', 
   }
 });
 
-function tripMapImageSrc(matchId, tracking) {
+function tripMapImageSrc(matchId) {
   if (matchId && typeof Auth !== 'undefined' && Auth.token) {
     return `/api/maps/trip-map/${encodeURIComponent(matchId)}?access_token=${encodeURIComponent(Auth.token)}`;
   }
-  return tracking?.static_map_url || null;
+  return null;
 }
 
-function renderTripMapEl(container, tracking) {
+function renderTripMapStatic(container, tracking) {
   if (!container) return;
-  if (!tracking?.tracking_active) {
-    container.hidden = true;
-    container.innerHTML = '';
-    return;
-  }
-  container.hidden = false;
   const updated = formatGpsTime(tracking.carrier_position?.updated_at);
-  const mapSrc = tripMapImageSrc(tracking.match_id, tracking);
+  const mapSrc = tripMapImageSrc(tracking.match_id);
   const hasRoute = tracking.route?.origin?.lat != null && tracking.route?.destination?.lat != null;
   const mapBlock = mapSrc
-    ? `<img class="trip-map-img" src="${mapSrc}" alt="Mapa del viaje: origen, destino y camión" loading="lazy" />`
+    ? `<img class="trip-map-img" src="${mapSrc}" alt="Mapa del viaje" loading="lazy" />`
     : hasRoute
-      ? `<p class="muted">Mapa no disponible (configura GOOGLE_MAPS_API_KEY en el servidor).</p>`
-      : `<p class="muted">Sin mapa: la carga no tiene coordenadas. Vuelve a publicarla eligiendo origen y destino en Google Maps.</p>`;
+      ? `<p class="muted">Mapa no disponible (configura GOOGLE_MAPS_API_KEY).</p>`
+      : `<p class="muted">Sin mapa: publica la carga con sugerencias Google Maps.</p>`;
   const posNote = tracking.carrier_position
-    ? `<p class="muted trip-map-meta">Camión en mapa (naranja)${updated ? ` · ${updated}` : ''}</p>`
-    : `<p class="muted trip-map-meta">Origen (verde) y destino (rojo). El camión (naranja) aparece cuando el transportista activa «Disponible» o comparte GPS en ruta.</p>`;
+    ? `<p class="muted trip-map-meta">Camión (naranja)${updated ? ` · ${updated}` : ''}</p>`
+    : `<p class="muted trip-map-meta">El camión aparece cuando el transportista comparte GPS.</p>`;
   container.innerHTML = `<div class="trip-map-card">${mapBlock}${posNote}</div>`;
   const img = container.querySelector('.trip-map-img');
   if (img) {
@@ -214,15 +208,41 @@ function renderTripMapEl(container, tracking) {
       img.replaceWith(
         Object.assign(document.createElement('p'), {
           className: 'muted trip-map-fallback',
-          textContent:
-            'No se pudo cargar el mapa. En Google Cloud habilita «Maps Static API» para la misma clave que Places.',
+          textContent: 'No se pudo cargar el mapa estático. Habilita Maps Static API.',
         })
       );
     });
   }
 }
 
-async function refreshActiveTripMap(matchId) {
+async function renderTripMapEl(container, tracking) {
+  if (!container) return;
+  if (!tracking?.tracking_active) {
+    if (typeof LiveMap !== 'undefined') LiveMap.destroy(container);
+    container.hidden = true;
+    container.innerHTML = '';
+    return;
+  }
+  container.hidden = false;
+
+  if (typeof LiveMap !== 'undefined') {
+    const ok = await LiveMap.render(container, tracking);
+    if (ok) return;
+  }
+  renderTripMapStatic(container, tracking);
+}
+
+async function fetchTracking(matchId) {
+  const res = await fetch(`/api/matches/${encodeURIComponent(matchId)}/tracking`, {
+    headers: trackingHeaders(),
+  });
+  const json = await res.json();
+  if (!res.ok) throw new Error(json.error || 'Mapa no disponible');
+  return json.data;
+}
+
+async function refreshActiveTripMap(matchId, opts = {}) {
+  const soft = Boolean(opts.soft);
   activeTrackMatchId =
     matchId && typeof Auth !== 'undefined' && Auth.user?.role === 'carrier' ? matchId : null;
   syncGpsWatch();
@@ -230,31 +250,38 @@ async function refreshActiveTripMap(matchId) {
   const bannerMap = document.getElementById('active-trip-map');
   const cardMap = document.querySelector(`[data-trip-map="${matchId}"]`);
   if (!matchId || typeof Auth === 'undefined' || !Auth.token) {
-    if (bannerMap) {
-      bannerMap.hidden = true;
-      bannerMap.innerHTML = '';
-    }
+    if (bannerMap && typeof LiveMap !== 'undefined') LiveMap.destroy(bannerMap);
     return;
   }
   const targets = [bannerMap, cardMap].filter(Boolean);
   if (!targets.length) return;
-  targets.forEach((el) => {
-    el.hidden = false;
-    el.innerHTML = '<p class="muted">Cargando mapa…</p>';
-  });
-  try {
-    const res = await fetch(`/api/matches/${encodeURIComponent(matchId)}/tracking`, {
-      headers: trackingHeaders(),
+
+  if (!soft) {
+    targets.forEach((el) => {
+      if (!el.querySelector('.trip-map-live') && !el.querySelector('.trip-map-img')) {
+        el.hidden = false;
+        el.innerHTML = '<p class="muted">Cargando mapa…</p>';
+      }
     });
-    const json = await res.json();
-    if (!res.ok) {
-      targets.forEach((el) => {
-        el.innerHTML = `<p class="muted">${json.error || 'Mapa no disponible'}</p>`;
-      });
-      return;
+  }
+
+  try {
+    let tracking = null;
+    const inflight = trackingFetchByMatch.get(matchId);
+    if (inflight) tracking = await inflight;
+    else {
+      const p = fetchTracking(matchId);
+      trackingFetchByMatch.set(matchId, p);
+      try {
+        tracking = await p;
+      } finally {
+        trackingFetchByMatch.delete(matchId);
+      }
     }
-    targets.forEach((el) => renderTripMapEl(el, json.data));
-    if (json.data?.tracking_active && Auth.user?.role === 'carrier') {
+
+    await Promise.all(targets.map((el) => renderTripMapEl(el, tracking)));
+
+    if (tracking?.tracking_active && Auth.user?.role === 'carrier') {
       activeTrackMatchId = matchId;
       syncGpsWatch();
       try {
@@ -264,9 +291,11 @@ async function refreshActiveTripMap(matchId) {
     }
   } catch (e) {
     console.error(e);
-    targets.forEach((el) => {
-      el.innerHTML = '<p class="muted">No se pudo cargar el mapa.</p>';
-    });
+    if (!soft) {
+      targets.forEach((el) => {
+        el.innerHTML = `<p class="muted">${e.message || 'No se pudo cargar el mapa.'}</p>`;
+      });
+    }
   }
 }
 
@@ -277,7 +306,8 @@ function onBoardMatchesUpdated(matches) {
     activeTrackMatchId = null;
     syncGpsWatch();
     const bannerMap = document.getElementById('active-trip-map');
-    if (bannerMap) {
+    if (bannerMap && typeof LiveMap !== 'undefined') LiveMap.destroy(bannerMap);
+    else if (bannerMap) {
       bannerMap.hidden = true;
       bannerMap.innerHTML = '';
     }

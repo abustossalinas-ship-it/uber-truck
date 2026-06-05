@@ -81,6 +81,8 @@ const Comms = {
     const panel = document.getElementById('notif-panel');
     const list = document.getElementById('notif-list');
     if (!panel || !list) return;
+    panel.hidden = false;
+    list.innerHTML = '<p class="muted">Cargando notificaciones…</p>';
     const json = await fetch('/api/comms/notifications/list', {
       headers: this.headers(),
     }).then((r) => r.json());
@@ -133,12 +135,19 @@ const Comms = {
         </article>`;
             })
             .join('');
-    if (typeof Penalties !== 'undefined') {
-      await Penalties.fetchSummary();
-      Penalties.renderNotifSummary();
+    const countEl = document.getElementById('notif-count');
+    if (countEl && json.ok) {
+      const unread = json.unread || 0;
+      countEl.textContent = String(unread);
+      countEl.hidden = unread === 0;
     }
-    panel.hidden = false;
-    await this.refreshBell();
+    if (typeof Penalties !== 'undefined') {
+      Penalties.fetchSummary()
+        .then(() => {
+          if (typeof Penalties.renderNotifSummary === 'function') Penalties.renderNotifSummary();
+        })
+        .catch(() => {});
+    }
   },
 
   async markRead(id) {

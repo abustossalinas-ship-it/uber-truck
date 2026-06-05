@@ -8,6 +8,7 @@ const { CHAT_PRESETS, otherRole, presetByCode } = require('../lib/match-comms');
 const { optionalAuth } = require('../lib/optional-auth');
 const { normalizeRole } = require('../lib/match-cancel');
 const { getMatchParties } = require('../lib/match-parties');
+const { breakdownForMatch, isPilotPaid } = require('../lib/payment-simulation');
 const { isMatchChatFree, enableMatchFreeChat } = require('../lib/match-chat');
 const { textContainsPhone } = require('../lib/phone-guard');
 const support = require('../lib/support-cases');
@@ -178,8 +179,25 @@ router.get('/notifications/list', optionalAuth, async (req, res) => {
     }
     const raw = await comms.listNotifications(role);
     const visible = [];
+    const matchCache = new Map();
+    const partiesCache = new Map();
     const eventsByMatch = new Map();
     const priceNotifsByMatch = new Map();
+
+    async function matchById(id) {
+      if (matchCache.has(id)) return matchCache.get(id);
+      const m = await repo.getById('matches', id);
+      matchCache.set(id, m);
+      return m;
+    }
+
+    async function partiesForMatch(match) {
+      if (!match?.id) return null;
+      if (partiesCache.has(match.id)) return partiesCache.get(match.id);
+      const p = await getMatchParties(repo, match);
+      partiesCache.set(match.id, p);
+      return p;
+    }
     for (const n of raw) {
       if (n.type === 'price_offer') {
         if (!priceNotifsByMatch.has(n.match_id)) priceNotifsByMatch.set(n.match_id, []);
@@ -187,14 +205,23 @@ router.get('/notifications/list', optionalAuth, async (req, res) => {
       }
     }
     for (const n of raw) {
-      const match = await repo.getById('matches', n.match_id);
+      const match = await matchById(n.match_id);
       if (!notificationVisibleForMatch(n, match)) {
         if (!n.read_at) await comms.markNotificationRead(n.id);
         continue;
       }
       let row = n;
+      if (n.type === 'pilot_payment' && match && isPilotPaid(match)) {
+        const parties = await partiesForMatch(match);
+        const carrierBd = breakdownForMatch(match, 'carrier');
+        row = {
+          ...n,
+          title: 'Embarcador pagó el flete',
+          body: `${parties?.shipper_name || 'Embarcador'} confirmó el pago (Cubik Saldo piloto). Neto $${Number(carrierBd?.net_clp || 0).toLocaleString('es-CL')} en gestión.`,
+        };
+      }
       if (n.type === 'price_offer') {
-        const parties = await getMatchParties(repo, match);
+        const parties = await partiesForMatch(match);
         const name = parties?.carrier_name || 'Transportista';
         if (!eventsByMatch.has(match.id)) {
           try {

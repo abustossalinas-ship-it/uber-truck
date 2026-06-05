@@ -273,15 +273,16 @@
 <p>Prioridad: <strong>P0</strong> bloquea validación; <strong>P1</strong> siguiente entrega; <strong>P2</strong> planificado.</p>
 <table>
   <tr><th>ID</th><th>P</th><th>Actividad</th><th>Entregable</th><th>Ventana</th><th>Estado</th></tr>
-  <tr><td>U1</td><td>P0</td><td>Ejecutar SQL 008 en Supabase prod</td><td>Tablas chat, notif, banco, penalty_charges</td><td>Inmediato</td><td class="g-doing">Pend. usuario</td></tr>
+  <tr><td>U1</td><td>P0</td><td>Ejecutar SQL 004–008 en Supabase prod</td><td>Chat, notif, banco (<code>users.bank_*</code>), <code>penalty_charges</code></td><td>May 2026</td><td class="g-done">Hecho (prod OK jun 2026)</td></tr>
   <tr><td>U2</td><td>P0</td><td>Validar prod /health + login JWT</td><td>Smoke test Railway</td><td>Inmediato</td><td class="g-done">Hecho</td></tr>
   <tr><td>U3</td><td>P0</td><td>Memoria + /docs/ en prod</td><td>Gantt y próximos pasos en un solo HTML</td><td>May 2026</td><td class="g-done">Código listo</td></tr>
   <tr><td>U4</td><td>P0</td><td>Scopes por rol + registro empresa</td><td>shipper/carrier/admin + tablero filtrado</td><td>May 2026</td><td class="g-done">Hecho</td></tr>
   <tr><td>U4b</td><td>P1</td><td>Precio oferta/demanda + rango sugerido</td><td>010 SQL, carrier-offer, accept-offer, budget-estimate</td><td>May 2026</td><td class="g-done">Hecho</td></tr>
   <tr><td>U4c</td><td>P1</td><td>Confianza y declaración de carga</td><td>011 SQL, términos, valor ref., incidentes</td><td>May 2026</td><td class="g-done">Hecho</td></tr>
   <tr><td>U4d</td><td>P2</td><td>Subida PDF guía + validación SII/DTE</td><td>Storage + facturador autorizado</td><td>Post-piloto</td><td class="g-todo">Plan</td></tr>
-  <tr><td>U5</td><td>P1</td><td>UX paridad Uber (copy y pasos)</td><td>Flujo publicar → match → activos unificado</td><td>Jun–Jul 2026</td><td class="g-doing">En curso</td></tr>
-  <tr><td>U6</td><td>P0</td><td>Piloto 20 viajes <strong>corredor RM ↔ V/San Antonio</strong></td><td>M2 — liquidez + densidad</td><td>Jul–Ago 2026</td><td class="g-todo">Plan</td></tr>
+  <tr><td>U5</td><td>P1</td><td>UX paridad Uber (copy y pasos)</td><td>Flujo publicar → match → activos; Cubik móvil; cubicación; billetera</td><td>Jun–Jul 2026</td><td class="g-doing">En curso (v0.0.90–0.0.94)</td></tr>
+  <tr><td>U5b</td><td>P1</td><td>SQL 027–030 en Supabase prod</td><td>FCM <code>device_tokens</code>, camión oferta, <code>user_bank_accounts</code></td><td>Jun 2026</td><td class="g-done">Hecho (billetera validada prod)</td></tr>
+  <tr><td>U6</td><td>P0</td><td>Piloto 20 viajes <strong>corredor RM ↔ V/San Antonio</strong></td><td>M2 — liquidez + densidad</td><td>Jul–Ago 2026</td><td class="g-doing"><strong>Siguiente foco</strong></td></tr>
   <tr><td>U6b</td><td>P1</td><td>KPIs marketplace M2 (semanal)</td><td>Match rate, tiempo match, NPS — ver anexo piloto</td><td>Jul–Ago 2026</td><td class="g-doing">Doc listo</td></tr>
   <tr><td>U6c</td><td>P1</td><td>Reputación v0</td><td>Historial cancelaciones + incidentes por cuenta</td><td>Post 5 viajes</td><td class="g-todo">Plan</td></tr>
   <tr><td>U6d</td><td>P1</td><td>Evidencia entrega</td><td>Foto + timestamp (antes GPS vivo)</td><td>Post-piloto corto</td><td class="g-todo">Plan</td></tr>

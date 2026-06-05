@@ -83,15 +83,23 @@ CREATE INDEX IF NOT EXISTS idx_penalty_charges_due ON penalty_charges (due_at);
 
 ---
 
-## Verificación
+## Verificación SQL 004–008 (si dudas)
+
+Pega en [SQL Editor Supabase](https://supabase.com/dashboard/project/ljinhegtywixtbzjgjfn/sql/new):
 
 ```sql
-SELECT column_name FROM information_schema.columns
-WHERE table_name = 'matches' AND column_name LIKE 'mutual_cancel%';
-
 SELECT table_name FROM information_schema.tables
-WHERE table_schema = 'public' AND table_name IN ('match_messages', 'match_notifications', 'penalty_charges');
+WHERE table_schema = 'public'
+  AND table_name IN ('match_messages', 'match_notifications', 'penalty_charges', 'user_bank_accounts');
+
+SELECT column_name FROM information_schema.columns
+WHERE table_name = 'users' AND column_name LIKE 'bank_%'
+ORDER BY column_name;
 ```
+
+**Esperado si ya aplicaste todo:** 4 tablas (incl. `user_bank_accounts` de 030) y columnas `bank_*` en `users`. Si aparecen, **no vuelvas a ejecutar 008** (es idempotente pero innecesario).
+
+**Checklist completo (001–030):** [`docs/RUN_VERIFY_ALL_MIGRATIONS.sql`](./RUN_VERIFY_ALL_MIGRATIONS.sql) — una sola consulta con filas `OK` / `FALTA` y script a ejecutar.
 
 ---
 

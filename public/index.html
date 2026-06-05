@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="/brand/logo.png" />
   <link rel="preconnect" href="https://uber-truck-production.up.railway.app" crossorigin />
   <link rel="dns-prefetch" href="https://uber-truck-production.up.railway.app" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.102" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.108" />
   <link rel="stylesheet" href="/app-shell.css?v=0.0.98" />
   <script src="/brand-config.js?v=0.0.76" defer></script>
   <script src="/api-base.js?v=0.0.83" defer></script>
@@ -557,15 +557,16 @@
             <button type="button" class="link-btn" data-open-terms>Ver términos</button>
           </div>
           <label>Urgencia</label>
-          <select name="urgency">
+          <select name="urgency" id="load-urgency" aria-describedby="load-urgency-hint">
             <option value="normal">Normal</option>
             <option value="urgent">Urgente</option>
             <option value="flexible">Flexible</option>
           </select>
+          <div id="load-urgency-hint" class="load-urgency-hint" role="status" aria-live="polite"></div>
           <h3 class="form-section">Presupuesto para el flete</h3>
           <p class="muted">
-            Rango orientativo (peso, urgencia y ruta pueden variar el valor real). El transportista puede ofertar
-            fuera del rango; podrás ampliarlo después si no hay otro precio ya acordado.
+            Rango orientativo según peso y ruta (la urgencia ajusta la sugerencia y el plazo de retiro; ver arriba).
+            El transportista puede ofertar fuera del rango; podrás ampliarlo después si no hay otro precio ya acordado.
           </p>
           <div class="grid grid-2">
             <div>
@@ -1138,7 +1139,7 @@
   <script src="/invite-ui.js?v=0.0.20" defer></script>
   <script src="/role-shell-ui.js?v=0.0.89" defer></script>
   <script src="/maps-ui.js?v=0.0.93" defer></script>
-  <script src="/load-budget-ui.js?v=0.0.43" defer></script>
+  <script src="/load-budget-ui.js?v=0.0.107" defer></script>
   <script src="/trip-schedule-ui.js?v=0.0.86" defer></script>
   <script src="/load-timing-ui.js?v=0.0.92" defer></script>
   <script src="/load-capacity-ui.js?v=0.0.93" defer></script>
@@ -1158,6 +1159,6 @@
   <script src="/comms-ui.js?v=0.0.98" defer></script>
   <script src="/rating-tags.js?v=0.0.31" defer></script>
   <script src="/trips-ui.js?v=0.0.102" defer></script>
-  <script src="/app.js?v=0.0.101" defer></script>
+  <script src="/app.js?v=0.0.108" defer></script>
 </body>
 </html>

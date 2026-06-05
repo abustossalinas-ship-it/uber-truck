@@ -1,6 +1,37 @@
-/** Rango de presupuesto sugerido al publicar carga (referencia km + peso + urgencia) */
+/** Rango de presupuesto sugerido + ayuda honesta de urgencia al publicar carga */
 
 const BUDGET_STEP = 1000;
+
+/** Copy opción 2 (comercial) — tono menos técnico, piloto honesto */
+const URGENCY_HINTS = {
+  normal: {
+    tone: 'normal',
+    title: 'Normal — equilibrio precio y plazo',
+    lines: [
+      'Equilibrio entre <strong>precio y plazo</strong> de retiro (referencia ~48 h si no programas fecha).',
+      'Al usar «Ver rango sugerido», el presupuesto es el <strong>estándar</strong> para tu ruta y peso.',
+      'Tu carga aparece en el tablero <strong>como cualquier otra</strong>; todos los transportistas la ven en el mismo momento.',
+    ],
+  },
+  urgent: {
+    tone: 'urgent',
+    title: 'Urgente — retiro rápido',
+    lines: [
+      'Necesitas retiro <strong>más rápido</strong> (referencia ~24 h si no programas fecha).',
+      'La sugerencia de presupuesto sale <strong>más alta (~18%)</strong> para atraer camión antes.',
+      'Hoy <strong>todos la ven al mismo tiempo</strong> — la fila prioritaria en tablero es un próximo paso, no está activa en el piloto.',
+    ],
+  },
+  flexible: {
+    tone: 'flexible',
+    title: 'Flexible — sin apuro',
+    lines: [
+      'Sin apuro: tienes <strong>más margen</strong> (referencia hasta ~5 días) para cerrar con un camión.',
+      'Presupuesto sugerido <strong>estándar</strong>, igual que Normal.',
+      'Ideal si puedes esperar a que un transportista encaje tu carga en una ruta ya planificada.',
+    ],
+  },
+};
 
 function formatClp(n) {
   return `$${Number(n).toLocaleString('es-CL')}`;
@@ -11,6 +42,28 @@ function roundBudgetToStep(n, mode = 'nearest') {
   if (mode === 'down') return Math.floor(v / BUDGET_STEP) * BUDGET_STEP;
   if (mode === 'up') return Math.ceil(v / BUDGET_STEP) * BUDGET_STEP;
   return Math.round(v / BUDGET_STEP) * BUDGET_STEP;
+}
+
+function renderLoadUrgencyHint(value) {
+  const box = document.getElementById('load-urgency-hint');
+  if (!box) return;
+  const hint = URGENCY_HINTS[value] || URGENCY_HINTS.normal;
+  box.className = `load-urgency-hint load-urgency-hint--${hint.tone}`;
+  box.innerHTML = `
+    <p class="load-urgency-hint__title">${hint.title}</p>
+    <ul class="load-urgency-hint__list">
+      ${hint.lines.map((line) => `<li>${line}</li>`).join('')}
+    </ul>
+    <p class="load-urgency-hint__foot muted">Cubik no cobra un cargo extra por marcar urgente; solo orienta plazo y presupuesto sugerido.</p>
+  `;
+}
+
+function bindLoadUrgencyHint(form) {
+  const select = form?.querySelector('[name="urgency"]');
+  if (!select) return;
+  const sync = () => renderLoadUrgencyHint(select.value || 'normal');
+  select.addEventListener('change', sync);
+  sync();
 }
 
 async function applyBudgetHintFromForm(form) {
@@ -43,7 +96,11 @@ async function applyBudgetHintFromForm(form) {
     const maxIn = form.querySelector('[name="budget_max_clp"]');
     if (minIn) minIn.value = minRounded;
     if (maxIn) maxIn.value = maxRounded;
-    box.innerHTML = `<strong>Sugerencia aplicada:</strong> ${formatClp(minRounded)} – ${formatClp(maxRounded)} (miles de $). ${j.data.note || ''} ${j.disclaimer || ''}`;
+    const urgentNote =
+      urgency === 'urgent'
+        ? ' Incluye recargo referencial por urgente (~18% vs Normal).'
+        : '';
+    box.innerHTML = `<strong>Sugerencia aplicada:</strong> ${formatClp(minRounded)} – ${formatClp(maxRounded)} (miles de $).${urgentNote} ${j.data.note || ''} ${j.disclaimer || ''}`;
   } catch {
     box.textContent = 'Error al obtener sugerencia.';
   }
@@ -51,6 +108,7 @@ async function applyBudgetHintFromForm(form) {
 
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('form-load');
+  bindLoadUrgencyHint(form);
   document.getElementById('btn-budget-hint')?.addEventListener('click', (e) => {
     e.preventDefault();
     applyBudgetHintFromForm(form);

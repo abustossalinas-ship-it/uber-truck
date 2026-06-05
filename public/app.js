@@ -309,7 +309,7 @@ function buildMatchPriceBox(m) {
       html +=
         role === 'shipper'
           ? `<p class="match-price-outside">Fuera de tu rango publicado. Puedes <strong>aceptar</strong> igual o <strong>ampliar el rango</strong> si no cerraste con otro transportista.</p>`
-          : `<p class="match-price-outside">Fuera del rango del embarcador.${typo ? ` ¿Quisiste <strong>$${typo.toLocaleString('es-CL')}</strong>?` : ''} Usa <strong>Corregir oferta</strong> para actualizar el monto.</p>`;
+          : `<p class="match-price-outside">Fuera del rango del embarcador.${typo ? ` ¿Quisiste <strong>$${typo.toLocaleString('es-CL')}</strong>?` : ''} Ajusta el monto y pulsa <strong>Enviar propuesta</strong>.</p>`;
     }
     if (role === 'shipper') {
       html += `<div class="match-price-cta"><button type="button" class="btn-accept-match" data-action="accept_offer" data-id="${m.id}">Aceptar precio y confirmar match</button></div>`;
@@ -318,15 +318,14 @@ function buildMatchPriceBox(m) {
       }
     } else {
       html += `<p class="muted">Esperando que el embarcador acepte tu oferta.</p>`;
-      html += `<div class="match-price-cta match-carrier-offer-cta">`;
-      html += `<button type="button" class="btn-secondary" data-action="fix_offer" data-id="${m.id}" data-offer="${m.carrier_offer_clp}">Corregir oferta (CLP)</button>`;
-      html += `</div>`;
-      html += `<input type="number" class="match-offer-input" data-id="${m.id}" min="1" step="1000" value="${m.carrier_offer_clp}" aria-label="Monto oferta CLP" />`;
-      html += `<button type="button" class="btn-secondary" data-action="offer_price" data-id="${m.id}">Guardar monto del cuadro</button>`;
+      html += `<label class="match-offer-label" for="match-offer-input-${m.id}">Tu oferta (CLP)</label>`;
+      html += `<input type="number" id="match-offer-input-${m.id}" class="match-offer-input match-offer-input--wide" data-id="${m.id}" min="1" step="1000" value="${m.carrier_offer_clp}" aria-label="Monto oferta CLP" />`;
+      html += `<div class="match-price-cta"><button type="button" class="btn-match-cta" data-action="offer_price" data-id="${m.id}">Enviar propuesta</button></div>`;
     }
   } else if (role === 'carrier') {
-    html += `<input type="number" class="match-offer-input" data-id="${m.id}" min="1" step="1000" placeholder="Tu oferta CLP" />`;
-    html += `<div class="match-price-cta"><button type="button" class="btn-match-cta" data-action="offer_price" data-id="${m.id}">Enviar oferta al embarcador</button></div>`;
+    html += `<label class="match-offer-label" for="match-offer-input-${m.id}">Tu oferta (CLP)</label>`;
+    html += `<input type="number" id="match-offer-input-${m.id}" class="match-offer-input match-offer-input--wide" data-id="${m.id}" min="1" step="1000" placeholder="Tu oferta CLP" aria-label="Monto oferta CLP" />`;
+    html += `<div class="match-price-cta"><button type="button" class="btn-match-cta" data-action="offer_price" data-id="${m.id}">Enviar propuesta</button></div>`;
   } else {
     html += `<p class="muted">Esperando oferta de precio del transportista.</p>`;
   }
@@ -405,9 +404,6 @@ function buildMatchActions(m) {
       html += `<button type="button" class="btn-secondary" data-action="change_offer" data-load-id="${m.load_request_id}" data-offer-id="${m.capacity_offer_id}" data-id="${m.id}" data-price="${m.agreed_price_clp || ''}">Cambiar oferta</button>`;
     }
     if (role === 'carrier') {
-      if (m.carrier_offer_clp) {
-        html += `<button type="button" class="btn-secondary" data-action="fix_offer" data-id="${m.id}" data-offer="${m.carrier_offer_clp}">Corregir oferta</button>`;
-      }
       html += `<button type="button" class="btn-match-cta" data-action="reject" data-id="${m.id}" data-phase="proposed" data-price="${m.agreed_price_clp || ''}">Rechazar propuesta</button>`;
     }
   }
@@ -1233,8 +1229,9 @@ async function loadSuggestionsFor(loadId) {
         <span class="pill">${s.score}% match</span>
         <strong>${s.offer.carrier_name}${reputationBadgeInline(s.reputation)}</strong>
         <p class="muted">${s.reasons.join(' · ')}</p>
-        <button type="button" class="use-suggestion" data-offer-id="${s.offer.id}" data-carrier="${s.offer.carrier_name.replace(/"/g, '')}">Usar esta oferta</button>
-        <button type="button" class="match-suggestion-now" data-offer-id="${s.offer.id}" data-carrier="${s.offer.carrier_name.replace(/"/g, '')}">Emparejar con esta oferta</button>
+        <button type="button" class="use-suggestion" data-offer-id="${s.offer.id}" data-carrier="${s.offer.carrier_name.replace(/"/g, '')}">Usar en Paso 2</button>
+        <button type="button" class="match-suggestion-now" data-offer-id="${s.offer.id}" data-carrier="${s.offer.carrier_name.replace(/"/g, '')}">Crear propuesta ya</button>
+        <p class="suggestion-actions-hint muted"><strong>Usar en Paso 2:</strong> solo elige la oferta abajo. <strong>Crear propuesta ya:</strong> envía de una vez si ya ingresaste monto CLP en Paso 3.</p>
       </div>`
         )
         .join('');
@@ -1536,7 +1533,7 @@ $('panel-board')?.addEventListener('click', async (e) => {
       const input = document.querySelector(`.match-offer-input[data-id="${id}"]`);
       amount = input?.value;
       if (!amount) {
-        alert('Ingresa el monto en CLP o usa «Corregir oferta».');
+        alert('Ingresa el monto en CLP y pulsa «Enviar propuesta».');
         return;
       }
       amount = Number(amount);
@@ -1713,8 +1710,25 @@ document.getElementById('match-suggestions')?.addEventListener('click', (e) => {
   const offerId = btn.getAttribute('data-offer-id');
   const label = btn.getAttribute('data-carrier') || btn.closest('.suggestion-item')?.querySelector('strong')?.textContent;
   if (!offerId) return;
+  if (nowBtn) {
+    const price = $('match-carrier-offer')?.value?.trim();
+    if (!price) {
+      setMatchOffer(offerId, label);
+      alert(
+        'Primero ingresa tu oferta en CLP en el Paso 3 (campo «Tu oferta al embarcador») y vuelve a pulsar «Crear propuesta ya», o usa el botón naranja «Crear propuesta de emparejamiento».'
+      );
+      $('match-carrier-offer-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      $('match-carrier-offer')?.focus();
+      return;
+    }
+  }
   setMatchOffer(offerId, label);
-  if (nowBtn) $('form-match')?.requestSubmit();
+  if (nowBtn) {
+    $('form-match')?.requestSubmit();
+    return;
+  }
+  $('match-offer')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  $('match-carrier-offer-wrap')?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 });
 
 document.getElementById('btn-seed-demo')?.addEventListener('click', async () => {

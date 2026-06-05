@@ -614,13 +614,41 @@ button[type="submit"]:disabled {
   font-size: 0.9rem;
 }
 
-.match-price-box input[type='number'] {
-  max-width: 10rem;
-  margin-right: 0.5rem;
+.match-price-box input[type='number'],
+.match-price-box .match-offer-input--wide {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  margin: 0.35rem 0 0.5rem;
+  font-size: 1.05rem;
+  padding: 0.65rem 0.75rem;
+}
+
+.match-offer-label {
+  display: block;
+  font-weight: 600;
+  font-size: 0.9rem;
+  margin-top: 0.35rem;
 }
 
 .match-price-cta {
   margin-top: 0.65rem;
+}
+
+.match-price-box .btn-match-cta {
+  display: block;
+  width: 100%;
+  margin: 0;
+  padding: 0.85rem 1.1rem;
+  font-size: 1.02rem;
+  font-weight: 800;
+  border-radius: 10px;
+}
+
+.suggestion-actions-hint {
+  margin: 0.5rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.35;
 }
 
 .match-price-box .btn-accept-match {
@@ -823,8 +851,9 @@ select.offer-picked {
   display: block;
   width: 100%;
   margin: 0;
-  padding: 0.75rem 1rem;
-  font-size: 0.95rem;
+  padding: 0.85rem 1.1rem;
+  font-size: 1.02rem;
+  font-weight: 800;
   border-radius: 10px;
 }
 
@@ -3030,4 +3059,53 @@ body.cubik-app .address-suggestions.address-suggestions-portal:not(.address-sugg
 
 body.cubik-app.maps-picker-open .address-suggestions.address-suggestions-portal:not([hidden]) {
   display: block;
+}
+
+/* Ayuda urgencia al publicar carga (opción A — copy honesto) */
+.load-urgency-hint {
+  margin: 0.35rem 0 1rem;
+  padding: 0.75rem 0.85rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--brand-gray-50);
+  font-size: 0.9rem;
+}
+
+.load-urgency-hint--urgent {
+  border-color: rgba(247, 148, 29, 0.45);
+  background: var(--surface-warm);
+}
+
+.load-urgency-hint--flexible {
+  border-color: rgba(41, 171, 226, 0.35);
+  background: var(--surface-cool);
+}
+
+.load-urgency-hint__title {
+  margin: 0 0 0.45rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.load-urgency-hint__list {
+  margin: 0 0 0.5rem 1.1rem;
+  padding: 0;
+}
+
+.load-urgency-hint__list li {
+  margin: 0.25rem 0;
+}
+
+.load-urgency-hint__foot {
+  margin: 0;
+  font-size: 0.82rem;
+}
+
+.match-budget-hint {
+  margin: 0.5rem 0 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: var(--radius);
+  border: 1px solid rgba(41, 171, 226, 0.35);
+  background: var(--surface-cool);
+  font-size: 0.88rem;
 }

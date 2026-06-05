@@ -1,6 +1,6 @@
 {
-  "version": "0.0.107",
+  "version": "0.0.108",
   "git_sha": "",
   "ui": "uber-parity-v1",
-  "note": "Actividad en ruta: sin Gestionar viaje; Chat + incidente; navegación corregida"
+  "note": "Fix mapa en Actividad: reinicializar LiveMap al re-renderizar viajes"
 }

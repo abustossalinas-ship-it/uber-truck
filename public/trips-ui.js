@@ -321,6 +321,8 @@ function updateActiveTripBanner(matches, loadById, offerById) {
   }
 
   _bannerActiveMatchId = active.id;
+  const prevBannerMap = banner.querySelector('#active-trip-map');
+  if (prevBannerMap && typeof LiveMap !== 'undefined') LiveMap.destroy(prevBannerMap);
   banner.innerHTML = `
     <div class="active-trip-inner">
       <p class="active-trip-tag">${statusText}</p>
@@ -337,6 +339,9 @@ function renderTripsList(matches, loadById, offerById) {
   const el = document.getElementById('list-trips');
   if (!el) return;
   const paint = () => {
+  if (typeof LiveMap !== 'undefined') {
+    el.querySelectorAll('[data-trip-map]').forEach((mapEl) => LiveMap.destroy(mapEl));
+  }
   const role =
     typeof getActorRole === 'function' && getActorRole() === 'carrier' ? 'carrier' : 'shipper';
   const sorted = [...(matches || [])].sort(

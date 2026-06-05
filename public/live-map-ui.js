@@ -69,7 +69,23 @@ const LiveMap = {
   _ensureInstance(container, tracking) {
     const key = this._containerKey(container);
     let inst = this._instances.get(key);
-    if (inst && inst.matchId === tracking.match_id && inst.map) return inst;
+    if (
+      inst &&
+      inst.container === container &&
+      document.contains(container) &&
+      inst.matchId === tracking.match_id &&
+      inst.map
+    ) {
+      return inst;
+    }
+
+    if (inst) {
+      this.stopPoll(key);
+      if (inst.markers) Object.values(inst.markers).forEach((m) => m.setMap(null));
+      if (inst.routePolyline) inst.routePolyline.setMap(null);
+      if (inst.trailPolyline) inst.trailPolyline.setMap(null);
+      this._instances.delete(key);
+    }
 
     this.stopPoll(key);
     container.innerHTML = '';
@@ -115,6 +131,7 @@ const LiveMap = {
 
     inst = {
       key,
+      container,
       matchId: tracking.match_id,
       map,
       mapEl,
@@ -398,8 +415,8 @@ const LiveMap = {
     const key = this._containerKey(container);
     this.stopPoll(key);
     const inst = this._instances.get(key);
-    if (inst) {
-      Object.values(inst.markers).forEach((m) => m.setMap(null));
+    if (inst && inst.container === container) {
+      Object.values(inst.markers || {}).forEach((m) => m.setMap(null));
       if (inst.routePolyline) inst.routePolyline.setMap(null);
       if (inst.trailPolyline) inst.trailPolyline.setMap(null);
       this._instances.delete(key);

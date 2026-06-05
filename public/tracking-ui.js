@@ -334,11 +334,11 @@ async function refreshActiveTripMap(matchId, opts = {}) {
     }
   } catch (e) {
     console.error(e);
-    if (!soft) {
-      targets.forEach((el) => {
-        el.innerHTML = `<p class="muted">${e.message || 'No se pudo cargar el mapa.'}</p>`;
-      });
-    }
+    targets.forEach((el) => {
+      if (!document.contains(el)) return;
+      if (el.querySelector('.trip-map-live') || el.querySelector('.trip-map-img')) return;
+      el.innerHTML = `<p class="muted">${e.message || 'No se pudo cargar el mapa.'}</p>`;
+    });
   }
 }
 

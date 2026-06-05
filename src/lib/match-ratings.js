@@ -96,7 +96,7 @@ function ratingRow(r) {
   };
 }
 
-async function enrichMatchesWithRatings(repo, matches, user) {
+async function enrichMatchesWithRatings(repo, matches, user, ctx = {}) {
   if (!matches?.length) return matches;
   let ratings = [];
   try {
@@ -114,11 +114,21 @@ async function enrichMatchesWithRatings(repo, matches, user) {
     }));
   }
 
-  const loads = await repo.list('load_requests', {});
-  const offers = await repo.list('capacity_offers', {});
-  const loadById = Object.fromEntries(loads.map((l) => [l.id, l]));
-  const offerById = Object.fromEntries(offers.map((o) => [o.id, o]));
-  const repIndex = await getReputationIndex(repo);
+  let loadById = ctx.loadById;
+  let offerById = ctx.offerById;
+  let allMatches = ctx.allMatches;
+  if (!loadById || !offerById) {
+    const [loads, offers] = await Promise.all([
+      repo.list('load_requests', {}),
+      repo.list('capacity_offers', {}),
+    ]);
+    loadById = Object.fromEntries(loads.map((l) => [l.id, l]));
+    offerById = Object.fromEntries(offers.map((o) => [o.id, o]));
+  }
+  if (!allMatches) {
+    allMatches = await repo.list('matches', {});
+  }
+  const repIndex = buildReputationIndex(ratings, allMatches, loadById, offerById);
 
   const byMatch = {};
   for (const r of ratings) {

@@ -307,10 +307,7 @@ function updateActiveTripBanner(matches, loadById, offerById) {
 function renderTripsList(matches, loadById, offerById) {
   const el = document.getElementById('list-trips');
   if (!el) return;
-  if (typeof RatingTags !== 'undefined' && !RatingTags.catalog) {
-    RatingTags.loadCatalog().then(() => renderTripsList(matches, loadById, offerById));
-    return;
-  }
+  const paint = () => {
   const role =
     typeof getActorRole === 'function' && getActorRole() === 'carrier' ? 'carrier' : 'shipper';
   const sorted = [...(matches || [])].sort(
@@ -439,6 +436,13 @@ function renderTripsList(matches, loadById, offerById) {
   groups.active.forEach((m) => {
     if (typeof refreshActiveTripMap === 'function') refreshActiveTripMap(m.id);
   });
+  };
+
+  if (typeof RatingTags !== 'undefined' && !RatingTags.catalog) {
+    RatingTags.loadCatalog().then(paint).catch(paint);
+    return;
+  }
+  paint();
 }
 
 let rateModalMatchId = null;

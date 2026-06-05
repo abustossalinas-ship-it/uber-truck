@@ -46,12 +46,8 @@ function filterOffersForUser(rows, user) {
   return rows;
 }
 
-async function filterMatchesForUser(matches, user) {
+function filterMatchesForUserWithMaps(matches, user, loadById, offerById) {
   if (!user || user.role === 'admin') return matches;
-  const loads = await repo.list('load_requests', {});
-  const offers = await repo.list('capacity_offers', {});
-  const loadById = Object.fromEntries(loads.map((l) => [l.id, l]));
-  const offerById = Object.fromEntries(offers.map((o) => [o.id, o]));
   return matches.filter((m) => {
     if (user.role === 'shipper') {
       return loadBelongsToUser(loadById[m.load_request_id], user);
@@ -61,6 +57,17 @@ async function filterMatchesForUser(matches, user) {
     }
     return true;
   });
+}
+
+async function filterMatchesForUser(matches, user) {
+  if (!user || user.role === 'admin') return matches;
+  const [loads, offers] = await Promise.all([
+    repo.list('load_requests', {}),
+    repo.list('capacity_offers', {}),
+  ]);
+  const loadById = Object.fromEntries(loads.map((l) => [l.id, l]));
+  const offerById = Object.fromEntries(offers.map((o) => [o.id, o]));
+  return filterMatchesForUserWithMaps(matches, user, loadById, offerById);
 }
 
 function assertCanPublishLoad(user) {
@@ -99,6 +106,7 @@ module.exports = {
   filterLoadsForUser,
   filterOffersForUser,
   filterMatchesForUser,
+  filterMatchesForUserWithMaps,
   assertCanPublishLoad,
   assertCanPublishOffer,
   assertCanMatchLoad,

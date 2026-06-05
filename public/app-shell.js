@@ -278,6 +278,12 @@ const AppShell = {
     if (user) {
       this.renderHome();
       this.renderAccount();
+      if (typeof RatingTags !== 'undefined' && !RatingTags.catalog) {
+        RatingTags.loadCatalog().catch(() => {});
+      }
+      if (typeof refreshBoard === 'function') {
+        refreshBoard().catch(() => {});
+      }
       if (!this.deep) this.setTab(this.tab || 'home');
     } else {
       this.deep = null;

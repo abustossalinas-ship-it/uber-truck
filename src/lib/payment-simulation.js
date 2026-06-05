@@ -1,7 +1,6 @@
 'use strict';
 
 const { filterMatchesForUser } = require('./access-scope');
-const { getMatchParties } = require('./match-parties');
 
 const SHIPPER_FEE_RATE = 0.1;
 const CARRIER_FEE_RATE = 0.05;
@@ -49,6 +48,30 @@ async function completedTripsForUser(repo, user) {
 async function buildPaymentSimulation(repo, user) {
   const role = userRole(user);
   const completed = await completedTripsForUser(repo, user);
+  if (!completed.length) {
+    return {
+      enabled: true,
+      pilot: true,
+      role,
+      fee_rate: role === 'shipper' ? SHIPPER_FEE_RATE : CARRIER_FEE_RATE,
+      wallet_balance_clp: 0,
+      wallet_label:
+        role === 'shipper' ? 'Saldo Cubik (simulado)' : 'Por cobrar — pago en gestión',
+      trips: [],
+      totals: { trip_count: 0, agreed_clp: 0, fees_clp: 0, net_clp: 0 },
+      note: 'Simulación piloto — sin movimiento real de dinero. Cubik Saldo disponible próximamente.',
+    };
+  }
+
+  const loadIds = [...new Set(completed.map((m) => m.load_request_id).filter(Boolean))];
+  const offerIds = [...new Set(completed.map((m) => m.capacity_offer_id).filter(Boolean))];
+  const [loads, offers] = await Promise.all([
+    Promise.all(loadIds.map((id) => repo.getById('load_requests', id))),
+    Promise.all(offerIds.map((id) => repo.getById('capacity_offers', id))),
+  ]);
+  const loadById = Object.fromEntries(loads.filter(Boolean).map((l) => [l.id, l]));
+  const offerById = Object.fromEntries(offers.filter(Boolean).map((o) => [o.id, o]));
+
   const trips = [];
   let totalAgreed = 0;
   let totalFees = 0;
@@ -57,7 +80,10 @@ async function buildPaymentSimulation(repo, user) {
   for (const m of completed) {
     const bd = breakdownForMatch(m, role);
     if (!bd) continue;
-    const parties = await getMatchParties(repo, m);
+    const load = loadById[m.load_request_id];
+    const offer = offerById[m.capacity_offer_id];
+    const shipper = load?.company_name?.trim() || 'Embarcador';
+    const carrier = offer?.carrier_name?.trim() || 'Transportista';
     totalAgreed += bd.agreed_price_clp;
     totalFees += bd.fee_clp;
     totalNet += role === 'shipper' ? bd.total_clp : bd.net_clp;
@@ -66,7 +92,7 @@ async function buildPaymentSimulation(repo, user) {
       ...bd,
       status: 'pilot_settlement',
       status_label: role === 'carrier' ? 'Pago en gestión' : 'Cobro simulado',
-      pair: parties?.short || 'Viaje completado',
+      pair: `${shipper} ↔ ${carrier}`,
       completed_at: m.updated_at || m.created_at,
     });
   }

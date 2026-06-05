@@ -4,23 +4,14 @@ const { normalizeRole } = require('./match-cancel');
 const { filterMatchesForUser } = require('./access-scope');
 const { maskPhoneDisplay } = require('./phone-guard');
 
-async function resolveParties(repo, match) {
-  const load = await repo.getById('load_requests', match.load_request_id);
-  const offer = await repo.getById('capacity_offers', match.capacity_offer_id);
+function partiesFromMaps(load, offer, userById = {}) {
   if (!load || !offer) return null;
-
-  const shipperUser = load.shipper_user_id
-    ? await repo.getById('users', load.shipper_user_id)
-    : null;
-  const carrierUser = offer.carrier_user_id
-    ? await repo.getById('users', offer.carrier_user_id)
-    : null;
-
+  const shipperUser = load.shipper_user_id ? userById[load.shipper_user_id] : null;
+  const carrierUser = offer.carrier_user_id ? userById[offer.carrier_user_id] : null;
   const shipperCompany = load.company_name?.trim() || 'Embarcador';
   const carrierCompany = offer.carrier_name?.trim() || 'Transportista';
   const shipperPerson = shipperUser?.full_name?.trim() || shipperCompany;
   const carrierPerson = carrierUser?.full_name?.trim() || carrierCompany;
-
   return {
     load,
     offer,
@@ -29,16 +20,32 @@ async function resolveParties(repo, match) {
       person: shipperPerson,
       company: shipperCompany,
       phone: shipperUser?.phone || null,
-      display: shipperPerson !== shipperCompany ? `${shipperPerson} · ${shipperCompany}` : shipperCompany,
+      display:
+        shipperPerson !== shipperCompany ? `${shipperPerson} · ${shipperCompany}` : shipperCompany,
     },
     carrier: {
       user_id: offer.carrier_user_id,
       person: carrierPerson,
       company: carrierCompany,
       phone: carrierUser?.phone || null,
-      display: carrierPerson !== carrierCompany ? `${carrierPerson} · ${carrierCompany}` : carrierCompany,
+      display:
+        carrierPerson !== carrierCompany ? `${carrierPerson} · ${carrierCompany}` : carrierCompany,
     },
   };
+}
+
+async function resolveParties(repo, match) {
+  const load = await repo.getById('load_requests', match.load_request_id);
+  const offer = await repo.getById('capacity_offers', match.capacity_offer_id);
+  if (!load || !offer) return null;
+
+  const userById = {};
+  const userIds = [load.shipper_user_id, offer.carrier_user_id].filter(Boolean);
+  const users = await Promise.all(userIds.map((id) => repo.getById('users', id)));
+  users.filter(Boolean).forEach((u) => {
+    userById[u.id] = u;
+  });
+  return partiesFromMaps(load, offer, userById);
 }
 
 function counterpartyForRole(parties, viewerRole) {
@@ -72,18 +79,35 @@ async function enrichMatchCounterparty(repo, match, viewer) {
   return match;
 }
 
-async function enrichMatchesCounterparty(repo, rows, viewer) {
-  if (!viewer?.role || viewer.role === 'admin') return rows;
+async function enrichMatchesCounterparty(repo, rows, viewer, ctx = {}) {
+  if (!viewer?.role || viewer.role === 'admin' || !rows?.length) return rows;
   const role = normalizeRole(viewer.role);
-  const out = [];
-  for (const m of rows) {
-    const parties = await resolveParties(repo, m);
-    const row = { ...m };
-    const cp = counterpartyForRole(parties, role);
-    if (cp) row.counterparty = cp;
-    out.push(row);
+  let loadById = ctx.loadById;
+  let offerById = ctx.offerById;
+  if (!loadById || !offerById) {
+    const [loads, offers] = await Promise.all([
+      repo.list('load_requests', {}),
+      repo.list('capacity_offers', {}),
+    ]);
+    loadById = Object.fromEntries(loads.map((l) => [l.id, l]));
+    offerById = Object.fromEntries(offers.map((o) => [o.id, o]));
   }
-  return out;
+
+  const userIds = new Set();
+  for (const m of rows) {
+    const load = loadById[m.load_request_id];
+    const offer = offerById[m.capacity_offer_id];
+    if (load?.shipper_user_id) userIds.add(load.shipper_user_id);
+    if (offer?.carrier_user_id) userIds.add(offer.carrier_user_id);
+  }
+  const users = await Promise.all([...userIds].map((id) => repo.getById('users', id)));
+  const userById = Object.fromEntries(users.filter(Boolean).map((u) => [u.id, u]));
+
+  return rows.map((m) => {
+    const parties = partiesFromMaps(loadById[m.load_request_id], offerById[m.capacity_offer_id], userById);
+    const cp = counterpartyForRole(parties, role);
+    return cp ? { ...m, counterparty: cp } : m;
+  });
 }
 
 async function buildMatchContact(repo, matchId, user) {

@@ -34,6 +34,7 @@ const { otherRole } = require('../lib/match-comms');
 const { getMatchParties } = require('../lib/match-parties');
 const {
   filterMatchesForUser,
+  filterMatchesForUserWithMaps,
   assertCanMatchLoad,
   assertCanMatchOffer,
 } = require('../lib/access-scope');
@@ -110,12 +111,19 @@ router.get('/cancel-options', optionalAuth, async (req, res) => {
 
 router.get('/', optionalAuth, async (req, res) => {
   try {
-    let rows = await repo.list('matches', {});
-    rows = await filterMatchesForUser(rows, req.user);
-    rows = await enrichMatchesWithRatings(repo, rows, req.user);
-    rows = await enrichMatchesCounterparty(repo, rows, req.user);
-    rows = enrichMatchesPaymentPilot(rows, req.user);
-    res.json({ ok: true, data: rows });
+    const [rows, loads, offers] = await Promise.all([
+      repo.list('matches', {}),
+      repo.list('load_requests', {}),
+      repo.list('capacity_offers', {}),
+    ]);
+    const loadById = Object.fromEntries(loads.map((l) => [l.id, l]));
+    const offerById = Object.fromEntries(offers.map((o) => [o.id, o]));
+    const ctx = { loadById, offerById, allMatches: rows };
+    let filtered = filterMatchesForUserWithMaps(rows, req.user, loadById, offerById);
+    filtered = await enrichMatchesWithRatings(repo, filtered, req.user, ctx);
+    filtered = await enrichMatchesCounterparty(repo, filtered, req.user, ctx);
+    filtered = enrichMatchesPaymentPilot(filtered, req.user);
+    res.json({ ok: true, data: filtered });
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al listar matches' });

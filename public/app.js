@@ -987,15 +987,32 @@ async function refreshBoard() {
   const gen = ++boardRefreshGen;
   const keepLoad = stickyMatchLoadId || $('match-load')?.value || '';
   const keepOffer = stickyMatchOfferId || $('match-offer')?.value || '';
+  const appTripsFocus =
+    document.body.classList.contains('cubik-app') && document.body.dataset.appTab === 'activity';
+  const tripsEl = document.getElementById('list-trips');
+
+  if (appTripsFocus && window._tripsCache && tripsEl && !tripsEl.dataset.loaded) {
+    renderTripsList(window._tripsCache.matchRows, window._tripsCache.loadById, window._tripsCache.offerById);
+    tripsEl.dataset.loaded = '1';
+  } else if (appTripsFocus && tripsEl && !tripsEl.innerHTML.trim()) {
+    tripsEl.innerHTML = '<p class="muted trips-loading">Cargando viajes…</p>';
+  }
 
   const [loads, offers, matches] = await Promise.all([API.allLoads(), API.allOffers(), API.matches()]);
   if (gen !== boardRefreshGen) return;
-  $('list-loads').innerHTML =
-    loads.data?.length === 0
-      ? '<p class="muted">Sin cargas.</p>'
-      : loads.data
-          .map(
-            (l) => `
+
+  const loadById = Object.fromEntries((loads.data || []).map((l) => [l.id, l]));
+  const offerById = Object.fromEntries((offers.data || []).map((o) => [o.id, o]));
+  const matchRows = matches.data || [];
+  window._tripsCache = { matchRows, loadById, offerById };
+
+  if (!appTripsFocus) {
+    $('list-loads').innerHTML =
+      loads.data?.length === 0
+        ? '<p class="muted">Sin cargas.</p>'
+        : loads.data
+            .map(
+              (l) => `
       <article class="item" data-id="${l.id}">
         <strong>${l.company_name}${reputationBadgeInline(l.reputation)}</strong>
         ${statusPillHtml(l.status, l.created_at)}
@@ -1007,15 +1024,15 @@ async function refreshBoard() {
         ${l.created_at ? `<p class="muted">Publicada ${formatDateTime(l.created_at)}</p>` : ''}
         ${formatCargoTrustLine(l)}
       </article>`
-          )
-          .join('');
+            )
+            .join('');
 
-  $('list-offers').innerHTML =
-    offers.data?.length === 0
-      ? '<p class="muted">Sin ofertas.</p>'
-      : offers.data
-          .map(
-            (o) => `
+    $('list-offers').innerHTML =
+      offers.data?.length === 0
+        ? '<p class="muted">Sin ofertas.</p>'
+        : offers.data
+            .map(
+              (o) => `
       <article class="item" data-id="${o.id}">
         <strong>${o.carrier_name}${reputationBadgeInline(o.reputation)}</strong>
         ${statusPillHtml(o.status, o.created_at)}
@@ -1023,13 +1040,10 @@ async function refreshBoard() {
         ${typeof formatTripScheduleHtml === 'function' ? formatTripScheduleHtml(o, 'offer') : ''}
         <p class="muted">${o.free_volume_m3 ? o.free_volume_m3 + ' m³ libres' : ''}${o.created_at ? ' · Ofertado ' + formatDateTime(o.created_at) : ''}</p>
       </article>`
-          )
-          .join('');
+            )
+            .join('');
+  }
 
-  const loadById = Object.fromEntries((loads.data || []).map((l) => [l.id, l]));
-  const offerById = Object.fromEntries((offers.data || []).map((o) => [o.id, o]));
-
-  const matchRows = matches.data || [];
   window._boardMatchesById = Object.fromEntries(matchRows.map((m) => [m.id, m]));
   matchRows.forEach((m) => {
     const offer = offerById[m.capacity_offer_id];
@@ -1045,14 +1059,14 @@ async function refreshBoard() {
       .map((m) => {
         const load = loadById[m.load_request_id];
         const offer = offerById[m.capacity_offer_id];
-            const title =
-              load && offer
-                ? `${load.company_name} (Embarcador) ↔ ${offer.carrier_name} (Transportista)`
-                : `Carga · Oferta`;
-            m._matchTitle = title;
-            const actions = buildMatchActions(m);
-            const mutualBanner = matchMutualBanner(m);
-            const cargoLine = formatCargoTrustLine(load);
+        const title =
+          load && offer
+            ? `${load.company_name} (Embarcador) ↔ ${offer.carrier_name} (Transportista)`
+            : `Carga · Oferta`;
+        m._matchTitle = title;
+        const actions = buildMatchActions(m);
+        const mutualBanner = matchMutualBanner(m);
+        const cargoLine = formatCargoTrustLine(load);
         const scheduleLine =
           load && typeof formatTripScheduleHtml === 'function'
             ? formatTripScheduleHtml(load, 'load')
@@ -1085,100 +1099,104 @@ async function refreshBoard() {
       .join('');
   }
 
-  $('list-matches').innerHTML = renderMatchCards(
-    activeMatches,
-    'Sin emparejamientos activos. Crea una propuesta arriba o revisa cargas y ofertas abajo.'
-  );
-  const histEl = $('list-matches-history');
-  const histWrap = $('matches-history-wrap');
-  if (histEl) {
-    histEl.innerHTML = renderMatchCards(cancelledMatches, 'Sin cancelaciones recientes.');
-    if (histWrap) histWrap.open = cancelledMatches.length > 0;
-  }
-
-  const publishedLoads = (loads.data || []).filter((l) => l.status === 'published');
-  window._boardLoadsById = Object.fromEntries((loads.data || []).map((l) => [l.id, l]));
-  const publishedOffers = (offers.data || []).filter((o) => o.status === 'published');
-  const loadSel = $('match-load');
-  const offerSel = $('match-offer');
-  const hint = $('board-hint');
-  const matchBtn = $('form-match')?.querySelector('button[type="submit"]');
-
-  loadSel.innerHTML =
-    publishedLoads.length === 0
-      ? '<option value="">No hay cargas publicadas</option>'
-      : '<option value="">Elegir carga publicada…</option>';
-  publishedLoads.forEach((l) => {
-    const br =
-      l.budget_min_clp || l.budget_max_clp
-        ? ` · ${formatBudgetRange(l.budget_min_clp, l.budget_max_clp)}`
-        : '';
-    const sched =
-      l.schedule_mode === 'scheduled' && l.scheduled_pickup_at
-        ? ` · ${formatDateTime(l.scheduled_pickup_at)}`
-        : '';
-    loadSel.innerHTML += `<option value="${l.id}">${l.company_name} — ${routeLine(l)}${sched}${br}</option>`;
-  });
-  if (keepLoad && loadSel.querySelector(`option[value="${keepLoad}"]`)) {
-    loadSel.value = keepLoad;
-    stickyMatchLoadId = keepLoad;
-  }
-
-  if (publishedOffers.length === 0) {
-    offerSel.innerHTML = '<option value="">Sin ofertas — ve a «Tengo espacio en ruta»</option>';
-    offerSel.disabled = true;
-    if (hint) {
-      hint.hidden = false;
-      hint.innerHTML =
-        'Primero publica una <strong>oferta de capacidad</strong> en la pestaña <button type="button" class="link-btn" data-goto="carrier">Tengo espacio en ruta</button>.';
+  if (!appTripsFocus) {
+    $('list-matches').innerHTML = renderMatchCards(
+      activeMatches,
+      'Sin emparejamientos activos. Crea una propuesta arriba o revisa cargas y ofertas abajo.'
+    );
+    const histEl = $('list-matches-history');
+    const histWrap = $('matches-history-wrap');
+    if (histEl) {
+      histEl.innerHTML = renderMatchCards(cancelledMatches, 'Sin cancelaciones recientes.');
+      if (histWrap) histWrap.open = cancelledMatches.length > 0;
     }
-    if (matchBtn) matchBtn.disabled = true;
-  } else {
-    offerSel.disabled = false;
-    offerSel.innerHTML = '<option value="">Elegir oferta publicada…</option>';
-    publishedOffers.forEach((o) => {
-      const repOpt =
-        o.reputation?.rating_count && o.reputation.avg_stars != null
-          ? ` · ${Number(o.reputation.avg_stars).toFixed(1)} ★`
+
+    const publishedLoads = (loads.data || []).filter((l) => l.status === 'published');
+    window._boardLoadsById = Object.fromEntries((loads.data || []).map((l) => [l.id, l]));
+    const publishedOffers = (offers.data || []).filter((o) => o.status === 'published');
+    const loadSel = $('match-load');
+    const offerSel = $('match-offer');
+    const hint = $('board-hint');
+    const matchBtn = $('form-match')?.querySelector('button[type="submit"]');
+
+    loadSel.innerHTML =
+      publishedLoads.length === 0
+        ? '<option value="">No hay cargas publicadas</option>'
+        : '<option value="">Elegir carga publicada…</option>';
+    publishedLoads.forEach((l) => {
+      const br =
+        l.budget_min_clp || l.budget_max_clp
+          ? ` · ${formatBudgetRange(l.budget_min_clp, l.budget_max_clp)}`
           : '';
-      offerSel.innerHTML += `<option value="${o.id}">${o.carrier_name}${repOpt} — ${routeLine(o)}</option>`;
+      const sched =
+        l.schedule_mode === 'scheduled' && l.scheduled_pickup_at
+          ? ` · ${formatDateTime(l.scheduled_pickup_at)}`
+          : '';
+      loadSel.innerHTML += `<option value="${l.id}">${l.company_name} — ${routeLine(l)}${sched}${br}</option>`;
     });
-    if (hint) hint.hidden = true;
-    if (matchBtn) matchBtn.disabled = false;
-    if (keepOffer) {
-      setMatchOffer(
-        keepOffer,
-        publishedOffers.find((o) => o.id === keepOffer)?.carrier_name
-      );
+    if (keepLoad && loadSel.querySelector(`option[value="${keepLoad}"]`)) {
+      loadSel.value = keepLoad;
+      stickyMatchLoadId = keepLoad;
     }
+
+    if (publishedOffers.length === 0) {
+      offerSel.innerHTML = '<option value="">Sin ofertas — ve a «Tengo espacio en ruta»</option>';
+      offerSel.disabled = true;
+      if (hint) {
+        hint.hidden = false;
+        hint.innerHTML =
+          'Primero publica una <strong>oferta de capacidad</strong> en la pestaña <button type="button" class="link-btn" data-goto="carrier">Tengo espacio en ruta</button>.';
+      }
+      if (matchBtn) matchBtn.disabled = true;
+    } else {
+      offerSel.disabled = false;
+      offerSel.innerHTML = '<option value="">Elegir oferta publicada…</option>';
+      publishedOffers.forEach((o) => {
+        const repOpt =
+          o.reputation?.rating_count && o.reputation.avg_stars != null
+            ? ` · ${Number(o.reputation.avg_stars).toFixed(1)} ★`
+            : '';
+        offerSel.innerHTML += `<option value="${o.id}">${o.carrier_name}${repOpt} — ${routeLine(o)}</option>`;
+      });
+      if (hint) hint.hidden = true;
+      if (matchBtn) matchBtn.disabled = false;
+      if (keepOffer) {
+        setMatchOffer(
+          keepOffer,
+          publishedOffers.find((o) => o.id === keepOffer)?.carrier_name
+        );
+      }
+    }
+    updateActiveProposalBanner(matchRows, loadSel.value);
+    loadSuggestionsFor(loadSel.value);
+    updateMatchPriceStep();
+    showMatchReady();
+    if (typeof ProposalCompare !== 'undefined') {
+      const compareLoad =
+        loadSel.value ||
+        (() => {
+          const proposed = matchRows.filter((m) => m.status === 'proposed');
+          const byLoad = {};
+          proposed.forEach((m) => {
+            byLoad[m.load_request_id] = (byLoad[m.load_request_id] || 0) + 1;
+          });
+          const top = Object.entries(byLoad).sort((a, b) => b[1] - a[1])[0];
+          return top && top[1] >= 2 ? top[0] : loadSel.value;
+        })();
+      ProposalCompare.render(compareLoad);
+    }
+    renderBoardActor();
   }
-  updateActiveProposalBanner(matchRows, loadSel.value);
-  loadSuggestionsFor(loadSel.value);
-  updateMatchPriceStep();
-  showMatchReady();
-  if (typeof ProposalCompare !== 'undefined') {
-    const compareLoad =
-      loadSel.value ||
-      (() => {
-        const proposed = matchRows.filter((m) => m.status === 'proposed');
-        const byLoad = {};
-        proposed.forEach((m) => {
-          byLoad[m.load_request_id] = (byLoad[m.load_request_id] || 0) + 1;
-        });
-        const top = Object.entries(byLoad).sort((a, b) => b[1] - a[1])[0];
-        return top && top[1] >= 2 ? top[0] : loadSel.value;
-      })();
-    ProposalCompare.render(compareLoad);
-  }
-  renderBoardActor();
+
   if (typeof Comms !== 'undefined') Comms.refreshBell();
   if (typeof updateActiveTripBanner === 'function') {
     updateActiveTripBanner(matchRows, loadById, offerById);
   }
   if (typeof renderTripsList === 'function') {
     renderTripsList(matchRows, loadById, offerById);
+    if (tripsEl) tripsEl.dataset.loaded = '1';
   }
-  if (typeof syncBoardRealtime === 'function') {
+  if (!appTripsFocus && typeof syncBoardRealtime === 'function') {
     syncBoardRealtime(activeMatches);
   }
   if (typeof onBoardMatchesUpdated === 'function') {

@@ -48,6 +48,7 @@ const { logMatchTrip } = require('../lib/match-trip-log');
 const { listTripEvents } = require('../lib/trip-events');
 const { buildMatchTracking } = require('../lib/match-tracking');
 const { enrichMatchesCounterparty, buildMatchContact } = require('../lib/match-contact');
+const { enrichMatchesPaymentPilot } = require('../lib/payment-simulation');
 const maps = require('../services/google-maps');
 const { computeDestinationEtaFromRoute } = require('../lib/load-time-estimate');
 
@@ -113,6 +114,7 @@ router.get('/', optionalAuth, async (req, res) => {
     rows = await filterMatchesForUser(rows, req.user);
     rows = await enrichMatchesWithRatings(repo, rows, req.user);
     rows = await enrichMatchesCounterparty(repo, rows, req.user);
+    rows = enrichMatchesPaymentPilot(rows, req.user);
     res.json({ ok: true, data: rows });
   } catch (e) {
     console.error(e);

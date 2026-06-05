@@ -133,6 +133,53 @@ function buildTripPaymentBadge(m, role) {
   if (ps === 'pending_release') {
     return `<p class="trip-payment-badge trip-payment-hold">Pago pendiente — confirma recepción</p>`;
   }
+  if (ps === 'pilot_settlement') {
+    const agreed = m.payment_agreed_clp;
+    const fee = m.payment_fee_clp;
+    const feePct = Math.round((m.payment_fee_rate || (role === 'shipper' ? 0.1 : 0.05)) * 100);
+    if (role === 'carrier') {
+      const net = m.payment_net_clp;
+      const netFmt =
+        net != null ? `$${Number(net).toLocaleString('es-CL')}` : '';
+      return `<div class="trip-payment-badge trip-payment-settlement">
+        <div class="trip-payment-settlement-head">
+          <span class="pill pill-warn trip-payment-pill">Pago en gestión</span>
+          ${netFmt ? `<strong class="trip-payment-amount">${netFmt}</strong>` : ''}
+        </div>
+        ${
+          agreed && fee
+            ? `<div class="trip-payment-breakdown">
+          <div class="trip-pay-row"><span>Flete acordado</span><span>$${Number(agreed).toLocaleString('es-CL')}</span></div>
+          <div class="trip-pay-row fee"><span>Comisión Cubik ${feePct}%</span><span>−$${Number(fee).toLocaleString('es-CL')}</span></div>
+          <div class="trip-pay-row total"><span>Neto a recibir</span><strong>$${Number(net).toLocaleString('es-CL')}</strong></div>
+        </div>`
+            : ''
+        }
+        <span class="trip-payment-hint">Cubik Saldo — simulación piloto</span>
+      </div>`;
+    }
+    const total = m.payment_total_clp ?? agreed;
+    if (agreed && fee && total) {
+      const feeShare = Math.round((fee / total) * 100);
+      const freightShare = 100 - feeShare;
+      return `<div class="trip-payment-badge trip-payment-charged">
+        <div class="trip-payment-charged-head">
+          <span class="pill trip-payment-pill">Cobro simulado</span>
+          <strong class="trip-payment-amount trip-payment-negative">−$${Number(total).toLocaleString('es-CL')}</strong>
+        </div>
+        <div class="cubik-pay-bar" aria-hidden="true">
+          <span class="cubik-pay-bar-freight" style="width:${freightShare}%"></span>
+          <span class="cubik-pay-bar-fee" style="width:${feeShare}%"></span>
+        </div>
+        <div class="trip-payment-breakdown">
+          <div class="trip-pay-row"><span>Flete</span><span>$${Number(agreed).toLocaleString('es-CL')}</span></div>
+          <div class="trip-pay-row fee"><span>Servicio Cubik ${feePct}%</span><span>+$${Number(fee).toLocaleString('es-CL')}</span></div>
+          <div class="trip-pay-row total"><span>Total descontado</span><strong>−$${Number(total).toLocaleString('es-CL')}</strong></div>
+        </div>
+        <span class="trip-payment-hint">Simulación — sin cargo real aún</span>
+      </div>`;
+    }
+  }
   if (m.status === 'in_progress') {
     return `<p class="trip-payment-badge trip-payment-pilot">Pago: se retendrá al marcar en ruta (Cubik Saldo — próx.)</p>`;
   }

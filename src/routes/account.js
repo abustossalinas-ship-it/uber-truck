@@ -31,6 +31,7 @@ const {
   disputePenaltyPayment,
   getPenaltyPaymentProof,
 } = require('../lib/penalty-payment');
+const { buildPaymentSimulation } = require('../lib/payment-simulation');
 
 const router = express.Router();
 
@@ -85,10 +86,17 @@ router.get('/summary', authMiddleware, async (req, res) => {
     const enforced = bankEnforced() && req.user?.role !== 'admin';
     const payment_required_for_operate = enforced && !setup.can_operate;
     const needsBank = payment_required_for_operate || (penalties.total_owed_clp > 0 && !setup.can_operate);
+    let cubik_saldo_pilot = null;
+    try {
+      cubik_saldo_pilot = await buildPaymentSimulation(repo, req.user);
+    } catch (e) {
+      console.error('buildPaymentSimulation', e);
+    }
 
     res.json({
       ok: true,
       penalties,
+      cubik_saldo_pilot,
       penalties_error,
       operating_status: operating,
       bank_account: bank,

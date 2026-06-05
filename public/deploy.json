@@ -1,6 +1,6 @@
 {
-  "version": "0.0.99",
+  "version": "0.0.100",
   "git_sha": "",
   "ui": "uber-parity-v1",
-  "note": "Drawer entrega/cierre viaje; push FCM validado en dispositivo"
+  "note": "Cubik Saldo piloto: pago en gestión transportista, cobro simulado embarcador"
 }

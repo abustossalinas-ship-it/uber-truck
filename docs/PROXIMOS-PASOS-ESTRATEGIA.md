@@ -1,6 +1,6 @@
 # Próximos pasos estratégicos — Cubik / Uber Truck
 
-Alineado al estado del repo (**25 may 2026**, software **0.0.98**).
+Alineado al estado del repo (**5 jun 2026**, software **0.0.104**).
 
 ## Principio
 
@@ -26,23 +26,23 @@ No perseguir la app perfecta en web: construir **operación tipo Uber** con mark
 | G2 | Distribución testers sin tienda (`/probar` + APK) | **Hecho jun 2026** |
 | G5 | Billetera multi-cuenta + RUT/bancos + cubicación carga | **Hecho v0.0.93–0.0.94** |
 | G6 | Push FCM backend + registro token Android | **Backend OK** — validación `push-test` en teléfono pendiente |
+| **D0** | **Cubik Saldo piloto** — comisiones 10/5, botón Pagar, notificación transportista | **Hecho v0.0.100–0.0.104** — simulación sin wallet real |
 | G3 | Play Store prueba cerrada «Cubik Envíos Chile» | **Siguiente opcional** — USD 25 |
 | G4 | iOS TestFlight | **Futuro** — USD 99/año + Mac; hoy PWA |
 | H | Piloto curado (5 carriers + 3 embarcadores) | Al final |
 | — | Recuperación contraseña por email | Futuro — bloque E |
-| D | Cubik Saldo + fees 10/5 + escrow en ruta | **Diseño cerrado** — implementación próxima semana; ver Memoria § monetización |
+| D | Cubik Saldo **producción** — wallet real, escrow en ruta, recarga | **Siguiente** — diseño cerrado; piloto validado |
 | D2 | Twilio Proxy (Llamar) | UI v0.0.98 lista; proxy semana siguiente |
 | E | Login Gmail / Apple | Pendiente — [AUTH-AND-EMAIL-ROADMAP.md](./AUTH-AND-EMAIL-ROADMAP.md) |
 | F | Panel admin KPIs | F1–F2 hecho v0.0.58 |
 
-## Siguiente etapa inmediata (may–jun 2026)
+## Siguiente etapa inmediata (jun 2026)
 
-1. **Cubik Saldo** — wallet, 10% embarcador + 5% transportista (cada rol ve solo su %), retención al **En ruta**, 20% saldo para publicar, tier ≥ $1M sin cash.
+1. **Wallet real + escrow en ruta** — retención al «En ruta», ledger, recarga Mercado Pago / transferencia.
 2. **Twilio Proxy** — llamadas enmascaradas (botón Llamar ya en v0.0.98).
-3. **Checkout UX** — «Terminar y confirmar» tipo Uber Eats; ayuda «Cómo funciona el dinero».
-4. **Piloto M2** — 20 viajes `completed` corredor RM ↔ Valparaíso/San Antonio.
-5. **Push FCM** — confirmar recepción en celular físico.
-6. **Cubik Plus Empresa** — suscripción vs descuento % (diseño; post-M2).
+3. **Piloto M2** — 20 viajes `completed` corredor RM ↔ Valparaíso/San Antonio (con pago piloto ya probado).
+4. **Push FCM** — confirmar recepción en celular físico.
+5. **Cubik Plus Empresa** — suscripción vs descuento % (diseño; post-M2).
 
 ## Qué NO hacer aún
 
@@ -56,3 +56,4 @@ No perseguir la app perfecta en web: construir **operación tipo Uber** con mark
 - [Journey](./Journey-Usuario-Uber-Truck.html)
 - [Probar app](./Probar-Uber-Truck.html)
 - [Play Store](./CUBIK-PLAY-STORE.md)
+- SQL piloto pago: [RUN_026_pilot_payment.sql](./RUN_026_pilot_payment.sql)

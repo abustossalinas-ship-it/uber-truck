@@ -47,3 +47,13 @@ Forzar modo app: `localStorage.setItem('cubik_force_app','1')` y recargar.
 ## Desktop
 
 Ancho ≥ 900px mantiene la UI web clásica (pestañas superiores).
+
+## Cubik Saldo piloto (v0.0.100–0.0.104)
+
+| Rol | Dónde | Acción |
+|-----|-------|--------|
+| Embarcador | Mis viajes → Completados | **Pagar con Cubik Saldo** (drawer; en web desktop modal centrado abajo) |
+| Transportista | Campana + Mis viajes | Notificación **Embarcador pagó el flete**; badges **Embarcador pagó** + **Cobro en gestión** |
+| Ambos | Cuenta | Sección **Cubik Saldo (piloto)** con desglose 10% / 5% |
+
+API: `POST /api/matches/:id/pilot-pay` · SQL: `docs/RUN_026_pilot_payment.sql`

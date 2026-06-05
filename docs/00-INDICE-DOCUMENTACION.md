@@ -11,7 +11,7 @@
 |-----------|--------|
 | **Memoria técnica** | [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html) |
 
-Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX, hitos, **Gantt**, **próximos pasos**, **bitácora de avance**, **modelo Cubik Saldo 10/5**, stack por capas, API y avance. **Última actualización:** 25 may 2026 · software **0.0.98** · memoria **v3.9**.
+Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX, hitos, **Gantt**, **próximos pasos**, **bitácora de avance**, **Cubik Saldo piloto 10/5** (v0.0.100–0.0.104), stack por capas, API y avance. **Última actualización:** 5 jun 2026 · software **0.0.104** · memoria **v4.0**.
 
 No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitácora MVP digital (evita duplicados).
 
@@ -22,7 +22,7 @@ No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitáco
 | Tema | HTML |
 |------|------|
 | Modelo de negocio | [Modelo-Negocio-Uber-Truck.html](./Modelo-Negocio-Uber-Truck.html) |
-| Journey usuario | [Journey-Usuario-Uber-Truck.html](./Journey-Usuario-Uber-Truck.html) (v2.8 · Cubik Saldo, checkout, v0.0.98) |
+| Journey usuario | [Journey-Usuario-Uber-Truck.html](./Journey-Usuario-Uber-Truck.html) (v2.9 · Cubik Saldo piloto, v0.0.104) |
 | Multas / soporte (MD) | [PENALTY-AND-SUPPORT.md](./PENALTY-AND-SUPPORT.md) |
 | Auth Gmail / Apple / correo (MD) | [AUTH-AND-EMAIL-ROADMAP.md](./AUTH-AND-EMAIL-ROADMAP.md) — pendiente producción |
 | Cubik — Play Store demo | [CUBIK-PLAY-STORE.md](./CUBIK-PLAY-STORE.md) |

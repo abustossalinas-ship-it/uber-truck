@@ -186,6 +186,12 @@ Al final del script: `NOTIFY pgrst, 'reload schema'` + consultas de verificació
 
 Archivos sueltos (mismo contenido): `RUN_022_023_SUPABASE.sql`, `RUN_024_SUPABASE.sql`, `RUN_025_SUPABASE.sql`.
 
+### Cubik Saldo piloto — pago por viaje (026)
+
+→ [`docs/RUN_026_pilot_payment.sql`](./RUN_026_pilot_payment.sql)
+
+Columnas en `matches`: `pilot_payment_status` (`in_settlement` | `released`), `pilot_payment_at`. API: `POST /api/matches/:id/pilot-pay` (embarcador, viaje `completed`). Repo: `supabase/migrations/026_pilot_payment.sql`.
+
 ### Tarjeta verificada + push FCM (027)
 
 → [`docs/RUN_027_payment_methods_fcm.sql`](./RUN_027_payment_methods_fcm.sql)

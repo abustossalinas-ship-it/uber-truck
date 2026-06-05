@@ -24,7 +24,8 @@ Word local (como Chanchi): `npm run export:all-docs` → pack completo; `npm run
 
 | Tarea | Archivos (cuando existan) |
 |-------|---------------------------|
-| **Memoria (Gantt, roadmap, próximos pasos)** | `docs/Memoria-tecnica-Uber-Truck.html`, `docs/index.html` |
+| **Memoria (Gantt, roadmap, próximos pasos)** | `docs/Memoria-tecnica-Uber-Truck.html`, `docs/index.html` — v4.0 / software 0.0.104 |
+| **Cubik Saldo piloto** | `src/lib/payment-simulation.js`, `pilot-pay-ui.js`, `docs/RUN_026_pilot_payment.sql` |
 | **Índice** | `docs/00-INDICE-DOCUMENTACION.md` |
 | Canvas avance | `canvases/estado-avance.canvas.tsx` |
 | **SQL Supabase** | `docs/SQL-SUPABASE.md`, `supabase/migrations/RUN_PENDING.sql` |

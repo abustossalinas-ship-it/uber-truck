@@ -2,7 +2,7 @@
 
 **Documento canónico:** [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html) (producción: `/docs/Memoria-tecnica-Uber-Truck.html`).
 
-**Versión documento:** 3.9 · **Software:** 0.0.98 (Cubik app móvil + API Railway) · **Bitácora:** 25 may 2026.
+**Versión documento:** 4.0 · **Software:** 0.0.104 (Cubik app móvil + API Railway) · **Bitácora:** 5 jun 2026.
 
 **Links testers:** https://uber-truck-production.up.railway.app/probar
 

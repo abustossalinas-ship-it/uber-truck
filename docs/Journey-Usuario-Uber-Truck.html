@@ -28,7 +28,7 @@
   <div class="doc-title-wrap">
     <h1>Journey de usuario — Uber Truck</h1>
     <p class="meta"><strong>Producto:</strong> App tipo Uber para carga por camión (backhaul).<br />
-    <strong>Versión:</strong> 2.8 · 25 may 2026 · Software app <strong>0.0.98</strong> · Canal: <strong>app Cubik</strong> (web PWA + APK Android)</p>
+    <strong>Versión:</strong> 2.9 · 5 jun 2026 · Software app <strong>0.0.104</strong> · Canal: <strong>app Cubik</strong> (web PWA + APK Android)</p>
   </div>
 </div>
 
@@ -72,6 +72,7 @@
   <tr><td>8. Cierre operativo</td><td>Embarcador o transportista marca <strong>Finalizar viaje (entregado)</strong></td><td>Emparejar (confirmación) → estado <code>completed</code></td><td>«¿Ya cerró el flete?»</td><td>Viaje en Completados</td></tr>
   <tr><td>9. Calificación</td><td>Califica al <strong>embarcador</strong> (1–5 ★, chips, comentario si ★ baja)</td><td><strong>Mis viajes → Completados</strong> → «Calificar embarcador ★»</td><td>«¿Me afecta mi reputación?»</td><td>Nota guardada · badge Calificado</td></tr>
   <tr><td>10. Post-viaje</td><td>Ve nota del embarcador (si ya calificó) y reputación histórica del embarcador</td><td>Bloque «Calificaciones del viaje» en la tarjeta</td><td>«¿Confío otra vez?»</td><td>Promedio ★ visible · vuelve a publicar</td></tr>
+  <tr><td>10b. Pago piloto</td><td>Espera que embarcador pague; recibe notificación <strong>«Embarcador pagó el flete»</strong></td><td>Campana → <strong>Mis viajes → Completados</strong>: «Embarcador pagó» + «Cobro en gestión» + neto</td><td>«¿Ya me pagaron?»</td><td>Badge actualizado + notificación</td></tr>
   <tr><td>11. Multa (si canceló)</td><td>Inscribe banco si falta; declara transferencia + <strong>sube comprobante</strong></td><td><strong>Cuenta y multas</strong> → «Declarar pago realizado»</td><td>«¿Me desbloquean?»</td><td>Acreedor confirma en 24 h o moderador</td></tr>
 </table>
 
@@ -89,6 +90,7 @@
   <tr><td>8. Cierre operativo</td><td>Confirma entrega → <code>completed</code></td><td>Emparejar → <strong>Finalizar viaje</strong></td><td>«¿Cerré bien?»</td><td>Viaje en Completados</td></tr>
   <tr><td>9. Calificación</td><td>Califica al <strong>transportista</strong> (1–5 ★, chips por experiencia, comentario obligatorio en ★1–2)</td><td><strong>Mis viajes → Completados</strong> → «Calificar transportista ★»</td><td>«¿Quedó registrado?»</td><td>Nota pública en reputación del transportista</td></tr>
   <tr><td>10. Post-viaje</td><td>Ve nota del transportista y su reputación histórica en la misma tarjeta</td><td>Bloque calificaciones (sin ir a Emparejar)</td><td>«¿Repito con ellos?»</td><td>NPS ≥ 7 · repite carga</td></tr>
+  <tr><td>10b. Pago piloto</td><td>En viaje <code>completed</code>, pulsa <strong>Pagar con Cubik Saldo</strong> → confirma total (flete + 10%)</td><td>Drawer pago → badge <strong>Pagado</strong> −total; transportista notificado</td><td>«¿Cuánto debitan?»</td><td><code>pilot_payment_status=in_settlement</code></td></tr>
   <tr><td>11. Multa / cobro (si aplica)</td><td>Si es <strong>acreedor</strong>: revisa comprobante del deudor y confirma o rechaza pago externo (24 h). Si es deudor: declara pago + comprobante. <strong>No sube</strong> comprobante como acreedor.</td><td><strong>Cuenta y multas</strong> → «Pagos por confirmar» / modal revisión</td><td>«¿Ya me pagaron?»</td><td>Confirmación o escalado a moderador</td></tr>
 </table>
 
@@ -103,7 +105,7 @@
   <tr><td>Mis viajes</td><td>Pestaña <strong>Mis viajes</strong>: En curso · En negociación · Completados (listado vertical)</td></tr>
   <tr><td>Calificar al otro</td><td>Mutuo post-<code>completed</code>; chips por rol; una nota por viaje y por rol</td></tr>
   <tr><td>Reputación ★</td><td>Promedio histórico en Completados (tablero Emparejar: pendiente M3)</td></tr>
-  <tr><td>Pago en app</td><td><strong>Cubik Saldo</strong> (tipo Uber Cash): retención al <strong>En ruta</strong>; sin efectivo; tier ≥ $1M factura</td></tr>
+  <tr><td>Pago en app</td><td><strong>Cubik Saldo piloto</strong> (v0.0.104): pago post-completado simulado; prod: retención al <strong>En ruta</strong>; sin efectivo; tier ≥ $1M factura</td></tr>
   <tr><td>Tarifas / checkout</td><td>Pantalla «Terminar y confirmar» estilo Uber Eats — cada rol ve solo su % (10% o 5%)</td></tr>
   <tr><td>Cuenta y multas</td><td><strong>Billetera</strong> bancos + <strong>Cubik Saldo</strong> + ayuda «Cómo funciona el dinero»; multas (legacy transferencia hasta wallet)</td></tr>
   <tr><td>Llamar / chat</td><td>Sin teléfonos en chat; botón Llamar (Twilio proxy próx. semana)</td></tr>
@@ -150,11 +152,13 @@
 <p class="meta">Técnico: migraciones SQL 012–014 · <a href="SQL-SUPABASE.md">SQL-SUPABASE.md</a> · <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica § bitácora</a>.</p>
 
 <h2 id="cuenta-multas">9. Cuenta, Cubik Saldo y multas (tipo Uber)</h2>
-<p>Con sesión, la pestaña <strong>Cuenta</strong> muestra <strong>Cuenta y multas</strong>, <strong>Billetera</strong> (v0.0.94) y próximamente <strong>Cubik Saldo</strong>:</p>
+<p>Con sesión, la pestaña <strong>Cuenta</strong> muestra <strong>Cuenta y multas</strong>, <strong>Billetera</strong> (v0.0.94) y <strong>Cubik Saldo (piloto)</strong> (v0.0.100+):</p>
 <ul>
   <li><strong>Varias cuentas bancarias</strong> chilenas: agregar, editar, eliminar y marcar <strong>predeterminada</strong> (estilo Uber).</li>
-  <li><strong>Cubik Saldo</strong> (wallet): recargar por transferencia/tarjeta; pagos y devoluciones en app — <strong>sin efectivo</strong>.</li>
-  <li><strong>Publicar carga:</strong> saldo ≥ <strong>20%</strong> del presupuesto máximo (garantía; no es el cobro del flete).</li>
+  <li><strong>Cubik Saldo piloto:</strong> simulación de cargo/débito por viaje completado; secciones <strong>Por pagar</strong> / <strong>Pagados</strong>; label «Simulación piloto».</li>
+  <li><strong>Embarcador:</strong> botón Pagar en Mis viajes; <strong>transportista:</strong> notificación campana + badges en tarjeta.</li>
+  <li><strong>Producción (pendiente):</strong> wallet real, recarga transferencia/tarjeta, retención al <strong>En ruta</strong> — <strong>sin efectivo</strong>.</li>
+  <li><strong>Publicar carga (prod):</strong> saldo ≥ <strong>20%</strong> del presupuesto máximo (garantía; no es el cobro del flete).</li>
   <li><strong>Retención:</strong> al transportista <strong>Marcar en ruta</strong> se retiene flete + <strong>10%</strong> servicio del embarcador.</li>
   <li><strong>Comisiones:</strong> embarcador ve solo 10%; transportista ve solo 5%; pantalla <strong>Terminar y confirmar</strong> con desglose (referencia Uber Eats).</li>
   <li><strong>Tier $1M:</strong> fletes &lt; $1.000.000 → saldo Cubik; ≥ $1M → factura + saldo/transferencia registrada.</li>

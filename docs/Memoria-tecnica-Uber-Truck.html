@@ -39,7 +39,7 @@
     <h1>Memoria técnica del proyecto</h1>
     <p class="meta"><strong>Producto:</strong> Uber Truck — marketplace de capacidad logística ociosa (backhaul), Chile.<br />
     <strong>Documento:</strong> memoria técnica viva del repositorio y del despliegue Railway.<br />
-    <strong>Versión documento:</strong> 3.9 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.98 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 25 may 2026</p>
+    <strong>Versión documento:</strong> 4.0 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.104 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 5 jun 2026</p>
   </div>
 </div>
 
@@ -79,8 +79,9 @@
   <tr><td>Declaración de carga y confianza</td><td>Valor ref. CLP, guía, términos, incidentes</td><td class="g-done">Hecho (v011)</td></tr>
   <tr><td>Mapa / dirección</td><td>Google Maps origen–destino + distancia</td><td class="g-done">Hecho</td></tr>
   <tr><td>Mapa en vivo / seguimiento GPS</td><td>Ubicación transportista + mapa en viaje activo</td><td class="g-done">Hecho (v0.0.34+)</td></tr>
-  <tr><td>Pago en app</td><td><strong>Cubik Saldo</strong> + retención al «En ruta»; comisión 10% embarcador + 5% transportista (cada rol ve solo su %)</td><td class="g-doing">Diseño cerrado may 2026; implementación semana siguiente</td></tr>
-  <tr><td>Paridad Uber Eats (checkout)</td><td>Pantalla «Terminar y confirmar» con desglose de tarifas por rol</td><td class="g-doing">Diseño UX; ver § monetización</td></tr>
+  <tr><td>Pago en app (piloto)</td><td><strong>Cubik Saldo piloto</strong>: embarcador paga en Completados; transportista ve «Embarcador pagó» + cobro en gestión; notificación campana</td><td class="g-done">Hecho v0.0.100–0.0.104 (simulación)</td></tr>
+  <tr><td>Pago en app (prod)</td><td>Wallet real + retención al «En ruta»; comisión 10% + 5%</td><td class="g-doing">Diseño cerrado; wallet/escrow siguiente</td></tr>
+  <tr><td>Paridad Uber Eats (checkout)</td><td>Drawer «Pagar con Cubik Saldo» + desglose por rol en Mis viajes / Cuenta</td><td class="g-done">Piloto UX v0.0.102+; checkout en ruta pendiente</td></tr>
   <tr><td>Llamadas enmascaradas</td><td>Twilio Proxy — botón Llamar sin mostrar teléfonos</td><td class="g-doing">UI + API contact listos v0.0.98; proxy semana siguiente</td></tr>
   <tr><td>Anti-bypass teléfono</td><td>Bloqueo números en chat; contacto vía app</td><td class="g-done">Hecho v0.0.98</td></tr>
   <tr><td>Incidentes / navegación / perfil</td><td>Drawer incidente, Maps/Waze, shell Cuenta tipo Uber</td><td class="g-done">Hecho v0.0.97–0.0.98</td></tr>
@@ -290,7 +291,8 @@
   <tr><td>U6b</td><td>P1</td><td>KPIs marketplace M2 (semanal)</td><td>Match rate, tiempo match, NPS — ver anexo piloto</td><td>Jul–Ago 2026</td><td class="g-doing">Doc listo</td></tr>
   <tr><td>U6c</td><td>P1</td><td>Reputación v0</td><td>Historial cancelaciones + incidentes por cuenta</td><td>Post 5 viajes</td><td class="g-todo">Plan</td></tr>
   <tr><td>U6d</td><td>P1</td><td>Evidencia entrega</td><td>Foto + timestamp (antes GPS vivo)</td><td>Post-piloto corto</td><td class="g-todo">Plan</td></tr>
-  <tr><td>U7</td><td>P0</td><td>Cubik Saldo + comisiones 10/5 + escrow en ruta</td><td>Wallet, checkout por rol, sin cash; tier $1M</td><td>Semana siguiente</td><td class="g-doing"><strong>En cola</strong></td></tr>
+  <tr><td>U7a</td><td>P0</td><td>Cubik Saldo <strong>piloto</strong> 10/5</td><td>SQL 026, <code>POST …/pilot-pay</code>, badges, notif <code>pilot_payment</code></td><td>Jun 2026</td><td class="g-done">Hecho v0.0.100–0.0.104</td></tr>
+  <tr><td>U7</td><td>P0</td><td>Cubik Saldo <strong>prod</strong> + escrow en ruta</td><td>Wallet, ledger, retención en ruta; tier $1M</td><td>Siguiente</td><td class="g-doing"><strong>En cola</strong></td></tr>
   <tr><td>U7d</td><td>P0</td><td>Twilio Proxy llamadas</td><td><code>TWILIO_MATCH_PROXY_NUMBER</code></td><td>Semana siguiente</td><td class="g-doing">UI lista v0.0.98</td></tr>
   <tr><td>U7a</td><td>P1</td><td>Multas + comprobante + confirmación acreedor</td><td>SQL 022–025, <code>penalties-ui.js</code>, 7 d / 24 h</td><td>May 2026</td><td class="g-done">Hecho v0.0.57</td></tr>
   <tr><td>U7b</td><td>P1</td><td>Banco obligatorio para operar (prod)</td><td><code>bank-gate</code>, formulario cuenta</td><td>May 2026</td><td class="g-done">Hecho v0.0.56</td></tr>
@@ -431,8 +433,24 @@
 </table>
 <p><strong>Deploy:</strong> Railway <code>main</code> · versión app <strong>0.0.98</strong> · APK <code>cubik-android.apk</code>.</p>
 
+<h2>Bitácora de avance — junio 2026 (Cubik Saldo piloto v0.0.99–0.0.104)</h2>
+<table>
+  <tr><th>Área</th><th>Entregado</th><th>Notas</th></tr>
+  <tr><td>Cierre viaje</td><td>Drawer confirmar entrega; push <code>trip_completed</code></td><td>v0.0.99</td></tr>
+  <tr><td>Cubik Saldo piloto</td><td>Comisiones 10% embarcador + 5% transportista; sección en Cuenta; badges en Mis viajes</td><td><code>payment-simulation.js</code>, <code>penalties-ui.js</code> v0.0.100</td></tr>
+  <tr><td>Performance Mis viajes</td><td>Batch API matches + precarga al login</td><td>v0.0.101</td></tr>
+  <tr><td>Botón Pagar</td><td>Embarcador confirma pago simulado; SQL <code>pilot_payment_status</code></td><td>SQL 026 · <code>pilot-pay-ui.js</code> · v0.0.102</td></tr>
+  <tr><td>Notificaciones pago</td><td><code>pilot_payment</code> visible en viajes completados; título «Embarcador pagó el flete»; enlace Mis viajes</td><td>v0.0.103–0.0.104</td></tr>
+  <tr><td>UX transportista</td><td>Badges «Embarcador pagó» + «Cobro en gestión»; neto a recibir</td><td><code>trips-ui.js</code></td></tr>
+  <tr><td>Drawer pago web</td><td>Modal centrado abajo (360px) en desktop</td><td><code>pilot-pay-drawer</code> en <code>theme.css</code></td></tr>
+  <tr><td>Campana</td><td>Panel abre al instante; Cubik Saldo carga en segundo plano</td><td><code>comms-ui.js</code> v0.0.104</td></tr>
+</table>
+<p><strong>API:</strong> <code>POST /api/matches/:id/pilot-pay</code> (solo embarcador, viaje <code>completed</code>). <strong>SQL:</strong> <a href="RUN_026_pilot_payment.sql">RUN_026_pilot_payment.sql</a>.</p>
+<p><strong>Deploy:</strong> commits <code>96947cf</code> (v0.0.102) → <code>7f09d15</code> (v0.0.104) · Railway <code>main</code> · APK <code>cubik-android.apk</code>.</p>
+<p><strong>Limitación piloto:</strong> sin movimiento real de dinero; label «Simulación piloto»; <code>completed</code> ≠ pagado hasta que el embarcador pulsa Pagar.</p>
+
 <h2>Modelo de monetización, Cubik Saldo y checkout (diseño may 2026)</h2>
-<p><strong>Estado:</strong> reglas de negocio y UX cerradas; código wallet + escrow + cobro automático en <strong>próxima semana</strong>. Hoy el GMV no genera ingreso real en plataforma (solo estimación admin con <code>TAKE_RATE_PERCENT</code> legacy 13,5%).</p>
+<p><strong>Estado jun 2026:</strong> <strong>piloto operativo</strong> (v0.0.100–0.0.104) con comisiones 10/5 y flujo pago post-completado simulado. <strong>Pendiente producción:</strong> wallet real, ledger, retención al «En ruta», recarga pasarela. GMV piloto no genera ingreso real (solo simulación en UI).</p>
 
 <h3>Comisiones (take rate dual)</h3>
 <table>
@@ -471,18 +489,26 @@
   <tr><td>Cubik Plus Empresa (futuro)</td><td>Banner ahorro mensualidad vs % (tipo Uber One)</td><td>Plan carrier opcional post-M2</td></tr>
 </table>
 
-<h3>Implementación técnica prevista</h3>
+<h3>Implementación técnica — piloto (hecho v0.0.100–0.0.104)</h3>
+<ul>
+  <li>SQL 026: <code>matches.pilot_payment_status</code> (<code>in_settlement</code> | <code>released</code>), <code>pilot_payment_at</code>.</li>
+  <li><code>src/lib/payment-simulation.js</code> — comisiones 10/5, enrich en GET matches y cuenta.</li>
+  <li><code>POST /api/matches/:id/pilot-pay</code> — embarcador marca pago; notifica transportista (<code>pilot_payment</code>).</li>
+  <li>UI: <code>pilot-pay-ui.js</code>, <code>trips-ui.js</code>, <code>penalties-ui.js</code>, <code>comms-ui.js</code>.</li>
+</ul>
+
+<h3>Implementación técnica — producción (pendiente)</h3>
 <ul>
   <li>SQL: <code>wallet_accounts</code>, <code>wallet_ledger</code>, campos fee en <code>matches</code>.</li>
-  <li>API role-scoped: <code>shipper_checkout_summary</code> / <code>carrier_checkout_summary</code> sin filtrar fee del otro rol.</li>
-  <li>Gate publicar: <code>wallet-gate.js</code> · retención: hook en transición <code>accepted → in_progress</code>.</li>
+  <li>API role-scoped: checkout por rol sin filtrar fee del otro rol.</li>
+  <li>Gate publicar: <code>wallet-gate.js</code> · retención: hook <code>accepted → in_progress</code>.</li>
   <li>Variables: <code>SHIPPER_FEE_PERCENT=10</code>, <code>CARRIER_FEE_PERCENT=5</code>, <code>WALLET_PUBLISH_MIN_RATIO=0.20</code>, <code>CHECKOUT_SIMPLE_MAX_CLP=1000000</code>.</li>
   <li>Pasarela: Mercado Pago / recarga saldo; multas migran a cargo wallet o tarjeta tokenizada.</li>
 </ul>
 
-<h2>Próxima etapa (may–jun 2026)</h2>
+<h2>Próxima etapa (jun 2026)</h2>
 <ol>
-  <li><strong>P0 — Cubik Saldo + comisiones 10/5</strong>: wallet, retención en ruta, checkout por rol, sin cash.</li>
+  <li><strong>P0 — Wallet real + escrow en ruta</strong> (piloto 10/5 ya validado en simulación).</li>
   <li><strong>P0 — Twilio Proxy</strong>: llamadas enmascaradas (botón Llamar ya en v0.0.98).</li>
   <li><strong>P0 — Piloto M2</strong>: 20 viajes <code>completed</code> corredor RM ↔ Valparaíso/San Antonio.</li>
   <li><strong>P1 — Push FCM</strong>: validar <code>push-test</code> en celular físico (backend ya OK).</li>

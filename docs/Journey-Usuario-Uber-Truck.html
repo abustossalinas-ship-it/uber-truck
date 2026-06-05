@@ -28,7 +28,7 @@
   <div class="doc-title-wrap">
     <h1>Journey de usuario — Uber Truck</h1>
     <p class="meta"><strong>Producto:</strong> App tipo Uber para carga por camión (backhaul).<br />
-    <strong>Versión:</strong> 2.7 · 3 jun 2026 · Software app <strong>0.0.94</strong> · Canal: <strong>app Cubik</strong> (web PWA + APK Android)</p>
+    <strong>Versión:</strong> 2.8 · 25 may 2026 · Software app <strong>0.0.98</strong> · Canal: <strong>app Cubik</strong> (web PWA + APK Android)</p>
   </div>
 </div>
 
@@ -64,10 +64,11 @@
   <tr><td>2. Registro</td><td>Email + contraseña, rol transportista, empresa (<strong>Gmail/Apple: pendiente</strong>)</td><td>Registro / JWT</td><td>Desconfianza si es largo</td><td>Cuenta activa (KYC si piloto curado)</td></tr>
   <tr><td>3. Publicar capacidad</td><td>Origen, destino, pallets/m³, tipo camión, ventana (paridad con publicar carga)</td><td>Formulario transportista</td><td>«Que sea rápido»</td><td>Oferta publicada (&lt; 3 min)</td></tr>
   <tr><td>4. Propuesta + precio</td><td>Elige carga, envía <strong>oferta en CLP</strong> (puede estar fuera del rango del embarcador)</td><td>Tablero paso 3</td><td>«¿Me pagan bien el desvío?»</td><td>Oferta visible al embarcador</td></tr>
-  <tr><td>5. Match</td><td>Embarcador <strong>acepta precio</strong> → match confirmado</td><td>Emparejamientos</td><td>«¿Cierra el trato?»</td><td>Aceptado en &lt; 30 min</td></tr>
-  <tr><td>6. Viaje activo</td><td>Estados: aceptado → en ejecución; ve valor ref. mercadería declarado por embarcador</td><td><strong>Mis viajes → En curso</strong> o Emparejar</td><td>Espera en planta</td><td>Estado actualizado</td></tr>
-  <tr><td>6b. Incidente (si aplica)</td><td>Reportar robo, daño, faltante, atraso</td><td>«Reportar incidente»</td><td>«¿Quién responde?»</td><td>Registro en plataforma</td></tr>
-  <tr><td>7. Chat</td><td>Coordina retiro/entrega con embarcador</td><td>Chat in-app</td><td>«¿Me responden?»</td><td>Mensaje &lt; 15 min</td></tr>
+  <tr><td>5. Match</td><td>Embarcador <strong>acepta precio</strong> → match confirmado; pantalla <strong>Terminar y confirmar</strong> (ve solo comisión 5%)</td><td>Emparejamientos</td><td>«¿Cuánto recibo neto?»</td><td>Aceptado en &lt; 30 min</td></tr>
+  <tr><td>5b. En ruta</td><td><strong>Marcar en ruta</strong> — verifica saldo embarcador; retiene flete (próx. semana Cubik Saldo)</td><td>Emparejar → En ruta</td><td>«¿Ya pagaron?»</td><td>GPS + mapa activo</td></tr>
+  <tr><td>6. Viaje activo</td><td>Estados: aceptado → en ejecución; chat libre en ruta; contraparte visible; Navegar Maps/Waze</td><td><strong>Mis viajes → En curso</strong> o Emparejar</td><td>Espera en planta</td><td>Estado actualizado</td></tr>
+  <tr><td>6b. Incidente (si aplica)</td><td>Reportar robo, daño, faltante, atraso (drawer tipo Uber Eats)</td><td>«Reportar incidente»</td><td>«¿Quién responde?»</td><td>Registro en plataforma</td></tr>
+  <tr><td>7. Chat</td><td>Coordina retiro/entrega; presets en espera; texto libre en ruta; sin teléfonos (botón Llamar)</td><td>Chat in-app</td><td>«¿Me responden?»</td><td>Mensaje &lt; 15 min</td></tr>
   <tr><td>8. Cierre operativo</td><td>Embarcador o transportista marca <strong>Finalizar viaje (entregado)</strong></td><td>Emparejar (confirmación) → estado <code>completed</code></td><td>«¿Ya cerró el flete?»</td><td>Viaje en Completados</td></tr>
   <tr><td>9. Calificación</td><td>Califica al <strong>embarcador</strong> (1–5 ★, chips, comentario si ★ baja)</td><td><strong>Mis viajes → Completados</strong> → «Calificar embarcador ★»</td><td>«¿Me afecta mi reputación?»</td><td>Nota guardada · badge Calificado</td></tr>
   <tr><td>10. Post-viaje</td><td>Ve nota del embarcador (si ya calificó) y reputación histórica del embarcador</td><td>Bloque «Calificaciones del viaje» en la tarjeta</td><td>«¿Confío otra vez?»</td><td>Promedio ★ visible · vuelve a publicar</td></tr>
@@ -79,9 +80,9 @@
   <tr><th>Etapa</th><th>Acción</th><th>En la app</th><th>Emoción</th><th>Éxito</th></tr>
   <tr><td>1. Necesidad</td><td>Carga urgente (ej. 2 pallets mañana)</td><td>Link <a href="https://uber-truck-production.up.railway.app/probar">/probar</a></td><td>«No hay camión»</td><td>Entra a Cubik</td></tr>
   <tr><td>2. Registro</td><td>Email + contraseña, rol embarcador (<strong>Gmail/Apple: pendiente</strong>)</td><td>Registro / JWT</td><td>«¿Es confiable?»</td><td>Cuenta activa</td></tr>
-  <tr><td>3. Publicar carga</td><td>Maps (móvil OK), pallets ↔ m³ sync, preset cubicación, tipo camión, <strong>declaración mercadería</strong>, guía/folio, <strong>términos</strong>, rango flete</td><td>Formulario embarcador</td><td>«¿Me cubren si pasa algo?»</td><td>Carga publicada con términos aceptados</td></tr>
+  <tr><td>3. Publicar carga</td><td>Maps (móvil OK), cubicación, términos, rango flete; requiere <strong>20% presupuesto máx.</strong> en Cubik Saldo (próx. semana)</td><td>Formulario embarcador</td><td>«¿Me cubren si pasa algo?»</td><td>Carga publicada con términos aceptados</td></tr>
   <tr><td>4. Propuesta</td><td>Ve ofertas; transportista envía precio</td><td>Tablero + sugerencias</td><td>«¿Es justo?»</td><td>Compara ofertas</td></tr>
-  <tr><td>5. Aceptar precio</td><td><strong>Aceptar precio y confirmar match</strong> (o ampliar rango si la oferta venía fuera)</td><td>Emparejamientos</td><td>«¿Cierro?»</td><td>Match aceptado</td></tr>
+  <tr><td>5. Aceptar precio</td><td><strong>Terminar y confirmar</strong> — resumen flete + Servicio Cubik <strong>10%</strong> (no ve el 5% del transportista)</td><td>Emparejamientos</td><td>«¿Cuánto pago al salir?»</td><td>Match aceptado</td></tr>
   <tr><td>6. Viaje activo</td><td>Sigue estados, chat y datos de carga declarados</td><td><strong>Mis viajes → En curso</strong> + notificaciones</td><td>Ansiedad SLA</td><td>Visibilidad sin llamar</td></tr>
   <tr><td>6b. Incidente</td><td>Robo, daño, faltante → reporte en app</td><td>«Reportar incidente»</td><td>«¿La plataforma paga?»</td><td>Antecedente registrado (resolución entre partes)</td></tr>
   <tr><td>7. Cancelar (si aplica)</td><td>Motivo, acuerdo mutuo o multa sugerida</td><td>Modal cancelación</td><td>«¿Cuánto me cobran?»</td><td>Regla clara</td></tr>
@@ -102,8 +103,11 @@
   <tr><td>Mis viajes</td><td>Pestaña <strong>Mis viajes</strong>: En curso · En negociación · Completados (listado vertical)</td></tr>
   <tr><td>Calificar al otro</td><td>Mutuo post-<code>completed</code>; chips por rol; una nota por viaje y por rol</td></tr>
   <tr><td>Reputación ★</td><td>Promedio histórico en Completados (tablero Emparejar: pendiente M3)</td></tr>
-  <tr><td>Pago en app</td><td>Pasarela + tarjeta validada (pendiente producción); hoy transferencia + comprobante</td></tr>
-  <tr><td>Cuenta y multas</td><td><strong>Billetera</strong>: varias cuentas bancarias (predeterminada, editar, eliminar) + tarjetas listadas; multas y comprobantes</td></tr>
+  <tr><td>Pago en app</td><td><strong>Cubik Saldo</strong> (tipo Uber Cash): retención al <strong>En ruta</strong>; sin efectivo; tier ≥ $1M factura</td></tr>
+  <tr><td>Tarifas / checkout</td><td>Pantalla «Terminar y confirmar» estilo Uber Eats — cada rol ve solo su % (10% o 5%)</td></tr>
+  <tr><td>Cuenta y multas</td><td><strong>Billetera</strong> bancos + <strong>Cubik Saldo</strong> + ayuda «Cómo funciona el dinero»; multas (legacy transferencia hasta wallet)</td></tr>
+  <tr><td>Llamar / chat</td><td>Sin teléfonos en chat; botón Llamar (Twilio proxy próx. semana)</td></tr>
+  <tr><td>Cubik Plus Empresa</td><td>Suscripción mensual → descuento % fee (futuro, tipo Uber One)</td></tr>
   <tr><td>Entrar con Gmail / Apple</td><td>OAuth (pendiente); hoy email + contraseña</td></tr>
   <tr><td>Tarifa / oferta</td><td>Rango embarcador + oferta transportista + aceptación</td></tr>
   <tr><td>Seguro / garantía de viaje</td><td>Valor ref. mercadería + términos (seguro integrado: fase 3)</td></tr>
@@ -145,14 +149,17 @@
 </ol>
 <p class="meta">Técnico: migraciones SQL 012–014 · <a href="SQL-SUPABASE.md">SQL-SUPABASE.md</a> · <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica § bitácora</a>.</p>
 
-<h2 id="cuenta-multas">9. Cuenta, billetera y multas (tipo Uber)</h2>
-<p>Con sesión, la pestaña <strong>Cuenta</strong> muestra <strong>Cuenta y multas</strong> y la sección <strong>Billetera</strong> (v0.0.94):</p>
+<h2 id="cuenta-multas">9. Cuenta, Cubik Saldo y multas (tipo Uber)</h2>
+<p>Con sesión, la pestaña <strong>Cuenta</strong> muestra <strong>Cuenta y multas</strong>, <strong>Billetera</strong> (v0.0.94) y próximamente <strong>Cubik Saldo</strong>:</p>
 <ul>
   <li><strong>Varias cuentas bancarias</strong> chilenas: agregar, editar, eliminar y marcar <strong>predeterminada</strong> (estilo Uber).</li>
-  <li>Validación de <strong>RUT</strong> y selector de <strong>banco</strong> desde lista oficial (v0.0.93).</li>
-  <li><strong>Tarjetas</strong> listadas (cobro integrado pendiente pasarela).</li>
-  <li>Antes de publicar u ofertar en <strong>producción</strong>, debe existir al menos una cuenta bancaria válida.</li>
-  <li>Web y APK comparten la misma billetera server-side; al refrescar Cuenta se sincroniza.</li>
+  <li><strong>Cubik Saldo</strong> (wallet): recargar por transferencia/tarjeta; pagos y devoluciones en app — <strong>sin efectivo</strong>.</li>
+  <li><strong>Publicar carga:</strong> saldo ≥ <strong>20%</strong> del presupuesto máximo (garantía; no es el cobro del flete).</li>
+  <li><strong>Retención:</strong> al transportista <strong>Marcar en ruta</strong> se retiene flete + <strong>10%</strong> servicio del embarcador.</li>
+  <li><strong>Comisiones:</strong> embarcador ve solo 10%; transportista ve solo 5%; pantalla <strong>Terminar y confirmar</strong> con desglose (referencia Uber Eats).</li>
+  <li><strong>Tier $1M:</strong> fletes &lt; $1.000.000 → saldo Cubik; ≥ $1M → factura + saldo/transferencia registrada.</li>
+  <li>Pantalla <strong>¿Cómo funciona el dinero?</strong> — 4 pasos + ejemplo con números (copy distinto por rol).</li>
+  <li>Web y APK comparten la misma billetera y saldo server-side.</li>
 </ul>
 <h3>Flujo de multa tras cancelación</h3>
 <ol>
@@ -163,9 +170,19 @@
   <li>Si no hay respuesta en 24 h o hay disputa, un <strong>moderador</strong> (admin) revisa el caso en soporte; no hay desbloqueo automático.</li>
 </ol>
 <p class="meta">Detalle técnico y API: <a href="PENALTY-AND-SUPPORT.md">PENALTY-AND-SUPPORT.md</a> · <a href="Multas-Cuenta-Uber-Truck.html">Multas y cuenta (HTML)</a> · SQL 030 · Memoria: <a href="Memoria-tecnica-Uber-Truck.html">§ bitácora 3 jun</a>.</p>
-<p><strong>Futuro producción:</strong> validación de tarjeta y cobro integrado dentro de la app (como Uber); hoy no está implementado.</p>
+<p><strong>Implementación:</strong> Cubik Saldo + cobro automático 10/5 en <strong>próxima semana</strong>; multas legacy siguen transferencia + comprobante hasta migración wallet.</p>
 
-<h2 id="auth-email">9b. Acceso y correo (pendiente)</h2>
+<h2 id="checkout-tarifas">9b. Checkout y tarifas (diseño may 2026)</h2>
+<p>Referencia visual: flujo Uber Eats «Terminar y pagar» — resumen explícito antes de confirmar.</p>
+<table>
+  <tr><th>Momento</th><th>Embarcador ve</th><th>Transportista ve</th></tr>
+  <tr><td>Aceptar match / antes de en ruta</td><td>Flete acordado + Servicio Cubik (10%) + total al salir en ruta</td><td>Flete acordado − Comisión Cubik (5%) = neto a recibir</td></tr>
+  <tr><td>Flete &lt; $1M</td><td>Flujo corto (mapa + confirmar) + resumen tarifas</td><td>Resumen tarifas al marcar en ruta</td></tr>
+  <tr><td>Flete ≥ $1M</td><td>Resumen + aviso factura / formalidad B2B</td><td>Igual; sin opciones «prioritarias» que confundan precio</td></tr>
+</table>
+<p><strong>Cubik Plus Empresa (futuro):</strong> mensualidad fija vs descuento en fee embarcador (tipo Uber One); banner de ahorro en checkout del embarcador.</p>
+
+<h2 id="auth-email">9c. Acceso y correo (pendiente)</h2>
 <p>Hoy el ingreso es con <strong>email y contraseña</strong>. Para probar dos roles se usan dos correos o alias Gmail (<code>correo+embarcador@gmail.com</code>).</p>
 <p><strong>Pendiente producción (bloque E):</strong></p>
 <ul>
@@ -175,7 +192,7 @@
 </ul>
 <p class="meta">Detalle: <a href="AUTH-AND-EMAIL-ROADMAP.md">AUTH-AND-EMAIL-ROADMAP.md</a> · <a href="Probar-Uber-Truck.html">Probar la app</a>.</p>
 
-<h2 id="cubicacion">9c. Cubicación al publicar carga (jun 2026)</h2>
+<h2 id="cubicacion">9d. Cubicación al publicar carga (jun 2026)</h2>
 <ol>
   <li>El embarcador indica <strong>pallets</strong> y/o <strong>volumen (m³)</strong>; la app sincroniza ambos (~1,2 m³ por pallet).</li>
   <li>Elige un <strong>preset de cubicación</strong> (ej. 1 pallet, 2 pallets…); si excede el preset, pasa a <strong>Personalizado</strong>.</li>
@@ -184,7 +201,7 @@
 </ol>
 <p class="meta">Técnico: <code>load-capacity-ui.js</code> · Memoria: <a href="Memoria-tecnica-Uber-Truck.html">bitácora 3 jun</a>.</p>
 
-<h2 id="push-fcm">9d. Notificaciones push (parcial)</h2>
+<h2 id="push-fcm">9e. Notificaciones push (parcial)</h2>
 <p>Backend FCM configurado en Railway; la app Android registra token en <code>device_tokens</code>. Validación de recepción con <code>push-test</code> pendiente en <strong>dispositivo físico</strong> (emulador poco fiable).</p>
 <p class="meta">Guía: <a href="CUBIK-PUSH-FCM.md">CUBIK-PUSH-FCM.md</a>.</p>
 
@@ -199,7 +216,9 @@
   <li><strong>«¿La app paga?»:</strong> copy claro: intermediación; valor ref. para seguro entre partes.</li>
   <li><strong>Confianza:</strong> KYC manual en piloto; <strong>reputación ★</strong> ya visible tras cada viaje completado.</li>
   <li><strong>Cancelaciones:</strong> política en app + acuerdo mutuo + multa con plazo y confirmación de pago.</li>
-  <li><strong>«¿La app cobra sola?»:</strong> hoy no; transferencia manual + comprobante; pasarela en roadmap.</li>
+  <li><strong>«¿La app cobra sola?»:</strong> próxima semana con Cubik Saldo; retención al en ruta; hoy multas siguen transferencia manual.</li>
+  <li><strong>«¿Por qué 20% al publicar?»:</strong> garantía de seriedad; el flete se retiene solo al salir en ruta.</li>
+  <li><strong>«¿Veo la comisión del otro?»:</strong> no; cada rol ve solo su % en checkout.</li>
   <li><strong>Espera en planta / comunicación:</strong> chips de calificación (ej. «Esperas largas», «Buena comunicación»).</li>
   <li><strong>«Califiqué pero el otro no puede»:</strong> usar cuenta distinta por rol; no reutilizar la misma sesión de embarcador para calificar como transportista sin cerrar sesión.</li>
 </ul>
@@ -218,7 +237,7 @@
   <tr><td>Tiempo mediano a match</td><td>&lt; 4 h</td></tr>
   <tr><td>Viajes completados (corredor piloto)</td><td>20</td></tr>
   <tr><td>Cancelación post-asignación</td><td>&lt; 10%</td></tr>
-  <tr><td>Take rate registrado</td><td>12–15% sobre precio acordado</td></tr>
+  <tr><td>Take rate registrado</td><td>15% efectivo (10% embarcador + 5% transportista)</td></tr>
   <tr><td>Tiempo respuesta transportista</td><td>&lt; 2 h (horario laboral)</td></tr>
   <tr><td>NPS embarcador / transportista</td><td>≥ 7</td></tr>
   <tr><td>Repetición embarcador 60 días</td><td>≥ 30%</td></tr>
@@ -231,6 +250,6 @@
 
 <p class="meta">Modelo de negocio: <a href="Modelo-Negocio-Uber-Truck.html">Modelo-Negocio-Uber-Truck.html</a> · Gantt y backlog: <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica v3.6</a> · Multas: <a href="PENALTY-AND-SUPPORT.md">PENALTY-AND-SUPPORT.md</a> · Auth/correo: <a href="AUTH-AND-EMAIL-ROADMAP.md">AUTH-AND-EMAIL-ROADMAP.md</a> · Probar: <a href="Probar-Uber-Truck.html">Probar-Uber-Truck.html</a></p>
 
-<p class="meta"><em>Fin del documento — v2.7 (3 jun 2026): billetera multi-cuenta, RUT/bancos, cubicación pallets↔m³, FCM backend OK; app Cubik v0.0.94.</em></p>
+<p class="meta"><em>Fin del documento — v2.8 (25 may 2026): v0.0.98 paridad Uber; diseño Cubik Saldo 10%+5%, retención en ruta, tier $1M, checkout tipo Uber Eats; implementación pagos próxima semana.</em></p>
 </body>
 </html>

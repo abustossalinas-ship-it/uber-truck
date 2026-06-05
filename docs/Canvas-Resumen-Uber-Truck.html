@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Resumen Canvas — Uber Truck (jun 2026)</title>
+  <title>Resumen Canvas — Cubik (may 2026)</title>
   <style>
     body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.35; max-width: 900px; margin: 2cm auto; color: #111; }
     h1 { font-size: 18pt; border-bottom: 1px solid #333; }
@@ -16,57 +16,65 @@
 </head>
 <body>
 
-<p class="meta"><strong>Versión:</strong> 1.1 · 3 jun 2026 · Software <strong>0.0.94</strong> · Canvas: <code>canvases/estado-avance.canvas.tsx</code></p>
+<p class="meta"><strong>Versión:</strong> 1.2 · 25 may 2026 · Software <strong>0.0.98</strong> · Canvas: <code>canvases/estado-avance.canvas.tsx</code></p>
 
-<h1>Resumen Canvas — Uber Truck</h1>
+<h1>Resumen Canvas — Cubik</h1>
 <p>Documento para Word (<code>npm run export:all-docs</code>). Equivalente al canvas de estado de avance en Cursor.</p>
 
-<h2>1. Avance global (jun 2026)</h2>
+<h2>1. Avance global (may 2026)</h2>
 <table>
   <tr><th>Área</th><th>%</th><th>Nota</th></tr>
-  <tr><td>MVP digital núcleo (fase 2)</td><td>~88%</td><td>Cubik app + billetera + cubicación; adelantado vs Gantt oct 2026</td></tr>
-  <tr><td>Multas y cobros (2.10)</td><td>~35%</td><td>UI + API + billetera multi-cuenta; sin pasarela</td></tr>
+  <tr><td>MVP digital núcleo (fase 2)</td><td>~92%</td><td>v0.0.98 paridad Uber: incidentes, chat ruta, Waze, perfil, anti-teléfono</td></tr>
+  <tr><td>Multas y cobros (2.10)</td><td>~40%</td><td>Billetera multi-cuenta; multas legacy; sin wallet aún</td></tr>
+  <tr><td>Cubik Saldo + fees 10/5 (2.11)</td><td>~15%</td><td>Diseño cerrado; implementación próxima semana</td></tr>
   <tr><td>Push móvil (FCM)</td><td>~70%</td><td>Backend OK; validación push-test en teléfono pendiente</td></tr>
-  <tr><td>Proyecto hasta M5</td><td>~42%</td><td>Piloto M2 (20 viajes) y 100 viajes pendientes</td></tr>
+  <tr><td>Proyecto hasta M5</td><td>~44%</td><td>Piloto M2 (20 viajes) siguiente foco operativo</td></tr>
 </table>
 
-<h2>2. Entregado reciente (v0.0.90–0.0.94)</h2>
+<h2>2. Entregado reciente (v0.0.97–0.0.98)</h2>
 <ul>
-  <li>Oferta transportista con paridad cubicación (pallets, m³, tipo camión)</li>
-  <li>Publicar carga: sync pallets ↔ m³, preset → Personalizado, Maps móvil OK</li>
-  <li>Validador RUT + selector bancos Chile</li>
-  <li>Billetera multi-cuenta (agregar, editar, eliminar, predeterminada) web ↔ APK</li>
-  <li>FCM en Railway + registro <code>device_tokens</code></li>
+  <li>Chat libre en ruta; presets carrusel; campana con abrir chat</li>
+  <li>Incidentes drawer estilo Uber Eats + notificaciones backend</li>
+  <li>Navegar: selector Google Maps / Waze</li>
+  <li>Shell Cuenta + botonera Inicio / Opciones / Actividad / Cuenta</li>
+  <li>Contraparte visible (avatar, empresa); anti-bypass teléfono; botón Llamar</li>
+  <li>Mapa banner estable; CTA oferta naranja; deploy 0.0.98 + APK</li>
 </ul>
 
-<h2>3. Flujo producto (MVP digital)</h2>
+<h2>3. Modelo pagos (diseño cerrado — próxima semana)</h2>
+<table>
+  <tr><th>Regla</th><th>Valor</th></tr>
+  <tr><td>Fee embarcador (solo él ve)</td><td><strong>10%</strong> sobre flete acordado</td></tr>
+  <tr><td>Comisión transportista (solo él ve)</td><td><strong>5%</strong> sobre flete acordado</td></tr>
+  <tr><td>Take rate plataforma</td><td><strong>15%</strong> efectivo</td></tr>
+  <tr><td>Publicar carga</td><td>Saldo ≥ <strong>20%</strong> del presupuesto máximo</td></tr>
+  <tr><td>Retención escrow</td><td>Al <strong>Marcar en ruta</strong> (flete + 10%)</td></tr>
+  <tr><td>Sin efectivo</td><td>Cubik Saldo; devoluciones a wallet</td></tr>
+  <tr><td>Tier formalidad</td><td>≥ <strong>$1.000.000</strong> → factura + saldo</td></tr>
+  <tr><td>Checkout UX</td><td>«Terminar y confirmar» tipo Uber Eats; flujo corto si &lt; $1M</td></tr>
+  <tr><td>Cubik Plus Empresa</td><td>Futuro: mensualidad vs descuento % (tipo Uber One)</td></tr>
+</table>
+
+<h2>4. Flujo producto (MVP digital)</h2>
 <ol>
-  <li>Registro / login (JWT; sesión multi-dispositivo OK)</li>
-  <li>Transportista publica capacidad · Embarcador publica carga (cubicación)</li>
-  <li>Sugerencias de match + aceptación</li>
-  <li>Estados de viaje + chat in-app + GPS</li>
-  <li>Cancelación: acuerdo mutuo o motivo con multa (ledger)</li>
-  <li>Notificaciones in-app; push FCM (validación pendiente)</li>
-  <li>Cuenta: billetera multi-banco + multas + comprobantes</li>
+  <li>Registro / login (JWT)</li>
+  <li>Publicar carga (20% saldo) · Ofertar ruta</li>
+  <li>Match + checkout tarifas por rol</li>
+  <li>En ruta → retención · GPS · chat · incidentes</li>
+  <li>Completar → liberar pago neto transportista</li>
+  <li>Multas / Cubik Saldo / Twilio (semana siguiente)</li>
 </ol>
 
-<h2>4. Hitos vs plan</h2>
-<table>
-  <tr><th>Hito</th><th>Plan</th><th>Real</th></tr>
-  <tr><td>M3 MVP en producción</td><td>25-oct-2026</td><td><strong>Hecho (adelantado)</strong></td></tr>
-  <tr><td>M2 20 viajes en la app</td><td>31-ago-2026</td><td><strong>Pendiente — siguiente foco</strong></td></tr>
-  <tr><td>M4 100 viajes digitales</td><td>31-ene-2027</td><td>Pendiente</td></tr>
-</table>
-
-<h2>5. Prioridades P0 / P1</h2>
+<h2>5. Prioridades inmediatas</h2>
 <ul>
-  <li><strong>P0:</strong> Piloto M2 — 20 viajes <code>completed</code> corredor RM ↔ Valparaíso/San Antonio</li>
-  <li><strong>P1:</strong> Validar push FCM en dispositivo físico (<code>push-test</code>)</li>
-  <li><strong>P1:</strong> Play Console prueba cerrada (opcional; USD 25)</li>
-  <li><strong>P2:</strong> Pasarela de pago + OAuth Gmail/Apple (post-piloto)</li>
+  <li><strong>P0:</strong> Cubik Saldo + comisiones 10/5 + retención en ruta</li>
+  <li><strong>P0:</strong> Twilio Proxy (llamadas enmascaradas)</li>
+  <li><strong>P0:</strong> Piloto M2 — 20 viajes <code>completed</code></li>
+  <li><strong>P1:</strong> Push FCM en dispositivo físico</li>
+  <li><strong>P2:</strong> Cubik Plus Empresa (suscripción)</li>
 </ul>
 
-<p class="meta">Detalle completo: <a href="Memoria-tecnica-Uber-Truck.html">Memoria-tecnica-Uber-Truck.html</a> · Estrategia: <a href="PROXIMOS-PASOS-ESTRATEGIA.md">PROXIMOS-PASOS-ESTRATEGIA.md</a></p>
+<p class="meta">Detalle: <a href="Memoria-tecnica-Uber-Truck.html">Memoria v3.9</a> · <a href="Journey-Usuario-Uber-Truck.html">Journey v2.8</a> · <a href="PROXIMOS-PASOS-ESTRATEGIA.md">Estrategia</a></p>
 
 </body>
 </html>

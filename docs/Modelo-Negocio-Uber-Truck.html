@@ -28,7 +28,7 @@
   <div class="doc-title-wrap">
     <h1>Modelo de negocio — Uber Truck</h1>
     <p class="meta"><strong>Producto:</strong> Marketplace de capacidad logística ociosa (backhaul), Chile.<br />
-    <strong>Versión:</strong> 2.1 · mayo 2026 · Complementa <a href="Memoria-tecnica-Uber-Truck.html">memoria técnica</a></p>
+    <strong>Versión:</strong> 2.2 · 25 may 2026 · Complementa <a href="Memoria-tecnica-Uber-Truck.html">memoria técnica v3.9</a></p>
   </div>
 </div>
 
@@ -54,10 +54,18 @@
 </table>
 
 <h2>4. Monetización</h2>
-<h3>Fase A — Take rate (MVP)</h3>
-<p><strong>12–15%</strong> sobre el flete acordado en la app. Ingreso incremental para el transportista; la comisión se justifica por match, estados, chat y reglas de cancelación.</p>
-<h3>Fase B — Híbrido SaaS + transaccional</h3>
-<p>Suscripción para embarcadores frecuentes: historial, prioridad de match, reportes.</p>
+<h3>Fase A — Take rate dual (MVP — diseño cerrado may 2026)</h3>
+<table>
+  <tr><th>Rol</th><th>Comisión</th><th>Visibilidad</th></tr>
+  <tr><td>Embarcador</td><td><strong>10%</strong> «Servicio Cubik» sobre <code>agreed_price_clp</code></td><td>Solo ve su 10%; no ve el 5% del transportista</td></tr>
+  <tr><td>Transportista</td><td><strong>5%</strong> comisión sobre <code>agreed_price_clp</code></td><td>Solo ve su 5%; no ve el 10% del embarcador</td></tr>
+  <tr><td>Plataforma</td><td><strong>15%</strong> efectivo del GMV flete</td><td>Panel admin</td></tr>
+</table>
+<p><strong>Ejemplo</strong> flete $1.200.000: Cubik ingresa $180.000; embarcador paga $1.320.000 al salir en ruta; transportista recibe $1.140.000 al completar.</p>
+<p><strong>Cobro:</strong> <strong>Cubik Saldo</strong> (wallet tipo Uber Cash), sin efectivo. Publicar requiere 20% del presupuesto máximo en saldo; retención al <strong>Marcar en ruta</strong>; liberación al completar. Tier ≥ <strong>$1.000.000</strong>: factura + saldo/transferencia registrada.</p>
+<p>Implementación código: próxima semana. Hoy GMV = $0 ingreso real (solo estimación admin).</p>
+<h3>Fase B — Cubik Plus Empresa (tipo Uber One)</h3>
+<p>Suscripción mensual para embarcadores de alto volumen → descuento en fee embarcador (ej. 10% → 7%). Banner de ahorro en checkout. Plan transportista opcional post-M2.</p>
 <h3>Fase C — Datos y add-on B2B</h3>
 <p>Red de capacidad predictiva; módulo integrable para socios (API/widgets) con métricas agregadas anonimizadas.</p>
 

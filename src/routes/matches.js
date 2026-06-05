@@ -50,6 +50,7 @@ const { listTripEvents } = require('../lib/trip-events');
 const { buildMatchTracking } = require('../lib/match-tracking');
 const { enrichMatchesCounterparty, buildMatchContact } = require('../lib/match-contact');
 const { enrichMatchesPaymentPilot } = require('../lib/payment-simulation');
+const { processPilotPay } = require('../lib/pilot-payment');
 const maps = require('../services/google-maps');
 const { computeDestinationEtaFromRoute } = require('../lib/load-time-estimate');
 
@@ -702,6 +703,37 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al actualizar match' });
+  }
+});
+
+router.post('/:id/pilot-pay', requireAuthIfDb, async (req, res) => {
+  try {
+    const { breakdownForMatch: bdFn, enrichMatchPaymentPilot } = require('../lib/payment-simulation');
+    const raw = await processPilotPay(repo, req.params.id, req.user);
+    const updated = enrichMatchPaymentPilot(raw, req.user);
+    const shipperBd = bdFn(updated, 'shipper');
+    const carrierBd = bdFn(updated, 'carrier');
+    const parties = await getMatchParties(repo, updated);
+    try {
+      await comms.addNotification({
+        match_id: updated.id,
+        for_role: 'carrier',
+        type: 'pilot_payment',
+        title: 'Pago en gestión',
+        body: `${parties?.shipper_name || 'Embarcador'} pagó el flete (simulación Cubik Saldo). Neto $${Number(carrierBd?.net_clp || 0).toLocaleString('es-CL')} en gestión.`,
+        amount_clp: shipperBd?.total_clp || null,
+      });
+    } catch (notifyErr) {
+      console.error('pilot-pay notification', notifyErr);
+    }
+    res.json({
+      ok: true,
+      data: updated,
+      message: 'Pago simulado registrado. El transportista verá el monto en gestión.',
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(e.status || 500).json({ ok: false, error: e.message || 'Error al procesar pago piloto' });
   }
 });
 

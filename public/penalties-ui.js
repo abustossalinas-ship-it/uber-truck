@@ -127,9 +127,12 @@ const Penalties = {
 
   renderCubikSaldoPilot(summary) {
     const pilot = summary?.cubik_saldo_pilot;
-    if (!pilot?.enabled || !pilot.totals?.trip_count) return '';
+    const pending = pilot?.pending;
+    const hasPaid = pilot?.totals?.trip_count > 0;
+    const hasPending = pending?.trip_count > 0;
+    if (!pilot?.enabled || (!hasPaid && !hasPending)) return '';
     const role = pilot.role;
-    const t = pilot.totals;
+    const t = pilot.totals || { trip_count: 0, agreed_clp: 0, fees_clp: 0, net_clp: 0 };
     const feePct = Math.round((pilot.fee_rate || 0) * 100);
     const balance = pilot.wallet_balance_clp || 0;
     const balanceClass =
@@ -137,58 +140,78 @@ const Penalties = {
     const feeShare = t.net_clp > 0 ? Math.round((t.fees_clp / t.net_clp) * 100) : 0;
     const freightShare = role === 'shipper' && t.net_clp > 0 ? 100 - feeShare : 0;
 
-    const tripRows = (pilot.trips || [])
-      .slice(0, 5)
-      .map((trip) => {
-        const when = trip.completed_at
-          ? new Date(trip.completed_at).toLocaleDateString('es-CL', {
-              day: 'numeric',
-              month: 'short',
-            })
-          : '';
-        if (role === 'carrier') {
-          return `<li class="cubik-trip-row">
-            <div class="cubik-trip-main">
-              <strong>${trip.pair}</strong>
-              <span class="pill pill-warn cubik-trip-pill">${trip.status_label}</span>
-            </div>
-            <p class="cubik-trip-amounts">
-              Flete $${Number(trip.agreed_price_clp).toLocaleString('es-CL')}
-              · Comisión ${feePct}% −$${Number(trip.fee_clp).toLocaleString('es-CL')}
-              · <strong>Neto $${Number(trip.net_clp).toLocaleString('es-CL')}</strong>
-            </p>
-            ${when ? `<p class="muted cubik-trip-when">${when}</p>` : ''}
-          </li>`;
-        }
+    const renderTripRow = (trip, { pendingRow = false } = {}) => {
+      const when = trip.completed_at
+        ? new Date(trip.completed_at).toLocaleDateString('es-CL', {
+            day: 'numeric',
+            month: 'short',
+          })
+        : '';
+      if (role === 'carrier') {
         return `<li class="cubik-trip-row">
           <div class="cubik-trip-main">
             <strong>${trip.pair}</strong>
-            <span class="pill cubik-trip-pill">Cobro simulado</span>
-          </div>
-          <div class="cubik-pay-bar cubik-pay-bar-sm" aria-hidden="true">
-            <span class="cubik-pay-bar-freight" style="width:${Math.round((trip.agreed_price_clp / trip.total_clp) * 100)}%"></span>
-            <span class="cubik-pay-bar-fee" style="width:${Math.round((trip.fee_clp / trip.total_clp) * 100)}%"></span>
+            <span class="pill ${pendingRow ? '' : 'pill-warn'} cubik-trip-pill">${trip.status_label}</span>
           </div>
           <p class="cubik-trip-amounts">
             Flete $${Number(trip.agreed_price_clp).toLocaleString('es-CL')}
-            + ${feePct}% $${Number(trip.fee_clp).toLocaleString('es-CL')}
-            = <strong class="cubik-amount-negative">−$${Number(trip.total_clp).toLocaleString('es-CL')}</strong>
+            · Comisión ${feePct}% −$${Number(trip.fee_clp).toLocaleString('es-CL')}
+            · <strong>Neto $${Number(trip.net_clp).toLocaleString('es-CL')}</strong>
           </p>
           ${when ? `<p class="muted cubik-trip-when">${when}</p>` : ''}
         </li>`;
-      })
+      }
+      const payBtn = pendingRow
+        ? `<button type="button" class="tab tab-sm btn-pilot-pay" data-pilot-pay="${trip.match_id}" data-pilot-agreed="${trip.agreed_price_clp}" data-pilot-fee="${trip.fee_clp}" data-pilot-total="${trip.total_clp}" data-pilot-pair="${String(trip.pair || '').replace(/"/g, '&quot;')}">Pagar</button>`
+        : '';
+      return `<li class="cubik-trip-row">
+        <div class="cubik-trip-main">
+          <strong>${trip.pair}</strong>
+          <span class="pill ${pendingRow ? 'pill-warn' : ''} cubik-trip-pill">${trip.status_label}</span>
+        </div>
+        ${
+          !pendingRow
+            ? `<div class="cubik-pay-bar cubik-pay-bar-sm" aria-hidden="true">
+          <span class="cubik-pay-bar-freight" style="width:${Math.round((trip.agreed_price_clp / trip.total_clp) * 100)}%"></span>
+          <span class="cubik-pay-bar-fee" style="width:${Math.round((trip.fee_clp / trip.total_clp) * 100)}%"></span>
+        </div>`
+            : ''
+        }
+        <p class="cubik-trip-amounts">
+          Flete $${Number(trip.agreed_price_clp).toLocaleString('es-CL')}
+          + ${feePct}% $${Number(trip.fee_clp).toLocaleString('es-CL')}
+          = <strong class="${pendingRow ? '' : 'cubik-amount-negative'}">${pendingRow ? `$${Number(trip.total_clp).toLocaleString('es-CL')}` : `−$${Number(trip.total_clp).toLocaleString('es-CL')}`}</strong>
+        </p>
+        ${payBtn}
+        ${when ? `<p class="muted cubik-trip-when">${when}</p>` : ''}
+      </li>`;
+    };
+
+    const tripRows = (pilot.trips || []).slice(0, 5).map((trip) => renderTripRow(trip)).join('');
+    const pendingRows = (pending?.trips || [])
+      .slice(0, 5)
+      .map((trip) => renderTripRow(trip, { pendingRow: true }))
       .join('');
 
-    const more =
-      pilot.trips.length > 5
-        ? `<p class="muted cubik-trips-more">+${pilot.trips.length - 5} viaje(s) más en historial</p>`
-        : '';
+    const pendingBlock =
+      hasPending && role === 'shipper'
+        ? `<section class="cubik-pending-block">
+            <h4>Por pagar</h4>
+            <p class="muted">Total pendiente: <strong>$${Number(pending.net_clp).toLocaleString('es-CL')}</strong></p>
+            <ul class="cubik-trip-list">${pendingRows}</ul>
+          </section>`
+        : hasPending && role === 'carrier'
+          ? `<section class="cubik-pending-block">
+              <h4>Esperando pago del embarcador</h4>
+              <ul class="cubik-trip-list">${pendingRows}</ul>
+            </section>`
+          : '';
 
     const breakdownBlock =
-      role === 'shipper'
+      hasPaid && role === 'shipper'
         ? `<div class="cubik-breakdown-grid">
             <div class="cubik-breakdown-item">
-              <span class="muted">Flete acordado</span>
+              <span class="muted">Flete pagado</span>
               <strong>$${Number(t.agreed_clp).toLocaleString('es-CL')}</strong>
             </div>
             <div class="cubik-breakdown-item fee">
@@ -196,7 +219,7 @@ const Penalties = {
               <strong>+$${Number(t.fees_clp).toLocaleString('es-CL')}</strong>
             </div>
             <div class="cubik-breakdown-item total">
-              <span class="muted">Total simulado</span>
+              <span class="muted">Total debitado</span>
               <strong class="cubik-amount-negative">−$${Number(t.net_clp).toLocaleString('es-CL')}</strong>
             </div>
           </div>
@@ -209,7 +232,8 @@ const Penalties = {
                 <p class="cubik-bar-legend"><span class="dot dot-freight"></span> Flete <span class="dot dot-fee"></span> Servicio ${feePct}%</p>`
               : ''
           }`
-        : `<div class="cubik-breakdown-grid">
+        : hasPaid
+          ? `<div class="cubik-breakdown-grid">
             <div class="cubik-breakdown-item">
               <span class="muted">Flete acordado</span>
               <strong>$${Number(t.agreed_clp).toLocaleString('es-CL')}</strong>
@@ -222,12 +246,17 @@ const Penalties = {
               <span class="muted">Neto en gestión</span>
               <strong class="cubik-amount-positive">$${Number(t.net_clp).toLocaleString('es-CL')}</strong>
             </div>
-          </div>`;
+          </div>`
+          : '';
 
     const statusHint =
       role === 'carrier'
-        ? `<p class="cubik-status-hint"><span class="pill pill-warn">Pago en gestión</span> El embarcador ya pagó el flete simulado; tu neto se libera cuando activemos Cubik Saldo.</p>`
-        : `<p class="cubik-status-hint">Al completar viajes, simulamos el cobro del flete + ${feePct}% de servicio en tu saldo Cubik.</p>`;
+        ? hasPaid
+          ? `<p class="cubik-status-hint"><span class="pill pill-warn">Pago en gestión</span> El embarcador pagó el flete simulado; tu neto se libera cuando activemos Cubik Saldo.</p>`
+          : `<p class="cubik-status-hint">Cuando el embarcador pague, verás el monto en gestión aquí.</p>`
+        : hasPending
+          ? `<p class="cubik-status-hint">Confirma el pago en cada viaje para debitar tu Cubik Saldo simulado y liberar gestión al transportista.</p>`
+          : `<p class="cubik-status-hint">Todos tus viajes completados están pagados en la simulación.</p>`;
 
     return `<section class="cubik-saldo-pilot">
       <div class="cubik-saldo-head">
@@ -237,13 +266,14 @@ const Penalties = {
       <div class="cubik-balance-card ${balanceClass}">
         <p class="cubik-balance-label">${pilot.wallet_label}</p>
         <p class="cubik-balance-amount">${this.formatClpSigned(balance)}</p>
-        <p class="muted cubik-balance-sub">${t.trip_count} viaje${t.trip_count === 1 ? '' : 's'} completado${t.trip_count === 1 ? '' : 's'}</p>
+        <p class="muted cubik-balance-sub">${hasPaid ? `${t.trip_count} pagado${t.trip_count === 1 ? '' : 's'}` : 'Sin cargos aún'}${hasPending ? ` · ${pending.trip_count} pendiente${pending.trip_count === 1 ? '' : 's'}` : ''}</p>
       </div>
       ${statusHint}
+      ${pendingBlock}
       ${breakdownBlock}
       ${
         tripRows
-          ? `<h4 class="cubik-trips-heading">Por viaje</h4><ul class="cubik-trip-list">${tripRows}</ul>${more}`
+          ? `<h4 class="cubik-trips-heading">Pagados</h4><ul class="cubik-trip-list">${tripRows}</ul>`
           : ''
       }
     </section>`;
@@ -774,6 +804,7 @@ const Penalties = {
     document.getElementById('btn-open-card-inline')?.addEventListener('click', () => this.openCardModal());
     this.bindWalletActions(box);
     this.bindPenaltyActions(box);
+    if (typeof PilotPayUI !== 'undefined') PilotPayUI.bind(box);
   },
 
   renderNotifSummary() {

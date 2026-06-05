@@ -14,7 +14,7 @@
   <link rel="apple-touch-icon" href="/brand/logo.png" />
   <link rel="preconnect" href="https://uber-truck-production.up.railway.app" crossorigin />
   <link rel="dns-prefetch" href="https://uber-truck-production.up.railway.app" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.100" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.102" />
   <link rel="stylesheet" href="/app-shell.css?v=0.0.98" />
   <script src="/brand-config.js?v=0.0.76" defer></script>
   <script src="/api-base.js?v=0.0.83" defer></script>
@@ -880,6 +880,16 @@
     </form>
   </div>
 
+  <div id="pilot-pay-drawer" class="chat-drawer help-drawer" hidden aria-hidden="true">
+    <div class="chat-drawer-header">
+      <h3 id="pilot-pay-title">Pagar con Cubik Saldo</h3>
+      <button type="button" class="link-btn" id="pilot-pay-close">Cerrar</button>
+    </div>
+    <div id="pilot-pay-context" class="help-trip-context"></div>
+    <div id="pilot-pay-body" class="help-drawer-body"></div>
+    <div id="pilot-pay-actions" class="delivery-close-actions"></div>
+  </div>
+
   <div id="incident-drawer" class="chat-drawer help-drawer" hidden aria-hidden="true">
     <div class="chat-drawer-header">
       <button type="button" class="link-btn" id="incident-back">←</button>
@@ -1139,14 +1149,15 @@
   <script src="/live-map-ui.js?v=0.0.98" defer></script>
   <script src="/tracking-ui.js?v=0.0.97" defer></script>
   <script src="/incident-ui.js?v=0.0.99" defer></script>
-  <script src="/delivery-close-ui.js?v=0.0.99" defer></script>
+  <script src="/delivery-close-ui.js?v=0.0.102" defer></script>
+  <script src="/pilot-pay-ui.js?v=0.0.102" defer></script>
   <script src="/contact-ui.js?v=0.0.98" defer></script>
   <script src="/rut-chile-ui.js?v=0.0.93" defer></script>
-  <script src="/penalties-ui.js?v=0.0.100" defer></script>
+  <script src="/penalties-ui.js?v=0.0.102" defer></script>
   <script src="/support-ui.js?v=0.0.56" defer></script>
   <script src="/comms-ui.js?v=0.0.98" defer></script>
   <script src="/rating-tags.js?v=0.0.31" defer></script>
-  <script src="/trips-ui.js?v=0.0.100" defer></script>
-  <script src="/app.js?v=0.0.99" defer></script>
+  <script src="/trips-ui.js?v=0.0.102" defer></script>
+  <script src="/app.js?v=0.0.101" defer></script>
 </body>
 </html>

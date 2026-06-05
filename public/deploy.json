@@ -1,6 +1,6 @@
 {
-  "version": "0.0.101",
+  "version": "0.0.102",
   "git_sha": "",
   "ui": "uber-parity-v1",
-  "note": "Perf Mis viajes: API matches batch + precarga al login"
+  "note": "Botón Pagar Cubik Saldo piloto + flujo pago en gestión"
 }

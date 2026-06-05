@@ -133,6 +133,30 @@ function buildTripPaymentBadge(m, role) {
   if (ps === 'pending_release') {
     return `<p class="trip-payment-badge trip-payment-hold">Pago pendiente — confirma recepción</p>`;
   }
+  if (ps === 'pilot_awaiting') {
+    return `<p class="trip-payment-badge trip-payment-pilot">Esperando pago del embarcador · Cubik Saldo piloto</p>`;
+  }
+  if (ps === 'pilot_pending') {
+    const agreed = m.payment_agreed_clp;
+    const fee = m.payment_fee_clp;
+    const total = m.payment_total_clp ?? agreed;
+    const feePct = Math.round((m.payment_fee_rate || 0.1) * 100);
+    if (agreed && total) {
+      return `<div class="trip-payment-badge trip-payment-pending">
+        <div class="trip-payment-charged-head">
+          <span class="pill pill-warn trip-payment-pill">Pendiente de pago</span>
+          <strong class="trip-payment-amount">${total != null ? `$${Number(total).toLocaleString('es-CL')}` : ''}</strong>
+        </div>
+        <div class="trip-payment-breakdown">
+          <div class="trip-pay-row"><span>Flete</span><span>$${Number(agreed).toLocaleString('es-CL')}</span></div>
+          ${fee ? `<div class="trip-pay-row fee"><span>Servicio Cubik ${feePct}%</span><span>+$${Number(fee).toLocaleString('es-CL')}</span></div>` : ''}
+          <div class="trip-pay-row total"><span>Total a pagar</span><strong>$${Number(total).toLocaleString('es-CL')}</strong></div>
+        </div>
+        <button type="button" class="btn-match-cta btn-pilot-pay" data-pilot-pay="${m.id}">Pagar con Cubik Saldo</button>
+        <span class="trip-payment-hint">Simulación — confirma para generar el cargo</span>
+      </div>`;
+    }
+  }
   if (ps === 'pilot_settlement') {
     const agreed = m.payment_agreed_clp;
     const fee = m.payment_fee_clp;
@@ -164,7 +188,7 @@ function buildTripPaymentBadge(m, role) {
       const freightShare = 100 - feeShare;
       return `<div class="trip-payment-badge trip-payment-charged">
         <div class="trip-payment-charged-head">
-          <span class="pill trip-payment-pill">Cobro simulado</span>
+          <span class="pill trip-payment-pill">Pagado</span>
           <strong class="trip-payment-amount trip-payment-negative">−$${Number(total).toLocaleString('es-CL')}</strong>
         </div>
         <div class="cubik-pay-bar" aria-hidden="true">
@@ -176,7 +200,7 @@ function buildTripPaymentBadge(m, role) {
           <div class="trip-pay-row fee"><span>Servicio Cubik ${feePct}%</span><span>+$${Number(fee).toLocaleString('es-CL')}</span></div>
           <div class="trip-pay-row total"><span>Total descontado</span><strong>−$${Number(total).toLocaleString('es-CL')}</strong></div>
         </div>
-        <span class="trip-payment-hint">Simulación — sin cargo real aún</span>
+        <span class="trip-payment-hint">Debitado en simulación — transportista en gestión</span>
       </div>`;
     }
   }
@@ -436,6 +460,7 @@ function renderTripsList(matches, loadById, offerById) {
   groups.active.forEach((m) => {
     if (typeof refreshActiveTripMap === 'function') refreshActiveTripMap(m.id);
   });
+  if (typeof PilotPayUI !== 'undefined') PilotPayUI.bind(el);
   };
 
   if (typeof RatingTags !== 'undefined' && !RatingTags.catalog) {

@@ -636,6 +636,14 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
       });
       await repo.update('load_requests', match.load_request_id, { status: 'delivered' });
       await repo.update('capacity_offers', match.capacity_offer_id, { status: 'reserved' });
+      const parties = await getMatchParties(repo, match);
+      await comms.addNotification({
+        match_id: match.id,
+        for_role: 'carrier',
+        type: 'trip_completed',
+        title: 'Viaje completado',
+        body: `${parties?.shipper_name || 'Embarcador'} confirmó recepción. Califica el viaje en Mis viajes.`,
+      });
       return res.json({
         ok: true,
         data: completed,

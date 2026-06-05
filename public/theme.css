@@ -931,6 +931,52 @@ select.offer-picked {
   font: inherit;
 }
 
+.delivery-close-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  margin-top: 0.5rem;
+}
+
+.delivery-close-actions .link-btn {
+  align-self: center;
+  font-size: 0.92rem;
+}
+
+.trip-payment-badge {
+  font-size: 0.82rem;
+  margin: 0.35rem 0 0.5rem;
+  padding: 0.45rem 0.65rem;
+  border-radius: 8px;
+  line-height: 1.35;
+}
+
+.trip-payment-pilot {
+  background: #f4f4f5;
+  color: #52525b;
+  border: 1px solid #e4e4e7;
+}
+
+.trip-payment-hold {
+  background: #fff7ed;
+  color: #9a3412;
+  border: 1px solid #fed7aa;
+}
+
+.trip-payment-ok {
+  background: #ecfdf5;
+  color: #047857;
+  border: 1px solid #a7f3d0;
+  font-weight: 600;
+}
+
+.help-detail-form label {
+  display: block;
+  font-size: 0.88rem;
+  font-weight: 600;
+  margin-bottom: 0.35rem;
+}
+
 .help-option-btn:active {
   border-color: var(--brand-orange);
   background: var(--surface-warm);

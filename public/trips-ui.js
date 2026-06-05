@@ -120,6 +120,33 @@ function ratingLine(label, rating, pendingText, roleForTags) {
   return `<p class="trip-rating-line muted"><span class="trip-rating-label">${label}</span> ${pendingText}</p>`;
 }
 
+/** Estado de pago en UI — piloto sin wallet; luego usa match.payment_status */
+function buildTripPaymentBadge(m, role) {
+  const ps = m.payment_status;
+  if (ps === 'released') {
+    const label = role === 'carrier' ? 'Cobrado en Cubik' : 'Pagado en Cubik';
+    return `<p class="trip-payment-badge trip-payment-ok">${label}</p>`;
+  }
+  if (ps === 'retained') {
+    return `<p class="trip-payment-badge trip-payment-hold">Saldo retenido en Cubik</p>`;
+  }
+  if (ps === 'pending_release') {
+    return `<p class="trip-payment-badge trip-payment-hold">Pago pendiente — confirma recepción</p>`;
+  }
+  if (m.status === 'in_progress') {
+    return `<p class="trip-payment-badge trip-payment-pilot">Pago: se retendrá al marcar en ruta (Cubik Saldo — próx.)</p>`;
+  }
+  if (m.status !== 'completed') return '';
+  const amt =
+    m.agreed_price_clp != null
+      ? `$${Number(m.agreed_price_clp).toLocaleString('es-CL')} acordados · `
+      : '';
+  if (role === 'shipper') {
+    return `<p class="trip-payment-badge trip-payment-pilot">${amt}Pago no procesado en app (piloto)</p>`;
+  }
+  return `<p class="trip-payment-badge trip-payment-pilot">Por cobrar — Cubik Saldo próximamente</p>`;
+}
+
 function buildTripRatingsBlock(m, role, counterpartyName) {
   if (m.status !== 'completed') return '';
   const cp = counterpartyName || (role === 'shipper' ? 'Transportista' : 'Embarcador');
@@ -264,6 +291,7 @@ function renderTripsList(matches, loadById, offerById) {
               ? `Oferta $${Number(m.carrier_offer_clp).toLocaleString('es-CL')}`
               : '';
         const rateTarget = role === 'shipper' ? 'transportista' : 'embarcador';
+        const paymentBadge = buildTripPaymentBadge(m, role);
         const ratingsBlock =
           m.status === 'completed' ? buildTripRatingsBlock(m, role, title) : '';
         const cancelDetail =
@@ -307,6 +335,7 @@ function renderTripsList(matches, loadById, offerById) {
           ${partyHeader}
           <p class="trip-route-line">${route}</p>
           ${price ? `<p class="muted">${price}</p>` : ''}
+          ${paymentBadge}
           ${m.delivery_note ? `<p class="muted">Entrega: ${m.delivery_note}</p>` : ''}
           ${cancelDetail}
           ${mapSlot}

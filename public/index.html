@@ -865,6 +865,21 @@
     </form>
   </div>
 
+  <div id="delivery-close-drawer" class="chat-drawer help-drawer" hidden aria-hidden="true">
+    <div class="chat-drawer-header">
+      <button type="button" class="link-btn" id="delivery-close-back" hidden aria-hidden="true">←</button>
+      <h3 id="delivery-close-title">Cerrar entrega</h3>
+      <button type="button" class="link-btn" id="delivery-close-cancel">Cerrar</button>
+    </div>
+    <div id="delivery-close-context" class="help-trip-context"></div>
+    <div id="delivery-close-body" class="help-drawer-body"></div>
+    <form id="form-delivery-close" class="help-detail-form" hidden>
+      <label for="delivery-close-note" id="delivery-close-note-label">Nota (opcional)</label>
+      <textarea id="delivery-close-note" rows="3" maxlength="500" placeholder="Observaciones…"></textarea>
+      <button type="submit" class="btn-match-cta" id="delivery-close-submit">Confirmar</button>
+    </form>
+  </div>
+
   <div id="incident-drawer" class="chat-drawer help-drawer" hidden aria-hidden="true">
     <div class="chat-drawer-header">
       <button type="button" class="link-btn" id="incident-back">←</button>
@@ -1123,14 +1138,15 @@
   <script src="/auth-ui.js?v=0.0.76" defer></script>
   <script src="/live-map-ui.js?v=0.0.98" defer></script>
   <script src="/tracking-ui.js?v=0.0.97" defer></script>
-  <script src="/incident-ui.js?v=0.0.98" defer></script>
+  <script src="/incident-ui.js?v=0.0.99" defer></script>
+  <script src="/delivery-close-ui.js?v=0.0.99" defer></script>
   <script src="/contact-ui.js?v=0.0.98" defer></script>
   <script src="/rut-chile-ui.js?v=0.0.93" defer></script>
   <script src="/penalties-ui.js?v=0.0.94" defer></script>
   <script src="/support-ui.js?v=0.0.56" defer></script>
   <script src="/comms-ui.js?v=0.0.98" defer></script>
   <script src="/rating-tags.js?v=0.0.31" defer></script>
-  <script src="/trips-ui.js?v=0.0.98" defer></script>
-  <script src="/app.js?v=0.0.98" defer></script>
+  <script src="/trips-ui.js?v=0.0.99" defer></script>
+  <script src="/app.js?v=0.0.99" defer></script>
 </body>
 </html>

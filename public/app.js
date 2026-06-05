@@ -1590,56 +1590,18 @@ $('panel-board')?.addEventListener('click', async (e) => {
     return;
   }
   if (action === 'mark_delivered') {
-    if (!confirmMatchAction('mark_delivered')) return;
-    const note = prompt(
-      'Nota de entrega (opcional). Ej. hora, receptor, observaciones:',
-      'Entregado en bodega destino'
-    );
-    if (note === null) return;
-    if (!beginMatchAction(btn)) return;
-    try {
-      const res = await API.patchMatch(id, {
-        action: 'mark_delivered',
-        delivery_note: note.trim() || undefined,
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        alert(json.error || 'Error');
-        return;
-      }
-      alert(json.message || 'Entrega marcada');
-      await refreshBoard();
-    } finally {
-      endMatchAction(btn);
+    if (typeof DeliveryCloseUI !== 'undefined') {
+      DeliveryCloseUI.open('mark_delivered', id, btn);
+    } else {
+      alert('Recarga la app (Ctrl+F5) e intenta de nuevo.');
     }
     return;
   }
   if (action === 'confirm_receipt' || action === 'complete') {
-    if (!confirmMatchAction('confirm_receipt')) return;
-    const note = prompt(
-      'Observación de recepción (opcional). Cancelar para volver:',
-      'Mercadería recibida conforme'
-    );
-    if (note === null) return;
-    if (!beginMatchAction(btn)) return;
-    try {
-      const res = await API.patchMatch(id, {
-        status: 'completed',
-        delivery_note: note.trim() || undefined,
-      });
-      const json = await res.json();
-      if (!res.ok) {
-        alert(json.error || 'Error');
-        return;
-      }
-      await refreshBoard();
-      if (json.prompt_rating && typeof openRateModal === 'function') {
-        openRateModal(id);
-      } else {
-        alert(json.message || 'Viaje cerrado');
-      }
-    } finally {
-      endMatchAction(btn);
+    if (typeof DeliveryCloseUI !== 'undefined') {
+      DeliveryCloseUI.open('confirm_receipt', id, btn);
+    } else {
+      alert('Recarga la app (Ctrl+F5) e intenta de nuevo.');
     }
     return;
   }

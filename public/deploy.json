@@ -1,6 +1,6 @@
 {
-  "version": "0.0.98",
+  "version": "0.0.99",
   "git_sha": "",
   "ui": "uber-parity-v1",
-  "note": "Uber-parity: ayuda, chat, Waze, perfil, contraparte visible, anti-teléfono chat"
+  "note": "Drawer entrega/cierre viaje; push FCM validado en dispositivo"
 }

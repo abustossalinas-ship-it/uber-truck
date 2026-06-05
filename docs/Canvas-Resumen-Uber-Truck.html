@@ -2,7 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <title>Resumen Canvas — Cubik (may 2026)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Resumen Canvas — Cubik (jun 2026)</title>
   <style>
     body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.35; max-width: 900px; margin: 2cm auto; color: #111; }
     h1 { font-size: 18pt; border-bottom: 1px solid #333; }
@@ -11,70 +12,86 @@
     th, td { border: 1px solid #444; padding: 6px 8px; vertical-align: top; }
     th { background: #e8e8e8; }
     .meta { font-size: 10pt; color: #444; }
+    .done { background: #e8f5e9; }
+    .doing { background: #fff8e1; }
     ul { margin: 0.4em 0 0.6em 1.2em; }
+    a { color: #d95418; }
   </style>
 </head>
 <body>
 
-<p class="meta"><strong>Versión:</strong> 1.2 · 25 may 2026 · Software <strong>0.0.98</strong> · Canvas: <code>canvases/estado-avance.canvas.tsx</code></p>
+<p class="meta"><a href="/docs/">← Documentación</a> · <a href="/">Inicio app</a></p>
+<p class="meta"><strong>Versión doc:</strong> 1.3 · <strong>5 jun 2026</strong> · Software <strong>0.0.104</strong> · Memoria <strong>v4.0</strong> · Canvas: <code>canvases/estado-avance.canvas.tsx</code></p>
 
 <h1>Resumen Canvas — Cubik</h1>
-<p>Documento para Word (<code>npm run export:all-docs</code>). Equivalente al canvas de estado de avance en Cursor.</p>
+<p>Equivalente al canvas de estado de avance en Cursor y a la memoria técnica v4.0. Export Word: <code>npm run export:all-docs</code>.</p>
+<p class="meta"><strong>Producción:</strong> <a href="https://uber-truck-production.up.railway.app">uber-truck-production.up.railway.app</a> · <a href="https://uber-truck-production.up.railway.app/probar">/probar</a></p>
 
-<h2>1. Avance global (may 2026)</h2>
+<h2>1. Avance global (jun 2026)</h2>
 <table>
   <tr><th>Área</th><th>%</th><th>Nota</th></tr>
-  <tr><td>MVP digital núcleo (fase 2)</td><td>~92%</td><td>v0.0.98 paridad Uber: incidentes, chat ruta, Waze, perfil, anti-teléfono</td></tr>
-  <tr><td>Multas y cobros (2.10)</td><td>~40%</td><td>Billetera multi-cuenta; multas legacy; sin wallet aún</td></tr>
-  <tr><td>Cubik Saldo + fees 10/5 (2.11)</td><td>~15%</td><td>Diseño cerrado; implementación próxima semana</td></tr>
+  <tr class="done"><td>MVP digital núcleo (fase 2)</td><td>~94%</td><td>Paridad Uber: viajes, chat, incidentes, GPS, billetera, app Cubik</td></tr>
+  <tr><td>Multas y cobros (2.10)</td><td>~40%</td><td>Billetera multi-cuenta; multas legacy; wallet prod pendiente</td></tr>
+  <tr class="done"><td>Cubik Saldo piloto 10/5 (2.11)</td><td>~78%</td><td>Pagar simulado, badges, notificación transportista, Cuenta piloto</td></tr>
+  <tr class="doing"><td>Cubik Saldo prod (wallet + escrow)</td><td>~8%</td><td>Retención al En ruta, ledger, recarga pasarela — siguiente</td></tr>
   <tr><td>Push móvil (FCM)</td><td>~70%</td><td>Backend OK; validación push-test en teléfono pendiente</td></tr>
-  <tr><td>Proyecto hasta M5</td><td>~44%</td><td>Piloto M2 (20 viajes) siguiente foco operativo</td></tr>
+  <tr><td>Proyecto hasta M5</td><td>~48%</td><td>Piloto M2 (20 viajes) siguiente foco operativo</td></tr>
 </table>
 
-<h2>2. Entregado reciente (v0.0.97–0.0.98)</h2>
+<h2>2. Releases recientes (v0.0.100–0.0.104)</h2>
+<table>
+  <tr><th>Versión</th><th>Foco</th><th>Commit</th></tr>
+  <tr><td>0.0.104</td><td>Notificaciones pago al día + campana más rápida</td><td><code>7f09d15</code></td></tr>
+  <tr><td>0.0.103</td><td>Badge «Embarcador pagó» + notif visible en completados</td><td><code>551c832</code></td></tr>
+  <tr><td>0.0.102</td><td>Botón Pagar + drawer Cubik Saldo + SQL 026</td><td><code>96947cf</code></td></tr>
+  <tr><td>0.0.101</td><td>Performance primera carga Mis viajes</td><td><code>5258886</code></td></tr>
+  <tr><td>0.0.100</td><td>Cubik Saldo piloto UI + comisiones 10/5</td><td><code>a52f23d</code></td></tr>
+</table>
+
+<h2>3. Cubik Saldo piloto — operativo</h2>
 <ul>
-  <li>Chat libre en ruta; presets carrusel; campana con abrir chat</li>
-  <li>Incidentes drawer estilo Uber Eats + notificaciones backend</li>
-  <li>Navegar: selector Google Maps / Waze</li>
-  <li>Shell Cuenta + botonera Inicio / Opciones / Actividad / Cuenta</li>
-  <li>Contraparte visible (avatar, empresa); anti-bypass teléfono; botón Llamar</li>
-  <li>Mapa banner estable; CTA oferta naranja; deploy 0.0.98 + APK</li>
+  <li>Embarcador: <strong>Pagar con Cubik Saldo</strong> en Mis viajes → Completados (drawer; web desktop modal 360px)</li>
+  <li>Transportista: campana <strong>«Embarcador pagó el flete»</strong> + badges «Embarcador pagó» / «Cobro en gestión»</li>
+  <li>Cuenta: sección <strong>Cubik Saldo (piloto)</strong> — Por pagar / Pagados</li>
+  <li>API: <code>POST /api/matches/:id/pilot-pay</code> · SQL: <a href="RUN_026_pilot_payment.sql">RUN_026_pilot_payment.sql</a></li>
+  <li>Limitación: simulación — sin movimiento real de dinero; <code>completed</code> ≠ pagado hasta pulsar Pagar</li>
 </ul>
 
-<h2>3. Modelo pagos (diseño cerrado — próxima semana)</h2>
+<h2>4. Modelo pagos (reglas de negocio)</h2>
 <table>
-  <tr><th>Regla</th><th>Valor</th></tr>
-  <tr><td>Fee embarcador (solo él ve)</td><td><strong>10%</strong> sobre flete acordado</td></tr>
-  <tr><td>Comisión transportista (solo él ve)</td><td><strong>5%</strong> sobre flete acordado</td></tr>
-  <tr><td>Take rate plataforma</td><td><strong>15%</strong> efectivo</td></tr>
-  <tr><td>Publicar carga</td><td>Saldo ≥ <strong>20%</strong> del presupuesto máximo</td></tr>
-  <tr><td>Retención escrow</td><td>Al <strong>Marcar en ruta</strong> (flete + 10%)</td></tr>
-  <tr><td>Sin efectivo</td><td>Cubik Saldo; devoluciones a wallet</td></tr>
-  <tr><td>Tier formalidad</td><td>≥ <strong>$1.000.000</strong> → factura + saldo</td></tr>
-  <tr><td>Checkout UX</td><td>«Terminar y confirmar» tipo Uber Eats; flujo corto si &lt; $1M</td></tr>
-  <tr><td>Cubik Plus Empresa</td><td>Futuro: mensualidad vs descuento % (tipo Uber One)</td></tr>
+  <tr><th>Regla</th><th>Valor</th><th>Estado</th></tr>
+  <tr><td>Fee embarcador (solo él ve)</td><td><strong>10%</strong> sobre flete acordado</td><td class="done">Piloto activo</td></tr>
+  <tr><td>Comisión transportista (solo él ve)</td><td><strong>5%</strong> sobre flete acordado</td><td class="done">Piloto activo</td></tr>
+  <tr><td>Take rate plataforma</td><td><strong>15%</strong> efectivo</td><td>Admin / GMV</td></tr>
+  <tr><td>Pago piloto</td><td>Post-<code>completed</code> simulado</td><td class="done">v0.0.102+</td></tr>
+  <tr><td>Publicar carga</td><td>Saldo ≥ <strong>20%</strong> del presupuesto máximo</td><td class="doing">Prod pendiente</td></tr>
+  <tr><td>Retención escrow</td><td>Al <strong>Marcar en ruta</strong> (flete + 10%)</td><td class="doing">Prod pendiente</td></tr>
+  <tr><td>Sin efectivo</td><td>Cubik Saldo; devoluciones a wallet</td><td>Diseño cerrado</td></tr>
+  <tr><td>Tier formalidad</td><td>≥ <strong>$1.000.000</strong> → factura + saldo</td><td>Diseño cerrado</td></tr>
+  <tr><td>Cubik Plus Empresa</td><td>Mensualidad vs descuento % (tipo Uber One)</td><td>Futuro post-M2</td></tr>
 </table>
 
-<h2>4. Flujo producto (MVP digital)</h2>
-<ol>
-  <li>Registro / login (JWT)</li>
-  <li>Publicar carga (20% saldo) · Ofertar ruta</li>
-  <li>Match + checkout tarifas por rol</li>
-  <li>En ruta → retención · GPS · chat · incidentes</li>
-  <li>Completar → liberar pago neto transportista</li>
-  <li>Multas / Cubik Saldo / Twilio (semana siguiente)</li>
-</ol>
+<h2>5. Funcionalidades MVP</h2>
+<table>
+  <tr><th>Funcionalidad</th><th>Estado</th></tr>
+  <tr class="done"><td>Emparejar, cancelación, chat ruta, GPS, Mis viajes, calificación ★</td><td>Hecho</td></tr>
+  <tr class="done"><td>Billetera multi-cuenta · Cubik app Android</td><td>Hecho</td></tr>
+  <tr class="done"><td>Cubik Saldo piloto — Pagar + notificación transportista</td><td>Hecho v0.0.100–0.0.104</td></tr>
+  <tr class="doing"><td>Wallet real + retención al En ruta</td><td>Pendiente</td></tr>
+  <tr class="doing"><td>Twilio Proxy (llamadas enmascaradas)</td><td>UI lista; proxy pendiente</td></tr>
+  <tr class="doing"><td>Push FCM recepción en teléfono</td><td>Backend OK; validación pendiente</td></tr>
+</table>
 
-<h2>5. Prioridades inmediatas</h2>
+<h2>6. Prioridades inmediatas</h2>
 <ul>
-  <li><strong>P0:</strong> Cubik Saldo + comisiones 10/5 + retención en ruta</li>
+  <li><strong>P0:</strong> Wallet real + escrow en ruta (piloto 10/5 ya validado)</li>
   <li><strong>P0:</strong> Twilio Proxy (llamadas enmascaradas)</li>
-  <li><strong>P0:</strong> Piloto M2 — 20 viajes <code>completed</code></li>
+  <li><strong>P0:</strong> Piloto M2 — 20 viajes <code>completed</code> corredor RM ↔ Valparaíso/San Antonio</li>
   <li><strong>P1:</strong> Push FCM en dispositivo físico</li>
   <li><strong>P2:</strong> Cubik Plus Empresa (suscripción)</li>
 </ul>
 
-<p class="meta">Detalle: <a href="Memoria-tecnica-Uber-Truck.html">Memoria v3.9</a> · <a href="Journey-Usuario-Uber-Truck.html">Journey v2.8</a> · <a href="PROXIMOS-PASOS-ESTRATEGIA.md">Estrategia</a></p>
+<p class="meta">Detalle: <a href="Memoria-tecnica-Uber-Truck.html">Memoria v4.0</a> · <a href="Journey-Usuario-Uber-Truck.html">Journey v2.9</a> · <a href="PROXIMOS-PASOS-ESTRATEGIA.md">Estrategia</a></p>
 
 </body>
 </html>

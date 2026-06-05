@@ -27,7 +27,7 @@ No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitáco
 | Auth Gmail / Apple / correo (MD) | [AUTH-AND-EMAIL-ROADMAP.md](./AUTH-AND-EMAIL-ROADMAP.md) — pendiente producción |
 | Cubik — Play Store demo | [CUBIK-PLAY-STORE.md](./CUBIK-PLAY-STORE.md) |
 | Pitch vs WebCarga + panel admin | [PITCH-WEBCARGA-Y-PANEL-ADMIN.html](./PITCH-WEBCARGA-Y-PANEL-ADMIN.html) |
-| Resumen canvas | [Canvas-Resumen-Uber-Truck.html](./Canvas-Resumen-Uber-Truck.html) |
+| Resumen canvas | [Canvas-Resumen-Uber-Truck.html](./Canvas-Resumen-Uber-Truck.html) (v1.3 · 0.0.104) · Cursor: `canvases/estado-avance.canvas.tsx` |
 | Cancelación / multas | [Politica-Cancelacion-Uber-Truck.html](./Politica-Cancelacion-Uber-Truck.html) · [Multas-Cuenta-Uber-Truck.html](./Multas-Cuenta-Uber-Truck.html) |
 | SQL Supabase | [Sql-Supabase-Uber-Truck.html](./Sql-Supabase-Uber-Truck.html) · [SQL-SUPABASE.md](./SQL-SUPABASE.md) |
 | Confianza y carga | [CARGO-TRUST.md](./CARGO-TRUST.md) · [Terminos-Confianza-Carga-Uber-Truck.html](./Terminos-Confianza-Carga-Uber-Truck.html) |

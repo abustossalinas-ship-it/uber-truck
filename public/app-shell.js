@@ -205,29 +205,7 @@ const AppShell = {
   },
 
   bindWelcome() {
-    document.getElementById('btn-welcome-change-role')?.addEventListener('click', () => {
-      if (typeof clearAuthIntentRole === 'function') clearAuthIntentRole();
-      if (typeof showWelcomeRoleStep === 'function') showWelcomeRoleStep();
-    });
-    document.getElementById('btn-welcome-login')?.addEventListener('click', () => {
-      const role = typeof getAuthIntentRole === 'function' ? getAuthIntentRole() : null;
-      if (!role) {
-        if (typeof showWelcomeRoleStep === 'function') showWelcomeRoleStep();
-        return;
-      }
-      if (typeof openAuthPanel === 'function') openAuthPanel(false, false, role);
-    });
-    document.getElementById('btn-welcome-register')?.addEventListener('click', () => {
-      const role = typeof getAuthIntentRole === 'function' ? getAuthIntentRole() : null;
-      if (!role) {
-        if (typeof showWelcomeRoleStep === 'function') showWelcomeRoleStep();
-        return;
-      }
-      if (typeof openAuthPanel === 'function') openAuthPanel(true, false, role);
-    });
-    if (typeof getAuthIntentRole === 'function' && getAuthIntentRole()) {
-      if (typeof showWelcomeAuthStep === 'function') showWelcomeAuthStep(getAuthIntentRole());
-    }
+    if (typeof showWelcomeRoleStep === 'function') showWelcomeRoleStep();
   },
 
   bindBottomNav() {

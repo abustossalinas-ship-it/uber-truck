@@ -1,6 +1,6 @@
 {
-  "version": "0.0.112",
+  "version": "0.0.115",
   "git_sha": "",
   "ui": "uber-parity-v1",
-  "note": "Login diferenciado transportista vs embarcador"
+  "note": "Fix click tarjetas rol abre login respectivo"
 }

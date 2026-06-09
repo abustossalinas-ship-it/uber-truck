@@ -14,8 +14,9 @@
   <link rel="apple-touch-icon" href="/brand/logo.png" />
   <link rel="preconnect" href="https://uber-truck-production.up.railway.app" crossorigin />
   <link rel="dns-prefetch" href="https://uber-truck-production.up.railway.app" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.112" />
-  <link rel="stylesheet" href="/app-shell.css?v=0.0.112" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.115" />
+  <link rel="stylesheet" href="/app-shell.css?v=0.0.115" />
+  <link rel="stylesheet" href="/role-welcome.css?v=0.0.115" />
   <script src="/brand-config.js?v=0.0.76" defer></script>
   <script src="/api-base.js?v=0.0.83" defer></script>
 </head>
@@ -25,30 +26,33 @@
       <div class="app-gate-hero">
         <img class="app-gate-logo" src="/brand/logo-mark.png?v=0.0.76" width="120" height="120" alt="" />
         <p class="app-gate-brand">Cubik</p>
-        <p class="app-gate-tagline">Optimiza tus envíos</p>
-        <p class="app-gate-lead">Cubicación y emparejamiento en tiempo real para tu operación logística.</p>
+        <p class="cubik-welcome-headline">Menos viajes vacíos. Más negocios.</p>
+        <p class="cubik-welcome-sub app-gate-lead">Conectamos empresas que necesitan mover carga con transportistas que tienen capacidad disponible.</p>
       </div>
       <div id="app-welcome-roles" class="app-gate-role-step">
-        <p class="app-gate-role-lead">¿Cómo usarás Cubik?</p>
-        <div class="app-gate-role-grid">
-          <button type="button" class="app-gate-role-card carrier" data-auth-intent="carrier">
-            <span class="app-gate-role-icon" aria-hidden="true">🚛</span>
-            <strong>Soy transportista</strong>
-            <span>Ofertar rutas y gestionar viajes</span>
+        <div class="role-market-grid">
+          <button type="button" class="role-market-card carrier" data-auth-intent="carrier">
+            <span class="role-market-card-bg" aria-hidden="true"></span>
+            <span class="role-market-card-overlay" aria-hidden="true"></span>
+            <span class="role-market-card-body">
+              <span class="role-market-card-emoji" aria-hidden="true">🚛</span>
+              <strong class="role-market-card-title">Soy Transportista</strong>
+              <span class="role-market-card-hook">Quiero encontrar carga para mi ruta</span>
+              <span class="role-market-card-story">Publica tu espacio disponible. Recibe solicitudes. Genera más ingresos.</span>
+              <span class="role-market-card-cta">Ingresar como Transportista</span>
+            </span>
           </button>
-          <button type="button" class="app-gate-role-card shipper" data-auth-intent="shipper">
-            <span class="app-gate-role-icon" aria-hidden="true">📦</span>
-            <strong>Soy empresa</strong>
-            <span>Publicar cargas y confirmar entregas</span>
+          <button type="button" class="role-market-card shipper" data-auth-intent="shipper">
+            <span class="role-market-card-bg" aria-hidden="true"></span>
+            <span class="role-market-card-overlay" aria-hidden="true"></span>
+            <span class="role-market-card-body">
+              <span class="role-market-card-emoji" aria-hidden="true">📦</span>
+              <strong class="role-market-card-title">Soy Empresa</strong>
+              <span class="role-market-card-hook">Necesito mover productos</span>
+              <span class="role-market-card-story">Publica tu carga. Encuentra capacidad disponible. Entrega más rápido.</span>
+              <span class="role-market-card-cta">Ingresar como Empresa</span>
+            </span>
           </button>
-        </div>
-      </div>
-      <div id="app-welcome-auth" class="app-gate-auth-step" hidden>
-        <p id="app-welcome-intent-badge" class="app-gate-intent-badge"></p>
-        <div class="app-gate-actions">
-          <button type="button" class="btn-primary-app" id="btn-welcome-login">Ingresar</button>
-          <button type="button" class="btn-outline-app" id="btn-welcome-register">Crear cuenta</button>
-          <button type="button" class="link-btn app-gate-change-role" id="btn-welcome-change-role">Cambiar tipo de cuenta</button>
         </div>
       </div>
     </div>
@@ -300,18 +304,30 @@
 
   <div id="auth-panel" class="auth-panel card" hidden>
     <div id="auth-intent-step" class="auth-intent-step" hidden>
-      <h2 id="auth-intent-title">¿Cómo usarás Cubik?</h2>
-      <p class="muted auth-intent-lead">Elige tu perfil para iniciar sesión o registrarte.</p>
-      <div class="auth-intent-grid">
-        <button type="button" class="auth-intent-card carrier" data-auth-intent="carrier">
-          <span class="auth-intent-icon" aria-hidden="true">🚛</span>
-          <strong>Soy transportista</strong>
-          <span>Ofertar rutas y gestionar viajes</span>
+      <p class="cubik-welcome-headline" id="auth-intent-title">Menos viajes vacíos. Más negocios.</p>
+      <p class="cubik-welcome-sub auth-intent-lead">Conectamos empresas que necesitan mover carga con transportistas que tienen capacidad disponible.</p>
+      <div class="role-market-grid auth-intent-grid">
+        <button type="button" class="role-market-card carrier" data-auth-intent="carrier">
+          <span class="role-market-card-bg" aria-hidden="true"></span>
+          <span class="role-market-card-overlay" aria-hidden="true"></span>
+          <span class="role-market-card-body">
+            <span class="role-market-card-emoji" aria-hidden="true">🚛</span>
+            <strong class="role-market-card-title">Soy Transportista</strong>
+            <span class="role-market-card-hook">Quiero encontrar carga para mi ruta</span>
+            <span class="role-market-card-story">Publica tu espacio disponible. Recibe solicitudes. Genera más ingresos.</span>
+            <span class="role-market-card-cta">Ingresar como Transportista</span>
+          </span>
         </button>
-        <button type="button" class="auth-intent-card shipper" data-auth-intent="shipper">
-          <span class="auth-intent-icon" aria-hidden="true">📦</span>
-          <strong>Soy empresa embarcadora</strong>
-          <span>Publicar cargas y confirmar entregas</span>
+        <button type="button" class="role-market-card shipper" data-auth-intent="shipper">
+          <span class="role-market-card-bg" aria-hidden="true"></span>
+          <span class="role-market-card-overlay" aria-hidden="true"></span>
+          <span class="role-market-card-body">
+            <span class="role-market-card-emoji" aria-hidden="true">📦</span>
+            <strong class="role-market-card-title">Soy Empresa</strong>
+            <span class="role-market-card-hook">Necesito mover productos</span>
+            <span class="role-market-card-story">Publica tu carga. Encuentra capacidad disponible. Entrega más rápido.</span>
+            <span class="role-market-card-cta">Ingresar como Empresa</span>
+          </span>
         </button>
       </div>
       <button type="button" class="link-btn auth-intent-cancel" id="auth-intent-cancel">Cancelar</button>
@@ -1177,7 +1193,7 @@
   </div>
 
   <script src="/roles-ui.js?v=0.0.89" defer></script>
-  <script src="/app-shell.js?v=0.0.112" defer></script>
+  <script src="/app-shell.js?v=0.0.115" defer></script>
   <script src="/pwa-ui.js?v=0.0.64" defer></script>
   <script src="/kyc-ui.js?v=0.0.33" defer></script>
   <script src="/admin-ui.js?v=0.0.59" defer></script>
@@ -1192,7 +1208,7 @@
   <script src="/legal-terms-ui.js?v=0.0.86" defer></script>
   <script src="/load-form-validation.js?v=0.0.86" defer></script>
   <script src="/proposal-compare-ui.js?v=0.0.47" defer></script>
-  <script src="/auth-ui.js?v=0.0.112" defer></script>
+  <script src="/auth-ui.js?v=0.0.115" defer></script>
   <script src="/live-map-ui.js?v=0.0.111" defer></script>
   <script src="/tracking-ui.js?v=0.0.111" defer></script>
   <script src="/incident-ui.js?v=0.0.99" defer></script>

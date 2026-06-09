@@ -169,7 +169,6 @@ function refreshAuthIntentUi() {
   const role = getAuthIntentRole();
   const badge = document.getElementById('auth-intent-badge');
   const changeBtn = document.getElementById('auth-change-intent');
-  const welcomeBadge = document.getElementById('app-welcome-intent-badge');
   const label = role && typeof roleLabel === 'function' ? roleLabel(role) : role;
   if (badge) {
     if (role && !authForgotMode) {
@@ -182,52 +181,58 @@ function refreshAuthIntentUi() {
     }
   }
   if (changeBtn) changeBtn.hidden = !role || authForgotMode;
-  if (welcomeBadge) {
-    welcomeBadge.textContent = role ? `Entrar como ${label}` : '';
-  }
+  document.querySelectorAll('.role-market-card[data-auth-intent]').forEach((card) => {
+    const pick = card.dataset.authIntent;
+    card.classList.toggle('selected', Boolean(role) && pick === role);
+    card.setAttribute('aria-pressed', Boolean(role) && pick === role ? 'true' : 'false');
+  });
   if (role) syncAuthRoleFields(role);
 }
 
 function showWelcomeRoleStep() {
-  document.getElementById('app-welcome-roles')?.removeAttribute('hidden');
   const roles = document.getElementById('app-welcome-roles');
-  if (roles) roles.hidden = false;
-  const authStep = document.getElementById('app-welcome-auth');
-  if (authStep) authStep.hidden = true;
-}
-
-function showWelcomeAuthStep(role) {
-  if (role) setAuthIntentRole(role);
-  const roles = document.getElementById('app-welcome-roles');
-  if (roles) roles.hidden = true;
-  const authStep = document.getElementById('app-welcome-auth');
-  if (authStep) {
-    authStep.hidden = false;
-    authStep.removeAttribute('hidden');
+  if (roles) {
+    roles.hidden = false;
+    roles.removeAttribute('hidden');
   }
   refreshAuthIntentUi();
 }
 
+function setPanelSectionVisible(el, visible) {
+  if (!el) return;
+  if (visible) {
+    el.hidden = false;
+    el.removeAttribute('hidden');
+  } else {
+    el.hidden = true;
+    el.setAttribute('hidden', '');
+  }
+}
+
 function showAuthIntentStep(show) {
-  const step = document.getElementById('auth-intent-step');
-  const wrap = document.getElementById('auth-form-wrap');
-  if (step) step.hidden = !show;
-  if (wrap) wrap.hidden = show;
+  setPanelSectionVisible(document.getElementById('auth-intent-step'), show);
+  setPanelSectionVisible(document.getElementById('auth-form-wrap'), !show);
+}
+
+function pickAuthIntent(role) {
+  const normalized = normalizeAuthIntentRole(role);
+  if (!normalized) return;
+  setAuthIntentRole(normalized);
+  openAuthPanel(pendingAuthRegister, false, normalized);
 }
 
 function bindAuthIntentPickers() {
-  document.querySelectorAll('[data-auth-intent]').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const role = btn.dataset.authIntent;
-      if (!role) return;
-      setAuthIntentRole(role);
-      if (document.body.classList.contains('cubik-app') && !Auth.user) {
-        showWelcomeAuthStep(role);
-        return;
-      }
-      showAuthIntentStep(false);
-      setAuthMode(pendingAuthRegister, false);
-    });
+  if (bindAuthIntentPickers.bound) return;
+  bindAuthIntentPickers.bound = true;
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-auth-intent]');
+    if (!btn) return;
+    const inAuthStep = btn.closest('#auth-intent-step');
+    const inWelcome = btn.closest('#app-welcome-roles');
+    if (inAuthStep?.hasAttribute('hidden')) return;
+    if (inWelcome?.hasAttribute('hidden') || inWelcome?.hidden) return;
+    e.preventDefault();
+    pickAuthIntent(btn.dataset.authIntent);
   });
 }
 
@@ -378,13 +383,12 @@ function setAuthMode(register, forgot = false) {
 
 function closeAuthPanel() {
   const panel = document.getElementById('auth-panel');
-  if (panel) panel.hidden = true;
-  showAuthIntentStep(false);
+  setPanelSectionVisible(panel, false);
+  showAuthIntentStep(true);
   if (document.body.classList.contains('cubik-app') && !Auth.user) {
     const welcome = document.getElementById('app-welcome');
     if (welcome) welcome.hidden = false;
-    if (getAuthIntentRole()) showWelcomeAuthStep();
-    else showWelcomeRoleStep();
+    showWelcomeRoleStep();
   }
 }
 
@@ -394,7 +398,7 @@ function openAuthPanel(register = false, forgot = false, roleIntent = null) {
   pendingAuthRegister = register;
   if (roleIntent) setAuthIntentRole(roleIntent);
   const intent = getAuthIntentRole();
-  panel.hidden = false;
+  setPanelSectionVisible(panel, true);
   document.getElementById('change-password-panel')?.setAttribute('hidden', '');
   if (document.body.classList.contains('cubik-app')) {
     const welcome = document.getElementById('app-welcome');
@@ -412,6 +416,10 @@ function openAuthPanel(register = false, forgot = false, roleIntent = null) {
     if (!document.body.classList.contains('cubik-app')) {
       panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
     }
+    setTimeout(() => {
+      const email = document.querySelector('#form-auth [name="email"]');
+      if (email && !authForgotMode) email.focus();
+    }, 50);
   }
 }
 
@@ -420,7 +428,6 @@ window.setAuthIntentRole = setAuthIntentRole;
 window.getAuthIntentRole = getAuthIntentRole;
 window.clearAuthIntentRole = clearAuthIntentRole;
 window.showWelcomeRoleStep = showWelcomeRoleStep;
-window.showWelcomeAuthStep = showWelcomeAuthStep;
 
 document.getElementById('auth-role')?.addEventListener('change', updateRegisterLabels);
 
@@ -435,6 +442,10 @@ document.querySelectorAll('[data-role-pick]').forEach((btn) => {
 
 document.getElementById('auth-change-intent')?.addEventListener('click', () => {
   clearAuthIntentRole();
+  if (document.body.classList.contains('cubik-app') && !Auth.user) {
+    closeAuthPanel();
+    return;
+  }
   pendingAuthRegister = authRegisterMode;
   showAuthIntentStep(true);
 });
@@ -679,7 +690,7 @@ setAuthMode(false, false);
 bindAuthIntentPickers();
 const urlIntent = readAuthIntentFromUrl();
 if (urlIntent) setAuthIntentRole(urlIntent);
-if (document.body.classList.contains('cubik-app') && !Auth.user && getAuthIntentRole()) {
-  showWelcomeAuthStep(getAuthIntentRole());
+if (document.body.classList.contains('cubik-app') && !Auth.user) {
+  showWelcomeRoleStep();
 }
 Auth.render();

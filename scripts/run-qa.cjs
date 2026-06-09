@@ -6,6 +6,7 @@ const path = require('path');
 
 const root = path.join(__dirname, '..');
 const npmCmd = process.platform === 'win32' ? 'npm.cmd' : 'npm';
+const withProd = process.argv.includes('--prod');
 
 function run(label, cmd, args, extraEnv = {}) {
   console.log(`\n=== ${label} ===\n`);
@@ -20,6 +21,10 @@ function run(label, cmd, args, extraEnv = {}) {
 }
 
 run('Unit tests (Node)', process.execPath, ['--test', 'tests/**/*.test.js']);
-run('E2E app (Playwright)', npmCmd, ['run', 'test:e2e']);
+run('E2E app local (Playwright)', npmCmd, ['run', 'test:e2e']);
+
+if (withProd) {
+  run('E2E prod Railway (Playwright)', npmCmd, ['run', 'test:e2e:prod']);
+}
 
 console.log('\nQA automatizado OK\n');

@@ -15,10 +15,14 @@
     "cap:sync:remote": "node scripts/cap-config-remote.cjs && node scripts/generate-android-icons.cjs && npx cap sync android",
     "cap:sync:bundle": "node scripts/cap-config-bundle.cjs && node scripts/generate-android-icons.cjs && npx cap sync android",
     "android:apk": "node scripts/build-android-apk.cjs",
+    "android:apk:remote": "node scripts/build-android-apk.cjs --remote",
+    "android:apk:bundle": "node scripts/build-android-apk.cjs --bundle",
     "test": "npm run test:unit && npm run test:e2e",
     "test:unit": "node --test tests/**/*.test.js",
     "test:e2e": "playwright test",
+    "test:e2e:prod": "playwright test --config=playwright.prod.config.js",
     "test:qa": "node scripts/run-qa.cjs",
+    "test:qa:prod": "node scripts/run-qa.cjs --prod",
     "qa:install": "playwright install chromium"
   },
   "engines": {

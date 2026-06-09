@@ -67,8 +67,16 @@ if (!javaHome) {
 const env = { ...process.env, JAVA_HOME: javaHome };
 console.log('JAVA_HOME →', javaHome);
 
-console.log('1/3 cap:sync:bundle…');
-execSync('npm run cap:sync:bundle', { cwd: root, stdio: 'inherit', env });
+const mode = process.argv.includes('--remote')
+  ? 'remote'
+  : process.argv.includes('--bundle')
+    ? 'bundle'
+    : 'bundle';
+const capSync = mode === 'remote' ? 'cap:sync:remote' : 'cap:sync:bundle';
+
+console.log(`Modo APK: ${mode} (${mode === 'remote' ? 'UI desde Railway' : 'UI empaquetada en APK'})`);
+console.log(`1/3 ${capSync}…`);
+execSync(`npm run ${capSync}`, { cwd: root, stdio: 'inherit', env });
 
 console.log('2/3 assembleDebug…');
 execSync(`${gradlew} assembleDebug`, {

@@ -12,6 +12,21 @@ const Comms = {
     return typeof getActorRole === 'function' ? getActorRole() : 'shipper';
   },
 
+  inactiveMatchStatuses: new Set(['completed', 'cancelled']),
+
+  async resolveMatch(matchId) {
+    let m =
+      window._boardMatchesById?.[matchId] ||
+      window._tripsCache?.matchRows?.find((x) => x.id === matchId);
+    if (!m) {
+      try {
+        const json = await fetch('/api/matches', { headers: this.headers() }).then((r) => r.json());
+        m = (json.data || []).find((x) => x.id === matchId);
+      } catch (_) {}
+    }
+    return m || null;
+  },
+
   isSessionActive() {
     return typeof Auth !== 'undefined' && Boolean(Auth.user && Auth.token);
   },
@@ -86,7 +101,10 @@ const Comms = {
     const json = await fetch('/api/comms/notifications/list', {
       headers: this.headers(),
     }).then((r) => r.json());
-    const rows = (json.data || []).slice().sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    const rows = (json.data || [])
+      .filter((n) => !n.match_status || !this.inactiveMatchStatuses.has(n.match_status))
+      .slice()
+      .sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     list.innerHTML =
       rows.length === 0
         ? '<p class="muted">Sin notificaciones.</p>'
@@ -110,11 +128,11 @@ const Comms = {
               const boardLink =
                 n.type === 'chat' || n.type === 'incident' || tripsTypes.has(n.type)
                   ? ''
-                  : `<button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en emparejamientos activos</button>`;
+                  : `<button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver emparejamiento</button>`;
               const actions = mutual
                 ? `<div class="notif-actions">
           <button type="button" class="tab tab-sm notif-cta" data-open-cancel="${n.match_id}">Confirmar acuerdo mutuo</button>
-          <button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver en emparejamientos activos</button>
+          <button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver emparejamiento</button>
         </div>`
                 : `<div class="notif-actions">${chatActions}${boardLink}</div>`;
               const when = this.formatNotifDate(n.created_at);
@@ -173,6 +191,16 @@ const Comms = {
   },
 
   async openChat(matchId, title) {
+    const match = await this.resolveMatch(matchId);
+    if (match && this.inactiveMatchStatuses.has(match.status)) {
+      await this.dismissMatchNotifications(matchId);
+      alert(
+        match.status === 'completed'
+          ? 'Este viaje ya está cerrado. Revisa Mis viajes → Completados.'
+          : 'Este emparejamiento ya no está activo.'
+      );
+      return;
+    }
     this.activeMatchId = matchId;
     const drawer = document.getElementById('chat-drawer');
     const titleEl = document.getElementById('chat-title');
@@ -356,7 +384,6 @@ document.getElementById('notif-list')?.addEventListener('click', async (e) => {
   if (chatBtn) {
     const id = chatBtn.dataset.openChat;
     document.getElementById('notif-panel').hidden = true;
-    await Comms.markChatNotificationsRead(id);
     await Comms.openChat(id, '');
     return;
   }

@@ -56,7 +56,7 @@ test('delivery_pending_confirm solo mientras espera confirmación del embarcador
   );
 });
 
-test('viaje completado oculta chat, ofertas y confirmación pendiente', () => {
+test('viaje completado oculta todo (incluye cierre y pago)', () => {
   const completed = { ...baseMatch, status: 'completed' };
   assert.equal(notificationVisibleForMatch({ type: 'chat' }, completed), false);
   assert.equal(notificationVisibleForMatch({ type: 'price_offer' }, completed), false);
@@ -64,7 +64,8 @@ test('viaje completado oculta chat, ofertas y confirmación pendiente', () => {
     notificationVisibleForMatch({ type: 'delivery_pending_confirm' }, completed),
     false
   );
-  assert.equal(notificationVisibleForMatch({ type: 'trip_completed' }, completed), true);
+  assert.equal(notificationVisibleForMatch({ type: 'trip_completed' }, completed), false);
+  assert.equal(notificationVisibleForMatch({ type: 'pilot_payment' }, completed), false);
 });
 
 test('support oculta cuando el chat ya está libre (agente atendió)', () => {

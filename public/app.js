@@ -820,9 +820,21 @@ async function scrollToActiveMatch(matchId) {
     return null;
   };
 
-  if (match && ['accepted', 'in_progress', 'completed'].includes(match.status)) {
+  if (match && ['accepted', 'in_progress'].includes(match.status)) {
     const r = await goTrips();
     if (r) return r;
+  }
+
+  if (match && ['completed', 'cancelled'].includes(match.status)) {
+    if (typeof Comms !== 'undefined') await Comms.dismissMatchNotifications(matchId);
+    const r = await goTrips();
+    if (r) return r;
+    alert(
+      match.status === 'completed'
+        ? 'Este viaje ya está cerrado. Revisa Mis viajes → Completados.'
+        : 'Este emparejamiento fue cancelado. Las notificaciones se archivaron.'
+    );
+    return { found: true, where: 'closed' };
   }
 
   const inCubikApp = document.body.classList.contains('cubik-app');
@@ -836,9 +848,20 @@ async function scrollToActiveMatch(matchId) {
   match =
     window._boardMatchesById?.[matchId] ||
     window._tripsCache?.matchRows?.find((m) => m.id === matchId);
-  if (match && ['accepted', 'in_progress', 'completed'].includes(match.status)) {
+  if (match && ['accepted', 'in_progress'].includes(match.status)) {
     const r = await goTrips();
     if (r) return r;
+  }
+  if (match && ['completed', 'cancelled'].includes(match.status)) {
+    if (typeof Comms !== 'undefined') await Comms.dismissMatchNotifications(matchId);
+    const r = await goTrips();
+    if (r) return r;
+    alert(
+      match.status === 'completed'
+        ? 'Este viaje ya está cerrado. Revisa Mis viajes → Completados.'
+        : 'Este emparejamiento fue cancelado. Las notificaciones se archivaron.'
+    );
+    return { found: true, where: 'closed' };
   }
 
   const heading = document.getElementById('matches-active-heading');
@@ -1089,8 +1112,12 @@ async function refreshBoard() {
     if (offer) m._offerName = offer.carrier_name;
   });
 
-  const activeMatches = matchRows.filter((m) => m.status !== 'cancelled');
-  const cancelledMatches = matchRows.filter((m) => m.status === 'cancelled');
+  const activeMatches = matchRows.filter((m) =>
+    ['proposed', 'accepted', 'in_progress', 'disputed'].includes(m.status)
+  );
+  const historyMatches = matchRows.filter((m) =>
+    ['completed', 'cancelled'].includes(m.status)
+  );
 
   function renderMatchCards(rows, emptyMsg) {
     if (rows.length === 0) return `<p class="muted">${emptyMsg}</p>`;
@@ -1146,8 +1173,11 @@ async function refreshBoard() {
     const histEl = $('list-matches-history');
     const histWrap = $('matches-history-wrap');
     if (histEl) {
-      histEl.innerHTML = renderMatchCards(cancelledMatches, 'Sin cancelaciones recientes.');
-      if (histWrap) histWrap.open = cancelledMatches.length > 0;
+      histEl.innerHTML = renderMatchCards(
+        historyMatches,
+        'Sin emparejamientos cerrados o cancelados recientes.'
+      );
+      if (histWrap) histWrap.open = historyMatches.length > 0;
     }
 
     const publishedLoads = (loads.data || []).filter((l) => l.status === 'published');

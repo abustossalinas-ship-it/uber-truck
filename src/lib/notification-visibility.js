@@ -4,9 +4,6 @@ const { isPickupDeadlinePassed } = require('./match-deadline');
 
 const ACTIVE_MATCH_STATUSES = new Set(['proposed', 'accepted', 'in_progress', 'disputed']);
 
-/** Tras completar el viaje solo dejamos cierre y pago visibles */
-const COMPLETED_VISIBLE_TYPES = new Set(['trip_completed', 'pilot_payment']);
-
 function isStaleProposal(match, load) {
   if (!match || match.status !== 'proposed') return false;
   if (load && load.status !== 'published') return true;
@@ -23,11 +20,7 @@ function isStaleProposal(match, load) {
 function notificationVisibleForMatch(n, match, load = null) {
   if (!match || !n?.type) return false;
 
-  if (match.status === 'cancelled') return false;
-
-  if (match.status === 'completed') {
-    return COMPLETED_VISIBLE_TYPES.has(n.type);
-  }
+  if (match.status === 'cancelled' || match.status === 'completed') return false;
 
   switch (n.type) {
     case 'price_offer':
@@ -63,10 +56,10 @@ function notificationVisibleForMatch(n, match, load = null) {
       return ACTIVE_MATCH_STATUSES.has(match.status);
 
     case 'trip_completed':
-      return match.status === 'completed';
+      return false;
 
     case 'pilot_payment':
-      return ['accepted', 'in_progress', 'completed'].includes(match.status);
+      return match.status === 'accepted' || match.status === 'in_progress';
 
     case 'incident':
       return ACTIVE_MATCH_STATUSES.has(match.status);
@@ -80,5 +73,4 @@ module.exports = {
   notificationVisibleForMatch,
   isStaleProposal,
   ACTIVE_MATCH_STATUSES,
-  COMPLETED_VISIBLE_TYPES,
 };

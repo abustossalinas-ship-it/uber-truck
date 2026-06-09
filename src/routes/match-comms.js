@@ -233,7 +233,7 @@ router.get('/notifications/list', optionalAuth, async (req, res) => {
           priceNotifsByMatch.get(match.id)
         );
       }
-      visible.push(row);
+      visible.push({ ...row, match_status: match.status });
     }
     visible.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
     const unread = visible.filter((n) => !n.read_at).length;

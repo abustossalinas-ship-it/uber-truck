@@ -93,7 +93,12 @@ const Comms = {
         : rows
             .map((n) => {
               const mutual = n.type === 'mutual_cancel';
-              const tripsTypes = new Set(['pilot_payment', 'trip_completed']);
+              const tripsTypes = new Set([
+                'pilot_payment',
+                'trip_completed',
+                'approaching_destination',
+                'arrived_at_destination',
+              ]);
               const chatActions =
                 n.type === 'chat'
                   ? `<button type="button" class="link-btn" data-open-chat="${n.match_id}">Abrir chat</button>`

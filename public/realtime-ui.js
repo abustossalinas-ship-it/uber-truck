@@ -42,9 +42,12 @@ function syncBoardRealtime(matches) {
     if (payload.type === 'status' || payload.type === 'trip_event') {
       if (typeof refreshBoard === 'function') refreshBoard();
       if (typeof Comms !== 'undefined') Comms.refreshBell?.();
+      const evType = payload.event?.event_type;
       if (
         payload.type === 'trip_event' &&
-        payload.event?.event_type === 'location_update' &&
+        ['location_update', 'approaching_destination', 'arrived_at_destination', 'arrival_at_destination'].includes(
+          evType
+        ) &&
         typeof refreshActiveTripMap === 'function'
       ) {
         refreshActiveTripMap(active.id);

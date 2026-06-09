@@ -131,6 +131,10 @@ async function postCarrierLocation(lat, lng) {
     const json = await res.json();
     if (res.ok && json.data?.active_match_id && typeof refreshActiveTripMap === 'function') {
       refreshActiveTripMap(json.data.active_match_id, { soft: true });
+      if (json.data.approaching_notified || json.data.arrived_notified) {
+        if (typeof refreshBoard === 'function') refreshBoard();
+        if (typeof Comms !== 'undefined') Comms.refreshBell?.();
+      }
       if (json.data.arrival_ready || json.data.pickup_ready) {
         const card = document.querySelector(
           `[data-trip-id="${json.data.active_match_id}"] .trip-map-action-btn, [data-trip-id="${json.data.active_match_id}"] [data-trip-deliver], [data-trip-id="${json.data.active_match_id}"] [data-trip-progress]`

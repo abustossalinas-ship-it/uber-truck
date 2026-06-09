@@ -44,6 +44,10 @@ const TRIP_STATUS_LABEL = {
   cancelled: 'Cancelado',
 };
 
+function tripArrivedAtDestination(m) {
+  return m.status === 'in_progress' && Boolean(m.arrived_at_destination_at) && !m.carrier_marked_delivered_at;
+}
+
 function tripAwaitingConfirm(m) {
   return m.status === 'in_progress' && Boolean(m.carrier_marked_delivered_at);
 }
@@ -51,6 +55,9 @@ function tripAwaitingConfirm(m) {
 function tripStatusLabel(m, role) {
   if (tripAwaitingConfirm(m)) {
     return role === 'shipper' ? 'Confirma recepción' : 'Entrega registrada';
+  }
+  if (tripArrivedAtDestination(m)) {
+    return role === 'shipper' ? 'Transportista en destino' : 'Llegaste al destino';
   }
   if (m.status === 'accepted' && role === 'shipper') return 'Transportista en camino';
   if (m.status === 'in_progress' && role === 'shipper') return 'En ruta';

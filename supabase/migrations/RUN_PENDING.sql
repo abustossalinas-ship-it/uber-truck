@@ -181,3 +181,7 @@ UPDATE matches
 SET penalty_payment_status = 'settled_moderator'
 WHERE penalty_paid_at IS NOT NULL
   AND penalty_payment_status = 'pending';
+
+-- 019 — Llegada automática al destino (GPS)
+ALTER TABLE matches
+  ADD COLUMN IF NOT EXISTS arrived_at_destination_at TIMESTAMPTZ;

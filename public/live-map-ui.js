@@ -129,6 +129,53 @@ const LiveMap = {
     }
   },
 
+  _updateArrivalBanner(inst, tracking) {
+    if (!inst.container) return;
+    let banner = inst.container.querySelector('[data-trip-arrival-banner]');
+    const role = typeof getActorRole === 'function' ? getActorRole() : 'shipper';
+    const arrived = Boolean(tracking.arrived_at_destination_at || tracking.trip_phase === 'arrived');
+    const approaching = Boolean(
+      !arrived &&
+        (tracking.approaching_destination ||
+          (tracking.trip_phase === 'delivery' &&
+            tracking.eta?.duration_min != null &&
+            tracking.eta.duration_min <= 5))
+    );
+
+    if (!approaching && !arrived) {
+      if (banner) banner.remove();
+      return;
+    }
+
+    if (!banner) {
+      banner = document.createElement('div');
+      banner.className = 'trip-arrival-banner';
+      banner.dataset.tripArrivalBanner = '1';
+      inst.container.insertBefore(banner, inst.container.firstChild);
+    }
+
+    banner.classList.toggle('trip-arrival-banner--approaching', approaching && !arrived);
+    banner.classList.toggle('trip-arrival-banner--arrived', arrived);
+
+    if (arrived) {
+      banner.innerHTML = `
+        <span class="trip-arrival-banner-icon" aria-hidden="true">📍</span>
+        <div class="trip-arrival-banner-copy">
+          <strong>${role === 'shipper' ? 'Transportista en destino' : 'Llegaste al destino'}</strong>
+          <span>${role === 'shipper' ? 'El camión dejó de estar en ruta. Confirma cuando recibas la carga.' : 'Marca entregado cuando descargues la carga.'}</span>
+        </div>`;
+      return;
+    }
+
+    const etaText = tracking.eta?.duration_text || '~5 min';
+    banner.innerHTML = `
+      <span class="trip-arrival-banner-icon" aria-hidden="true">🚛</span>
+      <div class="trip-arrival-banner-copy">
+        <strong>${role === 'shipper' ? 'Transportista llegando al destino' : 'Llegando al destino'}</strong>
+        <span>${role === 'shipper' ? `Se acerca · ETA ${etaText}` : `Faltan ${etaText} · al llegar, marca entregado`}</span>
+      </div>`;
+  },
+
   _ensureInstance(container, tracking) {
     const key = this._containerKey(container);
     let inst = this._instances.get(key);
@@ -303,6 +350,13 @@ const LiveMap = {
   },
 
   _updateRouteLine(inst, tracking) {
+    if (tracking.trip_phase === 'arrived' || tracking.arrived_at_destination_at || tracking.route_live === false) {
+      if (inst.routePolyline) {
+        inst.routePolyline.setMap(null);
+        inst.routePolyline = null;
+      }
+      return;
+    }
     const path = tracking.route?.driving_path;
     if (!path?.length) {
       const o = tracking.route?.origin;
@@ -407,7 +461,7 @@ const LiveMap = {
   _bindNavButton(inst, tracking) {
     const url = tracking.navigation_url;
     if (!inst.navBtn) return;
-    if (!url) {
+    if (!url || tracking.trip_phase === 'arrived' || tracking.arrived_at_destination_at) {
       inst.navBtn.hidden = true;
       return;
     }
@@ -439,9 +493,13 @@ const LiveMap = {
 
     if (tracking.status === 'in_progress' && !tracking.carrier_marked_delivered_at) {
       btn.hidden = false;
-      btn.textContent = tracking.arrival_ready
-        ? 'Llegaste — marcar entregado'
-        : 'Marcar entregado en destino';
+      if (tracking.arrived_at_destination_at || tracking.trip_phase === 'arrived') {
+        btn.textContent = 'Llegaste — marcar entregado';
+      } else {
+        btn.textContent = tracking.arrival_ready
+          ? 'Llegaste — marcar entregado'
+          : 'Marcar entregado en destino';
+      }
       btn.onclick = () => {
         if (typeof window.openTripDelivery === 'function') {
           window.openTripDelivery(matchId, btn);
@@ -452,6 +510,11 @@ const LiveMap = {
 
   _updateEta(inst, tracking) {
     if (!inst.etaEl) return;
+    if (tracking.trip_phase === 'arrived' || tracking.arrived_at_destination_at) {
+      inst.etaEl.hidden = true;
+      inst.etaEl.textContent = '';
+      return;
+    }
     if (tracking.eta?.duration_text) {
       const prefix =
         tracking.trip_phase === 'pickup' || tracking.eta?.phase === 'pickup'
@@ -471,9 +534,15 @@ const LiveMap = {
     const trailN = (tracking.location_trail || []).length;
     if (tracking.carrier_position) {
       const phaseLabel =
-        tracking.trip_phase === 'pickup' ? 'Ir a embarcadero' : 'Camión en vivo';
+        tracking.trip_phase === 'pickup'
+          ? 'Ir a embarcadero'
+          : tracking.trip_phase === 'arrived'
+            ? 'En destino'
+            : 'Camión en vivo';
       let line = `${phaseLabel}${t ? ` · ${t}` : ''}`;
-      if (tracking.eta?.duration_text) line += ` · ETA ${tracking.eta.duration_text}`;
+      if (tracking.eta?.duration_text && tracking.trip_phase !== 'arrived') {
+        line += ` · ETA ${tracking.eta.duration_text}`;
+      }
       if (trailN > 1) line += ` · recorrido ${trailN} pts`;
       if (tracking.arrival_ready) {
         line += ' · GPS: cerca del destino';
@@ -549,6 +618,7 @@ const LiveMap = {
       : inst.lastCarrier;
     this._updateEta(inst, tracking);
     this._updateMeta(inst, tracking);
+    this._updateArrivalBanner(inst, tracking);
     this._updateConnectivity(inst, tracking, Boolean(opts.pollFailed));
     this._bindNavButton(inst, tracking);
     this._bindTripActionButton(inst, tracking);

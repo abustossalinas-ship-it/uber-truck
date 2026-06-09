@@ -5,6 +5,7 @@ const maps = require('../services/google-maps');
 const { filterMatchesForUser } = require('./access-scope');
 const { listTripEvents } = require('./trip-events');
 const { computeTripProximity } = require('./trip-proximity');
+const { APPROACHING_ETA_MIN } = require('./trip-arrival-alerts');
 
 async function buildLocationTrail(matchId, carrier) {
   const events = await listTripEvents(matchId);
@@ -82,18 +83,25 @@ async function buildMatchTracking(matchId, user) {
 
   const trackingActive =
     ['accepted', 'in_progress'].includes(match.status) && !match.carrier_marked_delivered_at;
+  const arrivedAtDestination = Boolean(match.arrived_at_destination_at);
+  const routeLive = trackingActive && !arrivedAtDestination;
+
   const static_map_url =
     maps.isConfigured() && trackingActive
       ? maps.staticMapUrl({ origin, destination, carrier })
       : null;
 
   const trail = trackingActive ? await buildLocationTrail(matchId, carrier) : [];
+  const eventRows = trackingActive ? await listTripEvents(matchId) : [];
 
-  const trip_phase =
+  let trip_phase =
     match.status === 'accepted' ? 'pickup' : match.status === 'in_progress' ? 'delivery' : null;
+  if (arrivedAtDestination && match.status === 'in_progress') {
+    trip_phase = 'arrived';
+  }
 
   let driving_path = [];
-  if (trackingActive && maps.isConfigured()) {
+  if (routeLive && maps.isConfigured()) {
     if (trip_phase === 'pickup' && origin) {
       const from = carrier || null;
       if (from) {
@@ -108,7 +116,7 @@ async function buildMatchTracking(matchId, user) {
   }
 
   let eta = null;
-  if (trackingActive && carrier && maps.isConfigured()) {
+  if (routeLive && carrier && maps.isConfigured()) {
     const etaTarget =
       trip_phase === 'pickup' ? origin : trip_phase === 'delivery' ? destination : null;
     if (etaTarget?.lat != null) {
@@ -129,9 +137,24 @@ async function buildMatchTracking(matchId, user) {
     }
   }
 
-  const navTarget = trip_phase === 'pickup' ? origin : destination;
+  const approachingByEvent = eventRows.some((e) => e.event_type === 'approaching_destination');
+  const approachingByEta =
+    trip_phase === 'delivery' &&
+    eta?.duration_min != null &&
+    eta.duration_min <= APPROACHING_ETA_MIN;
+  const approaching_destination = approachingByEvent || approachingByEta;
+
+  const navTarget =
+    trip_phase === 'pickup' ? origin : trip_phase === 'arrived' ? destination : destination;
   const navFrom = carrier || (trip_phase === 'pickup' ? null : origin);
-  const navigation = maps.buildNavigationUrls(navFrom, navTarget);
+  const navigation = routeLive
+    ? maps.buildNavigationUrls(navFrom, navTarget)
+    : {
+        navigation_url: null,
+        navigation_android_intent: null,
+        navigation_waze_url: null,
+        navigation_waze_intent: null,
+      };
 
   const proximity =
     carrier?.lat != null && carrier?.lng != null
@@ -142,7 +165,10 @@ async function buildMatchTracking(matchId, user) {
     match_id: match.id,
     status: match.status,
     trip_phase,
+    route_live: routeLive,
     tracking_active: trackingActive,
+    arrived_at_destination_at: match.arrived_at_destination_at || null,
+    approaching_destination,
     carrier_marked_delivered_at: match.carrier_marked_delivered_at || null,
     proximity,
     pickup_ready: Boolean(proximity?.phase === 'pickup' && proximity.at_target),

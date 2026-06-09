@@ -219,10 +219,16 @@ body.cubik-app .app-gate {
 
 .app-gate-hero .cubik-welcome-headline,
 .app-gate-hero .cubik-welcome-sub,
-.app-gate-hero .cubik-welcome-bridge {
+.app-gate-hero .cubik-welcome-bridge,
+.app-gate-hero .cubik-welcome-trust,
+.app-gate-hero .cubik-welcome-route {
   text-align: center;
   margin-left: auto;
   margin-right: auto;
+}
+
+.app-gate-hero .cubik-welcome-trust {
+  justify-items: start;
 }
 
 .app-gate-logo {
@@ -359,6 +365,12 @@ body.cubik-app #auth-panel form button[type="submit"] {
 
 body.cubik-app #auth-panel .auth-login-footer {
   text-align: center;
+}
+
+body.cubik-app #auth-panel #auth-form-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
 }
 
 body.cubik-app #auth-panel[hidden],

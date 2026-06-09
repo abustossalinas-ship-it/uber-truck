@@ -27,6 +27,43 @@
   margin: 0.65rem auto 0;
 }
 
+.cubik-welcome-trust {
+  list-style: none;
+  margin: 0.55rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.35rem 0.65rem;
+  width: min(100%, 20rem);
+  text-align: left;
+}
+
+.cubik-welcome-trust li {
+  margin: 0;
+  padding: 0 0 0 1.15rem;
+  position: relative;
+  font-size: 0.72rem;
+  font-weight: 600;
+  line-height: 1.35;
+  color: var(--brand-navy-mid, #1e3a5f);
+}
+
+.cubik-welcome-trust li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  top: 0;
+  color: #29abe2;
+  font-weight: 800;
+}
+
+.cubik-welcome-route {
+  display: block;
+  width: min(100%, 17.5rem);
+  height: auto;
+  margin: 0.55rem auto 0;
+}
+
 .role-premium-grid {
   display: flex;
   flex-direction: column;
@@ -144,7 +181,7 @@
   padding: 0.55rem 0.65rem;
   text-align: center;
   font-size: 0.72rem;
-  line-height: 1.4;
+  line-height: 1.45;
   color: var(--text-muted);
   background: var(--brand-gray-50);
   border-radius: 10px;
@@ -154,6 +191,8 @@
 .cubik-welcome-pilot strong {
   color: var(--brand-navy);
   font-weight: 800;
+  display: block;
+  margin-bottom: 0.1rem;
 }
 
 .cubik-welcome-demo {
@@ -189,6 +228,18 @@
   margin-bottom: 0.65rem;
 }
 
+.auth-intent-step .cubik-welcome-trust {
+  max-width: none;
+  width: 100%;
+}
+
+.auth-intent-step .cubik-welcome-route {
+  margin-left: 0;
+  margin-right: 0;
+  width: 100%;
+  max-width: 17.5rem;
+}
+
 #auth-intent-step[hidden],
 #auth-form-wrap[hidden] {
   display: none !important;
@@ -202,5 +253,14 @@
   .cubik-welcome-bridge {
     max-width: 14rem;
     margin-top: 0.4rem;
+  }
+
+  .cubik-welcome-trust {
+    grid-template-columns: 1fr;
+    gap: 0.2rem;
+  }
+
+  .cubik-welcome-route {
+    max-width: 14rem;
   }
 }

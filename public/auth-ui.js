@@ -96,6 +96,23 @@ let pendingAuthRegister = false;
 
 const AUTH_INTENT_KEY = 'ut_auth_intent_role';
 
+const AUTH_CONTEXT_COPY = {
+  carrier: {
+    icon: '🚛',
+    role: 'Transportista',
+    taglineLogin: 'Encuentra carga para aprovechar tu ruta',
+    taglineRegister: 'Registra tu flota y conecta con cargas en tu ruta',
+    flowSrc: '/brand/welcome/auth-flow-carrier.svg',
+  },
+  shipper: {
+    icon: '📦',
+    role: 'Empresa',
+    taglineLogin: 'Encuentra transporte disponible cuando lo necesites',
+    taglineRegister: 'Publica cargas y empareja con transportistas',
+    flowSrc: '/brand/welcome/auth-flow-shipper.svg',
+  },
+};
+
 function normalizeAuthIntentRole(raw) {
   if (typeof normalizeAppRole === 'function') return normalizeAppRole(raw);
   const r = String(raw || '')
@@ -190,21 +207,44 @@ function switchAuthIntentRole(role) {
   setAuthMode(authRegisterMode, false);
 }
 
+function syncAuthContext(role) {
+  const ctx = document.getElementById('auth-context');
+  const title = document.getElementById('auth-title');
+  const panel = document.getElementById('auth-panel');
+  const cfg = role ? AUTH_CONTEXT_COPY[role] : null;
+  if (!ctx) return;
+  if (cfg && !authForgotMode) {
+    ctx.hidden = false;
+    ctx.removeAttribute('hidden');
+    ctx.dataset.role = role;
+    const iconEl = document.getElementById('auth-context-icon');
+    const roleEl = document.getElementById('auth-context-role');
+    const taglineEl = document.getElementById('auth-context-tagline');
+    const flowEl = document.getElementById('auth-context-flow');
+    if (iconEl) iconEl.textContent = cfg.icon;
+    if (roleEl) roleEl.textContent = cfg.role;
+    if (taglineEl) {
+      taglineEl.textContent = authRegisterMode ? cfg.taglineRegister : cfg.taglineLogin;
+    }
+    if (flowEl) flowEl.src = cfg.flowSrc;
+    if (title) {
+      title.textContent = authIntentHeadline(role, authRegisterMode);
+      title.classList.add('auth-title-sr');
+    }
+    if (panel) panel.dataset.authRole = role;
+  } else {
+    ctx.hidden = true;
+    ctx.setAttribute('hidden', '');
+    delete ctx.dataset.role;
+    if (title) title.classList.remove('auth-title-sr');
+    if (panel) delete panel.dataset.authRole;
+  }
+}
+
 function refreshAuthIntentUi() {
   const role = getAuthIntentRole();
-  const badge = document.getElementById('auth-intent-badge');
-  const label = role && typeof roleLabel === 'function' ? roleLabel(role) : role;
   syncAuthRoleToggle(role);
-  if (badge) {
-    if (role && !authForgotMode) {
-      badge.hidden = false;
-      badge.removeAttribute('hidden');
-      badge.textContent = `Perfil: ${label}`;
-    } else {
-      badge.hidden = true;
-      badge.textContent = '';
-    }
-  }
+  syncAuthContext(role);
   document.querySelectorAll('[data-role-card]').forEach((card) => {
     const pick = card.dataset.roleCard;
     card.classList.toggle('selected', Boolean(role) && pick === role);
@@ -232,9 +272,32 @@ function setPanelSectionVisible(el, visible) {
   }
 }
 
+function isCubikAppGuest() {
+  return document.body.classList.contains('cubik-app') && !Auth.user;
+}
+
 function showAuthIntentStep(show) {
+  if (isCubikAppGuest()) show = false;
   setPanelSectionVisible(document.getElementById('auth-intent-step'), show);
   setPanelSectionVisible(document.getElementById('auth-form-wrap'), !show);
+}
+
+function syncAuthBackWelcome() {
+  const btn = document.getElementById('auth-back-welcome');
+  if (!btn) return;
+  const panel = document.getElementById('auth-panel');
+  const panelOpen = panel && !panel.hidden;
+  const show = isCubikAppGuest() && panelOpen && !authForgotMode;
+  setPanelSectionVisible(btn, show);
+}
+
+function showAppWelcome() {
+  const welcome = document.getElementById('app-welcome');
+  if (welcome) {
+    welcome.hidden = false;
+    welcome.removeAttribute('hidden');
+  }
+  showWelcomeRoleStep();
 }
 
 function pickAuthIntent(role) {
@@ -291,6 +354,7 @@ function showAuthError(message) {
   } else {
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
+  syncAuthBackWelcome();
 }
 
 function notifyAuthFailure(message) {
@@ -374,6 +438,7 @@ function setAuthMode(register, forgot = false) {
     forgotErr.textContent = '';
     forgotErr.hidden = true;
   }
+  syncAuthBackWelcome();
   if (forgot) {
     title.textContent = 'Recuperar contraseña';
     if (formLogin) formLogin.hidden = true;
@@ -393,10 +458,10 @@ function setAuthMode(register, forgot = false) {
     if (backLogin) backLogin.hidden = true;
     if (rolePicker) rolePicker.hidden = !register;
     if (intentRole) {
-      title.textContent = authIntentHeadline(intentRole, register);
       syncAuthRoleFields(intentRole);
     } else {
       title.textContent = register ? 'Crear cuenta' : 'Iniciar sesión';
+      title.classList.remove('auth-title-sr');
     }
     const submit = document.getElementById('auth-submit');
     if (submit) submit.textContent = register ? 'Registrarse' : 'Entrar';
@@ -407,11 +472,13 @@ function setAuthMode(register, forgot = false) {
 function closeAuthPanel() {
   const panel = document.getElementById('auth-panel');
   setPanelSectionVisible(panel, false);
-  showAuthIntentStep(true);
-  if (document.body.classList.contains('cubik-app') && !Auth.user) {
-    const welcome = document.getElementById('app-welcome');
-    if (welcome) welcome.hidden = false;
-    showWelcomeRoleStep();
+  clearAuthError();
+  syncAuthBackWelcome();
+  if (isCubikAppGuest()) {
+    showAuthIntentStep(false);
+    showAppWelcome();
+  } else {
+    showAuthIntentStep(true);
   }
 }
 
@@ -423,7 +490,8 @@ function openAuthPanel(register = false, forgot = false, roleIntent = null) {
   const intent = getAuthIntentRole();
   setPanelSectionVisible(panel, true);
   document.getElementById('change-password-panel')?.setAttribute('hidden', '');
-  if (document.body.classList.contains('cubik-app')) {
+  if (isCubikAppGuest()) {
+    document.getElementById('app-welcome')?.setAttribute('hidden', '');
     const welcome = document.getElementById('app-welcome');
     if (welcome) welcome.hidden = true;
   }
@@ -431,6 +499,10 @@ function openAuthPanel(register = false, forgot = false, roleIntent = null) {
     showAuthIntentStep(false);
     setAuthMode(false, true);
   } else if (!intent) {
+    if (isCubikAppGuest()) {
+      closeAuthPanel();
+      return;
+    }
     showAuthIntentStep(true);
     setAuthMode(register, false);
   } else {
@@ -444,6 +516,7 @@ function openAuthPanel(register = false, forgot = false, roleIntent = null) {
       if (email && !authForgotMode) email.focus();
     }, 50);
   }
+  syncAuthBackWelcome();
 }
 
 window.openAuthPanel = openAuthPanel;
@@ -475,9 +548,17 @@ document.getElementById('auth-intent-cancel')?.addEventListener('click', () => {
   closeAuthPanel();
 });
 
+document.getElementById('auth-back-welcome')?.addEventListener('click', () => {
+  closeAuthPanel();
+});
+
 document.getElementById('btn-auth')?.addEventListener('click', () => {
   if (Auth.user) {
     Auth.logout();
+    closeAuthPanel();
+    return;
+  }
+  if (isCubikAppGuest()) {
     closeAuthPanel();
     return;
   }

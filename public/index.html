@@ -14,9 +14,9 @@
   <link rel="apple-touch-icon" href="/brand/logo.png" />
   <link rel="preconnect" href="https://uber-truck-production.up.railway.app" crossorigin />
   <link rel="dns-prefetch" href="https://uber-truck-production.up.railway.app" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.117" />
-  <link rel="stylesheet" href="/app-shell.css?v=0.0.117" />
-  <link rel="stylesheet" href="/role-welcome.css?v=0.0.117" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.119" />
+  <link rel="stylesheet" href="/app-shell.css?v=0.0.119" />
+  <link rel="stylesheet" href="/role-welcome.css?v=0.0.119" />
   <script src="/brand-config.js?v=0.0.76" defer></script>
   <script src="/api-base.js?v=0.0.83" defer></script>
 </head>
@@ -29,6 +29,13 @@
         <p class="cubik-welcome-headline">Menos viajes vacíos. Más negocios.</p>
         <p class="cubik-welcome-sub app-gate-lead">La red logística para aprovechar cada kilómetro recorrido.</p>
         <img class="cubik-welcome-bridge" src="/brand/welcome/story-bridge.svg" width="280" height="48" alt="" />
+        <ul class="cubik-welcome-trust" aria-label="Capacidades de Cubik">
+          <li>Matching en tiempo real</li>
+          <li>Geolocalización</li>
+          <li>Trazabilidad de viajes</li>
+          <li>Confirmación de entregas</li>
+        </ul>
+        <img class="cubik-welcome-route" src="/brand/welcome/route-chile.svg" width="280" height="72" alt="" />
       </div>
       <div id="app-welcome-roles" class="app-gate-role-step">
         <div class="role-premium-grid">
@@ -55,7 +62,7 @@
             </div>
           </article>
         </div>
-        <p class="cubik-welcome-pilot"><strong>+2.000 km</strong> vacíos recuperados · Piloto privado <span class="muted">(demo)</span></p>
+        <p class="cubik-welcome-pilot"><strong>Piloto privado</strong><br />Próximamente en rutas seleccionadas</p>
         <a class="cubik-welcome-demo" href="/docs/Journey-Usuario-Uber-Truck.html" target="_blank" rel="noopener">¿Quieres conocer Cubik? Ver demo →</a>
       </div>
     </div>
@@ -310,6 +317,13 @@
       <p class="cubik-welcome-headline" id="auth-intent-title">Menos viajes vacíos. Más negocios.</p>
       <p class="cubik-welcome-sub auth-intent-lead">La red logística para aprovechar cada kilómetro recorrido.</p>
       <img class="cubik-welcome-bridge" src="/brand/welcome/story-bridge.svg" width="280" height="48" alt="" />
+      <ul class="cubik-welcome-trust" aria-label="Capacidades de Cubik">
+        <li>Matching en tiempo real</li>
+        <li>Geolocalización</li>
+        <li>Trazabilidad de viajes</li>
+        <li>Confirmación de entregas</li>
+      </ul>
+      <img class="cubik-welcome-route" src="/brand/welcome/route-chile.svg" width="280" height="72" alt="" />
       <div class="role-premium-grid auth-intent-grid">
         <article class="role-premium-card carrier" data-role-card="carrier">
           <div class="role-premium-visual">
@@ -338,12 +352,20 @@
       <button type="button" class="link-btn auth-intent-cancel" id="auth-intent-cancel">Cancelar</button>
     </div>
     <div id="auth-form-wrap">
+    <button type="button" class="link-btn auth-back-welcome" id="auth-back-welcome" hidden>← Volver</button>
     <div id="auth-role-toggle" class="auth-role-toggle" hidden role="tablist" aria-label="Tipo de cuenta">
       <span class="auth-role-toggle-pill" aria-hidden="true"></span>
       <button type="button" class="auth-role-toggle-btn" data-auth-toggle="carrier" role="tab" id="auth-toggle-carrier">Transportista</button>
       <button type="button" class="auth-role-toggle-btn" data-auth-toggle="shipper" role="tab" id="auth-toggle-shipper">Empresa</button>
     </div>
-    <p id="auth-intent-badge" class="auth-intent-badge" hidden></p>
+    <div id="auth-context" class="auth-context" hidden>
+      <img id="auth-context-flow" class="auth-context-flow" src="/brand/welcome/auth-flow-carrier.svg" width="240" height="40" alt="" />
+      <div class="auth-context-copy">
+        <span class="auth-context-icon" id="auth-context-icon" aria-hidden="true">🚛</span>
+        <p class="auth-context-role" id="auth-context-role">Transportista</p>
+        <p class="auth-context-tagline" id="auth-context-tagline">Encuentra carga para aprovechar tu ruta</p>
+      </div>
+    </div>
     <h2 id="auth-title">Iniciar sesión</h2>
     <form id="form-auth">
       <label>Email</label>
@@ -1202,7 +1224,7 @@
   </div>
 
   <script src="/roles-ui.js?v=0.0.89" defer></script>
-  <script src="/app-shell.js?v=0.0.117" defer></script>
+  <script src="/app-shell.js?v=0.0.119" defer></script>
   <script src="/pwa-ui.js?v=0.0.64" defer></script>
   <script src="/kyc-ui.js?v=0.0.33" defer></script>
   <script src="/admin-ui.js?v=0.0.59" defer></script>
@@ -1217,7 +1239,7 @@
   <script src="/legal-terms-ui.js?v=0.0.86" defer></script>
   <script src="/load-form-validation.js?v=0.0.86" defer></script>
   <script src="/proposal-compare-ui.js?v=0.0.47" defer></script>
-  <script src="/auth-ui.js?v=0.0.117" defer></script>
+  <script src="/auth-ui.js?v=0.0.119" defer></script>
   <script src="/live-map-ui.js?v=0.0.111" defer></script>
   <script src="/tracking-ui.js?v=0.0.111" defer></script>
   <script src="/incident-ui.js?v=0.0.99" defer></script>

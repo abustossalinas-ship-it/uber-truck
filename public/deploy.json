@@ -1,6 +1,6 @@
 {
-  "version": "0.0.117",
+  "version": "0.0.119",
   "git_sha": "",
   "ui": "uber-parity-v1",
-  "note": "Login toggle segmentado transportista vs empresa"
+  "note": "Welcome confianza + ruta; login contextual por rol"
 }

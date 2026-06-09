@@ -327,8 +327,15 @@ const AppShell = {
         authError &&
         !authError.hidden &&
         authError.textContent.trim();
-      const authPanelOpen = authPanel && !authPanel.hidden;
-      if (!authOpenWithError && !authPanelOpen) {
+      const authPanelOpen =
+        authPanel && !authPanel.hidden && !authPanel.hasAttribute('hidden');
+      if (authPanelOpen) {
+        const welcome = document.getElementById('app-welcome');
+        if (welcome) {
+          welcome.hidden = true;
+          welcome.setAttribute('hidden', '');
+        }
+      } else if (!authOpenWithError) {
         authPanel?.setAttribute('hidden', '');
         const welcome = document.getElementById('app-welcome');
         if (welcome) {

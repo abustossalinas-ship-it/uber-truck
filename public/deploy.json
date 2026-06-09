@@ -1,6 +1,6 @@
 {
-  "version": "0.0.124",
+  "version": "0.0.125",
   "git_sha": "",
   "ui": "uber-parity-v1",
-  "note": "Fix welcome APK: CTAs abren login dentro del gate"
+  "note": "Fix auth-ui syntax: welcome CTAs abren login (prod/APK)"
 }

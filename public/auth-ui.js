@@ -335,7 +335,10 @@ function bindWelcomeAuthButtons() {
       e.stopPropagation();
       pickAuthIntent(btn.dataset.authIntent);
     };
-    btn.addEventListener('click', go);
+    btn.addEventListener('pointerup', (e) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
+      go(e);
+    });
   });
 }
 
@@ -370,7 +373,8 @@ function blockAuthIntentMismatch(user) {
   showAuthError(
     `Esta cuenta es de ${actualLabel}. Cambiamos la pestaña de arriba — vuelve a ingresar tu contraseña.`
   );
-  document.querySelector('#form-auth [name="password"]')?.value = '';
+  const pwdField = document.querySelector('#form-auth [name="password"]');
+  if (pwdField) pwdField.value = '';
   const panel = document.getElementById('auth-panel');
   if (panel) {
     panel.hidden = false;
@@ -572,6 +576,7 @@ function openAuthPanel(register = false, forgot = false, roleIntent = null) {
 }
 
 window.openAuthPanel = openAuthPanel;
+window.pickAuthIntent = pickAuthIntent;
 window.setAuthIntentRole = setAuthIntentRole;
 window.getAuthIntentRole = getAuthIntentRole;
 window.clearAuthIntentRole = clearAuthIntentRole;

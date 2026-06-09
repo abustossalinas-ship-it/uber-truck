@@ -7,6 +7,9 @@ Thumbs.db
 .cursor/projects/
 dist/
 coverage/
+test-results/
+playwright-report/
+blob-report/
 data/store.json
 
 public/downloads/*.apk

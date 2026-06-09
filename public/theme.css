@@ -235,6 +235,62 @@ body {
   display: none;
 }
 
+.auth-role-toggle {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  width: 100%;
+  padding: 4px;
+  margin: 0 0 0.55rem;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--brand-gray-50);
+  box-sizing: border-box;
+}
+
+.auth-role-toggle[hidden] {
+  display: none !important;
+}
+
+.auth-role-toggle-pill {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 9px;
+  background: var(--brand-blue, #29abe2);
+  transition: left 0.22s ease, background 0.22s ease;
+  pointer-events: none;
+}
+
+.auth-role-toggle[data-active='shipper'] .auth-role-toggle-pill {
+  left: calc(50%);
+  background: var(--brand-orange, #f7941d);
+}
+
+.auth-role-toggle-btn {
+  position: relative;
+  z-index: 1;
+  border: none;
+  background: transparent;
+  padding: 0.62rem 0.45rem;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 800;
+  cursor: pointer;
+  color: var(--brand-navy);
+  transition: color 0.15s ease;
+}
+
+.auth-role-toggle-btn[aria-selected='true'] {
+  color: var(--text-on-dark, #fff);
+}
+
+.auth-panel.has-auth-intent .auth-role-picker {
+  display: none;
+}
+
 .auth-role-picker {
   margin: 0.5rem 0 0.75rem;
 }

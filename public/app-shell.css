@@ -333,7 +333,8 @@ body.cubik-app #auth-panel form,
 body.cubik-app #change-password-panel form,
 body.cubik-app #auth-panel .auth-login-footer,
 body.cubik-app #auth-panel #auth-form-wrap,
-body.cubik-app #auth-panel .auth-intent-step {
+body.cubik-app #auth-panel .auth-intent-step,
+body.cubik-app #auth-panel .auth-role-toggle {
   width: 100%;
   max-width: 22rem;
   margin-left: auto;

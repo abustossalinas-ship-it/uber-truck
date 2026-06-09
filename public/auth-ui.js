@@ -165,11 +165,36 @@ function syncAuthRoleFields(role) {
   updateRegisterLabels();
 }
 
+function syncAuthRoleToggle(role) {
+  const toggle = document.getElementById('auth-role-toggle');
+  if (!toggle) return;
+  if (role && !authForgotMode) {
+    toggle.hidden = false;
+    toggle.removeAttribute('hidden');
+    toggle.dataset.active = role;
+    toggle.querySelectorAll('[data-auth-toggle]').forEach((btn) => {
+      const active = btn.dataset.authToggle === role;
+      btn.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+  } else {
+    toggle.hidden = true;
+    toggle.setAttribute('hidden', '');
+    delete toggle.dataset.active;
+  }
+}
+
+function switchAuthIntentRole(role) {
+  const normalized = normalizeAuthIntentRole(role);
+  if (!normalized) return;
+  setAuthIntentRole(normalized);
+  setAuthMode(authRegisterMode, false);
+}
+
 function refreshAuthIntentUi() {
   const role = getAuthIntentRole();
   const badge = document.getElementById('auth-intent-badge');
-  const changeBtn = document.getElementById('auth-change-intent');
   const label = role && typeof roleLabel === 'function' ? roleLabel(role) : role;
+  syncAuthRoleToggle(role);
   if (badge) {
     if (role && !authForgotMode) {
       badge.hidden = false;
@@ -180,7 +205,6 @@ function refreshAuthIntentUi() {
       badge.textContent = '';
     }
   }
-  if (changeBtn) changeBtn.hidden = !role || authForgotMode;
   document.querySelectorAll('[data-role-card]').forEach((card) => {
     const pick = card.dataset.roleCard;
     card.classList.toggle('selected', Boolean(role) && pick === role);
@@ -439,14 +463,12 @@ document.querySelectorAll('[data-role-pick]').forEach((btn) => {
   });
 });
 
-document.getElementById('auth-change-intent')?.addEventListener('click', () => {
-  clearAuthIntentRole();
-  if (document.body.classList.contains('cubik-app') && !Auth.user) {
-    closeAuthPanel();
-    return;
-  }
-  pendingAuthRegister = authRegisterMode;
-  showAuthIntentStep(true);
+document.getElementById('auth-role-toggle')?.addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-auth-toggle]');
+  if (!btn) return;
+  const role = btn.dataset.authToggle;
+  if (!role || role === getAuthIntentRole()) return;
+  switchAuthIntentRole(role);
 });
 
 document.getElementById('auth-intent-cancel')?.addEventListener('click', () => {

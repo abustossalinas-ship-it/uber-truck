@@ -14,9 +14,9 @@
   <link rel="apple-touch-icon" href="/brand/logo.png" />
   <link rel="preconnect" href="https://uber-truck-production.up.railway.app" crossorigin />
   <link rel="dns-prefetch" href="https://uber-truck-production.up.railway.app" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.116" />
-  <link rel="stylesheet" href="/app-shell.css?v=0.0.116" />
-  <link rel="stylesheet" href="/role-welcome.css?v=0.0.116" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.117" />
+  <link rel="stylesheet" href="/app-shell.css?v=0.0.117" />
+  <link rel="stylesheet" href="/role-welcome.css?v=0.0.117" />
   <script src="/brand-config.js?v=0.0.76" defer></script>
   <script src="/api-base.js?v=0.0.83" defer></script>
 </head>
@@ -338,6 +338,11 @@
       <button type="button" class="link-btn auth-intent-cancel" id="auth-intent-cancel">Cancelar</button>
     </div>
     <div id="auth-form-wrap">
+    <div id="auth-role-toggle" class="auth-role-toggle" hidden role="tablist" aria-label="Tipo de cuenta">
+      <span class="auth-role-toggle-pill" aria-hidden="true"></span>
+      <button type="button" class="auth-role-toggle-btn" data-auth-toggle="carrier" role="tab" id="auth-toggle-carrier">Transportista</button>
+      <button type="button" class="auth-role-toggle-btn" data-auth-toggle="shipper" role="tab" id="auth-toggle-shipper">Empresa</button>
+    </div>
     <p id="auth-intent-badge" class="auth-intent-badge" hidden></p>
     <h2 id="auth-title">Iniciar sesión</h2>
     <form id="form-auth">
@@ -381,7 +386,6 @@
       <button type="button" class="link-btn login-only" id="auth-forgot-link">¿Olvidaste tu contraseña?</button>
       <button type="button" class="link-btn" id="auth-toggle-mode">Crear cuenta</button>
       <button type="button" class="link-btn forgot-only" id="auth-back-login" hidden>Volver a iniciar sesión</button>
-      <button type="button" class="link-btn" id="auth-change-intent" hidden>Cambiar tipo de cuenta</button>
     </p>
     </div>
   </div>
@@ -1198,7 +1202,7 @@
   </div>
 
   <script src="/roles-ui.js?v=0.0.89" defer></script>
-  <script src="/app-shell.js?v=0.0.116" defer></script>
+  <script src="/app-shell.js?v=0.0.117" defer></script>
   <script src="/pwa-ui.js?v=0.0.64" defer></script>
   <script src="/kyc-ui.js?v=0.0.33" defer></script>
   <script src="/admin-ui.js?v=0.0.59" defer></script>
@@ -1213,7 +1217,7 @@
   <script src="/legal-terms-ui.js?v=0.0.86" defer></script>
   <script src="/load-form-validation.js?v=0.0.86" defer></script>
   <script src="/proposal-compare-ui.js?v=0.0.47" defer></script>
-  <script src="/auth-ui.js?v=0.0.116" defer></script>
+  <script src="/auth-ui.js?v=0.0.117" defer></script>
   <script src="/live-map-ui.js?v=0.0.111" defer></script>
   <script src="/tracking-ui.js?v=0.0.111" defer></script>
   <script src="/incident-ui.js?v=0.0.99" defer></script>

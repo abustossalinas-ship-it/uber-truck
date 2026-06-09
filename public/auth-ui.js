@@ -181,10 +181,9 @@ function refreshAuthIntentUi() {
     }
   }
   if (changeBtn) changeBtn.hidden = !role || authForgotMode;
-  document.querySelectorAll('.role-market-card[data-auth-intent]').forEach((card) => {
-    const pick = card.dataset.authIntent;
+  document.querySelectorAll('[data-role-card]').forEach((card) => {
+    const pick = card.dataset.roleCard;
     card.classList.toggle('selected', Boolean(role) && pick === role);
-    card.setAttribute('aria-pressed', Boolean(role) && pick === role ? 'true' : 'false');
   });
   if (role) syncAuthRoleFields(role);
 }

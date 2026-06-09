@@ -181,7 +181,7 @@ body.cubik-app .app-gate {
   flex: 1 0 auto;
   display: flex;
   flex-direction: column;
-  width: min(100%, 26rem);
+  width: min(100%, 22.5rem);
   min-height: min(100%, calc(100dvh - var(--app-safe-top) - var(--app-safe-bottom) - 2rem));
   min-height: min(100%, calc(-webkit-fill-available - var(--app-safe-top) - var(--app-safe-bottom) - 2rem));
   box-sizing: border-box;
@@ -218,8 +218,11 @@ body.cubik-app .app-gate {
 }
 
 .app-gate-hero .cubik-welcome-headline,
-.app-gate-hero .cubik-welcome-sub {
+.app-gate-hero .cubik-welcome-sub,
+.app-gate-hero .cubik-welcome-bridge {
   text-align: center;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .app-gate-logo {

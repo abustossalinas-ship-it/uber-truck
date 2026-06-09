@@ -1,173 +1,192 @@
-/* Cubik — pantalla de elección de rol (marketplace story) */
+/* Cubik — welcome premium (ilustración + CTAs sólidos) */
 
 .cubik-welcome-headline {
-  margin: 0.2rem 0 0;
-  font-size: clamp(1.02rem, 4.4vw, 1.2rem);
+  margin: 0.15rem 0 0;
+  font-size: clamp(1.05rem, 4.6vw, 1.28rem);
   font-weight: 800;
-  line-height: 1.28;
+  line-height: 1.25;
   color: var(--brand-navy);
-  max-width: 22rem;
+  max-width: 20rem;
+  text-wrap: balance;
 }
 
 .cubik-welcome-sub {
-  margin: 0.4rem 0 0;
-  padding: 0 0.25rem;
-  font-size: clamp(0.8rem, 3.2vw, 0.9rem);
+  margin: 0.35rem 0 0;
+  padding: 0 0.35rem;
+  font-size: clamp(0.82rem, 3.3vw, 0.92rem);
   line-height: 1.45;
   color: var(--text-muted);
-  max-width: 22rem;
+  max-width: 21rem;
+  text-wrap: balance;
 }
 
-.role-market-grid {
+.cubik-welcome-bridge {
+  display: block;
+  width: min(100%, 17.5rem);
+  height: auto;
+  margin: 0.65rem auto 0;
+}
+
+.role-premium-grid {
   display: flex;
   flex-direction: column;
-  gap: 0.7rem;
+  gap: 0.75rem;
   width: 100%;
 }
 
-.role-market-card {
-  position: relative;
-  display: block;
+.role-premium-card {
+  display: flex;
+  flex-direction: column;
   width: 100%;
-  min-height: 10.25rem;
-  border: none;
   border-radius: 18px;
   overflow: hidden;
-  cursor: pointer;
-  text-align: left;
-  font: inherit;
-  padding: 0;
-  box-shadow: 0 10px 28px rgba(15, 39, 68, 0.2);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: 0 8px 28px rgba(15, 39, 68, 0.08);
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.role-market-card:active {
-  transform: scale(0.985);
+.role-premium-card.selected {
+  border-color: var(--brand-navy-mid);
+  box-shadow: 0 10px 32px rgba(15, 39, 68, 0.12);
 }
 
-.role-market-card.selected {
-  box-shadow:
-    0 10px 28px rgba(15, 39, 68, 0.22),
-    0 0 0 3px var(--brand-navy);
+.role-premium-visual {
+  width: 100%;
+  line-height: 0;
+  background: var(--brand-gray-50);
 }
 
-.role-market-card-bg,
-.role-market-card-overlay {
-  pointer-events: none;
+.role-premium-visual img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
 }
 
-.role-market-card-bg {
-  position: absolute;
-  inset: 0;
-  background-size: cover;
-  background-position: center;
-  transform: scale(1.02);
-}
-
-.role-market-card.carrier .role-market-card-bg {
-  background-image: url('/brand/welcome/carrier-truck.jpg');
-}
-
-.role-market-card.shipper .role-market-card-bg {
-  background-image: url('/brand/welcome/shipper-warehouse.jpg');
-}
-
-.role-market-card-overlay {
-  position: absolute;
-  inset: 0;
-}
-
-.role-market-card.carrier .role-market-card-overlay {
-  background: linear-gradient(
-    160deg,
-    rgba(15, 39, 68, 0.35) 0%,
-    rgba(15, 39, 68, 0.82) 38%,
-    rgba(41, 171, 226, 0.72) 100%
-  );
-}
-
-.role-market-card.shipper .role-market-card-overlay {
-  background: linear-gradient(
-    160deg,
-    rgba(15, 39, 68, 0.32) 0%,
-    rgba(15, 39, 68, 0.8) 38%,
-    rgba(247, 148, 29, 0.78) 100%
-  );
-}
-
-.role-market-card-body {
-  position: relative;
-  z-index: 1;
+.role-premium-body {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  justify-content: flex-end;
-  gap: 0.22rem;
-  min-height: 10.25rem;
-  padding: 1rem 1rem 0.95rem;
-  color: #fff;
+  align-items: stretch;
+  gap: 0.35rem;
+  padding: 0.9rem 1rem 1rem;
 }
 
-.role-market-card-emoji {
-  font-size: 1.6rem;
-  line-height: 1;
-  margin-bottom: 0.1rem;
-  filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.25));
+.role-premium-kicker {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
-.role-market-card-title {
-  font-size: 1.08rem;
+.role-premium-card.carrier .role-premium-kicker {
+  color: #1a7aa8;
+}
+
+.role-premium-card.shipper .role-premium-kicker {
+  color: #b35f08;
+}
+
+.role-premium-title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--brand-navy);
+  line-height: 1.2;
+}
+
+.role-premium-benefit {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--brand-navy);
+  line-height: 1.35;
+}
+
+.role-premium-detail {
+  margin: 0 0 0.35rem;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.role-premium-cta {
+  width: 100%;
+  margin-top: 0.15rem;
+  padding: 0.78rem 1rem;
+  border: none;
+  border-radius: 12px;
+  font: inherit;
+  font-size: 0.88rem;
   font-weight: 800;
   letter-spacing: 0.01em;
-  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.35);
+  color: var(--text-on-dark);
+  cursor: pointer;
+  transition: transform 0.12s ease, filter 0.12s ease;
 }
 
-.role-market-card-hook {
-  font-size: 0.9rem;
-  font-weight: 700;
-  line-height: 1.3;
-  text-shadow: 0 1px 6px rgba(0, 0, 0, 0.3);
+.role-premium-cta:active {
+  transform: scale(0.98);
 }
 
-.role-market-card-story {
-  margin: 0.1rem 0 0.35rem;
+.role-premium-cta.carrier {
+  background: #29abe2;
+}
+
+.role-premium-cta.shipper {
+  background: #f7941d;
+}
+
+.cubik-welcome-pilot {
+  margin: 0.85rem 0 0;
+  padding: 0.55rem 0.65rem;
+  text-align: center;
   font-size: 0.72rem;
-  line-height: 1.42;
-  opacity: 0.92;
-  max-width: 19rem;
-  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.28);
+  line-height: 1.4;
+  color: var(--text-muted);
+  background: var(--brand-gray-50);
+  border-radius: 10px;
+  border: 1px dashed var(--border);
 }
 
-.role-market-card-cta {
-  display: inline-block;
-  margin-top: 0.15rem;
-  padding: 0.42rem 0.7rem;
-  border-radius: 999px;
-  font-size: 0.74rem;
-  font-weight: 800;
-  letter-spacing: 0.02em;
-  background: rgba(255, 255, 255, 0.96);
+.cubik-welcome-pilot strong {
   color: var(--brand-navy);
-  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.18);
+  font-weight: 800;
 }
 
-.role-market-card.carrier .role-market-card-cta {
-  color: #0d4a6e;
+.cubik-welcome-demo {
+  display: block;
+  margin: 0.55rem auto 0;
+  padding: 0.35rem 0.5rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--brand-orange);
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
 }
 
-.role-market-card.shipper .role-market-card-cta {
-  color: #8a4d08;
+.cubik-welcome-demo:hover {
+  text-decoration: underline;
 }
 
-.auth-intent-step .cubik-welcome-headline {
-  text-align: left;
-  max-width: none;
-}
-
+.auth-intent-step .cubik-welcome-headline,
 .auth-intent-step .cubik-welcome-sub {
   text-align: left;
   max-width: none;
-  margin-bottom: 0.85rem;
+}
+
+.auth-intent-step .cubik-welcome-bridge {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.auth-intent-step .cubik-welcome-sub {
+  margin-bottom: 0.65rem;
 }
 
 #auth-intent-step[hidden],
@@ -175,13 +194,13 @@
   display: none !important;
 }
 
-@media (max-height: 720px) {
-  .role-market-card,
-  .role-market-card-body {
-    min-height: 9rem;
+@media (max-height: 740px) {
+  .role-premium-detail {
+    display: none;
   }
 
-  .role-market-card-story {
-    display: none;
+  .cubik-welcome-bridge {
+    max-width: 14rem;
+    margin-top: 0.4rem;
   }
 }

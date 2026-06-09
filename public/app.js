@@ -127,7 +127,7 @@ const CANCEL_ACTION_LABEL = {
 
 const MATCH_ACTION_CONFIRM = {
   progress:
-    '¿Marcar este emparejamiento como «En ruta»?\n\nConfirma que el transporte ya salió o está en camino.',
+    '¿Ya retiraste la carga en el embarcadero?\n\nAl confirmar, el viaje pasa a «En ruta al destino» y el mapa navegará hacia el punto de entrega.',
   mark_delivered:
     '¿Marcaste la entrega en destino?\n\nEl embarcador recibirá aviso y deberá confirmar que recibió la mercadería.',
   confirm_receipt:
@@ -414,11 +414,11 @@ function buildMatchActions(m) {
     html += `<button type="button" class="btn-secondary" data-action="call" data-id="${m.id}">Llamar</button>`;
     if (m.status === 'accepted') {
       if (role === 'carrier') {
-        html += `<button type="button" class="btn-match-progress" data-action="progress" data-id="${m.id}">Marcar en ruta</button>`;
-        html += `<p class="muted match-role-hint">Solo cancela si aún <strong>no</strong> retiraste la carga. Al marcar en ruta ya no podrás cancelar el viaje.</p>`;
+        html += `<button type="button" class="btn-match-progress" data-action="progress" data-id="${m.id}">Carga retirada — en ruta al destino</button>`;
+        html += `<p class="muted match-role-hint">Primero navega al embarcadero (fase retiro). Solo cancela si aún <strong>no</strong> retiraste la carga.</p>`;
         html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="accepted" data-price="${m.agreed_price_clp || ''}">No puedo cumplir antes del retiro</button>`;
       } else {
-        html += `<p class="muted match-role-hint">Esperando que el transportista marque «En ruta» cuando retira la carga.</p>`;
+        html += `<p class="muted match-role-hint">El transportista va al embarcadero. Te avisará al retirar la carga y salir hacia destino.</p>`;
         html += `<button type="button" class="btn-danger" data-action="cancel" data-id="${m.id}" data-phase="accepted" data-price="${m.agreed_price_clp || ''}">Cancelar emparejamiento</button>`;
       }
     } else if (role === 'carrier') {

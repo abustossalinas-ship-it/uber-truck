@@ -87,41 +87,54 @@ async function buildMatchTracking(matchId, user) {
 
   const trail = trackingActive ? await buildLocationTrail(matchId, carrier) : [];
 
-  let driving_path = [];
-  if (trackingActive && maps.isConfigured() && origin && destination) {
-    const route = await maps.drivingRoutePath(origin, destination);
-    if (route.ok) driving_path = route.path;
-  }
+  const trip_phase =
+    match.status === 'accepted' ? 'pickup' : match.status === 'in_progress' ? 'delivery' : null;
 
-  let eta = null;
-  if (
-    trackingActive &&
-    match.status === 'in_progress' &&
-    carrier &&
-    destination &&
-    maps.isConfigured()
-  ) {
-    const dm = await maps.distanceKm(
-      { lat: carrier.lat, lng: carrier.lng },
-      { lat: destination.lat, lng: destination.lng },
-      { traffic: true }
-    );
-    if (dm.ok) {
-      eta = {
-        duration_min: dm.duration_min,
-        duration_text: dm.duration_text,
-        distance_km: dm.distance_km,
-        distance_text: dm.distance_text,
-      };
+  let driving_path = [];
+  if (trackingActive && maps.isConfigured()) {
+    if (trip_phase === 'pickup' && origin) {
+      const from = carrier || null;
+      if (from) {
+        const route = await maps.drivingRoutePath(from, origin);
+        if (route.ok) driving_path = route.path;
+      }
+    } else if (trip_phase === 'delivery' && origin && destination) {
+      const from = carrier || origin;
+      const route = await maps.drivingRoutePath(from, destination);
+      if (route.ok) driving_path = route.path;
     }
   }
 
-  const navFrom = carrier || origin;
-  const navigation = maps.buildNavigationUrls(navFrom, destination);
+  let eta = null;
+  if (trackingActive && carrier && maps.isConfigured()) {
+    const etaTarget =
+      trip_phase === 'pickup' ? origin : trip_phase === 'delivery' ? destination : null;
+    if (etaTarget?.lat != null) {
+      const dm = await maps.distanceKm(
+        { lat: carrier.lat, lng: carrier.lng },
+        { lat: etaTarget.lat, lng: etaTarget.lng },
+        { traffic: true }
+      );
+      if (dm.ok) {
+        eta = {
+          phase: trip_phase,
+          duration_min: dm.duration_min,
+          duration_text: dm.duration_text,
+          distance_km: dm.distance_km,
+          distance_text: dm.distance_text,
+        };
+      }
+    }
+  }
+
+  const navTarget = trip_phase === 'pickup' ? origin : destination;
+  const navFrom = carrier || (trip_phase === 'pickup' ? null : origin);
+  const navigation = maps.buildNavigationUrls(navFrom, navTarget);
 
   return {
     match_id: match.id,
     status: match.status,
+    trip_phase,
     tracking_active: trackingActive,
     route: {
       origin,

@@ -114,6 +114,24 @@ const AppShell = {
       });
     } catch (_) {}
     setTimeout(() => this.setupPushNotifications(), 1500);
+    setTimeout(() => this.setupCarrierGps(), 800);
+  },
+
+  async setupCarrierGps() {
+    if (!this.isNative()) return;
+    const user = typeof Auth !== 'undefined' ? Auth.user : null;
+    if (!user || user.role !== 'carrier') return;
+    if (typeof requestGpsPermission === 'function') {
+      const ok = await requestGpsPermission();
+      if (!ok) {
+        alert(
+          'Cubik necesita ubicación «Permitir siempre» para actualizar el mapa en ruta y compartir tu posición con el embarcador.'
+        );
+      }
+    }
+    if (typeof refreshCarrierPresencePanel === 'function') {
+      refreshCarrierPresencePanel().catch(() => {});
+    }
   },
 
   async sendPushTokenToServer(token) {
@@ -284,6 +302,7 @@ const AppShell = {
       if (typeof refreshBoard === 'function') {
         refreshBoard().catch(() => {});
       }
+      if (user.role === 'carrier') this.setupCarrierGps();
       if (!this.deep) this.setTab(this.tab || 'home');
     } else {
       this.deep = null;

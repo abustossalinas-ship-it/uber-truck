@@ -1,6 +1,6 @@
 {
-  "version": "0.0.108",
+  "version": "0.0.109",
   "git_sha": "",
   "ui": "uber-parity-v1",
-  "note": "Fix mapa en Actividad: reinicializar LiveMap al re-renderizar viajes"
+  "note": "GPS APK + fases viaje: retiro embarcadero y en ruta al destino"
 }

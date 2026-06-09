@@ -1,10 +1,34 @@
 /** GPS transportista — Disponible + mapa interactivo del viaje activo */
 
 let gpsWatchId = null;
+let gpsNativeWatchId = null;
 let lastGpsSentAt = 0;
 let activeTrackMatchId = null;
 let screenWakeLock = null;
 const trackingFetchByMatch = new Map();
+
+function isNativeGps() {
+  return Boolean(window.Capacitor?.isNativePlatform?.() && window.Capacitor?.Plugins?.Geolocation);
+}
+
+async function requestGpsPermission() {
+  if (!isNativeGps()) return true;
+  const Geo = window.Capacitor.Plugins.Geolocation;
+  try {
+    const perm = await Geo.checkPermissions();
+    if (perm.location === 'granted') return true;
+    const req = await Geo.requestPermissions();
+    return req.location === 'granted';
+  } catch (e) {
+    console.warn('GPS permission', e);
+    return false;
+  }
+}
+
+function setGpsStatusText(text) {
+  const status = document.getElementById('carrier-gps-status');
+  if (status) status.textContent = text;
+}
 
 function gpsPostIntervalMs() {
   return activeTrackMatchId ? 10000 : 25000;
@@ -24,6 +48,21 @@ function formatGpsTime(iso) {
 }
 
 async function readCurrentPosition() {
+  if (isNativeGps()) {
+    const ok = await requestGpsPermission();
+    if (!ok) throw new Error('Permiso de ubicación denegado. Actívalo en Ajustes → Cubik.');
+    const Geo = window.Capacitor.Plugins.Geolocation;
+    const pos = await Geo.getCurrentPosition({
+      enableHighAccuracy: true,
+      timeout: 20000,
+      maximumAge: 15000,
+    });
+    return {
+      lat: pos.coords.latitude,
+      lng: pos.coords.longitude,
+      accuracy: pos.coords.accuracy,
+    };
+  }
   if (!navigator.geolocation) {
     throw new Error('Tu navegador no soporta GPS');
   }
@@ -41,7 +80,13 @@ async function readCurrentPosition() {
   });
 }
 
-function stopGpsWatch() {
+async function stopGpsWatch() {
+  if (gpsNativeWatchId != null && isNativeGps()) {
+    try {
+      await window.Capacitor.Plugins.Geolocation.clearWatch({ id: gpsNativeWatchId });
+    } catch (_) {}
+    gpsNativeWatchId = null;
+  }
   if (gpsWatchId != null) {
     navigator.geolocation.clearWatch(gpsWatchId);
     gpsWatchId = null;
@@ -92,16 +137,42 @@ async function postCarrierLocation(lat, lng) {
   }
 }
 
-function startGpsWatch() {
-  if (!navigator.geolocation || gpsWatchId != null) return;
+async function startGpsWatch() {
+  if (!shouldShareGps() || gpsWatchId != null || gpsNativeWatchId != null) return;
+
+  if (isNativeGps()) {
+    const ok = await requestGpsPermission();
+    if (!ok) {
+      setGpsStatusText('GPS: activa ubicación en Ajustes → Cubik → Permitir siempre');
+      return;
+    }
+    const Geo = window.Capacitor.Plugins.Geolocation;
+    gpsNativeWatchId = await Geo.watchPosition(
+      {
+        enableHighAccuracy: true,
+        maximumAge: activeTrackMatchId ? 8000 : 30000,
+        timeout: 25000,
+      },
+      (pos, err) => {
+        if (err) {
+          setGpsStatusText(`GPS: ${err.message || 'sin señal'}`);
+          return;
+        }
+        if (!shouldShareGps() || !pos?.coords) return;
+        postCarrierLocation(pos.coords.latitude, pos.coords.longitude);
+      }
+    );
+    return;
+  }
+
+  if (!navigator.geolocation) return;
   gpsWatchId = navigator.geolocation.watchPosition(
     (pos) => {
       if (!shouldShareGps()) return;
       postCarrierLocation(pos.coords.latitude, pos.coords.longitude);
     },
     (err) => {
-      const status = document.getElementById('carrier-gps-status');
-      if (status) status.textContent = `GPS: ${err.message || 'sin señal'}`;
+      setGpsStatusText(`GPS: ${err.message || 'sin señal'}`);
     },
     {
       enableHighAccuracy: true,
@@ -358,6 +429,7 @@ function onBoardMatchesUpdated(matches) {
   }
 }
 
+window.requestGpsPermission = requestGpsPermission;
 window.refreshCarrierPresencePanel = refreshCarrierPresencePanel;
 window.refreshActiveTripMap = refreshActiveTripMap;
 window.onBoardMatchesUpdated = onBoardMatchesUpdated;

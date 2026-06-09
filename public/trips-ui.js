@@ -38,11 +38,17 @@ function hasRatedMatchId(matchId, match) {
 
 const TRIP_STATUS_LABEL = {
   proposed: 'Esperando precio',
-  accepted: 'Camión asignado',
-  in_progress: 'En ruta',
+  accepted: 'Ir a embarcadero',
+  in_progress: 'En ruta al destino',
   completed: 'Completado',
   cancelled: 'Cancelado',
 };
+
+function tripStatusLabel(m, role) {
+  if (m.status === 'accepted' && role === 'shipper') return 'Transportista en camino';
+  if (m.status === 'in_progress' && role === 'shipper') return 'En ruta';
+  return TRIP_STATUS_LABEL[m.status] || m.status;
+}
 
 function tripPhase(m) {
   if (['accepted', 'in_progress'].includes(m.status)) return 'active';
@@ -80,7 +86,7 @@ function tripCounterpartyFromMatch(m, role, load, offer) {
 function buildTripPartyHeader(m, role, load, offer) {
   const cp = tripCounterpartyFromMatch(m, role, load, offer);
   const initial = (cp.person || cp.display || '?').charAt(0).toUpperCase();
-  const status = TRIP_STATUS_LABEL[m.status] || m.status;
+  const status = tripStatusLabel(m, role);
   const showCall = ['accepted', 'in_progress'].includes(m.status);
   return `
     <div class="trip-party-row">
@@ -290,7 +296,7 @@ function updateActiveTripBanner(matches, loadById, offerById) {
   const shipper = load?.company_name || 'Embarcador';
   const role =
     typeof getActorRole === 'function' && getActorRole() === 'carrier' ? 'carrier' : 'shipper';
-  const statusText = TRIP_STATUS_LABEL[active.status] || active.status;
+  const statusText = tripStatusLabel(active, role);
   const price =
     active.agreed_price_clp != null
       ? `$${Number(active.agreed_price_clp).toLocaleString('es-CL')}`

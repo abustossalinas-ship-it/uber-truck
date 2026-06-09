@@ -334,7 +334,11 @@ const LiveMap = {
   _updateEta(inst, tracking) {
     if (!inst.etaEl) return;
     if (tracking.eta?.duration_text) {
-      inst.etaEl.textContent = `Llegada ~${tracking.eta.duration_text}`;
+      const prefix =
+        tracking.trip_phase === 'pickup' || tracking.eta?.phase === 'pickup'
+          ? 'Embarcadero'
+          : 'Llegada';
+      inst.etaEl.textContent = `${prefix} ~${tracking.eta.duration_text}`;
       inst.etaEl.hidden = false;
     } else {
       inst.etaEl.hidden = true;
@@ -347,10 +351,15 @@ const LiveMap = {
     const t = this._formatTime(tracking.carrier_position?.updated_at);
     const trailN = (tracking.location_trail || []).length;
     if (tracking.carrier_position) {
-      let line = `Camión en vivo${t ? ` · ${t}` : ''}`;
+      const phaseLabel =
+        tracking.trip_phase === 'pickup' ? 'Ir a embarcadero' : 'Camión en vivo';
+      let line = `${phaseLabel}${t ? ` · ${t}` : ''}`;
       if (tracking.eta?.duration_text) line += ` · ETA ${tracking.eta.duration_text}`;
       if (trailN > 1) line += ` · recorrido ${trailN} pts`;
       inst.meta.textContent = line;
+    } else if (tracking.trip_phase === 'pickup') {
+      inst.meta.textContent =
+        'Fase retiro: verde = embarcadero. Activa GPS para ver tu posición en el mapa.';
     } else {
       inst.meta.textContent =
         'Origen (verde) y destino (rojo). Línea azul = recorrido GPS del transportista.';
@@ -369,7 +378,7 @@ const LiveMap = {
         console.warn('LiveMap poll', e);
       }
     };
-    const id = setInterval(tick, 12000);
+    const id = setInterval(tick, 8000);
     this._pollTimers.set(key, id);
   },
 

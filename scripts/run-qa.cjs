@@ -20,7 +20,7 @@ function run(label, cmd, args, extraEnv = {}) {
   }
 }
 
-run('Unit tests (Node)', process.execPath, ['--test', 'tests/**/*.test.js']);
+run('Unit tests (Node)', process.execPath, [path.join(root, 'scripts', 'run-unit-tests.cjs')]);
 run('E2E app local (Playwright)', npmCmd, ['run', 'test:e2e']);
 
 if (withProd) {

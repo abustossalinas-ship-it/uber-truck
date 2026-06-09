@@ -458,6 +458,16 @@ router.patch('/:id/accept-offer', optionalAuth, ...operatorGate, async (req, res
     await repo.update('capacity_offers', match.capacity_offer_id, { status: 'reserved' });
     const parties = await getMatchParties(repo, match);
     await comms.markReadForMatchTypes('shipper', match.id, ['price_offer']);
+    const allMatches = await repo.list('matches', {});
+    const staleProposals = allMatches.filter(
+      (m) =>
+        m.load_request_id === match.load_request_id &&
+        m.id !== match.id &&
+        m.status === 'proposed'
+    );
+    for (const other of staleProposals) {
+      await comms.markReadForMatchTypes('shipper', other.id, ['price_offer']);
+    }
     await comms.addNotification({
       match_id: match.id,
       for_role: 'carrier',
@@ -585,6 +595,8 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
       const penalty = computePenalty(reason, match.agreed_price_clp);
       const updated = await applyCancelPatch(match, action, role, req.body);
       await releaseLoadAndOffer(match);
+      await comms.markAllReadForMatch('shipper', match.id);
+      await comms.markAllReadForMatch('carrier', match.id);
       await logMatchTrip(req, updated, {
         event_type: 'match_cancelled',
         from_status: match.status,
@@ -655,6 +667,22 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
         title: 'Viaje completado',
         body: `${parties?.shipper_name || 'Embarcador'} confirmó recepción. Califica el viaje en Mis viajes.`,
       });
+      await comms.markReadForMatchTypes('shipper', match.id, [
+        'delivery_pending_confirm',
+        'chat',
+        'approaching_destination',
+        'arrived_at_destination',
+        'price_offer',
+        'support',
+      ]);
+      await comms.markReadForMatchTypes('carrier', match.id, [
+        'delivery_pending_confirm',
+        'chat',
+        'approaching_destination',
+        'arrived_at_destination',
+        'price_accepted',
+        'support',
+      ]);
       return res.json({
         ok: true,
         data: completed,

@@ -12,6 +12,7 @@ const { breakdownForMatch, isPilotPaid } = require('../lib/payment-simulation');
 const { isMatchChatFree, enableMatchFreeChat } = require('../lib/match-chat');
 const { textContainsPhone } = require('../lib/phone-guard');
 const support = require('../lib/support-cases');
+const { notificationVisibleForMatch } = require('../lib/notification-visibility');
 
 const router = express.Router();
 
@@ -152,22 +153,6 @@ router.post('/:matchId/messages', optionalAuth, async (req, res) => {
   }
 });
 
-const STALE_MATCH_STATUSES = new Set(['cancelled']);
-
-/** En viajes completados solo ocultamos chat/ofertas; pago y cierre siguen visibles */
-const COMPLETED_VISIBLE_NOTIF_TYPES = new Set([
-  'pilot_payment',
-  'trip_completed',
-  'support',
-]);
-
-function notificationVisibleForMatch(n, match) {
-  if (!match) return false;
-  if (STALE_MATCH_STATUSES.has(match.status)) return false;
-  if (match.status === 'completed' && !COMPLETED_VISIBLE_NOTIF_TYPES.has(n.type)) return false;
-  return true;
-}
-
 router.get('/notifications/list', optionalAuth, async (req, res) => {
   try {
     if (!req.user?.role) {
@@ -180,6 +165,7 @@ router.get('/notifications/list', optionalAuth, async (req, res) => {
     const raw = await comms.listNotifications(role);
     const visible = [];
     const matchCache = new Map();
+    const loadCache = new Map();
     const partiesCache = new Map();
     const eventsByMatch = new Map();
     const priceNotifsByMatch = new Map();
@@ -189,6 +175,14 @@ router.get('/notifications/list', optionalAuth, async (req, res) => {
       const m = await repo.getById('matches', id);
       matchCache.set(id, m);
       return m;
+    }
+
+    async function loadForMatch(match) {
+      if (!match?.load_request_id) return null;
+      if (loadCache.has(match.load_request_id)) return loadCache.get(match.load_request_id);
+      const load = await repo.getById('load_requests', match.load_request_id);
+      loadCache.set(match.load_request_id, load);
+      return load;
     }
 
     async function partiesForMatch(match) {
@@ -206,7 +200,8 @@ router.get('/notifications/list', optionalAuth, async (req, res) => {
     }
     for (const n of raw) {
       const match = await matchById(n.match_id);
-      if (!notificationVisibleForMatch(n, match)) {
+      const load = await loadForMatch(match);
+      if (!notificationVisibleForMatch(n, match, load)) {
         if (!n.read_at) await comms.markNotificationRead(n.id);
         continue;
       }

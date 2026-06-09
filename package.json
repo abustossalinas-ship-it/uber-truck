@@ -22,7 +22,7 @@
     "android:install:remote": "node scripts/install-android-emulator.cjs --remote",
     "android:verify": "node scripts/verify-android-bundle.cjs",
     "test": "npm run test:unit && npm run test:e2e",
-    "test:unit": "node --test tests/**/*.test.js",
+    "test:unit": "node scripts/run-unit-tests.cjs",
     "test:e2e": "playwright test",
     "test:e2e:prod": "playwright test --config=playwright.prod.config.js",
     "test:qa": "node scripts/run-qa.cjs",

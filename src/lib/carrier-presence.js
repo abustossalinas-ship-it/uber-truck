@@ -41,7 +41,8 @@ async function findCarrierActiveMatch(carrierUserId) {
     matches.find(
       (m) =>
         offerIds.has(m.capacity_offer_id) &&
-        ['accepted', 'in_progress'].includes(m.status)
+        ['accepted', 'in_progress'].includes(m.status) &&
+        !m.carrier_marked_delivered_at
     ) || null
   );
 }

@@ -80,7 +80,8 @@ async function buildMatchTracking(matchId, user) {
     }
   }
 
-  const trackingActive = ['accepted', 'in_progress'].includes(match.status);
+  const trackingActive =
+    ['accepted', 'in_progress'].includes(match.status) && !match.carrier_marked_delivered_at;
   const static_map_url =
     maps.isConfigured() && trackingActive
       ? maps.staticMapUrl({ origin, destination, carrier })

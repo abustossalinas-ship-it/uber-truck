@@ -1,6 +1,6 @@
 {
-  "version": "0.0.110",
+  "version": "0.0.111",
   "git_sha": "",
   "ui": "uber-parity-v1",
-  "note": "Cierre viaje en Actividad + llegada validada por GPS (~600 m)"
+  "note": "Tras marcar entregado: pendiente confirmacion, sin mapa en ruta"
 }

@@ -992,6 +992,25 @@ select.offer-picked {
   border: 1px solid #fed7aa;
 }
 
+.trip-delivery-awaiting {
+  margin: 0.75rem 0;
+  padding: 0.85rem 1rem;
+  border-radius: 10px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+}
+
+.trip-delivery-awaiting-title {
+  margin: 0 0 0.35rem;
+  font-weight: 600;
+  color: #1e40af;
+}
+
+.trip-card-awaiting .trip-status-pill {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
 .trip-payment-ok {
   background: #ecfdf5;
   color: #047857;

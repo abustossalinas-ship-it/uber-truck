@@ -44,18 +44,42 @@ const TRIP_STATUS_LABEL = {
   cancelled: 'Cancelado',
 };
 
+function tripAwaitingConfirm(m) {
+  return m.status === 'in_progress' && Boolean(m.carrier_marked_delivered_at);
+}
+
 function tripStatusLabel(m, role) {
+  if (tripAwaitingConfirm(m)) {
+    return role === 'shipper' ? 'Confirma recepción' : 'Entrega registrada';
+  }
   if (m.status === 'accepted' && role === 'shipper') return 'Transportista en camino';
   if (m.status === 'in_progress' && role === 'shipper') return 'En ruta';
   return TRIP_STATUS_LABEL[m.status] || m.status;
 }
 
 function tripPhase(m) {
+  if (tripAwaitingConfirm(m)) return 'awaiting';
   if (['accepted', 'in_progress'].includes(m.status)) return 'active';
   if (m.status === 'proposed') return 'pending';
   if (m.status === 'completed') return 'done';
   if (m.status === 'cancelled') return 'cancelled';
   return 'other';
+}
+
+function buildTripDeliveryAwaitingBox(m, role) {
+  if (!tripAwaitingConfirm(m)) return '';
+  const note = m.delivery_note
+    ? `<p class="muted">Nota: ${m.delivery_note}</p>`
+    : '';
+  const lead =
+    role === 'shipper'
+      ? 'El transportista marcó entrega. Revisa y confirma recepción para cerrar el viaje.'
+      : 'Registraste la entrega. El embarcador debe confirmar recepción para cerrar el viaje.';
+  return `<div class="trip-delivery-awaiting">
+    <p class="trip-delivery-awaiting-title">Pendiente confirmación del embarcador</p>
+    ${note}
+    <p class="muted">${lead}</p>
+  </div>`;
 }
 
 function renderStars(n) {
@@ -212,6 +236,9 @@ function buildTripPaymentBadge(m, role) {
     }
   }
   if (m.status === 'in_progress') {
+    if (m.carrier_marked_delivered_at) {
+      return `<p class="trip-payment-badge trip-payment-hold">Entrega registrada — pendiente confirmación para cerrar pago</p>`;
+    }
     return `<p class="trip-payment-badge trip-payment-pilot">Pago: se retendrá al marcar en ruta (Cubik Saldo — próx.)</p>`;
   }
   if (m.status !== 'completed') return '';
@@ -279,8 +306,8 @@ function bindActiveTripBannerNav(matchId) {
 function updateActiveTripBanner(matches, loadById, offerById) {
   const banner = document.getElementById('active-trip-banner');
   if (!banner) return;
-  const active = (matches || []).find((m) =>
-    ['accepted', 'in_progress'].includes(m.status)
+  const active = (matches || []).find(
+    (m) => ['accepted', 'in_progress'].includes(m.status) && !m.carrier_marked_delivered_at
   );
   if (!active) {
     banner.hidden = true;
@@ -389,7 +416,7 @@ function renderTripsList(matches, loadById, offerById) {
   const sorted = [...(matches || [])].sort(
     (a, b) => new Date(b.updated_at || b.created_at) - new Date(a.updated_at || a.created_at)
   );
-  const groups = { active: [], pending: [], done: [], cancelled: [], other: [] };
+  const groups = { active: [], awaiting: [], pending: [], done: [], cancelled: [], other: [] };
   sorted.forEach((m) => groups[tripPhase(m)].push(m));
 
   function cards(rows, empty) {
@@ -463,16 +490,20 @@ function renderTripsList(matches, loadById, offerById) {
         } else if (m.ratings_unavailable) {
           actions += `<span class="muted">Calificaciones no disponibles (revisa /health)</span>`;
         }
-        const mapSlot = ['accepted', 'in_progress'].includes(m.status)
-          ? `<div class="trip-map-wrap" data-trip-map="${m.id}"></div>`
-          : '';
+        const awaiting = tripAwaitingConfirm(m);
+        const mapSlot =
+          ['accepted', 'in_progress'].includes(m.status) && !awaiting
+            ? `<div class="trip-map-wrap" data-trip-map="${m.id}"></div>`
+            : '';
+        const deliveryBox = buildTripDeliveryAwaitingBox(m, role);
         return `
-        <article class="item trip-card" data-trip-id="${m.id}">
+        <article class="item trip-card${awaiting ? ' trip-card-awaiting' : ''}" data-trip-id="${m.id}">
           ${partyHeader}
           <p class="trip-route-line">${route}</p>
           ${price ? `<p class="muted">${price}</p>` : ''}
           ${paymentBadge}
-          ${m.delivery_note ? `<p class="muted">Entrega: ${m.delivery_note}</p>` : ''}
+          ${deliveryBox}
+          ${!awaiting && m.delivery_note ? `<p class="muted">Entrega: ${m.delivery_note}</p>` : ''}
           ${cancelDetail}
           ${mapSlot}
           ${ratingsBlock}
@@ -485,6 +516,11 @@ function renderTripsList(matches, loadById, offerById) {
   el.innerHTML = `
     <h3>En curso</h3>
     ${cards(groups.active, 'Sin viajes en curso.')}
+    ${
+      groups.awaiting.length
+        ? `<h3>Pendiente confirmación</h3>${cards(groups.awaiting, '')}`
+        : ''
+    }
     <h3>En negociación</h3>
     ${cards(groups.pending, 'Sin propuestas abiertas.')}
     <h3>Completados</h3>

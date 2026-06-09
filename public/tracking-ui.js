@@ -421,7 +421,9 @@ async function refreshActiveTripMap(matchId, opts = {}) {
 }
 
 function onBoardMatchesUpdated(matches) {
-  const active = (matches || []).find((m) => ['accepted', 'in_progress'].includes(m.status));
+  const active = (matches || []).find(
+    (m) => ['accepted', 'in_progress'].includes(m.status) && !m.carrier_marked_delivered_at
+  );
   if (active) refreshActiveTripMap(active.id);
   else {
     activeTrackMatchId = null;

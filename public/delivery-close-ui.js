@@ -196,9 +196,11 @@ const DeliveryCloseUI = {
           : 'Viaje cerrado. Puedes calificar a la otra parte.');
       const promptRating = json.prompt_rating;
       const matchId = this.matchId;
+      const externalDone = this.onDone;
       this.showDone(doneMsg);
       this.onDone = async () => {
         if (typeof refreshBoard === 'function') await refreshBoard();
+        if (typeof externalDone === 'function') await externalDone();
         if (promptRating && typeof openRateModal === 'function') {
           openRateModal(matchId);
         }

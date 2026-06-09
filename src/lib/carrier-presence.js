@@ -1,7 +1,8 @@
 'use strict';
 
 const repo = require('./repository');
-const { recordTripEvent } = require('./trip-events');
+const { recordTripEvent, listTripEvents } = require('./trip-events');
+const { computeTripProximity } = require('./trip-proximity');
 
 const USER_PRESENCE_COLS =
   'id, role, is_available, last_lat, last_lng, location_updated_at';
@@ -60,6 +61,7 @@ async function updateCarrierLocation(userId, lat, lng, { logTrip = true } = {}) 
     location_updated_at: now,
   });
 
+  let proximity = null;
   const active = await findCarrierActiveMatch(userId);
   if (active) {
     await repo.update('matches', active.id, {
@@ -67,18 +69,43 @@ async function updateCarrierLocation(userId, lat, lng, { logTrip = true } = {}) 
       track_lng: ln,
       track_updated_at: now,
     });
+    const load = await repo.getById('load_requests', active.load_request_id);
+    proximity = computeTripProximity(active, load, la, ln);
     if (logTrip) {
       await recordTripEvent({
         match_id: active.id,
         event_type: 'location_update',
         actor_role: 'carrier',
         actor_user_id: userId,
-        payload: { lat: la, lng: ln },
+        payload: { lat: la, lng: ln, proximity },
       });
+      if (proximity?.at_target) {
+        const events = await listTripEvents(active.id);
+        const arrivalType =
+          proximity.phase === 'pickup' ? 'arrival_at_pickup' : 'arrival_at_destination';
+        const already = events.some((e) => e.event_type === arrivalType);
+        if (!already) {
+          await recordTripEvent({
+            match_id: active.id,
+            event_type: arrivalType,
+            from_status: active.status,
+            to_status: active.status,
+            actor_role: 'carrier',
+            actor_user_id: userId,
+            payload: { distance_km: proximity.distance_km },
+          });
+        }
+      }
     }
   }
 
-  return { active_match_id: active?.id || null, updated_at: now };
+  return {
+    active_match_id: active?.id || null,
+    updated_at: now,
+    proximity,
+    pickup_ready: Boolean(proximity?.phase === 'pickup' && proximity.at_target),
+    arrival_ready: Boolean(proximity?.phase === 'delivery' && proximity.at_target),
+  };
 }
 
 async function setCarrierAvailability(userId, isAvailable, coords = {}) {

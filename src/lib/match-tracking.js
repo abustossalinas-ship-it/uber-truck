@@ -4,6 +4,7 @@ const repo = require('./repository');
 const maps = require('../services/google-maps');
 const { filterMatchesForUser } = require('./access-scope');
 const { listTripEvents } = require('./trip-events');
+const { computeTripProximity } = require('./trip-proximity');
 
 async function buildLocationTrail(matchId, carrier) {
   const events = await listTripEvents(matchId);
@@ -131,11 +132,20 @@ async function buildMatchTracking(matchId, user) {
   const navFrom = carrier || (trip_phase === 'pickup' ? null : origin);
   const navigation = maps.buildNavigationUrls(navFrom, navTarget);
 
+  const proximity =
+    carrier?.lat != null && carrier?.lng != null
+      ? computeTripProximity(match, load, carrier.lat, carrier.lng)
+      : null;
+
   return {
     match_id: match.id,
     status: match.status,
     trip_phase,
     tracking_active: trackingActive,
+    carrier_marked_delivered_at: match.carrier_marked_delivered_at || null,
+    proximity,
+    pickup_ready: Boolean(proximity?.phase === 'pickup' && proximity.at_target),
+    arrival_ready: Boolean(proximity?.phase === 'delivery' && proximity.at_target),
     route: {
       origin,
       destination,

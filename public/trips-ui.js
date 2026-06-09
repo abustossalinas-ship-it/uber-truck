@@ -341,6 +341,42 @@ function updateActiveTripBanner(matches, loadById, offerById) {
   if (typeof refreshActiveTripMap === 'function') refreshActiveTripMap(active.id);
 }
 
+async function runTripProgress(matchId, btn) {
+  if (typeof confirmMatchAction === 'function' && !confirmMatchAction('progress')) return;
+  if (typeof beginMatchAction === 'function' && btn && !beginMatchAction(btn)) return;
+  try {
+    const res = await API.patchMatch(matchId, { status: 'in_progress' });
+    const json = await res.json();
+    if (!res.ok) {
+      alert(json.error || 'No se pudo actualizar el viaje');
+      return;
+    }
+    if (typeof refreshBoard === 'function') await refreshBoard();
+  } finally {
+    if (typeof endMatchAction === 'function' && btn) endMatchAction(btn);
+  }
+}
+
+function openTripDelivery(matchId, btn) {
+  if (typeof DeliveryCloseUI !== 'undefined') {
+    DeliveryCloseUI.open('mark_delivered', matchId, btn, async () => {
+      if (typeof refreshBoard === 'function') await refreshBoard();
+    });
+  } else {
+    alert('Recarga la app e intenta de nuevo.');
+  }
+}
+
+function openTripConfirmReceipt(matchId, btn) {
+  if (typeof DeliveryCloseUI !== 'undefined') {
+    DeliveryCloseUI.open('confirm_receipt', matchId, btn, async () => {
+      if (typeof refreshBoard === 'function') await refreshBoard();
+    });
+  } else {
+    alert('Recarga la app e intenta de nuevo.');
+  }
+}
+
 function renderTripsList(matches, loadById, offerById) {
   const el = document.getElementById('list-trips');
   if (!el) return;
@@ -396,9 +432,22 @@ function renderTripsList(matches, loadById, offerById) {
           actions = `<button type="button" class="btn-secondary" data-trip-view="${m.id}">Ver propuesta</button>`;
           actions += `<button type="button" class="btn-secondary" data-trip-chat="${m.id}" data-trip-title="${title.replace(/"/g, '')}">Chat</button>`;
         } else if (['accepted', 'in_progress'].includes(m.status)) {
-          actions = `<button type="button" class="btn-match-cta" data-trip-chat="${m.id}" data-trip-title="${title.replace(/"/g, '')}">Chat</button>`;
-          if (m.status === 'in_progress' && role === 'carrier') {
+          actions = `<button type="button" class="btn-secondary" data-trip-chat="${m.id}" data-trip-title="${title.replace(/"/g, '')}">Chat</button>`;
+          if (m.status === 'accepted' && role === 'carrier') {
+            actions += `<button type="button" class="btn-match-cta" data-trip-progress="${m.id}">Carga retirada — en ruta al destino</button>`;
+          } else if (m.status === 'in_progress' && role === 'carrier') {
+            if (!m.carrier_marked_delivered_at) {
+              actions += `<button type="button" class="btn-match-cta" data-trip-deliver="${m.id}">Marcar entregado en destino</button>`;
+            } else {
+              actions += `<p class="muted trip-wait-hint">Entrega registrada. Esperando confirmación del embarcador.</p>`;
+            }
             actions += `<button type="button" class="btn-secondary" data-trip-incident="${m.id}" data-trip-title="${title.replace(/"/g, '')}">Reportar incidente</button>`;
+          } else if (m.status === 'in_progress' && role === 'shipper') {
+            if (m.carrier_marked_delivered_at) {
+              actions += `<button type="button" class="btn-match-cta" data-trip-confirm="${m.id}">Confirmar recepción de carga</button>`;
+            } else {
+              actions += `<p class="muted trip-wait-hint">El transportista aún no marca entrega en destino.</p>`;
+            }
           }
         } else if (m.status !== 'completed') {
           actions = `<button type="button" class="btn-secondary" data-trip-view="${m.id}">Ver detalle</button>`;
@@ -478,6 +527,15 @@ function renderTripsList(matches, loadById, offerById) {
         alert('Recarga la app (Ctrl+F5) e intenta de nuevo.');
       }
     });
+  });
+  el.querySelectorAll('[data-trip-progress]').forEach((btn) => {
+    btn.addEventListener('click', () => runTripProgress(btn.dataset.tripProgress, btn));
+  });
+  el.querySelectorAll('[data-trip-deliver]').forEach((btn) => {
+    btn.addEventListener('click', () => openTripDelivery(btn.dataset.tripDeliver, btn));
+  });
+  el.querySelectorAll('[data-trip-confirm]').forEach((btn) => {
+    btn.addEventListener('click', () => openTripConfirmReceipt(btn.dataset.tripConfirm, btn));
   });
   el.querySelectorAll('[data-scroll-penalties]').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -724,6 +782,9 @@ async function scrollToTripCard(matchId) {
   });
 }
 
+window.runTripProgress = runTripProgress;
+window.openTripDelivery = openTripDelivery;
+window.openTripConfirmReceipt = openTripConfirmReceipt;
 window.updateActiveTripBanner = updateActiveTripBanner;
 window.renderTripsList = renderTripsList;
 window.openRateModal = openRateModal;

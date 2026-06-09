@@ -106,6 +106,14 @@ const LiveMap = {
     navBtn.dataset.liveMapNav = '1';
     toolbar.appendChild(navBtn);
 
+    const actionBtn = document.createElement('button');
+    actionBtn.type = 'button';
+    actionBtn.className = 'btn-match-cta trip-map-action-btn';
+    actionBtn.textContent = 'Marcar entregado';
+    actionBtn.hidden = true;
+    actionBtn.dataset.liveMapAction = '1';
+    toolbar.appendChild(actionBtn);
+
     const mapEl = document.createElement('div');
     mapEl.className = 'trip-map-live';
     mapEl.setAttribute('role', 'img');
@@ -138,6 +146,7 @@ const LiveMap = {
       toolbar,
       etaEl,
       navBtn,
+      actionBtn,
       meta,
       markers: {},
       routePolyline: null,
@@ -331,6 +340,41 @@ const LiveMap = {
     inst.navBtn.onclick = () => this.openNavigationPicker(tracking);
   },
 
+  _bindTripActionButton(inst, tracking) {
+    const btn = inst.actionBtn;
+    if (!btn) return;
+    const role = typeof getActorRole === 'function' ? getActorRole() : null;
+    const matchId = tracking.match_id;
+    btn.hidden = true;
+    btn.onclick = null;
+    if (role !== 'carrier' || !matchId) return;
+
+    if (tracking.status === 'accepted') {
+      btn.hidden = false;
+      btn.textContent = tracking.pickup_ready
+        ? 'En embarcadero — retirar carga'
+        : 'Carga retirada — en ruta';
+      btn.onclick = () => {
+        if (typeof window.runTripProgress === 'function') {
+          window.runTripProgress(matchId, btn);
+        }
+      };
+      return;
+    }
+
+    if (tracking.status === 'in_progress' && !tracking.carrier_marked_delivered_at) {
+      btn.hidden = false;
+      btn.textContent = tracking.arrival_ready
+        ? 'Llegaste — marcar entregado'
+        : 'Marcar entregado en destino';
+      btn.onclick = () => {
+        if (typeof window.openTripDelivery === 'function') {
+          window.openTripDelivery(matchId, btn);
+        }
+      };
+    }
+  },
+
   _updateEta(inst, tracking) {
     if (!inst.etaEl) return;
     if (tracking.eta?.duration_text) {
@@ -356,6 +400,11 @@ const LiveMap = {
       let line = `${phaseLabel}${t ? ` · ${t}` : ''}`;
       if (tracking.eta?.duration_text) line += ` · ETA ${tracking.eta.duration_text}`;
       if (trailN > 1) line += ` · recorrido ${trailN} pts`;
+      if (tracking.arrival_ready) {
+        line += ' · GPS: cerca del destino';
+      } else if (tracking.pickup_ready) {
+        line += ' · GPS: en embarcadero';
+      }
       inst.meta.textContent = line;
     } else if (tracking.trip_phase === 'pickup') {
       inst.meta.textContent =
@@ -416,6 +465,7 @@ const LiveMap = {
     this._updateEta(inst, tracking);
     this._updateMeta(inst, tracking);
     this._bindNavButton(inst, tracking);
+    this._bindTripActionButton(inst, tracking);
     return true;
   },
 

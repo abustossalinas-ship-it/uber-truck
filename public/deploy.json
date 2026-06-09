@@ -1,6 +1,6 @@
 {
-  "version": "0.0.123",
+  "version": "0.0.124",
   "git_sha": "",
   "ui": "uber-parity-v1",
-  "note": "Alertas llegada ~5 min y en destino tipo Uber Eats"
+  "note": "Fix welcome APK: CTAs abren login dentro del gate"
 }

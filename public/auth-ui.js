@@ -258,6 +258,7 @@ function showWelcomeRoleStep() {
     roles.hidden = false;
     roles.removeAttribute('hidden');
   }
+  bindWelcomeAuthButtons();
   refreshAuthIntentUi();
 }
 
@@ -325,7 +326,21 @@ function pickAuthIntent(role) {
   openAuthPanel(pendingAuthRegister, false, normalized);
 }
 
+function bindWelcomeAuthButtons() {
+  document.querySelectorAll('#app-welcome-roles [data-auth-intent]').forEach((btn) => {
+    if (btn.dataset.welcomeBound === '1') return;
+    btn.dataset.welcomeBound = '1';
+    const go = (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      pickAuthIntent(btn.dataset.authIntent);
+    };
+    btn.addEventListener('click', go);
+  });
+}
+
 function bindAuthIntentPickers() {
+  bindWelcomeAuthButtons();
   if (bindAuthIntentPickers.bound) return;
   bindAuthIntentPickers.bound = true;
   document.addEventListener('click', (e) => {
@@ -334,7 +349,12 @@ function bindAuthIntentPickers() {
     const inAuthStep = btn.closest('#auth-intent-step');
     const inWelcome = btn.closest('#app-welcome-roles');
     if (inAuthStep?.hasAttribute('hidden')) return;
-    if (inWelcome?.hasAttribute('hidden') || inWelcome?.hidden) return;
+    if (inWelcome) {
+      if (inWelcome.hasAttribute('hidden') || inWelcome.hidden) return;
+      e.preventDefault();
+      pickAuthIntent(btn.dataset.authIntent);
+      return;
+    }
     e.preventDefault();
     pickAuthIntent(btn.dataset.authIntent);
   });
@@ -510,15 +530,23 @@ function closeAuthPanel() {
 function openAuthPanel(register = false, forgot = false, roleIntent = null) {
   const panel = document.getElementById('auth-panel');
   if (!panel) return;
+  if (typeof AppShell?.mountAuthInGate === 'function') AppShell.mountAuthInGate();
   pendingAuthRegister = register;
   if (roleIntent) setAuthIntentRole(roleIntent);
   const intent = getAuthIntentRole();
   setPanelSectionVisible(panel, true);
   document.getElementById('change-password-panel')?.setAttribute('hidden', '');
   if (isCubikAppGuest()) {
-    document.getElementById('app-welcome')?.setAttribute('hidden', '');
     const welcome = document.getElementById('app-welcome');
-    if (welcome) welcome.hidden = true;
+    if (welcome) {
+      welcome.hidden = true;
+      welcome.setAttribute('hidden', '');
+    }
+    const gate = document.getElementById('app-gate');
+    if (gate) {
+      gate.hidden = false;
+      gate.removeAttribute('hidden');
+    }
   }
   if (forgot) {
     showAuthIntentStep(false);

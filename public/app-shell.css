@@ -372,6 +372,24 @@ body.cubik-app #change-password-panel[hidden] {
   display: none !important;
 }
 
+body.cubik-app #app-gate #app-welcome[hidden] {
+  display: none !important;
+}
+
+body.cubik-app #app-gate #auth-panel:not([hidden]),
+body.cubik-app #app-gate #change-password-panel:not([hidden]) {
+  display: flex !important;
+  position: relative;
+  inset: auto;
+  z-index: 2;
+  flex: 1 0 auto;
+  width: 100%;
+  max-width: 22.5rem;
+  margin: 0 auto;
+  min-height: min(100%, calc(100dvh - var(--app-safe-top) - var(--app-safe-bottom) - 2rem));
+  box-sizing: border-box;
+}
+
 body.cubik-app #auth-panel.is-register,
 body.cubik-app #auth-panel.is-forgot {
   justify-content: flex-start;

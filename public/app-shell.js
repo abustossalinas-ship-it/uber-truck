@@ -37,6 +37,7 @@ const AppShell = {
     }
     const gate = document.getElementById('app-gate');
     if (gate) gate.hidden = false;
+    this.mountAuthInGate();
     this.hideNativeSplash();
     this.bindWelcome();
     this.bindBottomNav();
@@ -49,7 +50,21 @@ const AppShell = {
     this.initNativePlugins();
     this.showBuildVersion();
     this.syncAuthState();
-    document.addEventListener('DOMContentLoaded', () => this.syncAuthState());
+    document.addEventListener('DOMContentLoaded', () => {
+      this.mountAuthInGate();
+      this.syncAuthState();
+    });
+  },
+
+  mountAuthInGate() {
+    if (!document.body.classList.contains('cubik-app')) return;
+    const gate = document.getElementById('app-gate');
+    if (!gate || gate.dataset.authMounted === '1') return;
+    ['auth-panel', 'change-password-panel'].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el && !gate.contains(el)) gate.appendChild(el);
+    });
+    gate.dataset.authMounted = '1';
   },
 
   initNativePlugins() {
@@ -312,11 +327,15 @@ const AppShell = {
         authError &&
         !authError.hidden &&
         authError.textContent.trim();
-      if (!authOpenWithError) {
+      const authPanelOpen = authPanel && !authPanel.hidden;
+      if (!authOpenWithError && !authPanelOpen) {
         authPanel?.setAttribute('hidden', '');
         const welcome = document.getElementById('app-welcome');
-        if (welcome) welcome.hidden = false;
-      } else {
+        if (welcome) {
+          welcome.hidden = false;
+          welcome.removeAttribute('hidden');
+        }
+      } else if (authOpenWithError) {
         document.getElementById('app-welcome')?.setAttribute('hidden', '');
         const welcome = document.getElementById('app-welcome');
         if (welcome) welcome.hidden = true;

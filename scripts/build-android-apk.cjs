@@ -78,7 +78,13 @@ console.log(`Modo APK: ${mode} (${mode === 'remote' ? 'UI desde Railway' : 'UI e
 console.log(`1/3 ${capSync}…`);
 execSync(`npm run ${capSync}`, { cwd: root, stdio: 'inherit', env });
 
-console.log('2/3 assembleDebug…');
+console.log('2/3 verify android bundle…');
+if (mode === 'remote') {
+  console.log('(modo remoto: UI se carga desde Railway; verify del bundle local es fallback)');
+}
+execSync('node scripts/verify-android-bundle.cjs', { cwd: root, stdio: 'inherit', env });
+
+console.log('3/3 assembleDebug…');
 execSync(`${gradlew} assembleDebug`, {
   cwd: path.join(root, 'android'),
   stdio: 'inherit',
@@ -94,5 +100,5 @@ if (!fs.existsSync(apkOut)) {
 fs.mkdirSync(destDir, { recursive: true });
 fs.copyFileSync(apkOut, destApk);
 const mb = (fs.statSync(destApk).size / (1024 * 1024)).toFixed(1);
-console.log(`3/3 Listo: ${destApk} (${mb} MB)`);
+console.log(`Listo: ${destApk} (${mb} MB)`);
 console.log('Envíalo por WhatsApp o arrástralo al emulador para instalar.');

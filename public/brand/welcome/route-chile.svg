@@ -1,16 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 72" fill="none" aria-hidden="true">
-  <path d="M52 32 C100 18, 180 18, 228 32" stroke="#29ABE2" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round"/>
-  <circle cx="52" cy="32" r="7" fill="#F7941D" opacity="0.25"/>
-  <circle cx="52" cy="32" r="3.5" fill="#F7941D"/>
-  <text x="52" y="54" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" font-weight="700" fill="#0F2744">Santiago</text>
-  <circle cx="228" cy="32" r="7" fill="#29ABE2" opacity="0.25"/>
-  <circle cx="228" cy="32" r="3.5" fill="#29ABE2"/>
-  <text x="228" y="54" text-anchor="middle" font-family="system-ui,sans-serif" font-size="9" font-weight="700" fill="#0F2744">Valparaíso</text>
-  <g transform="translate(118 14)">
+  <path d="M52 30 C100 16, 180 16, 228 30" stroke="#29ABE2" stroke-width="2" stroke-dasharray="5 4" stroke-linecap="round"/>
+  <circle cx="52" cy="30" r="7" fill="#F7941D" opacity="0.25"/>
+  <circle cx="52" cy="30" r="3.5" fill="#F7941D"/>
+  <circle cx="228" cy="30" r="7" fill="#29ABE2" opacity="0.25"/>
+  <circle cx="228" cy="30" r="3.5" fill="#29ABE2"/>
+  <g transform="translate(118 12)">
     <rect x="0" y="10" width="32" height="12" rx="2.5" fill="#29ABE2"/>
     <rect x="24" y="13" width="14" height="9" rx="2" fill="#0F2744"/>
     <circle cx="7" cy="26" r="4.5" fill="#0F2744"/>
     <circle cx="30" cy="26" r="4.5" fill="#0F2744"/>
   </g>
-  <text x="140" y="68" text-anchor="middle" font-family="system-ui,sans-serif" font-size="8" font-weight="600" fill="#64748b">Camión disponible en ruta</text>
+  <rect x="34" y="46" width="36" height="3" rx="1.5" fill="#F7941D" opacity="0.35"/>
+  <rect x="210" y="46" width="36" height="3" rx="1.5" fill="#29ABE2" opacity="0.35"/>
+  <rect x="98" y="58" width="84" height="3" rx="1.5" fill="#64748b" opacity="0.25"/>
 </svg>

@@ -105,9 +105,11 @@ const AppShell = {
           this.exitDeep();
           return;
         }
-        if (document.getElementById('auth-panel')?.hidden === false) {
-          if (typeof closeAuthPanel === 'function') closeAuthPanel();
-          else document.getElementById('auth-panel').hidden = true;
+        const authPanel = document.getElementById('auth-panel');
+        if (authPanel && authPanel.hidden === false) {
+          if (typeof handleAuthBackNavigation === 'function' && handleAuthBackNavigation()) {
+            return;
+          }
           return;
         }
         if (!canGoBack) Cap.Plugins.App?.exitApp?.();

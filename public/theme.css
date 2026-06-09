@@ -439,24 +439,6 @@ body.cubik-app #auth-panel .auth-context {
   width: min(100%, 24rem);
 }
 
-.auth-back-welcome {
-  display: none;
-  align-self: flex-start;
-  margin: 0 0 0.35rem;
-  padding: 0.2rem 0;
-  font-weight: 700;
-  color: var(--brand-orange, #f7941d);
-}
-
-body.cubik-app #auth-panel .auth-back-welcome:not([hidden]) {
-  display: block;
-  width: 100%;
-  max-width: 22rem;
-  margin-left: auto;
-  margin-right: auto;
-  text-align: left;
-}
-
 .auth-error {
   margin: 0.5rem 0 0;
   padding: 0.55rem 0.65rem;

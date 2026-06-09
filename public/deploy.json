@@ -1,6 +1,6 @@
 {
-  "version": "0.0.119",
+  "version": "0.0.120",
   "git_sha": "",
   "ui": "uber-parity-v1",
-  "note": "Welcome confianza + ruta; login contextual por rol"
+  "note": "Quitar volver en login; fix SVG ruta; back Android si form vacio"
 }

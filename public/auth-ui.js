@@ -282,13 +282,31 @@ function showAuthIntentStep(show) {
   setPanelSectionVisible(document.getElementById('auth-form-wrap'), !show);
 }
 
-function syncAuthBackWelcome() {
-  const btn = document.getElementById('auth-back-welcome');
-  if (!btn) return;
+function isAuthFormEmpty() {
+  const form = document.getElementById('form-auth');
+  if (!form) return true;
+  const email = form.querySelector('[name="email"]')?.value?.trim();
+  const password = form.querySelector('[name="password"]')?.value;
+  if (email || password) return false;
+  if (authRegisterMode) {
+    const company = form.querySelector('[name="company_name"]')?.value?.trim();
+    const fullName = form.querySelector('[name="full_name"]')?.value?.trim();
+    const phone = form.querySelector('[name="phone"]')?.value?.trim();
+    if (company || fullName || phone) return false;
+  }
+  return true;
+}
+
+function handleAuthBackNavigation() {
   const panel = document.getElementById('auth-panel');
-  const panelOpen = panel && !panel.hidden;
-  const show = isCubikAppGuest() && panelOpen && !authForgotMode;
-  setPanelSectionVisible(btn, show);
+  if (!panel || panel.hidden) return false;
+  if (authForgotMode) {
+    openAuthPanel(false, false);
+    return true;
+  }
+  if (!isAuthFormEmpty()) return false;
+  closeAuthPanel();
+  return true;
 }
 
 function showAppWelcome() {
@@ -354,7 +372,6 @@ function showAuthError(message) {
   } else {
     el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
-  syncAuthBackWelcome();
 }
 
 function notifyAuthFailure(message) {
@@ -438,7 +455,6 @@ function setAuthMode(register, forgot = false) {
     forgotErr.textContent = '';
     forgotErr.hidden = true;
   }
-  syncAuthBackWelcome();
   if (forgot) {
     title.textContent = 'Recuperar contraseña';
     if (formLogin) formLogin.hidden = true;
@@ -473,7 +489,6 @@ function closeAuthPanel() {
   const panel = document.getElementById('auth-panel');
   setPanelSectionVisible(panel, false);
   clearAuthError();
-  syncAuthBackWelcome();
   if (isCubikAppGuest()) {
     showAuthIntentStep(false);
     showAppWelcome();
@@ -516,7 +531,6 @@ function openAuthPanel(register = false, forgot = false, roleIntent = null) {
       if (email && !authForgotMode) email.focus();
     }, 50);
   }
-  syncAuthBackWelcome();
 }
 
 window.openAuthPanel = openAuthPanel;
@@ -524,6 +538,7 @@ window.setAuthIntentRole = setAuthIntentRole;
 window.getAuthIntentRole = getAuthIntentRole;
 window.clearAuthIntentRole = clearAuthIntentRole;
 window.showWelcomeRoleStep = showWelcomeRoleStep;
+window.handleAuthBackNavigation = handleAuthBackNavigation;
 
 document.getElementById('auth-role')?.addEventListener('change', updateRegisterLabels);
 
@@ -545,10 +560,6 @@ document.getElementById('auth-role-toggle')?.addEventListener('click', (e) => {
 });
 
 document.getElementById('auth-intent-cancel')?.addEventListener('click', () => {
-  closeAuthPanel();
-});
-
-document.getElementById('auth-back-welcome')?.addEventListener('click', () => {
   closeAuthPanel();
 });
 

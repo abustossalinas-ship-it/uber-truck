@@ -14,8 +14,8 @@
   <link rel="apple-touch-icon" href="/brand/logo.png" />
   <link rel="preconnect" href="https://uber-truck-production.up.railway.app" crossorigin />
   <link rel="dns-prefetch" href="https://uber-truck-production.up.railway.app" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.111" />
-  <link rel="stylesheet" href="/app-shell.css?v=0.0.98" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.112" />
+  <link rel="stylesheet" href="/app-shell.css?v=0.0.112" />
   <script src="/brand-config.js?v=0.0.76" defer></script>
   <script src="/api-base.js?v=0.0.83" defer></script>
 </head>
@@ -28,9 +28,28 @@
         <p class="app-gate-tagline">Optimiza tus envíos</p>
         <p class="app-gate-lead">Cubicación y emparejamiento en tiempo real para tu operación logística.</p>
       </div>
-      <div class="app-gate-actions">
-        <button type="button" class="btn-primary-app" id="btn-welcome-login">Ingresar</button>
-        <button type="button" class="btn-outline-app" id="btn-welcome-register">Crear cuenta</button>
+      <div id="app-welcome-roles" class="app-gate-role-step">
+        <p class="app-gate-role-lead">¿Cómo usarás Cubik?</p>
+        <div class="app-gate-role-grid">
+          <button type="button" class="app-gate-role-card carrier" data-auth-intent="carrier">
+            <span class="app-gate-role-icon" aria-hidden="true">🚛</span>
+            <strong>Soy transportista</strong>
+            <span>Ofertar rutas y gestionar viajes</span>
+          </button>
+          <button type="button" class="app-gate-role-card shipper" data-auth-intent="shipper">
+            <span class="app-gate-role-icon" aria-hidden="true">📦</span>
+            <strong>Soy empresa</strong>
+            <span>Publicar cargas y confirmar entregas</span>
+          </button>
+        </div>
+      </div>
+      <div id="app-welcome-auth" class="app-gate-auth-step" hidden>
+        <p id="app-welcome-intent-badge" class="app-gate-intent-badge"></p>
+        <div class="app-gate-actions">
+          <button type="button" class="btn-primary-app" id="btn-welcome-login">Ingresar</button>
+          <button type="button" class="btn-outline-app" id="btn-welcome-register">Crear cuenta</button>
+          <button type="button" class="link-btn app-gate-change-role" id="btn-welcome-change-role">Cambiar tipo de cuenta</button>
+        </div>
       </div>
     </div>
   </div>
@@ -280,6 +299,25 @@
   </div>
 
   <div id="auth-panel" class="auth-panel card" hidden>
+    <div id="auth-intent-step" class="auth-intent-step" hidden>
+      <h2 id="auth-intent-title">¿Cómo usarás Cubik?</h2>
+      <p class="muted auth-intent-lead">Elige tu perfil para iniciar sesión o registrarte.</p>
+      <div class="auth-intent-grid">
+        <button type="button" class="auth-intent-card carrier" data-auth-intent="carrier">
+          <span class="auth-intent-icon" aria-hidden="true">🚛</span>
+          <strong>Soy transportista</strong>
+          <span>Ofertar rutas y gestionar viajes</span>
+        </button>
+        <button type="button" class="auth-intent-card shipper" data-auth-intent="shipper">
+          <span class="auth-intent-icon" aria-hidden="true">📦</span>
+          <strong>Soy empresa embarcadora</strong>
+          <span>Publicar cargas y confirmar entregas</span>
+        </button>
+      </div>
+      <button type="button" class="link-btn auth-intent-cancel" id="auth-intent-cancel">Cancelar</button>
+    </div>
+    <div id="auth-form-wrap">
+    <p id="auth-intent-badge" class="auth-intent-badge" hidden></p>
     <h2 id="auth-title">Iniciar sesión</h2>
     <form id="form-auth">
       <label>Email</label>
@@ -289,8 +327,14 @@
       <p id="auth-register-intro" class="register-only muted">
         Datos mínimos de tu empresa. Cada cuenta ve solo lo de su organización; el administrador ve todo.
       </p>
-      <label id="auth-role-label" class="register-only">Tipo de cuenta</label>
-      <select name="role" id="auth-role" class="register-only">
+      <div id="auth-role-picker" class="register-only auth-role-picker" role="group" aria-labelledby="auth-role-label">
+        <span id="auth-role-label" class="auth-role-picker-label">Tipo de cuenta</span>
+        <div class="auth-role-picker-btns">
+          <button type="button" class="auth-role-pill" data-role-pick="shipper">Empresa embarcadora</button>
+          <button type="button" class="auth-role-pill" data-role-pick="carrier">Transportista</button>
+        </div>
+      </div>
+      <select name="role" id="auth-role" class="register-only visually-hidden" tabindex="-1" aria-hidden="true">
         <option value="shipper">Empresa embarcadora (publica cargas)</option>
         <option value="carrier">Empresa transportista (publica capacidad)</option>
       </select>
@@ -316,7 +360,9 @@
       <button type="button" class="link-btn login-only" id="auth-forgot-link">¿Olvidaste tu contraseña?</button>
       <button type="button" class="link-btn" id="auth-toggle-mode">Crear cuenta</button>
       <button type="button" class="link-btn forgot-only" id="auth-back-login" hidden>Volver a iniciar sesión</button>
+      <button type="button" class="link-btn" id="auth-change-intent" hidden>Cambiar tipo de cuenta</button>
     </p>
+    </div>
   </div>
 
   <div id="change-password-panel" class="auth-panel card" hidden>
@@ -1131,7 +1177,7 @@
   </div>
 
   <script src="/roles-ui.js?v=0.0.89" defer></script>
-  <script src="/app-shell.js?v=0.0.109" defer></script>
+  <script src="/app-shell.js?v=0.0.112" defer></script>
   <script src="/pwa-ui.js?v=0.0.64" defer></script>
   <script src="/kyc-ui.js?v=0.0.33" defer></script>
   <script src="/admin-ui.js?v=0.0.59" defer></script>
@@ -1146,7 +1192,7 @@
   <script src="/legal-terms-ui.js?v=0.0.86" defer></script>
   <script src="/load-form-validation.js?v=0.0.86" defer></script>
   <script src="/proposal-compare-ui.js?v=0.0.47" defer></script>
-  <script src="/auth-ui.js?v=0.0.76" defer></script>
+  <script src="/auth-ui.js?v=0.0.112" defer></script>
   <script src="/live-map-ui.js?v=0.0.111" defer></script>
   <script src="/tracking-ui.js?v=0.0.111" defer></script>
   <script src="/incident-ui.js?v=0.0.99" defer></script>

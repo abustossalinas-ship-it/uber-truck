@@ -210,6 +210,92 @@ body.cubik-app .app-gate {
   padding: 0.75rem 0 0.25rem;
 }
 
+.app-gate-role-step {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.app-gate-role-lead {
+  margin: 0 0 0.65rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--brand-navy);
+}
+
+.app-gate-role-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.app-gate-role-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.app-gate-role-card:active {
+  transform: scale(0.98);
+}
+
+.app-gate-role-card.carrier {
+  border-color: rgba(41, 171, 226, 0.45);
+  background: var(--surface-cool);
+}
+
+.app-gate-role-card.shipper {
+  border-color: rgba(247, 148, 29, 0.45);
+  background: var(--surface-warm);
+}
+
+.app-gate-role-card strong {
+  font-size: 0.95rem;
+  color: var(--brand-navy);
+}
+
+.app-gate-role-card span:last-child {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.app-gate-role-icon {
+  font-size: 1.5rem;
+  line-height: 1;
+}
+
+.app-gate-auth-step {
+  width: 100%;
+  flex-shrink: 0;
+}
+
+.app-gate-intent-badge {
+  margin: 0 0 0.35rem;
+  text-align: center;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--brand-navy-mid);
+}
+
+.app-gate-change-role {
+  margin-top: 0.15rem;
+  align-self: center;
+  font-size: 0.82rem;
+}
+
 .app-gate-logo {
   display: block;
   width: clamp(88px, 28vw, 128px);
@@ -306,7 +392,8 @@ body.cubik-app #change-password-panel::before {
   background: url('/brand/logo-mark.png?v=0.0.75') center / contain no-repeat;
 }
 
-body.cubik-app #auth-panel > h2,
+body.cubik-app #auth-panel #auth-title,
+body.cubik-app #auth-panel #auth-intent-title,
 body.cubik-app #change-password-panel > h2 {
   text-align: center;
   width: 100%;
@@ -315,7 +402,9 @@ body.cubik-app #change-password-panel > h2 {
 
 body.cubik-app #auth-panel form,
 body.cubik-app #change-password-panel form,
-body.cubik-app #auth-panel .auth-login-footer {
+body.cubik-app #auth-panel .auth-login-footer,
+body.cubik-app #auth-panel #auth-form-wrap,
+body.cubik-app #auth-panel .auth-intent-step {
   width: 100%;
   max-width: 22rem;
   margin-left: auto;

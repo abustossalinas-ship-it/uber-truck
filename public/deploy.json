@@ -1,6 +1,6 @@
 {
-  "version": "0.0.111",
+  "version": "0.0.112",
   "git_sha": "",
   "ui": "uber-parity-v1",
-  "note": "Tras marcar entregado: pendiente confirmacion, sin mapa en ruta"
+  "note": "Login diferenciado transportista vs embarcador"
 }

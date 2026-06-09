@@ -92,6 +92,158 @@ const Auth = {
 
 let authRegisterMode = false;
 let authForgotMode = false;
+let pendingAuthRegister = false;
+
+const AUTH_INTENT_KEY = 'ut_auth_intent_role';
+
+function normalizeAuthIntentRole(raw) {
+  if (typeof normalizeAppRole === 'function') return normalizeAppRole(raw);
+  const r = String(raw || '')
+    .toLowerCase()
+    .trim();
+  if (r === 'carrier' || r === 'transportista') return 'carrier';
+  if (r === 'shipper' || r === 'embarcador' || r === 'embarcadora') return 'shipper';
+  return r === 'carrier' || r === 'shipper' ? r : null;
+}
+
+function readAuthIntentFromUrl() {
+  try {
+    const q = new URLSearchParams(window.location.search);
+    return normalizeAuthIntentRole(q.get('rol') || q.get('role'));
+  } catch (_) {
+    return null;
+  }
+}
+
+function getAuthIntentRole() {
+  try {
+    const stored = sessionStorage.getItem(AUTH_INTENT_KEY);
+    const role = normalizeAuthIntentRole(stored);
+    if (role) return role;
+  } catch (_) {}
+  return readAuthIntentFromUrl();
+}
+
+function setAuthIntentRole(role) {
+  const normalized = normalizeAuthIntentRole(role);
+  if (!normalized) return;
+  try {
+    sessionStorage.setItem(AUTH_INTENT_KEY, normalized);
+  } catch (_) {}
+  syncAuthRoleFields(normalized);
+  refreshAuthIntentUi();
+}
+
+function clearAuthIntentRole() {
+  try {
+    sessionStorage.removeItem(AUTH_INTENT_KEY);
+  } catch (_) {}
+  refreshAuthIntentUi();
+}
+
+function authIntentHeadline(role, register) {
+  const label = typeof roleLabel === 'function' ? roleLabel(role) : role;
+  if (register) return `Crear cuenta — ${label}`;
+  return `${label} — iniciar sesión`;
+}
+
+function authIntentRegisterIntro(role) {
+  if (role === 'carrier') {
+    return 'Registra tu flota o servicio de transporte. Un administrador debe aprobar la cuenta antes de ofertar y emparejar.';
+  }
+  return 'Registra tu empresa embarcadora. Un administrador debe aprobar la cuenta antes de publicar cargas y emparejar.';
+}
+
+function syncAuthRoleFields(role) {
+  const select = document.getElementById('auth-role');
+  if (select && role) select.value = role;
+  document.querySelectorAll('[data-role-pick]').forEach((btn) => {
+    const pick = btn.dataset.rolePick;
+    btn.classList.toggle('active', pick === role);
+    btn.setAttribute('aria-pressed', pick === role ? 'true' : 'false');
+  });
+  updateRegisterLabels();
+}
+
+function refreshAuthIntentUi() {
+  const role = getAuthIntentRole();
+  const badge = document.getElementById('auth-intent-badge');
+  const changeBtn = document.getElementById('auth-change-intent');
+  const welcomeBadge = document.getElementById('app-welcome-intent-badge');
+  const label = role && typeof roleLabel === 'function' ? roleLabel(role) : role;
+  if (badge) {
+    if (role && !authForgotMode) {
+      badge.hidden = false;
+      badge.removeAttribute('hidden');
+      badge.textContent = `Perfil: ${label}`;
+    } else {
+      badge.hidden = true;
+      badge.textContent = '';
+    }
+  }
+  if (changeBtn) changeBtn.hidden = !role || authForgotMode;
+  if (welcomeBadge) {
+    welcomeBadge.textContent = role ? `Entrar como ${label}` : '';
+  }
+  if (role) syncAuthRoleFields(role);
+}
+
+function showWelcomeRoleStep() {
+  document.getElementById('app-welcome-roles')?.removeAttribute('hidden');
+  const roles = document.getElementById('app-welcome-roles');
+  if (roles) roles.hidden = false;
+  const authStep = document.getElementById('app-welcome-auth');
+  if (authStep) authStep.hidden = true;
+}
+
+function showWelcomeAuthStep(role) {
+  if (role) setAuthIntentRole(role);
+  const roles = document.getElementById('app-welcome-roles');
+  if (roles) roles.hidden = true;
+  const authStep = document.getElementById('app-welcome-auth');
+  if (authStep) {
+    authStep.hidden = false;
+    authStep.removeAttribute('hidden');
+  }
+  refreshAuthIntentUi();
+}
+
+function showAuthIntentStep(show) {
+  const step = document.getElementById('auth-intent-step');
+  const wrap = document.getElementById('auth-form-wrap');
+  if (step) step.hidden = !show;
+  if (wrap) wrap.hidden = show;
+}
+
+function bindAuthIntentPickers() {
+  document.querySelectorAll('[data-auth-intent]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const role = btn.dataset.authIntent;
+      if (!role) return;
+      setAuthIntentRole(role);
+      if (document.body.classList.contains('cubik-app') && !Auth.user) {
+        showWelcomeAuthStep(role);
+        return;
+      }
+      showAuthIntentStep(false);
+      setAuthMode(pendingAuthRegister, false);
+    });
+  });
+}
+
+function checkAuthIntentMismatch(user) {
+  const intent = getAuthIntentRole();
+  if (!intent || !user?.role) return;
+  const actual = typeof normalizeAppRole === 'function' ? normalizeAppRole(user.role) : user.role;
+  if (actual === 'admin') return;
+  if (actual !== intent) {
+    const actualLabel = typeof roleLabel === 'function' ? roleLabel(actual) : actual;
+    const intentLabel = typeof roleLabel === 'function' ? roleLabel(intent) : intent;
+    alert(
+      `Tu cuenta es de ${actualLabel}, pero entraste como ${intentLabel}. Puedes seguir; las opciones dependen de tu rol real en Cubik.`
+    );
+  }
+}
 
 function showAuthError(message) {
   const el = document.getElementById('auth-error');
@@ -151,14 +303,16 @@ function authErrorMessage(res, json, register) {
 }
 
 function updateRegisterLabels() {
-  const role = document.getElementById('auth-role')?.value || 'shipper';
+  const role = document.getElementById('auth-role')?.value || getAuthIntentRole() || 'shipper';
   const companyLabel = document.getElementById('auth-company-label');
+  const intro = document.getElementById('auth-register-intro');
   if (companyLabel) {
     companyLabel.textContent =
       role === 'carrier'
         ? 'Nombre transportista / flota'
         : 'Razón social embarcadora';
   }
+  if (intro && authRegisterMode) intro.textContent = authIntentRegisterIntro(role);
 }
 
 function setRegisterFieldsRequired(register) {
@@ -178,11 +332,15 @@ function setAuthMode(register, forgot = false) {
   const toggle = document.getElementById('auth-toggle-mode');
   const forgotLink = document.getElementById('auth-forgot-link');
   const backLogin = document.getElementById('auth-back-login');
+  const rolePicker = document.getElementById('auth-role-picker');
+  const intentRole = getAuthIntentRole();
   if (!panel) return;
   panel.classList.toggle('is-register', register && !forgot);
   panel.classList.toggle('is-forgot', forgot);
+  panel.classList.toggle('has-auth-intent', Boolean(intentRole) && !forgot);
   setRegisterFieldsRequired(register && !forgot);
   clearAuthError();
+  refreshAuthIntentUi();
   const forgotErr = document.getElementById('auth-forgot-error');
   if (forgotErr) {
     forgotErr.textContent = '';
@@ -195,6 +353,7 @@ function setAuthMode(register, forgot = false) {
     if (toggle) toggle.hidden = true;
     if (forgotLink) forgotLink.hidden = true;
     if (backLogin) backLogin.hidden = false;
+    if (rolePicker) rolePicker.hidden = true;
   } else {
     if (formLogin) formLogin.hidden = false;
     if (formForgot) formForgot.hidden = true;
@@ -204,7 +363,13 @@ function setAuthMode(register, forgot = false) {
     }
     if (forgotLink) forgotLink.hidden = register;
     if (backLogin) backLogin.hidden = true;
-    title.textContent = register ? 'Crear cuenta empresa' : 'Iniciar sesión';
+    if (rolePicker) rolePicker.hidden = !register;
+    if (intentRole) {
+      title.textContent = authIntentHeadline(intentRole, register);
+      syncAuthRoleFields(intentRole);
+    } else {
+      title.textContent = register ? 'Crear cuenta' : 'Iniciar sesión';
+    }
     const submit = document.getElementById('auth-submit');
     if (submit) submit.textContent = register ? 'Registrarse' : 'Entrar';
     if (register) updateRegisterLabels();
@@ -214,27 +379,69 @@ function setAuthMode(register, forgot = false) {
 function closeAuthPanel() {
   const panel = document.getElementById('auth-panel');
   if (panel) panel.hidden = true;
+  showAuthIntentStep(false);
   if (document.body.classList.contains('cubik-app') && !Auth.user) {
     const welcome = document.getElementById('app-welcome');
     if (welcome) welcome.hidden = false;
+    if (getAuthIntentRole()) showWelcomeAuthStep();
+    else showWelcomeRoleStep();
   }
 }
 
-function openAuthPanel(register = false, forgot = false) {
+function openAuthPanel(register = false, forgot = false, roleIntent = null) {
   const panel = document.getElementById('auth-panel');
   if (!panel) return;
-  setAuthMode(register, forgot);
+  pendingAuthRegister = register;
+  if (roleIntent) setAuthIntentRole(roleIntent);
+  const intent = getAuthIntentRole();
   panel.hidden = false;
   document.getElementById('change-password-panel')?.setAttribute('hidden', '');
   if (document.body.classList.contains('cubik-app')) {
     const welcome = document.getElementById('app-welcome');
     if (welcome) welcome.hidden = true;
+  }
+  if (forgot) {
+    showAuthIntentStep(false);
+    setAuthMode(false, true);
+  } else if (!intent) {
+    showAuthIntentStep(true);
+    setAuthMode(register, false);
   } else {
-    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    showAuthIntentStep(false);
+    setAuthMode(register, false);
+    if (!document.body.classList.contains('cubik-app')) {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }
 }
 
+window.openAuthPanel = openAuthPanel;
+window.setAuthIntentRole = setAuthIntentRole;
+window.getAuthIntentRole = getAuthIntentRole;
+window.clearAuthIntentRole = clearAuthIntentRole;
+window.showWelcomeRoleStep = showWelcomeRoleStep;
+window.showWelcomeAuthStep = showWelcomeAuthStep;
+
 document.getElementById('auth-role')?.addEventListener('change', updateRegisterLabels);
+
+document.querySelectorAll('[data-role-pick]').forEach((btn) => {
+  btn.addEventListener('click', () => {
+    const role = btn.dataset.rolePick;
+    if (!role) return;
+    setAuthIntentRole(role);
+    updateRegisterLabels();
+  });
+});
+
+document.getElementById('auth-change-intent')?.addEventListener('click', () => {
+  clearAuthIntentRole();
+  pendingAuthRegister = authRegisterMode;
+  showAuthIntentStep(true);
+});
+
+document.getElementById('auth-intent-cancel')?.addEventListener('click', () => {
+  closeAuthPanel();
+});
 
 document.getElementById('btn-auth')?.addEventListener('click', () => {
   if (Auth.user) {
@@ -408,6 +615,12 @@ formAuth?.addEventListener('submit', async (e) => {
       showAuthError('Ingresa el nombre de la empresa');
       return;
     }
+    const intent = getAuthIntentRole();
+    if (intent) body.role = intent;
+    if (!body.role || !normalizeAuthIntentRole(body.role)) {
+      showAuthError('Elige si eres transportista o empresa embarcadora');
+      return;
+    }
   } else {
     delete body.role;
     delete body.company_name;
@@ -443,6 +656,7 @@ formAuth?.addEventListener('submit', async (e) => {
       const meJson = await meRes.json();
       if (meRes.ok && meJson.user) Auth.save(json.token, meJson.user);
     } catch (_) {}
+    checkAuthIntentMismatch(Auth.user);
     document.getElementById('auth-panel').hidden = true;
     if (authRegisterMode && Auth.user?.kyc_status === 'pending' && Auth.user?.role !== 'admin') {
       alert(
@@ -462,4 +676,10 @@ formAuth?.addEventListener('submit', async (e) => {
 });
 
 setAuthMode(false, false);
+bindAuthIntentPickers();
+const urlIntent = readAuthIntentFromUrl();
+if (urlIntent) setAuthIntentRole(urlIntent);
+if (document.body.classList.contains('cubik-app') && !Auth.user && getAuthIntentRole()) {
+  showWelcomeAuthStep(getAuthIntentRole());
+}
 Auth.render();

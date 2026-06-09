@@ -207,6 +207,133 @@ body {
   max-width: 420px;
 }
 
+.auth-intent-step {
+  width: 100%;
+}
+
+.auth-intent-lead {
+  margin: 0 0 0.85rem;
+  font-size: 0.88rem;
+}
+
+.auth-intent-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  margin-bottom: 0.75rem;
+}
+
+.auth-intent-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.2rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 2px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+  cursor: pointer;
+  text-align: left;
+  font: inherit;
+  color: var(--text);
+  transition: border-color 0.15s ease, transform 0.15s ease;
+}
+
+.auth-intent-card:active {
+  transform: scale(0.98);
+}
+
+.auth-intent-card.carrier {
+  border-color: rgba(41, 171, 226, 0.45);
+  background: var(--surface-cool);
+}
+
+.auth-intent-card.shipper {
+  border-color: rgba(247, 148, 29, 0.45);
+  background: var(--surface-warm);
+}
+
+.auth-intent-card strong {
+  font-size: 0.95rem;
+  color: var(--brand-navy);
+}
+
+.auth-intent-card span:last-child {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+.auth-intent-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.auth-intent-cancel {
+  display: block;
+  margin: 0 auto;
+}
+
+.auth-intent-badge {
+  margin: 0 0 0.35rem;
+  padding: 0.35rem 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--brand-navy-mid);
+  background: var(--brand-gray-50);
+  border-radius: 8px;
+  text-align: center;
+}
+
+.auth-intent-badge[hidden] {
+  display: none;
+}
+
+.auth-role-picker {
+  margin: 0.5rem 0 0.75rem;
+}
+
+.auth-role-picker-label {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.auth-role-picker-btns {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.45rem;
+}
+
+.auth-role-pill {
+  padding: 0.55rem 0.45rem;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--brand-navy);
+  cursor: pointer;
+  line-height: 1.25;
+}
+
+.auth-role-pill.active {
+  border-color: var(--brand-orange);
+  background: var(--surface-warm);
+  color: var(--brand-navy);
+}
+
+.auth-panel.has-auth-intent .auth-role-picker-btns .auth-role-pill:not(.active) {
+  opacity: 0.55;
+}
+
+body.cubik-app #auth-panel .auth-intent-step,
+body.cubik-app #auth-panel #auth-form-wrap {
+  width: min(100%, 24rem);
+}
+
 .auth-error {
   margin: 0.5rem 0 0;
   padding: 0.55rem 0.65rem;

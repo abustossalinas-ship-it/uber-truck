@@ -3,6 +3,7 @@ const Penalties = {
   paymentConfig: null,
   chileBanks: null,
   editingBankId: null,
+  _summaryCacheKey: 'ut_account_summary_cache',
 
   accountTypeLabel(type) {
     const map = {
@@ -279,6 +280,26 @@ const Penalties = {
     </section>`;
   },
 
+  readSummaryCache() {
+    try {
+      const raw = sessionStorage.getItem(this._summaryCacheKey);
+      if (!raw) return null;
+      return JSON.parse(raw);
+    } catch (_) {
+      return null;
+    }
+  },
+
+  writeSummaryCache(summary) {
+    if (!summary?.ok) return;
+    try {
+      sessionStorage.setItem(
+        this._summaryCacheKey,
+        JSON.stringify({ saved_at: Date.now(), summary })
+      );
+    } catch (_) {}
+  },
+
   emptyPenalties() {
     const role = typeof getActorRole === 'function' ? getActorRole() : 'shipper';
     return {
@@ -311,9 +332,20 @@ const Penalties = {
         return this.summary;
       }
       this.summary = { ...json, ok: true };
+      this.writeSummaryCache(this.summary);
       return this.summary;
     } catch (e) {
       console.error(e);
+      const cached = this.readSummaryCache();
+      if (cached?.summary?.ok) {
+        this.summary = {
+          ...cached.summary,
+          ok: true,
+          from_cache: true,
+          cache_saved_at: cached.saved_at,
+        };
+        return this.summary;
+      }
       this.summary = {
         ok: false,
         error: 'Sin conexión con el servidor',
@@ -732,14 +764,29 @@ const Penalties = {
     }
     const p = s.penalties || this.emptyPenalties();
     if (s.ok === false || s.penalties_error) {
+      const errRaw = s.error || s.penalties_error || 'Error';
+      const offline = /sin conexi|network|fetch|failed/i.test(String(errRaw));
+      const userMsg = offline
+        ? 'Sin conexión a internet. Revisa tu red móvil o Wi‑Fi e intenta de nuevo.'
+        : errRaw;
+      const devHint = document.body.classList.contains('cubik-app')
+        ? ''
+        : '<p class="muted">Si acabas de desplegar v0.0.52+, ejecuta <code>RUN_024_SUPABASE.sql</code> en Supabase.</p>';
       box.innerHTML = `
         <h2>Cuenta y multas</h2>
-        <p class="penalty-block-warn"><strong>No se pudo cargar:</strong> ${s.error || s.penalties_error || 'Error'}</p>
-        <p class="muted">Si acabas de desplegar v0.0.52+, ejecuta <code>RUN_024_SUPABASE.sql</code> en Supabase.</p>
+        <p class="penalty-block-warn"><strong>${offline ? 'Sin conexión' : 'No se pudo cargar'}:</strong> ${userMsg}</p>
+        ${devHint}
         <button type="button" class="tab tab-sm" id="btn-penalties-retry">Reintentar</button>`;
       document.getElementById('btn-penalties-retry')?.addEventListener('click', () => this.refresh());
       return;
     }
+    const cacheBanner = s.from_cache
+      ? `<p class="penalty-block-warn"><strong>Sin conexión.</strong> Mostrando datos guardados de tu última sesión${
+          s.cache_saved_at
+            ? ` (${new Date(s.cache_saved_at).toLocaleString('es-CL', { dateStyle: 'short', timeStyle: 'short' })})`
+            : ''
+        }.</p>`
+      : '';
     const rolText =
       typeof window.roleLabel === 'function' ? window.roleLabel(p.role) : p.role;
     const op = s.operating_status || {};
@@ -773,6 +820,7 @@ const Penalties = {
 
     box.innerHTML = `
       <h2>Cuenta y multas</h2>
+      ${cacheBanner}
       <p class="muted">Resumen para ${rolText || 'tu cuenta'}. Plazo ${p.penalty_due_days || 7} días para pagar; al declarar pago el acreedor tiene ${confirmH} h para confirmar. Sin confirmación → moderador.</p>
       ${blockWarn}
       ${cubikSaldoBlock}

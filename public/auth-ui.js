@@ -340,18 +340,28 @@ function bindAuthIntentPickers() {
   });
 }
 
-function checkAuthIntentMismatch(user) {
+function blockAuthIntentMismatch(user) {
   const intent = getAuthIntentRole();
-  if (!intent || !user?.role) return;
+  if (!intent || !user?.role) return false;
   const actual = typeof normalizeAppRole === 'function' ? normalizeAppRole(user.role) : user.role;
-  if (actual === 'admin') return;
-  if (actual !== intent) {
-    const actualLabel = typeof roleLabel === 'function' ? roleLabel(actual) : actual;
-    const intentLabel = typeof roleLabel === 'function' ? roleLabel(intent) : intent;
-    alert(
-      `Tu cuenta es de ${actualLabel}, pero entraste como ${intentLabel}. Puedes seguir; las opciones dependen de tu rol real en Cubik.`
-    );
+  if (actual === 'admin' || actual === intent) return false;
+  const actualLabel = typeof roleLabel === 'function' ? roleLabel(actual) : actual;
+  switchAuthIntentRole(actual);
+  showAuthError(
+    `Esta cuenta es de ${actualLabel}. Cambiamos la pestaña de arriba — vuelve a ingresar tu contraseña.`
+  );
+  document.querySelector('#form-auth [name="password"]')?.value = '';
+  const panel = document.getElementById('auth-panel');
+  if (panel) {
+    panel.hidden = false;
+    panel.removeAttribute('hidden');
   }
+  if (isCubikAppGuest()) {
+    document.getElementById('app-welcome')?.setAttribute('hidden', '');
+    const w = document.getElementById('app-welcome');
+    if (w) w.hidden = true;
+  }
+  return true;
 }
 
 function showAuthError(message) {
@@ -774,13 +784,16 @@ formAuth?.addEventListener('submit', async (e) => {
       notifyAuthFailure(msg);
       return;
     }
-    Auth.save(json.token, json.user);
+    let userPayload = json.user;
     try {
-      const meRes = await apiFetch('/api/auth/me', { headers: Auth.headers() });
+      const meRes = await apiFetch('/api/auth/me', {
+        headers: { Authorization: `Bearer ${json.token}` },
+      });
       const meJson = await meRes.json();
-      if (meRes.ok && meJson.user) Auth.save(json.token, meJson.user);
+      if (meRes.ok && meJson.user) userPayload = meJson.user;
     } catch (_) {}
-    checkAuthIntentMismatch(Auth.user);
+    if (blockAuthIntentMismatch(userPayload)) return;
+    Auth.save(json.token, userPayload);
     document.getElementById('auth-panel').hidden = true;
     if (authRegisterMode && Auth.user?.kyc_status === 'pending' && Auth.user?.role !== 'admin') {
       alert(

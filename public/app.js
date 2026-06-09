@@ -341,7 +341,17 @@ function updateMatchPriceStep() {
   const role = getActorRole();
   if (hint) {
     if (load) {
-      hint.textContent = `Rango que paga el embarcador: ${formatBudgetRange(load.budget_min_clp, load.budget_max_clp)}`;
+      let text = `Rango que paga el embarcador: ${formatBudgetRange(load.budget_min_clp, load.budget_max_clp)}`;
+      const cargoVal = Number(load.declared_cargo_value_clp);
+      const maxB = Number(load.budget_max_clp);
+      if (cargoVal > 0 && maxB > 0) {
+        const pct = ((maxB / cargoVal) * 100).toFixed(2);
+        text += ` · Valor carga $${cargoVal.toLocaleString('es-CL')} (${pct}% del flete máx.)`;
+        if (maxB < cargoVal * 0.005) {
+          text += ' — revisa alineación con seguro.';
+        }
+      }
+      hint.textContent = text;
     } else {
       hint.textContent = 'Selecciona una carga para ver el rango del embarcador.';
     }
@@ -1173,8 +1183,14 @@ async function refreshBoard() {
       offerSel.disabled = true;
       if (hint) {
         hint.hidden = false;
-        hint.innerHTML =
-          'Primero publica una <strong>oferta de capacidad</strong> en la pestaña <button type="button" class="link-btn" data-goto="carrier">Tengo espacio en ruta</button>.';
+        const role = getActorRole();
+        if (role === 'carrier') {
+          hint.innerHTML =
+            'Sin oferta publicada. <button type="button" class="link-btn" id="btn-quick-offer-from-load">Oferta rápida (≤6 pallets)</button> en la ruta de la carga elegida, o publica en <button type="button" class="link-btn" data-goto="carrier">Tengo espacio en ruta</button>.';
+        } else {
+          hint.innerHTML =
+            'Primero publica una <strong>oferta de capacidad</strong> en la pestaña <button type="button" class="link-btn" data-goto="carrier">Tengo espacio en ruta</button>.';
+        }
       }
       if (matchBtn) matchBtn.disabled = true;
     } else {
@@ -1773,6 +1789,94 @@ document.getElementById('btn-seed-demo')?.addEventListener('click', async () => 
   }
   alert(`Demo listo: ${json.loads} cargas, ${json.offers} ofertas`);
   showTab('board');
+});
+
+async function quickOfferFromSelectedLoad() {
+  if (typeof assertCanOperate === 'function' && !assertCanOperate()) return;
+  if (typeof Auth !== 'undefined' && Auth.user?.role === 'shipper') {
+    alert('Solo transportistas pueden publicar oferta rápida.');
+    return;
+  }
+  const loadId = $('match-load')?.value;
+  const load = window._boardLoadsById?.[loadId];
+  if (!load) {
+    alert('Elige una carga en el paso 1 primero.');
+    return;
+  }
+  if (!load.origin_lat || !load.destination_lat) {
+    alert('La carga no tiene coordenadas Maps. Publica la oferta completa en «Tengo espacio en ruta».');
+    return;
+  }
+  const truckId =
+    (typeof Auth !== 'undefined' && Auth.user?.default_truck_type_id) || 'truck_5t';
+  const truck =
+    typeof LoadCapacityUI !== 'undefined'
+      ? LoadCapacityUI.truckById(truckId) || LoadCapacityUI.truckById('truck_5t')
+      : null;
+  if (!truck) {
+    alert('Configura tu camión en Cuenta antes de la oferta rápida.');
+    return;
+  }
+  const pallets = Math.min(
+    6,
+    LoadCapacityUI.capacityForTruck(truck, 'euro', false)
+  );
+  const body = {
+    carrier_name:
+      Auth.user?.company_name || Auth.user?.full_name || Auth.user?.name || 'Transportista',
+    origin_city: load.origin_city,
+    origin_region: load.origin_region,
+    origin_commune: load.origin_commune,
+    origin_address: load.origin_address,
+    origin_lat: load.origin_lat,
+    origin_lng: load.origin_lng,
+    origin_place_id: load.origin_place_id,
+    destination_city: load.destination_city,
+    destination_region: load.destination_region,
+    destination_commune: load.destination_commune,
+    destination_address: load.destination_address,
+    destination_lat: load.destination_lat,
+    destination_lng: load.destination_lng,
+    destination_place_id: load.destination_place_id,
+    available_pallets: pallets,
+    free_volume_m3: LoadCapacityUI.volumeFromPallets(pallets),
+    max_weight_kg: truck.weight_kg_max,
+    truck_type_id: truck.id,
+    truck_type_label: truck.label,
+    pallet_type: 'euro',
+    cargo_stackable: false,
+    schedule_mode: 'flexible',
+    notes: 'Oferta rápida piloto — ruta alineada a carga del tablero',
+  };
+  const btn = document.getElementById('btn-quick-offer-from-load');
+  const prev = btn?.textContent;
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Publicando…';
+  }
+  try {
+    const res = await API.postOffer(body);
+    const json = await res.json();
+    if (!res.ok) {
+      if (typeof handleApiKycError === 'function' && handleApiKycError(res, json)) return;
+      alert(json.errors?.join('\n') || json.error || 'No se pudo publicar la oferta rápida');
+      return;
+    }
+    alert('Oferta rápida publicada. Ya puedes emparejar con esa carga.');
+    await refreshBoard();
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = prev || 'Oferta rápida (≤6 pallets)';
+    }
+  }
+}
+
+document.getElementById('panel-board')?.addEventListener('click', (e) => {
+  if (e.target.closest('#btn-quick-offer-from-load')) {
+    e.preventDefault();
+    quickOfferFromSelectedLoad();
+  }
 });
 
 window.renderBoardActor = renderBoardActor;

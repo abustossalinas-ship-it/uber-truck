@@ -66,6 +66,69 @@ const LiveMap = {
     };
   },
 
+  _markerLabel(role) {
+    if (role === 'origin') return '🏭';
+    if (role === 'destination') return '📍';
+    if (role === 'carrier') return '🚛';
+    return '•';
+  },
+
+  _positionAgeMinutes(tracking) {
+    const ts = tracking?.carrier_position?.updated_at;
+    if (!ts) return null;
+    return (Date.now() - new Date(ts).getTime()) / 60000;
+  },
+
+  _updateConnectivity(inst, tracking, pollFailed = false) {
+    if (!inst.toolbar) return;
+    let banner = inst.toolbar.querySelector('[data-live-map-stale]');
+    if (!banner) {
+      banner = document.createElement('p');
+      banner.className = 'trip-map-stale muted';
+      banner.dataset.liveMapStale = '1';
+      inst.toolbar.insertBefore(banner, inst.toolbar.firstChild);
+    }
+    const age = this._positionAgeMinutes(tracking);
+    const stale = pollFailed || (age != null && age > 15);
+    if (stale) {
+      banner.hidden = false;
+      banner.removeAttribute('hidden');
+      banner.textContent = pollFailed
+        ? 'Sin conexión · mostrando la última posición guardada en el mapa'
+        : `Sin señal GPS hace ${Math.round(age)} min · verifica ubicación «Permitir siempre»`;
+    } else {
+      banner.hidden = true;
+      banner.setAttribute('hidden', '');
+    }
+    let help = inst.toolbar.querySelector('[data-live-map-help]');
+    if (stale) {
+      if (!help) {
+        help = document.createElement('button');
+        help.type = 'button';
+        help.className = 'btn-secondary trip-map-help-btn';
+        help.dataset.liveMapHelp = '1';
+        help.textContent = 'Necesito ayuda';
+        inst.toolbar.appendChild(help);
+      }
+      help.hidden = false;
+      help.removeAttribute('hidden');
+      help.onclick = () => {
+        const title = tracking?.route?.destination?.label || 'Viaje en curso';
+        if (typeof IncidentUI !== 'undefined') {
+          IncidentUI.open(inst.matchId, title);
+          IncidentUI.pickType('delay');
+        } else {
+          alert(
+            'Reporta el problema desde Actividad → viaje en curso, o llama al embarcador con el botón Llamar.'
+          );
+        }
+      };
+    } else if (help) {
+      help.hidden = true;
+      help.setAttribute('hidden', '');
+    }
+  },
+
   _ensureInstance(container, tracking) {
     const key = this._containerKey(container);
     let inst = this._instances.get(key);
@@ -153,6 +216,7 @@ const LiveMap = {
       trailPolyline: null,
       lastCarrier: null,
       followMode: true,
+      lastTracking: null,
     };
     this._instances.set(key, inst);
     return inst;
@@ -167,13 +231,24 @@ const LiveMap = {
       return;
     }
     const latLng = { lat: pos.lat, lng: pos.lng };
+    const label = this._markerLabel(role);
     if (!inst.markers[role]) {
       inst.markers[role] = new google.maps.Marker({
         map: inst.map,
         position: latLng,
         icon: this._circleIcon(color, scale),
+        label: {
+          text: label,
+          fontSize: role === 'carrier' ? '15px' : '13px',
+          fontWeight: '700',
+        },
+        title:
+          role === 'origin'
+            ? 'Embarcadero'
+            : role === 'destination'
+              ? 'Destino'
+              : 'Transportista',
         zIndex: role === 'carrier' ? 3 : role === 'destination' ? 2 : 1,
-        title: role === 'carrier' ? 'Transportista' : role === 'destination' ? 'Destino' : 'Origen',
       });
     } else if (role === 'carrier') {
       this._animateMarker(inst.markers[role], latLng, 1800);
@@ -408,10 +483,10 @@ const LiveMap = {
       inst.meta.textContent = line;
     } else if (tracking.trip_phase === 'pickup') {
       inst.meta.textContent =
-        'Fase retiro: verde = embarcadero. Activa GPS para ver tu posición en el mapa.';
+        'Fase retiro: 🏭 embarcadero · 🚛 transportista. Activa GPS para ver tu posición en el mapa.';
     } else {
       inst.meta.textContent =
-        'Origen (verde) y destino (rojo). Línea azul = recorrido GPS del transportista.';
+        '🏭 origen · 📍 destino · 🚛 camión. Línea azul = recorrido GPS del transportista.';
     }
   },
 
@@ -420,11 +495,20 @@ const LiveMap = {
     this.stopPoll(key);
     const tick = async () => {
       if (!document.contains(container) || container.hidden) return;
+      const key = this._containerKey(container);
+      const inst = this._instances.get(key);
       try {
         const tracking = await fetchTracking(matchId);
-        if (tracking?.tracking_active) await this.render(container, tracking);
+        if (tracking?.tracking_active) {
+          await this.render(container, tracking, { pollFailed: false });
+        }
       } catch (e) {
         console.warn('LiveMap poll', e);
+        if (inst?.lastTracking) {
+          await this.render(container, inst.lastTracking, { pollFailed: true });
+        } else if (inst) {
+          this._updateConnectivity(inst, inst.lastTracking, true);
+        }
       }
     };
     const id = setInterval(tick, 8000);
@@ -439,7 +523,7 @@ const LiveMap = {
     }
   },
 
-  async render(container, tracking) {
+  async render(container, tracking, opts = {}) {
     if (!container || !tracking?.tracking_active) {
       this.destroy(container);
       return false;
@@ -452,6 +536,7 @@ const LiveMap = {
     }
 
     const inst = this._ensureInstance(container, tracking);
+    inst.lastTracking = tracking;
     this._setMarker(inst, 'origin', tracking.route?.origin, '#22a06b', 9);
     this._setMarker(inst, 'destination', tracking.route?.destination, '#de350b', 9);
     this._setMarker(inst, 'carrier', tracking.carrier_position, '#f26522', 12);
@@ -464,6 +549,7 @@ const LiveMap = {
       : inst.lastCarrier;
     this._updateEta(inst, tracking);
     this._updateMeta(inst, tracking);
+    this._updateConnectivity(inst, tracking, Boolean(opts.pollFailed));
     this._bindNavButton(inst, tracking);
     this._bindTripActionButton(inst, tracking);
     return true;

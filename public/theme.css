@@ -2807,6 +2807,36 @@ body.kyc-pending #btn-create-match {
   flex-wrap: wrap;
 }
 
+.trip-map-stale {
+  flex: 1 1 100%;
+  margin: 0;
+  padding: 0.45rem 0.55rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #92400e;
+  background: #fef3c7;
+  border-radius: 8px;
+}
+
+.trip-map-help-btn {
+  font-size: 0.78rem;
+  padding: 0.35rem 0.65rem;
+}
+
+.load-cargo-freight-insight {
+  margin: 0.45rem 0 0;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.load-cargo-freight-warn {
+  color: #92400e;
+  background: #fef3c7;
+  border: 1px solid #fcd34d;
+}
+
 .trip-map-eta {
   font-size: 0.85rem;
   font-weight: 600;

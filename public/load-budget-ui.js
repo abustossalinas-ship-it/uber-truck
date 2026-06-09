@@ -33,8 +33,45 @@ const URGENCY_HINTS = {
   },
 };
 
+const CARGO_FREIGHT_MIN_RATIO = 0.005;
+
 function formatClp(n) {
   return `$${Number(n).toLocaleString('es-CL')}`;
+}
+
+function syncCargoFreightInsight(form) {
+  const box = document.getElementById('load-cargo-freight-insight');
+  if (!form || !box) return;
+  const cargo = Number(form.querySelector('[name="declared_cargo_value_clp"]')?.value);
+  const maxB = Number(form.querySelector('[name="budget_max_clp"]')?.value);
+  if (!cargo || cargo < 1000) {
+    box.hidden = true;
+    return;
+  }
+  box.hidden = false;
+  let html = `Valor mercadería: ${formatClp(cargo)}. El flete es el costo logístico; para seguro conviene no desalinearlo del valor declarado.`;
+  if (maxB > 0) {
+    const pct = ((maxB / cargo) * 100).toFixed(2);
+    html += ` Tope flete ${formatClp(maxB)} ≈ ${pct}% del valor.`;
+    if (maxB < cargo * CARGO_FREIGHT_MIN_RATIO) {
+      box.className = 'load-cargo-freight-insight load-cargo-freight-warn';
+      html +=
+        ' <strong>Revisa:</strong> el flete parece muy bajo vs el valor de la carga (referencia seguro ~0,5%).';
+    } else {
+      box.className = 'load-cargo-freight-insight muted';
+    }
+  } else {
+    box.className = 'load-cargo-freight-insight muted';
+  }
+  box.innerHTML = html;
+}
+
+function bindCargoFreightInsight(form) {
+  if (!form) return;
+  ['declared_cargo_value_clp', 'budget_min_clp', 'budget_max_clp'].forEach((name) => {
+    form.querySelector(`[name="${name}"]`)?.addEventListener('input', () => syncCargoFreightInsight(form));
+  });
+  syncCargoFreightInsight(form);
 }
 
 function roundBudgetToStep(n, mode = 'nearest') {
@@ -101,6 +138,7 @@ async function applyBudgetHintFromForm(form) {
         ? ' Incluye recargo referencial por urgente (~18% vs Normal).'
         : '';
     box.innerHTML = `<strong>Sugerencia aplicada:</strong> ${formatClp(minRounded)} – ${formatClp(maxRounded)} (miles de $).${urgentNote} ${j.data.note || ''} ${j.disclaimer || ''}`;
+    syncCargoFreightInsight(form);
   } catch {
     box.textContent = 'Error al obtener sugerencia.';
   }
@@ -109,6 +147,7 @@ async function applyBudgetHintFromForm(form) {
 document.addEventListener('DOMContentLoaded', () => {
   const form = document.getElementById('form-load');
   bindLoadUrgencyHint(form);
+  bindCargoFreightInsight(form);
   document.getElementById('btn-budget-hint')?.addEventListener('click', (e) => {
     e.preventDefault();
     applyBudgetHintFromForm(form);

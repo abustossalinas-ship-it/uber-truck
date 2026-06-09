@@ -314,6 +314,9 @@ function updateActiveTripBanner(matches, loadById, offerById) {
     _bannerActiveMatchId = null;
     const mapEl = document.getElementById('active-trip-map');
     if (mapEl && typeof LiveMap !== 'undefined') LiveMap.destroy(mapEl);
+    if (document.body.classList.contains('cubik-app') && typeof AppShell?.renderHome === 'function') {
+      AppShell.renderHome();
+    }
     return;
   }
   const load = loadById[active.load_request_id];
@@ -350,6 +353,9 @@ function updateActiveTripBanner(matches, loadById, offerById) {
     } else if (priceEl) priceEl.remove();
     bindActiveTripBannerNav(active.id);
     if (typeof refreshActiveTripMap === 'function') refreshActiveTripMap(active.id, { soft: true });
+    if (document.body.classList.contains('cubik-app') && typeof AppShell?.renderHome === 'function') {
+      AppShell.renderHome();
+    }
     return;
   }
 
@@ -366,6 +372,9 @@ function updateActiveTripBanner(matches, loadById, offerById) {
     </div>`;
   bindActiveTripBannerNav(active.id);
   if (typeof refreshActiveTripMap === 'function') refreshActiveTripMap(active.id);
+  if (document.body.classList.contains('cubik-app') && typeof AppShell?.renderHome === 'function') {
+    AppShell.renderHome();
+  }
 }
 
 async function runTripProgress(matchId, btn) {

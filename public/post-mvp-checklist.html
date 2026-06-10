@@ -159,7 +159,7 @@
     }
 
     function badgeClass(status, userDone) {
-      if (userDone) return 'badge-done';
+      if (userDone || status === 'validated') return 'badge-done';
       if (status === 'deferred') return 'badge-deferred';
       if (status === 'ready_to_validate') return 'badge-ready';
       if (status === 'blocked_env' || status === 'blocked_deps') return 'badge-blocked';
@@ -167,7 +167,7 @@
     }
 
     function badgeLabel(status, userDone) {
-      if (userDone) return 'Validado ✓';
+      if (userDone || status === 'validated') return 'Validado ✓';
       if (status === 'deferred') return 'Diferido';
       if (status === 'ready_to_validate') return 'Listo para validar';
       if (status === 'blocked_env') return 'Falta env';
@@ -198,7 +198,7 @@
       list.innerHTML = data.items
         .sort((a, b) => a.order - b.order)
         .map((item) => {
-          const userDone = Boolean(validated[item.id]);
+          const userDone = Boolean(validated[item.id]) || item.status === 'validated';
           const doneClass = userDone ? ' done' : '';
           return `
             <article class="item${doneClass}" data-id="${item.id}">
@@ -222,7 +222,7 @@
         })
         .join('');
 
-      const doneCount = data.items.filter((i) => validated[i.id]).length;
+      const doneCount = data.items.filter((i) => validated[i.id] || i.status === 'validated').length;
       document.getElementById('progress-label').textContent = `${doneCount} / ${data.items.length} validados por ti`;
       document.getElementById('progress-fill').style.width = `${(doneCount / data.items.length) * 100}%`;
 

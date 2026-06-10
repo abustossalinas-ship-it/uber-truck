@@ -1,6 +1,6 @@
 {
-  "version": "0.0.126",
+  "version": "0.0.127",
   "git_sha": "",
   "ui": "post-mvp-checklist",
-  "note": "Checklist Post-MVP interactivo + API /api/post-mvp/status"
+  "note": "Push FCM validado 10 jun 2026 — ítem 5 Post-MVP cerrado"
 }

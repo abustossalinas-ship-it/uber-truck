@@ -14,7 +14,7 @@ Validar y cerrar cada ítem **en el orden de la tabla Post-MVP** de la memoria t
 | 2 | Recuperar contraseña | Con Resend en Railway | App → ¿Olvidaste tu contraseña? → correo real → `reset-password.html` |
 | 3 | Pago en app (prod) | Sem 2–8 piloto | Wallet real + ledger; hoy piloto simulado OK |
 | 4 | Twilio Proxy | Sem 2–4 | `TWILIO_MATCH_PROXY_NUMBER` en Railway → Llamar en viaje activo |
-| 5 | Push FCM | Sem 1–3 | APK + login → `/api/devices/push-test` o botón en checklist |
+| 5 | Push FCM | Sem 1–3 | **Hecho 10 jun 2026** — segundo plano, acciones de viaje |
 | 6 | GPS background | Sem 4–9 si aplica | Spike Capacitor solo si >30% quejas GPS |
 | 7 | App iOS nativa | Post escala | Hoy PWA `/probar` — cerrar como diferido |
 | 8 | Escrow en ruta | Tras ítem 3 | Retención al «Marcar en ruta» — bloqueado hasta wallet prod |

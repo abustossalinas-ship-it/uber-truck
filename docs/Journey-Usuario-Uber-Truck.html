@@ -205,9 +205,9 @@
 </ol>
 <p class="meta">Técnico: <code>load-capacity-ui.js</code> · Memoria: <a href="Memoria-tecnica-Uber-Truck.html">bitácora 3 jun</a>.</p>
 
-<h2 id="push-fcm">9e. Notificaciones push (parcial)</h2>
-<p>Backend FCM configurado en Railway; la app Android registra token en <code>device_tokens</code>. Validación de recepción con <code>push-test</code> pendiente en <strong>dispositivo físico</strong> (emulador poco fiable).</p>
-<p class="meta">Guía: <a href="CUBIK-PUSH-FCM.md">CUBIK-PUSH-FCM.md</a>.</p>
+<h2 id="push-fcm">9e. Notificaciones push</h2>
+<p>FCM Android validado en producción (<strong>10 jun 2026</strong>): app en segundo plano, recepción de notificaciones push ligadas a acciones de viaje (ofertas, estados, etc.). Token en <code>device_tokens</code>; envío automático al crear notificación in-app.</p>
+<p class="meta">Guía: <a href="CUBIK-PUSH-FCM.md">CUBIK-PUSH-FCM.md</a> · Checklist: <a href="/post-mvp-checklist.html">Post-MVP ítem 5</a>.</p>
 
 <h2>10. Estados en la app</h2>
 <p><strong>Oferta capacidad:</strong> draft · published · reserved · expired · cancelled</p>

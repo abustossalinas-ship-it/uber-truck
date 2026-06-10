@@ -27,7 +27,7 @@ No perseguir la app perfecta en web: construir **operación tipo Uber** con mark
 | G | **Cubik** — shell móvil + Capacitor Android bundle | **Hecho v0.0.94+** — ver [CUBIK-APP-UX.md](./CUBIK-APP-UX.md) |
 | G2 | Distribución testers sin tienda (`/probar` + APK) | **Hecho jun 2026** |
 | G5 | Billetera multi-cuenta + RUT/bancos + cubicación carga | **Hecho v0.0.93–0.0.94** |
-| G6 | Push FCM backend + registro token Android | **Backend OK** — validación `push-test` en teléfono pendiente |
+| G6 | Push FCM backend + registro token Android | **Hecho 10 jun 2026** — 3 push en segundo plano (acciones) |
 | **D0** | **Cubik Saldo piloto** — comisiones 10/5, botón Pagar, notificación transportista | **Hecho v0.0.100–0.0.105** — simulación sin wallet real |
 | **D0b** | **Calibración tarifas sugerencia flete** (RM–V) | **Hecho v0.0.105** — `match-price.js` + `BUDGET_*` Railway |
 | **Q1** | **QA automatizado** — unit + Playwright + CI + Laboratorio | **Hecho v0.0.107–0.0.125** — ver [QA-AUTOMATIZADO.md](./QA-AUTOMATIZADO.md) |
@@ -49,7 +49,6 @@ No perseguir la app perfecta en web: construir **operación tipo Uber** con mark
 3. **Wallet real + escrow en ruta** — retención al «En ruta», ledger, recarga Mercado Pago / transferencia.
 4. **Twilio Proxy** — llamadas enmascaradas (botón Llamar ya en v0.0.98).
 5. **Piloto M2** — 20 viajes `completed` corredor RM ↔ Valparaíso/San Antonio.
-6. **Push FCM** — confirmar recepción en celular físico.
 
 ## Qué NO hacer aún
 

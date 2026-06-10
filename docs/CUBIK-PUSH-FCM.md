@@ -2,7 +2,9 @@
 
 **Costo:** Firebase Cloud Messaging es **gratuito**.
 
-## Backend v0.0.81
+**Estado piloto:** **Validado 10 jun 2026** — app Android en segundo plano; 3 notificaciones push de acciones de viaje recibidas en dispositivo físico.
+
+## Backend v0.0.81+
 
 | Componente | Detalle |
 |------------|---------|

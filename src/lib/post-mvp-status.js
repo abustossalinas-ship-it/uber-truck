@@ -24,7 +24,7 @@ function buildPostMvpStatus(ctx = {}) {
 
   return {
     updated: '2026-06-10',
-    software: '0.0.126',
+    software: '0.0.127',
     items: [
       {
         id: 'oauth',
@@ -112,19 +112,17 @@ function buildPostMvpStatus(ctx = {}) {
         order: 5,
         title: 'Push móvil (FCM)',
         phase: 'pilot_p0',
-        status:
-          fcmOk && tokenCount > 0 ? 'ready_to_validate' : fcmOk ? 'in_progress' : 'blocked_env',
+        status: fcmOk ? 'validated' : 'blocked_env',
         server_ready: fcmOk,
         blocking_demo: false,
+        validated_at: '2026-06-10',
         summary: fcmOk
-          ? tokenCount > 0
-            ? `${tokenCount} dispositivo(s) registrado(s)`
-            : 'FCM OK; abre APK + login para registrar token'
+          ? 'Validado 10 jun 2026 — 3 push en segundo plano (acciones de viaje)'
           : 'Falta FCM_SERVICE_ACCOUNT_B64 en Railway',
         env: { ...fcm.statusPayload(), device_tokens: tokenCount },
         validate: [
-          'APK Android → login → permiso notificaciones',
-          'POST /api/devices/push-test → notificación en teléfono',
+          '✓ APK Android + login + permiso notificaciones',
+          '✓ App en segundo plano — 3 notificaciones push de acciones (10 jun 2026)',
         ],
       },
       {

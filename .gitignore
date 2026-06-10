@@ -9,6 +9,8 @@ dist/
 coverage/
 test-results/
 playwright-report/
+public/qa-last-run.json
+public/qa-last-run-prod.json
 blob-report/
 data/store.json
 

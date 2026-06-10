@@ -1,10 +1,113 @@
 {
-  "generated_at": "2026-06-09T23:40:22.905Z",
+  "generated_at": "2026-06-10T00:20:06.810Z",
   "version": "0.0.125",
   "counts": {
     "unit": 14,
     "e2e": 16,
-    "e2e_optional": 0
+    "e2e_optional": 3,
+    "required": 27,
+    "optional": 3,
+    "total": 30
+  },
+  "charts": {
+    "by_kind": [
+      {
+        "label": "Unitarios (Node)",
+        "value": 14
+      },
+      {
+        "label": "E2E (Playwright)",
+        "value": 16
+      }
+    ],
+    "by_coverage": [
+      {
+        "label": "Obligatorios (CI)",
+        "value": 27
+      },
+      {
+        "label": "Opcionales (.env / Supabase)",
+        "value": 3
+      }
+    ],
+    "by_area": [
+      {
+        "label": "Tablero / datos",
+        "value": 13
+      },
+      {
+        "label": "Welcome / login",
+        "value": 12
+      },
+      {
+        "label": "Navegación app",
+        "value": 5
+      }
+    ],
+    "by_suite": [
+      {
+        "label": "android-bundle-sync",
+        "value": 1,
+        "kind": "unit"
+      },
+      {
+        "label": "auth-ui-syntax",
+        "value": 1,
+        "kind": "unit"
+      },
+      {
+        "label": "notification-visibility",
+        "value": 7,
+        "kind": "unit"
+      },
+      {
+        "label": "trip-proximity",
+        "value": 5,
+        "kind": "unit"
+      },
+      {
+        "label": "app-authed",
+        "value": 6,
+        "kind": "e2e"
+      },
+      {
+        "label": "app-board",
+        "value": 1,
+        "kind": "e2e"
+      },
+      {
+        "label": "app-welcome",
+        "value": 5,
+        "kind": "e2e"
+      },
+      {
+        "label": "prod-smoke",
+        "value": 4,
+        "kind": "e2e"
+      }
+    ],
+    "last_run": null
+  },
+  "stacks": {
+    "web_e2e": {
+      "name": "Playwright",
+      "role": "UI web + app móvil simulada (Pixel 5)",
+      "when": "Welcome, login, tabs, emparejar, smoke Railway",
+      "cmd": "npm run test:e2e"
+    },
+    "unit": {
+      "name": "Node test runner",
+      "role": "Lógica pura, sintaxis auth-ui, notificaciones, proximidad GPS",
+      "when": "Regresiones rápidas sin abrir navegador",
+      "cmd": "npm run test:unit"
+    },
+    "android_native": {
+      "name": "JUnit / Espresso / MockK",
+      "role": "Código nativo Kotlin/Java del shell Android",
+      "when": "Solo si agregas plugins o Activities propias (hoy Cubik es WebView Capacitor)",
+      "cmd": "Android Studio → app/src/test (aún no configurado)",
+      "status": "optional_future"
+    }
   },
   "scripts": [
     {
@@ -60,7 +163,9 @@
       "cases": [
         {
           "name": "android bundle auth-ui no está roto ni desactualizado",
-          "optional": false
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
         }
       ]
     },
@@ -71,7 +176,9 @@
       "cases": [
         {
           "name": "auth-ui.js parsea sin errores (bloquea login en APK bundle)",
-          "optional": false
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
         }
       ]
     },
@@ -82,31 +189,45 @@
       "cases": [
         {
           "name": "price_offer oculta si el match ya no está en propuesta",
-          "optional": false
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
         },
         {
           "name": "price_offer oculta si la carga ya no está publicada (otro emparejamiento ganó)",
-          "optional": false
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
         },
         {
           "name": "delivery_pending_confirm solo mientras espera confirmación del embarcador",
-          "optional": false
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
         },
         {
           "name": "viaje completado oculta todo (incluye cierre y pago)",
-          "optional": false
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
         },
         {
           "name": "support oculta cuando el chat ya está libre (agente atendió)",
-          "optional": false
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
         },
         {
           "name": "match cancelado oculta todo",
-          "optional": false
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
         },
         {
           "name": "isStaleProposal detecta carga ya emparejada",
-          "optional": false
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
         }
       ]
     },
@@ -117,23 +238,33 @@
       "cases": [
         {
           "name": "arrival radius default 0.6 km",
-          "optional": false
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
         },
         {
           "name": "delivery: en destino cuando distancia <= radio",
-          "optional": false
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
         },
         {
           "name": "delivery: fuera de destino cuando distancia > radio",
-          "optional": false
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
         },
         {
           "name": "pickup: en embarcadero dentro del radio",
-          "optional": false
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
         },
         {
           "name": "haversineKm mismo punto es ~0",
-          "optional": false
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
         }
       ]
     }
@@ -147,32 +278,44 @@
         {
           "name": "Transportista: Inicio muestra saludo y acceso a Emparejar",
           "group": "Cubik app — sesión mock (sin backend)",
-          "optional": false
+          "optional": false,
+          "area": "nav",
+          "area_label": "Navegación app"
         },
         {
           "name": "Transportista: atrás desde Emparejar vuelve a Inicio",
           "group": "Cubik app — sesión mock (sin backend)",
-          "optional": false
+          "optional": false,
+          "area": "nav",
+          "area_label": "Navegación app"
         },
         {
           "name": "Embarcador: Opciones muestra Publicar carga y Emparejar",
           "group": "Cubik app — sesión mock (sin backend)",
-          "optional": false
+          "optional": false,
+          "area": "nav",
+          "area_label": "Navegación app"
         },
         {
           "name": "Actividad muestra sección Mis viajes",
           "group": "Cubik app — sesión mock (sin backend)",
-          "optional": false
+          "optional": false,
+          "area": "nav",
+          "area_label": "Navegación app"
         },
         {
           "name": "Cuenta muestra perfil y cerrar sesión",
           "group": "Cubik app — sesión mock (sin backend)",
-          "optional": false
+          "optional": false,
+          "area": "nav",
+          "area_label": "Navegación app"
         },
         {
           "name": "Login transportista navega a Emparejar",
           "group": "Cubik app — login real (QA_* en .env)",
-          "optional": false
+          "optional": true,
+          "area": "welcome",
+          "area_label": "Welcome / login"
         }
       ]
     },
@@ -184,7 +327,9 @@
         {
           "name": "Demo seed carga tablero con cargas y ofertas",
           "group": "Cubik app — tablero con datos (QA + Supabase)",
-          "optional": false
+          "optional": true,
+          "area": "board",
+          "area_label": "Tablero / datos"
         }
       ]
     },
@@ -196,27 +341,37 @@
         {
           "name": "Comenzar como Transportista abre login contextual",
           "group": "Cubik app — welcome y login",
-          "optional": false
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
         },
         {
           "name": "Comenzar como Empresa abre login contextual",
           "group": "Cubik app — welcome y login",
-          "optional": false
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
         },
         {
           "name": "Atrás con formulario vacío vuelve al welcome",
           "group": "Cubik app — welcome y login",
-          "optional": false
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
         },
         {
           "name": "Toggle cambia rol sin volver al welcome",
           "group": "Cubik app — welcome y login",
-          "optional": false
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
         },
         {
           "name": "Login transportista llega a Inicio",
           "group": "Cubik app — login opcional (QA_* en .env)",
-          "optional": false
+          "optional": true,
+          "area": "welcome",
+          "area_label": "Welcome / login"
         }
       ]
     },
@@ -228,25 +383,34 @@
         {
           "name": "deploy.json responde con versión",
           "group": "Producción — welcome/login (APK remoto / web app)",
-          "optional": false
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
         },
         {
           "name": "auth-ui.js en prod no tiene sintaxis rota",
           "group": "Producción — welcome/login (APK remoto / web app)",
-          "optional": false
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
         },
         {
           "name": "Comenzar Transportista abre login en prod",
           "group": "Producción — welcome/login (APK remoto / web app)",
-          "optional": false
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
         },
         {
           "name": "Comenzar Empresa abre login en prod",
           "group": "Producción — welcome/login (APK remoto / web app)",
-          "optional": false
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
         }
       ]
     }
   ],
-  "report_available": true
+  "report_available": true,
+  "last_run_at": null
 }

@@ -4,122 +4,174 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Cubik — Laboratorio QA</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7/dist/chart.umd.min.js"></script>
   <style>
     :root {
-      --bg: #f4f6fb;
+      --bg: #eef1f8;
       --card: #fff;
-      --ink: #1a2744;
-      --muted: #5c6b85;
+      --ink: #152238;
+      --muted: #5f6f8f;
       --accent: #e86f1a;
-      --accent-soft: #fff3ea;
+      --accent-2: #2952a3;
+      --accent-soft: #fff4ec;
       --ok: #0d8a5b;
-      --line: #dde3ef;
-      --shadow: 0 8px 28px rgba(26, 39, 68, 0.08);
+      --line: #dce3f0;
+      --shadow: 0 10px 40px rgba(21, 34, 56, 0.07);
     }
     * { box-sizing: border-box; }
     body {
       margin: 0;
       font-family: "Segoe UI", system-ui, sans-serif;
-      background: var(--bg);
+      background: linear-gradient(165deg, #f8fafc 0%, var(--bg) 45%, #fdeee3 100%);
       color: var(--ink);
       line-height: 1.45;
+      min-height: 100vh;
     }
-    .wrap { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
-    header { margin-bottom: 24px; }
-    h1 { margin: 0 0 6px; font-size: 1.65rem; }
-    .lead { color: var(--muted); margin: 0; }
-    .stats {
+    .wrap { max-width: 1100px; margin: 0 auto; padding: 28px 18px 56px; }
+    header { margin-bottom: 28px; }
+    h1 { margin: 0 0 8px; font-size: 1.85rem; letter-spacing: -0.02em; }
+    .lead { color: var(--muted); margin: 0; max-width: 52ch; }
+    .hero-stats {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 12px;
-      margin: 20px 0;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 14px;
+      margin: 22px 0 24px;
     }
     .stat {
       background: var(--card);
-      border-radius: 14px;
-      padding: 14px 16px;
+      border-radius: 18px;
+      padding: 16px 18px;
       box-shadow: var(--shadow);
+      border: 1px solid rgba(255,255,255,0.8);
     }
-    .stat strong { display: block; font-size: 1.6rem; color: var(--accent); }
-    .stat span { color: var(--muted); font-size: 0.9rem; }
-    section {
+    .stat strong { display: block; font-size: 1.75rem; color: var(--accent); font-weight: 700; }
+    .stat span { color: var(--muted); font-size: 0.88rem; }
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .chart-card {
       background: var(--card);
-      border-radius: 16px;
-      padding: 18px 20px;
+      border-radius: 20px;
+      padding: 18px 18px 12px;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--line);
+    }
+    .chart-card.wide { grid-column: 1 / -1; }
+    .chart-card h2 {
+      margin: 0 0 4px;
+      font-size: 0.95rem;
+      font-weight: 700;
+    }
+    .chart-card p.sub {
+      margin: 0 0 12px;
+      font-size: 0.82rem;
+      color: var(--muted);
+    }
+    .chart-box { position: relative; height: 220px; }
+    .chart-box.tall { height: 280px; }
+    section.panel {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 20px 22px;
       margin-bottom: 16px;
       box-shadow: var(--shadow);
+      border: 1px solid var(--line);
     }
-    h2 { margin: 0 0 12px; font-size: 1.05rem; }
-    .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    section.panel h2 { margin: 0 0 14px; font-size: 1.05rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
     .btn {
       appearance: none;
       border: 0;
       border-radius: 999px;
-      padding: 10px 16px;
+      padding: 11px 18px;
       font-weight: 600;
       cursor: pointer;
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
       font-size: 0.92rem;
+      transition: transform 0.15s ease;
     }
+    .btn:hover { transform: translateY(-1px); }
     .btn-primary { background: var(--accent); color: #fff; }
     .btn-secondary { background: var(--accent-soft); color: var(--ink); }
-    .btn-ghost { background: #eef2f9; color: var(--ink); }
-    .btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+    .btn[disabled] { opacity: 0.45; cursor: not-allowed; transform: none; }
+    .stacks {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 12px;
+    }
+    .stack {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 14px 16px;
+      background: #fafbfd;
+    }
+    .stack h3 { margin: 0 0 6px; font-size: 0.95rem; }
+    .stack .role { color: var(--muted); font-size: 0.86rem; margin: 0 0 8px; }
+    .stack code { font-size: 0.8rem; }
+    .stack.future { border-style: dashed; opacity: 0.92; }
     .hint {
       margin-top: 12px;
       padding: 12px 14px;
       background: #eef8f3;
       border-left: 4px solid var(--ok);
-      border-radius: 8px;
-      color: #234;
-      font-size: 0.92rem;
+      border-radius: 10px;
+      font-size: 0.9rem;
     }
-    .warn {
-      background: #fff8ea;
-      border-left-color: #d4a017;
+    .suite {
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+      margin-top: 14px;
     }
-    .suite { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
     .suite:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
-    .suite-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+    .suite-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; flex-wrap: wrap; }
     .suite-head h3 { margin: 0; font-size: 0.98rem; }
     .badge {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.04em;
-      padding: 3px 8px;
+      letter-spacing: 0.05em;
+      padding: 4px 9px;
       border-radius: 999px;
-      background: #eef2f9;
-      color: var(--muted);
-      white-space: nowrap;
     }
-    .badge.e2e { background: #e8f0ff; color: #2952a3; }
-    .badge.unit { background: #eaf8f1; color: #0d8a5b; }
+    .badge.unit { background: #e8f7ef; color: var(--ok); }
+    .badge.e2e { background: #e8f0ff; color: var(--accent-2); }
     .badge.prod { background: #fff0e8; color: #b45309; }
     ul.tests { margin: 8px 0 0; padding-left: 18px; }
-    ul.tests li { margin: 4px 0; }
-    .optional { color: var(--muted); font-style: italic; }
-    code, .cmd {
-      font-family: Consolas, "Courier New", monospace;
-      font-size: 0.86rem;
+    ul.tests li { margin: 5px 0; font-size: 0.92rem; }
+    .optional { color: var(--muted); font-style: italic; font-size: 0.85rem; }
+    .area-tag {
+      display: inline-block;
+      font-size: 0.72rem;
       background: #f0f3fa;
-      padding: 2px 6px;
+      color: var(--muted);
+      padding: 2px 7px;
       border-radius: 6px;
+      margin-right: 6px;
     }
+    details.panel summary {
+      cursor: pointer;
+      font-weight: 600;
+      list-style: none;
+    }
+    details.panel summary::-webkit-details-marker { display: none; }
     .cmd-row {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
       align-items: center;
-      padding: 8px 0;
+      padding: 9px 0;
       border-bottom: 1px solid var(--line);
+      font-size: 0.9rem;
     }
     .cmd-row:last-child { border-bottom: 0; }
-    footer { margin-top: 20px; color: var(--muted); font-size: 0.85rem; text-align: center; }
-    .loading { color: var(--muted); padding: 24px; text-align: center; }
+    code { font-family: Consolas, monospace; background: #f0f3fa; padding: 2px 7px; border-radius: 6px; font-size: 0.84rem; }
+    footer { margin-top: 24px; color: var(--muted); font-size: 0.85rem; text-align: center; }
+    .loading { color: var(--muted); padding: 40px; text-align: center; }
     .err { color: #b42318; }
   </style>
 </head>
@@ -127,35 +179,91 @@
   <div class="wrap">
     <header>
       <h1>Laboratorio QA — Cubik</h1>
-      <p class="lead">Catálogo visual de pruebas. Ligero: no ejecuta tests, solo los lista y abre reportes.</p>
+      <p class="lead">Mapa visual del set de pruebas Playwright + unitarias. Ligero: no ejecuta tests; muestra gráficos y abre reportes.</p>
     </header>
-
     <div id="root" class="loading">Cargando catálogo…</div>
     <footer id="foot"></footer>
   </div>
 
   <script>
+    const COLORS = {
+      kind: ['#0d8a5b', '#2952a3'],
+      coverage: ['#e86f1a', '#94a3b8'],
+      area: ['#e86f1a', '#2952a3', '#0d8a5b', '#7c5cbf', '#d97706', '#64748b'],
+      run: ['#0d8a5b', '#dc2626', '#94a3b8', '#d97706'],
+      barUnit: '#0d8a5b',
+      barE2e: '#2952a3',
+    };
+
     function esc(s) {
-      return String(s)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;');
+      return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
     }
 
-    function renderSuite(s, kind) {
-      const badgeClass = s.file.includes('prod') ? 'prod' : kind;
-      const items = s.cases
-        .map((c) => {
-          const opt = c.optional ? ' <span class="optional">(opcional / requiere .env)</span>' : '';
-          const group = c.group ? `<span class="muted">${esc(c.group)} · </span>` : '';
-          return `<li>${group}${esc(c.name)}${opt}</li>`;
-        })
-        .join('');
+    function pie(id, title, subtitle, rows, colors) {
+      const canvas = document.getElementById(id);
+      if (!canvas || !rows.length) return;
+      new Chart(canvas, {
+        type: 'doughnut',
+        data: {
+          labels: rows.map((r) => r.label),
+          datasets: [{
+            data: rows.map((r) => r.value),
+            backgroundColor: colors.slice(0, rows.length),
+            borderWidth: 2,
+            borderColor: '#fff',
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { position: 'bottom', labels: { boxWidth: 12, padding: 14, font: { size: 11 } } },
+            title: { display: false },
+          },
+        },
+      });
+    }
+
+    function barSuites(id, rows) {
+      const canvas = document.getElementById(id);
+      if (!canvas) return;
+      new Chart(canvas, {
+        type: 'bar',
+        data: {
+          labels: rows.map((r) => r.label),
+          datasets: [{
+            label: 'Tests',
+            data: rows.map((r) => r.value),
+            backgroundColor: rows.map((r) => (r.kind === 'unit' ? COLORS.barUnit : COLORS.barE2e)),
+            borderRadius: 8,
+          }],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          indexAxis: 'y',
+          plugins: { legend: { display: false } },
+          scales: {
+            x: { beginAtZero: true, ticks: { stepSize: 1 } },
+            y: { ticks: { font: { size: 11 } } },
+          },
+        },
+      });
+    }
+
+    function renderSuite(s) {
+      const badgeClass = s.file.includes('prod') ? 'prod' : s.kind;
+      const items = s.cases.map((c) => {
+        const opt = c.optional ? ' <span class="optional">(opcional)</span>' : '';
+        const area = c.area_label ? `<span class="area-tag">${esc(c.area_label)}</span>` : '';
+        const group = c.group ? `<em>${esc(c.group)}</em> · ` : '';
+        return `<li>${area}${group}${esc(c.name)}${opt}</li>`;
+      }).join('');
       return `
         <article class="suite">
           <div class="suite-head">
             <h3>${esc(s.suite)}</h3>
-            <span class="badge ${badgeClass}">${esc(s.file)}</span>
+            <span class="badge ${badgeClass}">${esc(s.file)} · ${s.cases.length}</span>
           </div>
           <ul class="tests">${items}</ul>
         </article>`;
@@ -168,63 +276,115 @@
         const res = await fetch('/qa-catalog.json', { cache: 'no-store' });
         if (!res.ok) throw new Error('No se pudo cargar qa-catalog.json');
         const data = await res.json();
+        const c = data.counts || {};
+        const charts = data.charts || {};
 
         const reportBtn = data.report_available
-          ? `<a class="btn btn-primary" href="/qa-report/" target="_blank" rel="noopener">Ver último reporte Playwright</a>`
-          : `<button class="btn btn-primary" disabled>Sin reporte aún — corre test:e2e primero</button>`;
+          ? `<a class="btn btn-primary" href="/qa-report/" target="_blank" rel="noopener">Reporte Playwright (timeline + video)</a>`
+          : `<button class="btn btn-primary" disabled>Sin reporte — corre npm run test:e2e</button>`;
 
-        const scripts = (data.scripts || [])
-          .map(
-            (s) => `
-          <div class="cmd-row">
-            <code>npm run ${esc(s.name)}</code>
-            <span class="muted">${esc(s.cmd.replace(/^npm run \S+\s*/, ''))}</span>
-          </div>`
-          )
-          .join('');
+        const lastRunChart = charts.last_run && charts.last_run.length
+          ? `<div class="chart-card">
+              <h2>Última corrida E2E</h2>
+              <p class="sub">Generado al correr npm run test:e2e (qa-last-run.json)</p>
+              <div class="chart-box"><canvas id="chart-run"></canvas></div>
+            </div>`
+          : `<div class="chart-card">
+              <h2>Última corrida E2E</h2>
+              <p class="sub">Aún sin datos. Corre <code>npm run test:e2e</code> y vuelve a abrir este panel.</p>
+              <div class="hint" style="margin:0">Aparecerá un gráfico de torta: pasaron / fallaron / omitidos.</div>
+            </div>`;
+
+        const stacks = data.stacks || {};
+        const stackCards = Object.values(stacks).map((s) => `
+          <article class="stack ${s.status === 'optional_future' ? 'future' : ''}">
+            <h3>${esc(s.name)}</h3>
+            <p class="role">${esc(s.role)}</p>
+            <p class="role"><strong>Cuándo:</strong> ${esc(s.when)}</p>
+            <code>${esc(s.cmd)}</code>
+          </article>`).join('');
 
         root.innerHTML = `
-          <div class="stats">
-            <div class="stat"><strong>${data.counts.unit}</strong><span>Tests unitarios</span></div>
-            <div class="stat"><strong>${data.counts.e2e}</strong><span>Tests E2E</span></div>
-            <div class="stat"><strong>${data.counts.e2e_optional}</strong><span>E2E opcionales</span></div>
-            <div class="stat"><strong>v${esc(data.version)}</strong><span>Versión app</span></div>
+          <div class="hero-stats">
+            <div class="stat"><strong>${c.total || 0}</strong><span>Tests totales</span></div>
+            <div class="stat"><strong>${c.unit || 0}</strong><span>Unitarios</span></div>
+            <div class="stat"><strong>${c.e2e || 0}</strong><span>E2E Playwright</span></div>
+            <div class="stat"><strong>${c.optional || 0}</strong><span>Opcionales</span></div>
+            <div class="stat"><strong>v${esc(data.version)}</strong><span>Versión Cubik</span></div>
           </div>
 
-          <section>
-            <h2>Ver resultados (gráfico, sin PowerShell)</h2>
+          <div class="charts-grid">
+            <div class="chart-card">
+              <h2>Mix unit / E2E</h2>
+              <p class="sub">Distribución del set completo</p>
+              <div class="chart-box"><canvas id="chart-kind"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <h2>Obligatorio vs opcional</h2>
+              <p class="sub">CI vs credenciales .env / Supabase</p>
+              <div class="chart-box"><canvas id="chart-coverage"></canvas></div>
+            </div>
+            <div class="chart-card">
+              <h2>Área funcional</h2>
+              <p class="sub">Login, navegación, tablero, Android, prod</p>
+              <div class="chart-box"><canvas id="chart-area"></canvas></div>
+            </div>
+            ${lastRunChart}
+            <div class="chart-card wide">
+              <h2>Tests por suite (Playwright + Node)</h2>
+              <p class="sub">Verde = unit · Azul = E2E</p>
+              <div class="chart-box tall"><canvas id="chart-suites"></canvas></div>
+            </div>
+          </div>
+
+          <section class="panel">
+            <h2>Resultados y herramientas gráficas</h2>
             <div class="actions">
               ${reportBtn}
-              <a class="btn btn-secondary" href="https://playwright.dev/docs/test-ui-mode" target="_blank" rel="noopener">Docs Playwright UI</a>
+              <a class="btn btn-secondary" href="https://playwright.dev/docs/test-ui-mode" target="_blank" rel="noopener">Playwright UI (depurar 1 test)</a>
             </div>
             <div class="hint">
-              <strong>Recomendado:</strong> corre una vez <code>npm run test:e2e</code> y luego abre el reporte arriba.
-              Tiene capturas, video y timeline por test — mucho más liviano que dejar PowerShell pegado.
-            </div>
-            <div class="hint warn">
-              <strong>Playwright UI</strong> (<code>npm run test:e2e:ui</code>) es interactivo pero consume más RAM/CPU.
-              Úsalo solo para depurar un test puntual.
+              <strong>Playwright HTML Report</strong> es la vista más rica: árbol de tests, capturas, video, trace.
+              El Laboratorio QA muestra el <em>mapa</em>; el reporte muestra <em>resultados</em> de la última corrida.
             </div>
           </section>
 
-          <section>
-            <h2>Comandos npm</h2>
-            ${scripts}
+          <section class="panel">
+            <h2>Estrategia de QA — Web vs Android nativo</h2>
+            <div class="stacks">${stackCards}</div>
+            <div class="hint" style="margin-top:14px">
+              <strong>JUnit / MockK / Espresso</strong> en Android Studio sirven para código Kotlin nativo (plugins, Activities).
+              Cubik hoy es <strong>Capacitor + WebView</strong>: la UI se prueba con <strong>Playwright</strong> (misma JS que web/APK).
+              MockK no reemplaza Playwright para login o Emparejar; complementaría solo si agregas lógica nativa Android.
+            </div>
           </section>
 
-          <section>
-            <h2>Unitarios (Node)</h2>
-            ${(data.unit || []).map((s) => renderSuite(s, 'unit')).join('')}
-          </section>
+          <details class="panel">
+            <summary>Comandos npm (${(data.scripts || []).length})</summary>
+            ${(data.scripts || []).map((s) => `
+              <div class="cmd-row"><code>npm run ${esc(s.name)}</code><span style="color:var(--muted)">${esc(s.cmd)}</span></div>
+            `).join('')}
+          </details>
 
-          <section>
-            <h2>E2E (Playwright — celular simulado)</h2>
-            ${(data.e2e || []).map((s) => renderSuite(s, 'e2e')).join('')}
-          </section>`;
+          <details class="panel" open>
+            <summary>Detalle por suite — unitarios (${c.unit})</summary>
+            ${(data.unit || []).map(renderSuite).join('')}
+          </details>
 
-        foot.textContent = `Catálogo generado ${new Date(data.generated_at).toLocaleString('es-CL')}`;
+          <details class="panel" open>
+            <summary>Detalle por suite — E2E Playwright (${c.e2e})</summary>
+            ${(data.e2e || []).map(renderSuite).join('')}
+          </details>`;
+
+        pie('chart-kind', '', '', charts.by_kind || [], COLORS.kind);
+        pie('chart-coverage', '', '', charts.by_coverage || [], COLORS.coverage);
+        pie('chart-area', '', '', charts.by_area || [], COLORS.area);
+        if (charts.last_run) pie('chart-run', '', '', charts.last_run, COLORS.run);
+        barSuites('chart-suites', charts.by_suite || []);
+
+        foot.textContent = `Catálogo ${new Date(data.generated_at).toLocaleString('es-CL')}${data.report_available ? ' · reporte Playwright disponible' : ''}`;
       } catch (e) {
-        root.innerHTML = `<p class="err">Error: ${esc(e.message)}. Ejecuta <code>npm run qa:catalog</code> y abre con el servidor (<code>npm run dev</code>).</p>`;
+        root.innerHTML = `<p class="err">Error: ${esc(e.message)}. Ejecuta <code>npm run qa:lab</code>.</p>`;
       }
     }
 

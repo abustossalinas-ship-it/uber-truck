@@ -22,6 +22,10 @@ function run(label, cmd, args, extraEnv = {}) {
 
 run('Unit tests (Node)', process.execPath, [path.join(root, 'scripts', 'run-unit-tests.cjs')]);
 run('E2E app local (Playwright)', npmCmd, ['run', 'test:e2e']);
+spawnSync(process.execPath, [path.join(root, 'scripts', 'build-qa-catalog.cjs')], {
+  cwd: root,
+  stdio: 'inherit',
+});
 
 if (withProd) {
   run('E2E prod Railway (Playwright)', npmCmd, ['run', 'test:e2e:prod']);

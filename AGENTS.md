@@ -25,7 +25,9 @@ Word local: `npm run export:all-docs` → pack completo; `npm run export:memoria
 
 | Tarea | Archivos (cuando existan) |
 |-------|---------------------------|
-| **Memoria (Gantt, roadmap, próximos pasos)** | `docs/Memoria-tecnica-Uber-Truck.html`, `docs/01-MEMORIA-TECNICA.md` — **v4.2 / 0.0.125** |
+| **Memoria (Gantt, roadmap, próximos pasos)** | `docs/Memoria-tecnica-Uber-Truck.html`, `docs/01-MEMORIA-TECNICA.md` — **v4.4 / 0.0.129** |
+| **Dominio + correo piloto** | `docs/DOMAIN-AND-EMAIL.md`, `docs/AUTH-AND-EMAIL-ROADMAP.md`, `docs/POST-MVP-CHECKLIST.md` |
+| **Auth / contraseña** | `src/lib/password-policy.js`, `src/routes/auth.js`, `src/services/mail.js` |
 | **QA + Laboratorio** | `docs/QA-AUTOMATIZADO.md`, `public/qa-lab.html`, `e2e/`, `tests/`, `.github/workflows/qa.yml` |
 | **Plan comercial piloto/escala** | `docs/PLAN-COMERCIAL-PILOTO.md`, `canvases/cubik-plan-native-escala.canvas.tsx` |
 | **Demo comercial** | `docs/DEMO-GUION.md` |

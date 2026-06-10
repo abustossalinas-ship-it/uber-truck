@@ -1,6 +1,6 @@
 # Uber Truck — Optimización de capacidad logística ociosa
 
-> **Tesis:** monetizar cubicación disponible en rutas activas (backhaul). MVP = **app tipo Uber** para carga por camión. **Prod:** v0.0.31 — calificaciones mutuas embarcador/transportista en Mis viajes.
+> **Cubik** — marketplace de transporte por camión (repo `uber-truck`). MVP flujo **cerrado** en prod. **Software:** v0.0.129 · **Memoria:** v4.4 (25 may 2026).
 
 ## Documentación
 
@@ -8,8 +8,10 @@
 
 | Documento | Enlace |
 |-----------|--------|
-| **Memoria técnica** (Gantt, próximos pasos, stack) | [docs/Memoria-tecnica-Uber-Truck.html](docs/Memoria-tecnica-Uber-Truck.html) |
+| **Memoria técnica** (Gantt, backlog, stack) | [docs/Memoria-tecnica-Uber-Truck.html](docs/Memoria-tecnica-Uber-Truck.html) |
 | Índice | [docs/00-INDICE-DOCUMENTACION.md](docs/00-INDICE-DOCUMENTACION.md) |
+| Dominio + correo piloto | [docs/DOMAIN-AND-EMAIL.md](docs/DOMAIN-AND-EMAIL.md) |
+| Post-MVP checklist | [docs/POST-MVP-CHECKLIST.md](docs/POST-MVP-CHECKLIST.md) |
 | SQL Supabase | [docs/SQL-SUPABASE.md](docs/SQL-SUPABASE.md) |
 | Canvas avance | `canvases/estado-avance.canvas.tsx` |
 

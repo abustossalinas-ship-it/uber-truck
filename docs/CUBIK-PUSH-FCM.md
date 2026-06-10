@@ -2,7 +2,7 @@
 
 **Costo:** Firebase Cloud Messaging es **gratuito**.
 
-**Estado piloto:** **Validado 10 jun 2026** — app Android en segundo plano; 3 notificaciones push de acciones de viaje recibidas en dispositivo físico.
+**Estado piloto:** **Cerrado (may 2026)** — app Android en segundo plano; 3 notificaciones push de acciones de viaje recibidas en dispositivo físico. Ver [POST-MVP-CHECKLIST.md](./POST-MVP-CHECKLIST.md) ítem 5.
 
 ## Backend v0.0.81+
 

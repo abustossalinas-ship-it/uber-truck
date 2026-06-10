@@ -30,6 +30,7 @@ function serverBehindManifest(serverVer, manifestVer) {
 }
 
 const app = express();
+app.set('trust proxy', 1);
 
 const CORS_ORIGINS = new Set([
   'https://localhost',
@@ -37,14 +38,42 @@ const CORS_ORIGINS = new Set([
   'capacitor://localhost',
   'ionic://localhost',
   'https://uber-truck-production.up.railway.app',
+  'https://getcubik.cl',
+  'https://www.getcubik.cl',
 ]);
+
+function landingHosts() {
+  const fromEnv = (process.env.LANDING_HOSTS || 'getcubik.cl,www.getcubik.cl')
+    .split(',')
+    .map((h) => h.trim().toLowerCase())
+    .filter(Boolean);
+  return new Set(fromEnv);
+}
+
+function requestHost(req) {
+  const raw =
+    req.headers['x-forwarded-host'] ||
+    req.headers.host ||
+    '';
+  return String(Array.isArray(raw) ? raw[0] : raw)
+    .split(',')[0]
+    .trim()
+    .split(':')[0]
+    .toLowerCase()
+    .replace(/\.$/, '');
+}
+
+function wantsAppShell(req) {
+  return req.query.app === '1' || req.query.app === 'true';
+}
 
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (
     origin &&
     (CORS_ORIGINS.has(origin) ||
-      /^https:\/\/[a-z0-9-]+\.up\.railway\.app$/i.test(origin))
+      /^https:\/\/[a-z0-9-]+\.up\.railway\.app$/i.test(origin) ||
+      /^https:\/\/(www\.)?getcubik\.cl$/i.test(origin))
   ) {
     res.setHeader('Access-Control-Allow-Origin', origin);
     res.setHeader('Vary', 'Origin');
@@ -73,8 +102,19 @@ app.get('/qa-lab', (_req, res) => {
 if (process.env.NODE_ENV !== 'production') {
   app.use('/qa-report', express.static(path.join(__dirname, '..', 'playwright-report')));
 }
-app.get('/', (_req, res) => {
+app.get('/app', (req, res) => {
+  const q = new URLSearchParams(req.query);
+  q.set('app', '1');
+  const target = `/?${q.toString()}`;
+  res.redirect(302, target);
+});
+app.get('/', (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
+  const host = requestHost(req);
+  if (!wantsAppShell(req) && landingHosts().has(host)) {
+    res.sendFile(path.join(publicDir, 'landing.html'));
+    return;
+  }
   res.sendFile(path.join(publicDir, 'index.html'));
 });
 app.use(express.static(publicDir));

@@ -15,5 +15,5 @@ window.CUBIK_BRAND = {
     background: '#f4f7fb',
   },
   packageId: 'cl.cubik.logistics',
-  productionUrl: 'https://uber-truck-production.up.railway.app',
+  productionUrl: 'https://www.getcubik.cl',
 };

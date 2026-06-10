@@ -11,11 +11,19 @@
 |-----------|--------|
 | **Memoria técnica** | [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html) |
 
-Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX **MVP cerrada**, hitos, **Gantt 16 sem**, **backlog vivo (10 jun 2026)**, Cubik Saldo piloto, QA automatizado, plan comercial piloto 25/50. **Última actualización:** 10 jun 2026 · software **0.0.125** · memoria **v4.3**.
+Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX **MVP cerrada**, hitos, **Gantt 16 sem**, **backlog vivo**, Cubik Saldo piloto, QA automatizado, plan comercial piloto 25/50, auth/correo/dominio. **Última actualización:** 25 may 2026 · software **0.0.129** · memoria **v4.4**.
 
 No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitácora MVP digital (evita duplicados).
 
 ---
+
+## Auth, correo y dominio (piloto)
+
+| Tema | Documento |
+|------|-----------|
+| **Dominio + Resend (bloqueante piloto)** | [DOMAIN-AND-EMAIL.md](./DOMAIN-AND-EMAIL.md) |
+| Auth, OAuth futuro, contraseña | [AUTH-AND-EMAIL-ROADMAP.md](./AUTH-AND-EMAIL-ROADMAP.md) |
+| Checklist Post-MVP | [POST-MVP-CHECKLIST.md](./POST-MVP-CHECKLIST.md) |
 
 ## Comercial y piloto (jun 2026)
 

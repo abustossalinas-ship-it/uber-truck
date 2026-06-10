@@ -2,7 +2,9 @@
 
 Ejecutar en [SQL Editor](https://supabase.com/dashboard/project/ljinhegtywixtbzjgjfn/sql/new) del proyecto **ljinhegtywixtbzjgjfn**.
 
-**Orden:** instalación nueva → `001_init.sql`, `003_auth_password.sql`, luego 004–008 (bloque abajo), `010_price_negotiation.sql`, **`011_cargo_trust.sql`**, **`012_uber_parity.sql`**, **`013_rating_tags.sql`**, **`014_match_ratings_rater_user.sql`** (opcional si falta columna).
+**Orden:** instalación nueva → `001_init.sql`, `003_auth_password.sql`, luego 004–008 (bloque abajo), `010_price_negotiation.sql`, **`011_cargo_trust.sql`**, **`012_uber_parity.sql`**, **`013_rating_tags.sql`**, **`014_match_ratings_rater_user.sql`**.
+
+**Verificación prod (may 2026):** script [`RUN_VERIFY_ALL_MIGRATIONS.sql`](./RUN_VERIFY_ALL_MIGRATIONS.sql) → **23/23 OK**. Migración **014** (`rater_user_id`) aplicada. No ejecutar `RUN_PENDING.sql` completo en prod ya migrada.
 
 **Archivo en repo:** `supabase/migrations/RUN_PENDING.sql`
 

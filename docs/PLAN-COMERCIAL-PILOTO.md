@@ -1,6 +1,6 @@
 # Plan comercial — piloto y escala
 
-**Software:** 0.0.125 · **Jun 2026**
+**Software:** 0.0.129 · **May–Jun 2026**
 
 Canvas interactivo (Gantt, costos, checklist nativo): `canvases/cubik-plan-native-escala.canvas.tsx`
 
@@ -29,6 +29,16 @@ Canvas interactivo (Gantt, costos, checklist nativo): `canvases/cubik-plan-nativ
 - App 100 % nativa reescrita
 - Wallet real / escrow (siguiente fase tras piloto)
 - Cobertura nacional día uno
+
+## Prerrequisito piloto — correo transaccional
+
+Antes de onboarding masivo (25/50), cerrar:
+
+1. Comprar dominio libre (variante Cubik — `cubik.cl` y `cubik.com` ocupados).
+2. Verificar dominio en Resend + `EMAIL_FROM` en Railway.
+3. Probar reset de contraseña a Gmail y correo corporativo tester.
+
+Detalle: [DOMAIN-AND-EMAIL.md](./DOMAIN-AND-EMAIL.md).
 
 ## Tareas pre-presentación
 

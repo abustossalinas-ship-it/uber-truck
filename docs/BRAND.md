@@ -34,6 +34,13 @@
 
 Ver `:root` en `public/theme.css` — variables `--brand-navy`, `--brand-orange`, `--brand-blue`.
 
+## Dominio vs marca
+
+- **Marca producto:** Cubik (app, correos, stores).
+- **Dominio web/correo:** puede ser variante (`cubikenvios.com`, etc.); no requiere renombrar la app.
+- **Dominio producto:** `getcubik.cl` (HostGator DNS → Railway).
+- `cubik.cl` y `cubik.com` siguen ocupados — ver [DOMAIN-AND-EMAIL.md](./DOMAIN-AND-EMAIL.md).
+
 ## Play Store
 
 Iconos Android: Image Asset desde `logo.png`. Guía: [CUBIK-PLAY-STORE.md](./CUBIK-PLAY-STORE.md)

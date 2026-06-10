@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f2744" />
+  <meta name="description" content="Cubik conecta empresas con transportistas de carga en Chile. Publica fletes, oferta tu ruta y sigue el viaje en tiempo real." />
+  <meta property="og:title" content="Cubik — Optimiza tus envíos" />
+  <meta property="og:description" content="Marketplace de transporte por camión en Chile. Menos viajes vacíos, más negocios." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://getcubik.cl/" />
+  <title>Cubik — Optimiza tus envíos | getcubik.cl</title>
+  <link rel="icon" href="/brand/logo.png" type="image/png" />
+  <link rel="apple-touch-icon" href="/brand/logo.png" />
+  <style>
+    :root {
+      --navy: #0f2744;
+      --navy-mid: #1a3d66;
+      --orange: #f7941d;
+      --orange-light: #ffba42;
+      --blue: #29abe2;
+      --blue-light: #5ec4ef;
+      --bg: #f4f7fb;
+      --muted: #6b7c92;
+      --white: #fff;
+      --radius: 16px;
+      --shadow: 0 12px 40px rgba(15, 39, 68, 0.1);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+      color: var(--navy);
+      background: var(--bg);
+      line-height: 1.5;
+    }
+    a { color: var(--blue); }
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem max(1.25rem, env(safe-area-inset-right)) 1rem max(1.25rem, env(safe-area-inset-left));
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      text-decoration: none;
+      color: var(--navy);
+      font-weight: 800;
+      font-size: 1.15rem;
+    }
+    .brand img { width: 44px; height: 44px; border-radius: 10px; }
+    .topbar-cta {
+      display: inline-flex;
+      align-items: center;
+      padding: 0.55rem 1rem;
+      border-radius: 999px;
+      background: var(--orange);
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.9rem;
+      text-decoration: none;
+    }
+    .hero {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 1.5rem 1.25rem 3rem;
+      display: grid;
+      gap: 2rem;
+      align-items: center;
+    }
+    @media (min-width: 900px) {
+      .hero { grid-template-columns: 1.1fr 0.9fr; padding-top: 2.5rem; }
+    }
+    .hero-kicker {
+      color: var(--orange);
+      font-weight: 700;
+      font-size: 0.85rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin: 0 0 0.5rem;
+    }
+    .hero h1 {
+      font-size: clamp(1.85rem, 4vw, 2.65rem);
+      line-height: 1.15;
+      margin: 0 0 1rem;
+    }
+    .hero-lead {
+      font-size: 1.05rem;
+      color: var(--muted);
+      margin: 0 0 1.5rem;
+      max-width: 34rem;
+    }
+    .hero-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.25rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0.9rem 1.25rem;
+      border-radius: 14px;
+      font-weight: 700;
+      font-size: 0.95rem;
+      text-decoration: none;
+      border: 2px solid transparent;
+      min-width: 10rem;
+    }
+    .btn-primary { background: var(--orange); color: #fff; }
+    .btn-secondary { background: var(--white); color: var(--navy); border-color: var(--navy); }
+    .btn-ghost { background: transparent; color: var(--navy-mid); border-color: var(--blue); }
+    .hero-trust {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 1rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+      padding: 0;
+      margin: 0;
+      list-style: none;
+    }
+    .hero-trust li::before { content: "✓ "; color: var(--blue); font-weight: 700; }
+    .hero-visual {
+      background: linear-gradient(145deg, var(--navy) 0%, var(--navy-mid) 45%, var(--blue) 100%);
+      border-radius: 24px;
+      padding: 1.75rem;
+      color: #fff;
+      box-shadow: var(--shadow);
+    }
+    .hero-visual img.logo-hero {
+      width: 88px;
+      height: 88px;
+      display: block;
+      margin: 0 auto 1rem;
+      border-radius: 18px;
+      background: rgba(255,255,255,0.08);
+    }
+    .hero-visual h2 {
+      text-align: center;
+      font-size: 1.1rem;
+      margin: 0 0 1rem;
+      font-weight: 600;
+    }
+    .route-card {
+      background: rgba(255,255,255,0.1);
+      border: 1px solid rgba(255,255,255,0.15);
+      border-radius: var(--radius);
+      padding: 1rem 1.1rem;
+      margin-bottom: 0.75rem;
+    }
+    .route-card strong { display: block; font-size: 0.95rem; }
+    .route-card span { font-size: 0.82rem; opacity: 0.85; }
+    .features {
+      background: var(--white);
+      padding: 3rem 1.25rem;
+    }
+    .features-inner { max-width: 1100px; margin: 0 auto; }
+    .features h2 {
+      text-align: center;
+      font-size: 1.5rem;
+      margin: 0 0 0.35rem;
+    }
+    .features-sub {
+      text-align: center;
+      color: var(--muted);
+      margin: 0 0 2rem;
+    }
+    .feature-grid {
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    }
+    .feature-card {
+      background: var(--bg);
+      border-radius: var(--radius);
+      padding: 1.25rem;
+      border: 1px solid #e8eef5;
+    }
+    .feature-card h3 { margin: 0 0 0.35rem; font-size: 1rem; }
+    .feature-card p { margin: 0; font-size: 0.9rem; color: var(--muted); }
+    .roles {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 3rem 1.25rem;
+      display: grid;
+      gap: 1rem;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+    .role-card {
+      background: var(--white);
+      border-radius: 20px;
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
+      border-top: 4px solid var(--orange);
+    }
+    .role-card.carrier { border-top-color: var(--blue); }
+    .role-card h3 { margin: 0 0 0.5rem; }
+    .role-card p { color: var(--muted); font-size: 0.92rem; margin: 0 0 1rem; }
+    .cta-band {
+      background: linear-gradient(90deg, var(--navy), var(--navy-mid));
+      color: #fff;
+      text-align: center;
+      padding: 2.5rem 1.25rem;
+    }
+    .cta-band h2 { margin: 0 0 0.5rem; font-size: 1.4rem; }
+    .cta-band p { margin: 0 0 1.25rem; opacity: 0.9; }
+    footer {
+      text-align: center;
+      padding: 1.5rem 1.25rem 2rem;
+      font-size: 0.85rem;
+      color: var(--muted);
+    }
+    footer a { color: var(--navy-mid); }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="/">
+      <img src="/brand/logo-mark.png" width="44" height="44" alt="" />
+      Cubik
+    </a>
+    <a class="topbar-cta" href="/app">Entrar a la app</a>
+  </header>
+
+  <section class="hero">
+    <div>
+      <p class="hero-kicker">Chile · Logística por camión</p>
+      <h1>Menos viajes vacíos.<br />Más negocios en tu ruta.</h1>
+      <p class="hero-lead">
+        Cubik conecta empresas que necesitan flete con transportistas que tienen
+        cubicación disponible. Publica, empareja, sigue el viaje y paga con reglas claras.
+      </p>
+      <div class="hero-actions">
+        <a class="btn btn-primary" href="/app?role=shipper">Soy empresa →</a>
+        <a class="btn btn-secondary" href="/app?role=carrier">Soy transportista →</a>
+        <a class="btn btn-ghost" href="/probar">Probar piloto</a>
+      </div>
+      <ul class="hero-trust">
+        <li>Matching en tiempo real</li>
+        <li>Mapa y seguimiento GPS</li>
+        <li>Chat y notificaciones</li>
+        <li>App Android disponible</li>
+      </ul>
+    </div>
+    <aside class="hero-visual" aria-label="Ejemplo de corredor piloto">
+      <img class="logo-hero" src="/brand/logo-mark.png" width="88" height="88" alt="Cubik" />
+      <h2>Corredor piloto RM ↔ Valparaíso</h2>
+      <div class="route-card">
+        <strong>Empresa publica carga</strong>
+        <span>Rango de precio, origen y destino en mapa</span>
+      </div>
+      <div class="route-card">
+        <strong>Transportista oferta ruta</strong>
+        <span>Cubicación, pallets y camión habitual</span>
+      </div>
+      <div class="route-card">
+        <strong>Viaje en curso</strong>
+        <span>Estados, chat, GPS y cierre con calificación</span>
+      </div>
+    </aside>
+  </section>
+
+  <section class="features">
+    <div class="features-inner">
+      <h2>Todo en una sola app</h2>
+      <p class="features-sub">Flujo tipo Uber, adaptado a carga por camión en Chile.</p>
+      <div class="feature-grid">
+        <article class="feature-card">
+          <h3>Publicar y ofertar</h3>
+          <p>Pedir flete u ofrecer capacidad en rutas ya planificadas.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Emparejar rápido</h3>
+          <p>Sugerencias automáticas por corredor, peso y cubicación.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Seguimiento en vivo</h3>
+          <p>Ubicación del transportista y mapa en viaje activo.</p>
+        </article>
+        <article class="feature-card">
+          <h3>Cuenta y confianza</h3>
+          <p>KYC, multas con reglas, calificaciones y soporte in-app.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="roles">
+    <article class="role-card shipper">
+      <h3>Para empresas embarcadoras</h3>
+      <p>Encuentra camión disponible sin llamadas infinitas. Declara tu carga, negocia precio y sigue la entrega.</p>
+      <a class="btn btn-primary" href="/app?role=shipper">Crear cuenta empresa</a>
+    </article>
+    <article class="role-card carrier">
+      <h3>Para transportistas</h3>
+      <p>Monetiza el espacio libre en tu ruta. Oferta tu cubicación y recibe notificaciones de nuevas cargas.</p>
+      <a class="btn btn-secondary" href="/app?role=carrier">Crear cuenta transportista</a>
+    </article>
+  </section>
+
+  <section class="cta-band">
+    <h2>¿Eres tester del piloto?</h2>
+    <p>Descarga la app Android o usa la versión web desde tu celular.</p>
+    <a class="btn btn-primary" href="/probar">Ir a /probar</a>
+  </section>
+
+  <footer>
+    <p><strong>Cubik</strong> · Optimiza tus envíos · <a href="https://getcubik.cl">getcubik.cl</a></p>
+    <p>Producto en evolución — piloto comercial Chile 2026.</p>
+  </footer>
+</body>
+</html>

@@ -661,14 +661,18 @@ document.getElementById('form-forgot')?.addEventListener('submit', async (e) => 
       body: JSON.stringify({ email }),
     });
     const json = await res.json();
-    if (!res.ok && res.status !== 200) {
+    if (!res.ok) {
       if (errEl) {
-        errEl.textContent = json.error || 'No se pudo enviar';
+        errEl.textContent = json.error || json.detail || 'No se pudo enviar';
         errEl.hidden = false;
       }
       return;
     }
     let msg = json.message || 'Revisa tu correo.';
+    if (json.throttled) {
+      alert(msg);
+      return;
+    }
     if (json.dev_reset_url) {
       msg += `\n\n[Desarrollo] Enlace directo:\n${json.dev_reset_url}`;
     }

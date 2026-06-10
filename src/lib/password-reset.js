@@ -13,10 +13,17 @@ function hashToken(token) {
   return crypto.createHash('sha256').update(String(token)).digest('hex');
 }
 
-function canRequestForgot(email) {
+function forgotCooldownRemainingMs(email) {
   const key = email.trim().toLowerCase();
   const prev = lastForgotByEmail.get(key);
-  if (prev && Date.now() - prev < FORGOT_COOLDOWN_MS) return false;
+  if (!prev) return 0;
+  const left = FORGOT_COOLDOWN_MS - (Date.now() - prev);
+  return left > 0 ? left : 0;
+}
+
+function canRequestForgot(email) {
+  const key = email.trim().toLowerCase();
+  if (forgotCooldownRemainingMs(email) > 0) return false;
   lastForgotByEmail.set(key, Date.now());
   return true;
 }
@@ -160,6 +167,7 @@ async function changePassword(userId, currentPassword, newPassword) {
 
 module.exports = {
   canRequestForgot,
+  forgotCooldownRemainingMs,
   findUserByEmail,
   createPasswordResetToken,
   verifyPasswordResetToken,

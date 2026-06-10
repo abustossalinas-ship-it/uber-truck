@@ -13,6 +13,7 @@ const { fetchKycStatus } = require('../lib/kyc-gate');
 const { getUserPresence } = require('../lib/carrier-presence');
 const {
   canRequestForgot,
+  forgotCooldownRemainingMs,
   findUserByEmail,
   createPasswordResetToken,
   verifyPasswordResetToken,
@@ -87,6 +88,16 @@ router.post('/forgot-password', async (req, res) => {
     return res.status(503).json({ ok: false, error: 'Recuperación requiere Supabase configurado' });
   }
   try {
+    const waitMs = forgotCooldownRemainingMs(email);
+    if (waitMs > 0) {
+      const mins = Math.ceil(waitMs / 60000);
+      return res.json({
+        ok: true,
+        throttled: true,
+        wait_seconds: Math.ceil(waitMs / 1000),
+        message: `Ya pediste un enlace hace poco. Revisa bandeja y spam; si no llegó, espera ${mins} min y vuelve a intentar.`,
+      });
+    }
     if (!canRequestForgot(email)) {
       return res.json({ ok: true, message: FORGOT_OK_MESSAGE });
     }
@@ -100,19 +111,27 @@ router.post('/forgot-password', async (req, res) => {
         fullName: user.full_name,
         resetUrl,
       });
-      const payload = { ok: true, message: FORGOT_OK_MESSAGE };
+      const payload = { ok: true, message: FORGOT_OK_MESSAGE, sent: true };
       if (mailResult.dev && process.env.NODE_ENV !== 'production') {
         payload.dev_reset_url = resetUrl;
       }
       return res.json(payload);
     }
-    res.json({ ok: true, message: FORGOT_OK_MESSAGE });
+    res.json({ ok: true, message: FORGOT_OK_MESSAGE, sent: false });
   } catch (e) {
-    console.error(e);
+    console.error('[auth] forgot-password', e);
     if (e.status === 503) {
       return res.status(503).json({ ok: false, error: e.message });
     }
-    res.json({ ok: true, message: FORGOT_OK_MESSAGE });
+    if (e.status === 502) {
+      return res.status(502).json({
+        ok: false,
+        error:
+          'No se pudo enviar el correo. Si usas onboarding@resend.dev, solo funciona con el email de tu cuenta Resend.',
+        detail: e.message,
+      });
+    }
+    return res.status(500).json({ ok: false, error: 'Error al procesar la solicitud. Intenta más tarde.' });
   }
 });
 

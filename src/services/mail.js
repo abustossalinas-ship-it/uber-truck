@@ -4,6 +4,20 @@ function isConfigured() {
   return Boolean(process.env.RESEND_API_KEY?.trim());
 }
 
+function statusPayload() {
+  const from = process.env.EMAIL_FROM?.trim() || '';
+  const sandboxFrom = /onboarding@resend\.dev/i.test(from) || !from;
+  return {
+    configured: isConfigured(),
+    email_from_set: Boolean(from),
+    email_from: from ? from.replace(/<[^>]+>/, '…').trim() : null,
+    sandbox_sender: sandboxFrom,
+    hint: sandboxFrom
+      ? 'Con onboarding@resend.dev solo llega al email de tu cuenta Resend. Verifica dominio para otros destinatarios.'
+      : null,
+  };
+}
+
 function publicAppUrl(fallback) {
   const base = (process.env.APP_PUBLIC_URL || fallback || '').replace(/\/$/, '');
   return base || 'http://localhost:3001';
@@ -52,11 +66,15 @@ async function sendPasswordResetEmail({ to, fullName, resetUrl }) {
   });
   const body = await res.json().catch(() => ({}));
   if (!res.ok) {
-    const err = new Error(body.message || body.error || 'No se pudo enviar el correo');
+    const detail = body.message || body.error || JSON.stringify(body) || 'No se pudo enviar el correo';
+    console.error('[mail] Resend error', res.status, detail, { to, from });
+    const err = new Error(detail);
     err.status = 502;
+    err.resend = body;
     throw err;
   }
+  console.log('[mail] Password reset sent', { to, id: body.id });
   return { ok: true, id: body.id };
 }
 
-module.exports = { isConfigured, publicAppUrl, sendPasswordResetEmail };
+module.exports = { isConfigured, publicAppUrl, sendPasswordResetEmail, statusPayload };

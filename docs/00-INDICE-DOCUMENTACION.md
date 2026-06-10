@@ -33,6 +33,7 @@ No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitáco
 | Tema | Documento |
 |------|-----------|
 | **QA automatizado** | [QA-AUTOMATIZADO.md](./QA-AUTOMATIZADO.md) · Laboratorio: `/qa-lab` (`npm run qa:lab`) |
+| **Checklist Post-MVP** | [POST-MVP-CHECKLIST.md](./POST-MVP-CHECKLIST.md) · [/post-mvp-checklist.html](/post-mvp-checklist.html) |
 | UX app móvil | [CUBIK-APP-UX.md](./CUBIK-APP-UX.md) |
 | Play Store | [CUBIK-PLAY-STORE.md](./CUBIK-PLAY-STORE.md) |
 | Push FCM | [CUBIK-PUSH-FCM.md](./CUBIK-PUSH-FCM.md) |

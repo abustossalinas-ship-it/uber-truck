@@ -1,6 +1,6 @@
 {
-  "version": "0.0.125",
+  "version": "0.0.126",
   "git_sha": "",
-  "ui": "uber-parity-v1",
-  "note": "Fix auth-ui syntax: welcome CTAs abren login (prod/APK)"
+  "ui": "post-mvp-checklist",
+  "note": "Checklist Post-MVP interactivo + API /api/post-mvp/status"
 }

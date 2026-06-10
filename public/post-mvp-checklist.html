@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cubik — Checklist Post-MVP</title>
+  <style>
+    :root {
+      --bg: #eef1f8;
+      --card: #fff;
+      --ink: #152238;
+      --muted: #5f6f8f;
+      --accent: #e86f1a;
+      --ok: #0d8a5b;
+      --warn: #d97706;
+      --todo: #94a3b8;
+      --line: #dce3f0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    .wrap { max-width: 820px; margin: 0 auto; padding: 24px 16px 48px; }
+    h1 { margin: 0 0 8px; font-size: 1.6rem; }
+    .lead { color: var(--muted); margin: 0 0 20px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 20px; }
+    .btn {
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-secondary { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+    .progress {
+      background: #fff;
+      border-radius: 14px;
+      padding: 14px 18px;
+      margin-bottom: 16px;
+      border: 1px solid var(--line);
+    }
+    .progress-bar {
+      height: 8px;
+      background: #e8edf5;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--ok);
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .item {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin-bottom: 12px;
+    }
+    .item.done { border-color: #b8e6d0; background: #f6fdf9; }
+    .item-head { display: flex; gap: 12px; align-items: flex-start; }
+    .order {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: #f0f3fa;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+    }
+    .item.done .order { background: #d1fae5; color: var(--ok); }
+    .item-title { margin: 0; font-size: 1.05rem; }
+    .badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 3px 8px;
+      border-radius: 999px;
+      margin-left: 8px;
+      vertical-align: middle;
+    }
+    .badge-deferred { background: #f1f5f9; color: var(--muted); }
+    .badge-progress { background: #fef3c7; color: #92400e; }
+    .badge-ready { background: #dbeafe; color: #1d4ed8; }
+    .badge-blocked { background: #fee2e2; color: #991b1b; }
+    .badge-done { background: #d1fae5; color: var(--ok); }
+    .summary { color: var(--muted); font-size: 0.92rem; margin: 6px 0 10px; }
+    ul.steps { margin: 8px 0; padding-left: 20px; font-size: 0.9rem; }
+    ul.steps li { margin: 4px 0; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
+    .note { font-size: 0.85rem; color: var(--muted); margin-top: 10px; }
+    .auth-hint {
+      background: #fff8e1;
+      border-left: 4px solid var(--warn);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+    footer { margin-top: 24px; color: var(--muted); font-size: 0.85rem; text-align: center; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>Checklist Post-MVP — validación en orden</h1>
+    <p class="lead">
+      Los 8 ítems de la memoria técnica (Post-MVP). Marca cada uno al validarlo en prod.
+      El servidor indica qué está listo; tu marca se guarda en este navegador.
+    </p>
+    <div id="auth-hint" class="auth-hint" hidden></div>
+    <div class="toolbar">
+      <button type="button" class="btn btn-primary" id="btn-refresh">Actualizar estado servidor</button>
+      <a class="btn btn-secondary" href="/?app=1">Abrir app Cubik</a>
+      <a class="btn btn-secondary" href="/docs/POST-MVP-CHECKLIST.md">Guía MD</a>
+      <a class="btn btn-secondary" href="/docs/Memoria-tecnica-Uber-Truck.html">Memoria</a>
+    </div>
+    <div class="progress">
+      <strong id="progress-label">0 / 8 validados por ti</strong>
+      <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+    </div>
+    <div id="list"></div>
+    <footer id="foot"></footer>
+  </div>
+  <script>
+    const LS_KEY = 'cubik_post_mvp_validated_v1';
+
+    function authHeaders() {
+      const t = localStorage.getItem('ut_token');
+      const h = { 'Content-Type': 'application/json' };
+      if (t) h.Authorization = 'Bearer ' + t;
+      return h;
+    }
+
+    function loadValidated() {
+      try {
+        return JSON.parse(localStorage.getItem(LS_KEY) || '{}');
+      } catch {
+        return {};
+      }
+    }
+
+    function saveValidated(map) {
+      localStorage.setItem(LS_KEY, JSON.stringify(map));
+    }
+
+    function badgeClass(status, userDone) {
+      if (userDone) return 'badge-done';
+      if (status === 'deferred') return 'badge-deferred';
+      if (status === 'ready_to_validate') return 'badge-ready';
+      if (status === 'blocked_env' || status === 'blocked_deps') return 'badge-blocked';
+      return 'badge-progress';
+    }
+
+    function badgeLabel(status, userDone) {
+      if (userDone) return 'Validado ✓';
+      if (status === 'deferred') return 'Diferido';
+      if (status === 'ready_to_validate') return 'Listo para validar';
+      if (status === 'blocked_env') return 'Falta env';
+      if (status === 'blocked_deps') return 'Depende otro';
+      return 'En curso';
+    }
+
+    function actionButtons(item) {
+      const actions = [];
+      if (item.id === 'password_reset') {
+        actions.push('<a class="btn btn-secondary" href="/?app=1">Probar olvidé contraseña</a>');
+      }
+      if (item.id === 'push_fcm') {
+        actions.push('<button type="button" class="btn btn-secondary" data-push-test>Enviar push de prueba</button>');
+      }
+      if (item.id === 'twilio_proxy') {
+        actions.push('<a class="btn btn-secondary" href="/?app=1#board">Ir a viaje → Llamar</a>');
+      }
+      if (item.id === 'wallet_prod') {
+        actions.push('<a class="btn btn-secondary" href="/docs/DEPLOY.md">Ver DEPLOY.md pagos</a>');
+      }
+      return actions.join('');
+    }
+
+    function renderItems(data) {
+      const validated = loadValidated();
+      const list = document.getElementById('list');
+      list.innerHTML = data.items
+        .sort((a, b) => a.order - b.order)
+        .map((item) => {
+          const userDone = Boolean(validated[item.id]);
+          const doneClass = userDone ? ' done' : '';
+          return `
+            <article class="item${doneClass}" data-id="${item.id}">
+              <div class="item-head">
+                <span class="order">${item.order}</span>
+                <div style="flex:1">
+                  <h2 class="item-title">
+                    ${item.title}
+                    <span class="badge ${badgeClass(item.status, userDone)}">${badgeLabel(item.status, userDone)}</span>
+                  </h2>
+                  <p class="summary">${item.summary}</p>
+                  <ul class="steps">${(item.validate || []).map((s) => `<li>${s}</li>`).join('')}</ul>
+                  <div class="actions">
+                    ${actionButtons(item)}
+                    <button type="button" class="btn btn-primary" data-toggle-validate>${userDone ? 'Reabrir' : 'Marcar validado'}</button>
+                  </div>
+                  ${item.blocked_by ? `<p class="note">Depende de: ${item.blocked_by.join(', ')}</p>` : ''}
+                </div>
+              </div>
+            </article>`;
+        })
+        .join('');
+
+      const doneCount = data.items.filter((i) => validated[i.id]).length;
+      document.getElementById('progress-label').textContent = `${doneCount} / ${data.items.length} validados por ti`;
+      document.getElementById('progress-fill').style.width = `${(doneCount / data.items.length) * 100}%`;
+
+      list.querySelectorAll('[data-toggle-validate]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const id = btn.closest('.item').dataset.id;
+          const map = loadValidated();
+          map[id] = !map[id];
+          saveValidated(map);
+          renderItems(data);
+        });
+      });
+
+      list.querySelector('[data-push-test]')?.addEventListener('click', async () => {
+        if (!localStorage.getItem('ut_token')) {
+          alert('Inicia sesión en la app Cubik primero (misma URL), luego vuelve aquí.');
+          return;
+        }
+        try {
+          const res = await fetch('/api/devices/push-test', {
+            method: 'POST',
+            headers: authHeaders(),
+            body: JSON.stringify({ title: 'Cubik', body: 'Checklist Post-MVP — push OK' }),
+          });
+          const json = await res.json();
+          alert(json.message || json.error || (res.ok ? 'Enviado' : 'Error'));
+        } catch (e) {
+          alert('Error de red');
+        }
+      });
+    }
+
+    async function refresh() {
+      const foot = document.getElementById('foot');
+      const hint = document.getElementById('auth-hint');
+      try {
+        const res = await fetch('/api/post-mvp/status', { headers: authHeaders() });
+        const data = await res.json();
+        if (!data.ok) throw new Error(data.error || 'Error');
+        renderItems(data);
+        foot.textContent = `Actualizado ${data.updated} · software ${data.software}`;
+        if (!localStorage.getItem('ut_token')) {
+          hint.hidden = false;
+          hint.textContent =
+            'Sin sesión: abre la app Cubik e inicia sesión para ver tokens FCM y probar push.';
+        } else {
+          hint.hidden = true;
+        }
+      } catch (e) {
+        document.getElementById('list').innerHTML =
+          '<p style="color:#b42318">No se pudo cargar. ¿Está el servidor en marcha?</p>';
+      }
+    }
+
+    document.getElementById('btn-refresh').addEventListener('click', refresh);
+    refresh();
+  </script>
+</body>
+</html>

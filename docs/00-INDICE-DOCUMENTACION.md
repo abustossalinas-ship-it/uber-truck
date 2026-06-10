@@ -11,7 +11,7 @@
 |-----------|--------|
 | **Memoria técnica** | [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html) |
 
-Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX, hitos, **Gantt**, **próximos pasos**, **bitácora de avance**, **Cubik Saldo piloto**, **QA automatizado (v0.0.125)**, **plan comercial piloto 25/50 y escala 200 camiones**, stack por capas, API y avance. **Última actualización:** 10 jun 2026 · software **0.0.125** · memoria **v4.2**.
+Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX **MVP cerrada**, hitos, **Gantt 16 sem**, **backlog vivo (10 jun 2026)**, Cubik Saldo piloto, QA automatizado, plan comercial piloto 25/50. **Última actualización:** 10 jun 2026 · software **0.0.125** · memoria **v4.3**.
 
 No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitácora MVP digital (evita duplicados).
 

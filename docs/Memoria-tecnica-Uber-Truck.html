@@ -39,7 +39,7 @@
     <h1>Memoria técnica del proyecto</h1>
     <p class="meta"><strong>Producto:</strong> Uber Truck — marketplace de capacidad logística ociosa (backhaul), Chile.<br />
     <strong>Documento:</strong> memoria técnica viva del repositorio y del despliegue Railway.<br />
-    <strong>Versión documento:</strong> 4.2 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.125 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 10 jun 2026</p>
+    <strong>Versión documento:</strong> 4.3 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.125 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 10 jun 2026 &nbsp;|&nbsp; <strong>Backlog/Gantt:</strong> vivo — revisar semanalmente</p>
   </div>
 </div>
 
@@ -61,40 +61,48 @@
 <p>Priorizar <strong>paridad de flujo Uber</strong> y usuarios activos en la app antes que integraciones B2B o Open Finance. Pagos in-app y mapa en vivo entran cuando el flujo base ya se usa sin fricción.</p>
 
 <h3>Paridad UX — Uber vs Uber Truck (MVP final)</h3>
+<p><strong>Resumen jun 2026:</strong> el <strong>MVP final de flujo</strong> está <strong>cerrado en producción</strong> (v0.0.125). Lo que queda en la tabla como «Post-MVP» <strong>no bloquea</strong> demo comercial ni piloto 25/50. Canvas plan: <code>canvases/cubik-plan-native-escala.canvas.tsx</code>.</p>
+
+<h4>MVP final — flujos core (cerrados)</h4>
 <table>
-  <tr><th>Flujo tipo Uber</th><th>Uber Truck</th><th>Estado mayo 2026</th></tr>
+  <tr><th>Flujo tipo Uber</th><th>Uber Truck</th><th>Estado MVP</th></tr>
   <tr><td>Pedir un viaje</td><td>Embarcador publica <strong>carga</strong></td><td class="g-done">Hecho</td></tr>
   <tr><td>Conductor disponible / acepta</td><td>Transportista publica <strong>capacidad</strong> y acepta match</td><td class="g-done">Hecho</td></tr>
-  <tr><td>Viaje en curso (estados)</td><td>Emparejamiento: propuesto → aceptado → en ejecución → completado</td><td class="g-done">Hecho</td></tr>
-  <tr><td>Chat con la otra parte</td><td>Chat in-app por match</td><td class="g-done">Hecho</td></tr>
+  <tr><td>Viaje en curso (estados)</td><td>Propuesto → aceptado → en ejecución → completado</td><td class="g-done">Hecho</td></tr>
+  <tr><td>Chat con la otra parte</td><td>Chat in-app por match (+ presets en ruta)</td><td class="g-done">Hecho v0.0.97+</td></tr>
   <tr><td>Cancelar con reglas</td><td>Modal motivos, acuerdo mutuo, multas sugeridas</td><td class="g-done">Hecho</td></tr>
-  <tr><td>Iniciar sesión / registro</td><td>Email + contraseña (JWT)</td><td class="g-done">Hecho MVP</td></tr>
-  <tr><td>Login Gmail / Apple</td><td>OAuth Google + Sign in with Apple</td><td class="g-todo">Pendiente producción — <a href="AUTH-AND-EMAIL-ROADMAP.md">bloque E</a></td></tr>
-  <tr><td>Recuperar contraseña</td><td>Enlace por correo (Resend)</td><td class="g-todo">Código en repo; no activo en prod</td></tr>
-  <tr><td>Notificaciones</td><td>Campana in-app (JWT); archivo automático al cerrar viaje</td><td class="g-done">Hecho (v0.0.125)</td></tr>
-  <tr><td>Mis viajes</td><td>Pestaña <strong>Mis viajes</strong> + banner viaje activo</td><td class="g-done">Hecho (v012)</td></tr>
-  <tr><td>Publicar / ofertar</td><td>Pestañas <strong>Pedir flete</strong> / <strong>Ofertar ruta</strong></td><td class="g-done">Hecho</td></tr>
+  <tr><td>Iniciar sesión / registro</td><td>Email + contraseña (JWT)</td><td class="g-done">Hecho</td></tr>
+  <tr><td>Notificaciones</td><td>Campana in-app; activos vs historial; archivo al cerrar viaje</td><td class="g-done">Hecho v0.0.125</td></tr>
+  <tr><td>Mis viajes</td><td>Pestaña <strong>Mis viajes</strong> + banner viaje activo + calificación</td><td class="g-done">Hecho v0.0.28+</td></tr>
+  <tr><td>Publicar / ofertar</td><td><strong>Pedir flete</strong> / <strong>Ofertar ruta</strong> + mis cargas/ofertas (<code>owner_user_id</code>)</td><td class="g-done">Hecho</td></tr>
   <tr><td>Buscando camiones</td><td>Sugerencias con estado «buscando…»</td><td class="g-done">Hecho</td></tr>
-  <tr><td>Precio oferta/demanda</td><td>Rango embarcador + oferta transportista + aceptación</td><td class="g-done">Hecho (v010)</td></tr>
-  <tr><td>Declaración de carga y confianza</td><td>Valor ref. CLP, guía, términos, incidentes</td><td class="g-done">Hecho (v011)</td></tr>
-  <tr><td>Mapa / dirección</td><td>Google Maps origen–destino + distancia</td><td class="g-done">Hecho</td></tr>
-  <tr><td>QA automatizado</td><td>Playwright E2E + unit Node + CI GitHub + Laboratorio QA (<code>/qa-lab</code>)</td><td class="g-done">Hecho (v0.0.125)</td></tr>
-  <tr><td>App Android testers</td><td>APK bundle / remoto + verify <code>auth-ui.js</code></td><td class="g-done">Hecho (v0.0.125)</td></tr>
-  <tr><td>Mapa en vivo / seguimiento GPS</td><td>Ubicación transportista + mapa en viaje activo</td><td class="g-done">Hecho (v0.0.34+)</td></tr>
-  <tr><td>Pago en app (piloto)</td><td><strong>Cubik Saldo piloto</strong>: embarcador paga en Completados; transportista ve «Embarcador pagó» + cobro en gestión; notificación campana</td><td class="g-done">Hecho v0.0.100–0.0.104 (simulación)</td></tr>
-  <tr><td>Pago en app (prod)</td><td>Wallet real + retención al «En ruta»; comisión 10% + 5%</td><td class="g-doing">Diseño cerrado; wallet/escrow siguiente</td></tr>
-  <tr><td>Paridad Uber Eats (checkout)</td><td>Drawer «Pagar con Cubik Saldo» + desglose por rol en Mis viajes / Cuenta</td><td class="g-done">Piloto UX v0.0.102+; checkout en ruta pendiente</td></tr>
-  <tr><td>Llamadas enmascaradas</td><td>Twilio Proxy — botón Llamar sin mostrar teléfonos</td><td class="g-doing">UI + API contact listos v0.0.98; proxy semana siguiente</td></tr>
-  <tr><td>Anti-bypass teléfono</td><td>Bloqueo números en chat; contacto vía app</td><td class="g-done">Hecho v0.0.98</td></tr>
-  <tr><td>Incidentes / navegación / perfil</td><td>Drawer incidente, Maps/Waze, shell Cuenta tipo Uber</td><td class="g-done">Hecho v0.0.97–0.0.98</td></tr>
-  <tr><td>Calificación ★</td><td>Mutua 1–5 + chips por rol (embarcador/transportista), reputación histórica en <strong>Mis viajes</strong></td><td class="g-done">Hecho (012–014, v0.0.28–0.0.31)</td></tr>
-  <tr><td>Perfil y cuenta</td><td>Login, empresa, <strong>billetera</strong> (varias cuentas bancarias + tarjetas), multas, comprobante</td><td class="g-done">Hecho v0.0.94; pasarela tarjeta piloto</td></tr>
-  <tr><td>Publicar carga (cubicación)</td><td>Pallets ↔ m³ sync, preset cubicación → Personalizado, tipo camión + multi-viaje</td><td class="g-done">Hecho v0.0.90–0.0.93</td></tr>
-  <tr><td>Ofertar ruta (transportista)</td><td>Pallets, camión habitual en perfil, validación capacidad</td><td class="g-done">Hecho v0.0.90</td></tr>
-  <tr><td>Push móvil (FCM)</td><td>Registro token Android + envío servidor; prueba manual pendiente en dispositivo físico</td><td class="g-doing">Backend OK (v0.0.91+); validación push-test pendiente</td></tr>
-  <tr><td>App móvil Cubik (Android)</td><td>Capacitor + shell UX (bienvenida, bottom nav, bundle local)</td><td class="g-done">Hecho v0.0.75–0.0.94</td></tr>
-  <tr><td>Distribución testers sin tienda</td><td>Link <code>/probar</code> (PWA) + APK debug</td><td class="g-done">Hecho jun 2026</td></tr>
-  <tr><td>App iOS nativa</td><td>TestFlight / App Store</td><td class="g-todo">Pendiente — hoy PWA Safari vía <code>/probar</code></td></tr>
+  <tr><td>Precio oferta/demanda</td><td>Rango embarcador + oferta transportista + aceptación + tarifa sugerida calibrada</td><td class="g-done">Hecho v0.0.105+</td></tr>
+  <tr><td>Declaración de carga y confianza</td><td>Valor ref. CLP, guía, términos, incidentes drawer</td><td class="g-done">Hecho v0.0.98+</td></tr>
+  <tr><td>Mapa / dirección</td><td>Google Maps origen–destino + distancia + navegar Maps/Waze</td><td class="g-done">Hecho</td></tr>
+  <tr><td>Mapa en vivo / GPS</td><td>Ubicación transportista + mapa en viaje activo</td><td class="g-done">Hecho v0.0.34+</td></tr>
+  <tr><td>Anti-bypass teléfono</td><td>Bloqueo números en chat; botón Llamar (UI lista)</td><td class="g-done">Hecho v0.0.98</td></tr>
+  <tr><td>Incidentes / perfil shell</td><td>Drawer incidente, shell Cuenta tipo Uber</td><td class="g-done">Hecho v0.0.97–0.0.98</td></tr>
+  <tr><td>Calificación ★</td><td>Mutua 1–5 + chips por rol; reputación en tablero</td><td class="g-done">Hecho v0.0.28–0.0.31</td></tr>
+  <tr><td>Perfil y cuenta</td><td>Empresa, <strong>billetera</strong> multi-cuenta, multas, comprobante</td><td class="g-done">Hecho v0.0.94+</td></tr>
+  <tr><td>Cubicación carga / oferta</td><td>Pallets ↔ m³, preset, tipo camión, camión habitual</td><td class="g-done">Hecho v0.0.90–0.0.93</td></tr>
+  <tr><td>Pago en app (piloto)</td><td><strong>Cubik Saldo piloto</strong> 10/5 — Pagar post-<code>completed</code> + notif transportista</td><td class="g-done">Hecho v0.0.100–0.0.104</td></tr>
+  <tr><td>Checkout UX (piloto)</td><td>Drawer «Pagar con Cubik Saldo» + desglose por rol</td><td class="g-done">Hecho v0.0.102+</td></tr>
+  <tr><td>QA automatizado</td><td>Unit + Playwright + CI GitHub + Laboratorio <code>/qa-lab</code></td><td class="g-done">Hecho v0.0.125</td></tr>
+  <tr><td>App Android testers</td><td>Capacitor + APK remoto/bundle + verify login</td><td class="g-done">Hecho v0.0.125</td></tr>
+  <tr><td>Distribución sin tienda</td><td><code>/probar</code> + APK + PWA iPhone</td><td class="g-done">Hecho jun 2026</td></tr>
+</table>
+
+<h4>Post-MVP — no bloquea demo ni piloto 25/50</h4>
+<table>
+  <tr><th>Flujo / capacidad</th><th>Uber Truck</th><th>Estado</th><th>Ventana</th></tr>
+  <tr><td>Login Gmail / Apple</td><td>OAuth Google + Sign in with Apple</td><td class="g-todo">Bloque E — post-piloto</td><td>Q3 2026+</td></tr>
+  <tr><td>Recuperar contraseña</td><td>Enlace por correo (Resend)</td><td class="g-todo">Código en repo; no prod</td><td>Con bloque E</td></tr>
+  <tr><td>Pago en app (prod)</td><td>Wallet real + retención al «En ruta»; escrow 10/5</td><td class="g-doing"><strong>P0 siguiente</strong></td><td>Sem 2–8 piloto</td></tr>
+  <tr><td>Llamadas enmascaradas</td><td>Twilio Proxy — botón Llamar</td><td class="g-doing">UI lista v0.0.98; proxy pendiente</td><td>Sem 2–4</td></tr>
+  <tr><td>Push móvil (FCM)</td><td>Token Android + envío servidor</td><td class="g-doing">Backend OK; validar en teléfono</td><td>Sem 1–3 piloto</td></tr>
+  <tr><td>GPS background (app cerrada)</td><td>Plugin Capacitor / módulo nativo lite</td><td class="g-doing">Spike sem 4–9 si piloto lo exige</td><td>Ver canvas nativo</td></tr>
+  <tr><td>App iOS nativa</td><td>TestFlight / App Store</td><td class="g-todo">Hoy PWA vía <code>/probar</code></td><td>Post escala</td></tr>
+  <tr><td>Escrow checkout en ruta</td><td>Retención al «Marcar en ruta» (prod)</td><td class="g-doing">Diseño cerrado; wallet real primero</td><td>Con U7 prod</td></tr>
 </table>
 
 <div class="rule"></div>
@@ -104,17 +112,18 @@
 <h2>Fase 0 — Descubrimiento y legal</h2>
 <h3>Objetivo</h3>
 <p>Entrevistas en nodo industrial (San Bernardo / RM), validación de precio/comisión y borrador legal + seguro piloto.</p>
-<h3>Estado (mayo 2026)</h3>
-<p class="check">En curso — paralelo al MVP digital ya desplegado.</p>
+<h3>Estado (jun 2026)</h3>
+<p class="check">En curso — paralelo al MVP digital ya desplegado y demo comercial.</p>
 
 <h2>Fase 1 — MVP final app tipo Uber (producto único)</h2>
 <h3>Objetivo</h3>
 <p>Cerrar la <strong>paridad de flujo</strong> en la misma app: mis viajes por cuenta, copy y pasos al estilo Uber, piloto con <strong>20 viajes reales</strong> hechos 100% en la plataforma (hito M2).</p>
-<h3>Pendiente clave</h3>
+<h3>Estado jun 2026</h3>
+<p class="check"><strong>MVP flujo cerrado</strong> (v0.0.125). Pendiente operacional: <strong>20 viajes M2</strong> + piloto comercial 25 empresas / 50 transportistas — no más pantallas core.</p>
 <ul>
-  <li><code>owner_user_id</code> — mis cargas / mis ofertas (como “Mis viajes” en Uber).</li>
-  <li>Refino UX: publicar → match → activos → historial (sin herramientas externas).</li>
-  <li>SQL 008 en prod; luego capturas en <code>docs/img/</code> para memoria y pitch.</li>
+  <li><code>owner_user_id</code> — mis cargas / mis ofertas: <strong>hecho</strong>.</li>
+  <li>Refino UX publicar → match → activos → historial: <strong>hecho</strong> (v0.0.90–0.0.125).</li>
+  <li>SQL 008+ en prod: <strong>hecho</strong>; capturas pitch en <code>docs/img/</code> opcional.</li>
 </ul>
 
 <h2>Fase 2 — Núcleo digital (ya en producción)</h2>
@@ -131,10 +140,10 @@
   <li>KYC semi-curado (<code>kyc_status=approved</code>); <code>owner_user_id</code> en listados.</li>
   <li>Railway producción + <code>/health</code> + documentación en <code>/docs/</code>.</li>
 </ul>
-<h3>Pendiente en fase 2</h3>
+<h3>Pendiente en fase 2 (post-MVP prod)</h3>
 <ul>
-  <li><strong>2.4–2.9:</strong> <code>owner_user_id</code> — mis cargas / mis ofertas.</li>
-  <li><strong>2.10e–f (futuro):</strong> validar tarjeta/cuenta + cobro integrado multas (Webpay u otro); hoy pago manual + comprobante + confirmación acreedor.</li>
+  <li><strong>2.10b:</strong> pasarela + wallet real + retención al «En ruta» (U7 prod).</li>
+  <li><strong>2.10e–f (futuro):</strong> cobro integrado multas vía wallet (hoy transferencia + comprobante).</li>
 </ul>
 
 <h2>Fase 3 — Piloto confianza</h2>
@@ -188,17 +197,17 @@
   </tr>
     <tr>
       <td class="hito-head">1 · MVP final app</td>
-      <td class="g-doing">En curso</td>
-      <td class="g-doing">En curso</td>
-      <td class="g-todo">Piloto 20</td>
+      <td class="g-done">Paridad cerrada</td>
+      <td class="g-doing">Piloto 25/50 + M2</td>
+      <td class="g-doing">Operación</td>
       <td class="g-na">—</td>
     </tr>
   <tr>
     <td class="hito-head">2 · MVP digital</td>
     <td class="g-done">Hecho</td>
     <td class="g-done">Hecho</td>
-    <td class="g-doing">Refino</td>
-    <td class="g-todo">Cobros</td>
+    <td class="g-doing">Wallet prod</td>
+    <td class="g-todo">Escala</td>
   </tr>
   <tr>
     <td class="hito-head">3 · Confianza</td>
@@ -218,10 +227,11 @@
 
 <h3>Hitos (milestones)</h3>
 <table>
-  <tr><th>Hito</th><th>Fecha plan</th><th>Estado real (mayo 2026)</th></tr>
+  <tr><th>Hito</th><th>Fecha plan</th><th>Estado real (10 jun 2026)</th></tr>
   <tr><td>M1 Descubrimiento + legal</td><td>28-jun-2026</td><td class="g-doing">En curso</td></tr>
-  <tr><td>M2 20 viajes en la app (piloto)</td><td>31-ago-2026</td><td class="g-todo">Pendiente</td></tr>
-  <tr><td>M3 MVP digital en producción</td><td>25-oct-2026</td><td class="g-done"><strong>Hecho (adelantado)</strong></td></tr>
+  <tr><td>M3 MVP digital en producción</td><td>25-oct-2026</td><td class="g-done"><strong>Hecho (adelantado jun 2026)</strong></td></tr>
+  <tr><td>M2b Demo comercial + plan piloto 25/50</td><td>13-jun-2026</td><td class="g-doing"><strong>Esta semana</strong></td></tr>
+  <tr><td>M2 20 viajes en la app (piloto corredor)</td><td>31-ago-2026</td><td class="g-doing"><strong>P0 operación</strong></td></tr>
   <tr><td>M4 100 viajes digitales</td><td>31-ene-2027</td><td class="g-todo">Pendiente</td></tr>
   <tr><td>M5 Match semi-auto + SaaS</td><td>31-mar-2027</td><td class="g-todo">Pendiente</td></tr>
 </table>
@@ -235,7 +245,7 @@
   <tr><td>NPS transportista</td><td>≥ 7</td><td>≥ 8</td></tr>
 </table>
 
-<p><strong>Interpretación 29 mayo 2026:</strong> núcleo digital y <strong>cuenta/multas operativas</strong> en prod (v0.0.57); pasarela y validación de tarjetas <strong>documentadas como pendiente</strong> (<a href="PENALTY-AND-SUPPORT.md">PENALTY-AND-SUPPORT.md</a>, <a href="PROXIMOS-PASOS-ESTRATEGIA.md">bloque D</a>); foco = <strong>liquidez corredor RM ↔ V/San Antonio + piloto 20 viajes</strong>. Add-on a terceros solo tras M2/M4.</p>
+<p><strong>Interpretación 10 jun 2026:</strong> MVP flujo <strong>cerrado</strong> (v0.0.125); QA + Laboratorio operativos; foco = <strong>demo comercial (jueves)</strong> → piloto 25/50 → 20 viajes M2 corredor RM ↔ V/San Antonio. Wallet prod y Twilio en cola P0; OAuth/iOS fuera de alcance inmediato.</p>
 
 <h2>Piloto M2 — corredor único (liquidez)</h2>
 <p>El cuello de botella del marketplace no es el código sino la <strong>oferta y demanda simultánea</strong>. El piloto M2 se concentra en un corredor para lograr densidad operacional.</p>
@@ -276,77 +286,106 @@
 <p>La plataforma <strong>no transporta</strong> ni <strong>reembolsa</strong> el valor declarado de la mercadería por defecto. Transportista ejecuta el flete; embarcador declara con veracidad; Uber Truck facilita match, registro, chat, incidentes y reglas de cancelación.</p>
 <p>Tabla completa: <a href="Piloto-M2-Corredor-KPIs-Riesgos.html#">anexo piloto §4</a> · <a href="Terminos-Confianza-Carga-Uber-Truck.html">términos cargo-trust-v1</a>.</p>
 
-<h2>Próximos pasos — backlog de actividades (mayo 2026)</h2>
-<p>Prioridad: <strong>P0</strong> bloquea validación; <strong>P1</strong> siguiente entrega; <strong>P2</strong> planificado.</p>
+<h2>Próximos pasos — backlog vivo (10 jun 2026)</h2>
+<p>Prioridad: <strong>P0</strong> bloquea piloto; <strong>P1</strong> siguiente entrega; <strong>P2</strong> planificado. Actualizar al cerrar cada release o semana de piloto. Detalle comercial: <a href="PLAN-COMERCIAL-PILOTO.md">PLAN-COMERCIAL-PILOTO.md</a> · canvas <code>cubik-plan-native-escala</code>.</p>
 <table>
   <tr><th>ID</th><th>P</th><th>Actividad</th><th>Entregable</th><th>Ventana</th><th>Estado</th></tr>
-  <tr><td>U1</td><td>P0</td><td>Ejecutar SQL 004–008 en Supabase prod</td><td>Chat, notif, banco (<code>users.bank_*</code>), <code>penalty_charges</code></td><td>May 2026</td><td class="g-done">Hecho (prod OK jun 2026)</td></tr>
-  <tr><td>U2</td><td>P0</td><td>Validar prod /health + login JWT</td><td>Smoke test Railway</td><td>Inmediato</td><td class="g-done">Hecho</td></tr>
-  <tr><td>U3</td><td>P0</td><td>Memoria + /docs/ en prod</td><td>Gantt y próximos pasos en un solo HTML</td><td>May 2026</td><td class="g-done">Código listo</td></tr>
-  <tr><td>U4</td><td>P0</td><td>Scopes por rol + registro empresa</td><td>shipper/carrier/admin + tablero filtrado</td><td>May 2026</td><td class="g-done">Hecho</td></tr>
-  <tr><td>U4b</td><td>P1</td><td>Precio oferta/demanda + rango sugerido</td><td>010 SQL, carrier-offer, accept-offer, budget-estimate</td><td>May 2026</td><td class="g-done">Hecho</td></tr>
-  <tr><td>U4c</td><td>P1</td><td>Confianza y declaración de carga</td><td>011 SQL, términos, valor ref., incidentes</td><td>May 2026</td><td class="g-done">Hecho</td></tr>
-  <tr><td>U4d</td><td>P2</td><td>Subida PDF guía + validación SII/DTE</td><td>Storage + facturador autorizado</td><td>Post-piloto</td><td class="g-todo">Plan</td></tr>
-  <tr><td>U5</td><td>P1</td><td>UX paridad Uber (copy y pasos)</td><td>Flujo publicar → match → activos; Cubik móvil; cubicación; billetera</td><td>Jun–Jul 2026</td><td class="g-doing">En curso (v0.0.90–0.0.94)</td></tr>
-  <tr><td>U5b</td><td>P1</td><td>SQL 027–030 en Supabase prod</td><td>FCM <code>device_tokens</code>, camión oferta, <code>user_bank_accounts</code></td><td>Jun 2026</td><td class="g-done">Hecho (billetera validada prod)</td></tr>
-  <tr><td>U6</td><td>P0</td><td>Piloto 20 viajes <strong>corredor RM ↔ V/San Antonio</strong></td><td>M2 — liquidez + densidad</td><td>Jul–Ago 2026</td><td class="g-doing"><strong>Siguiente foco</strong></td></tr>
-  <tr><td>U6b</td><td>P1</td><td>KPIs marketplace M2 (semanal)</td><td>Match rate, tiempo match, NPS — ver anexo piloto</td><td>Jul–Ago 2026</td><td class="g-doing">Doc listo</td></tr>
-  <tr><td>U6c</td><td>P1</td><td>Reputación v0</td><td>Historial cancelaciones + incidentes por cuenta</td><td>Post 5 viajes</td><td class="g-todo">Plan</td></tr>
-  <tr><td>U6d</td><td>P1</td><td>Evidencia entrega</td><td>Foto + timestamp (antes GPS vivo)</td><td>Post-piloto corto</td><td class="g-todo">Plan</td></tr>
-  <tr><td>U7a</td><td>P0</td><td>Cubik Saldo <strong>piloto</strong> 10/5</td><td>SQL 026, <code>POST …/pilot-pay</code>, badges, notif <code>pilot_payment</code></td><td>Jun 2026</td><td class="g-done">Hecho v0.0.100–0.0.104</td></tr>
-  <tr><td>U7</td><td>P0</td><td>Cubik Saldo <strong>prod</strong> + escrow en ruta</td><td>Wallet, ledger, retención en ruta; tier $1M</td><td>Siguiente</td><td class="g-doing"><strong>En cola</strong></td></tr>
-  <tr><td>U7d</td><td>P0</td><td>Twilio Proxy llamadas</td><td><code>TWILIO_MATCH_PROXY_NUMBER</code></td><td>Semana siguiente</td><td class="g-doing">UI lista v0.0.98</td></tr>
-  <tr><td>U7a</td><td>P1</td><td>Multas + comprobante + confirmación acreedor</td><td>SQL 022–025, <code>penalties-ui.js</code>, 7 d / 24 h</td><td>May 2026</td><td class="g-done">Hecho v0.0.57</td></tr>
-  <tr><td>U7b</td><td>P1</td><td>Banco obligatorio para operar (prod)</td><td><code>bank-gate</code>, formulario cuenta</td><td>May 2026</td><td class="g-done">Hecho v0.0.56</td></tr>
-  <tr><td>U7c</td><td>P1</td><td>Soporte moderador en multas</td><td><code>support_cases</code>, chat admin</td><td>May 2026</td><td class="g-done">Hecho v0.0.50+</td></tr>
-  <tr><td>U10</td><td>P2</td><td>Login Gmail + Apple + email (bloque E)</td><td>OAuth + Resend + SQL 017</td><td>Post-piloto</td><td class="g-todo">Doc listo; no desarrollar aún</td></tr>
-  <tr><td>U11</td><td>P1</td><td>Panel admin (bloque F)</td><td>Viajes, KPIs M2, NPS/★, GMV — ver <a href="PITCH-WEBCARGA-Y-PANEL-ADMIN.html">pitch + panel</a></td><td>Piloto M2</td><td class="g-todo">Diseño listo</td></tr>
-  <tr><td>U4e</td><td>P1</td><td>Calificaciones mutuas + chips (012–014)</td><td>Modal ★, Mis viajes, API rate, prod OK</td><td>May 2026</td><td class="g-done">Hecho</td></tr>
-  <tr><td>U4f</td><td>P2</td><td>Reputación en tablero (M3)</td><td>★ promedio en cargas, ofertas, matches, sugerencias</td><td>May 2026</td><td class="g-done">Hecho</td></tr>
-  <tr><td>U8</td><td>P2</td><td>KYC manual</td><td>Fase 3 operativa</td><td>Oct 2026+</td><td class="g-todo">Plan</td></tr>
+  <tr><td colspan="6" style="background:#e8f5e9;font-weight:bold">Cerrado — MVP digital y paridad UX</td></tr>
+  <tr><td>U1</td><td>—</td><td>SQL 004–030 en Supabase prod</td><td>Chat, notif, banco, ratings, FCM, billetera</td><td>May–Jun 2026</td><td class="g-done">Hecho</td></tr>
+  <tr><td>U4</td><td>—</td><td>Scopes por rol + registro empresa</td><td>shipper/carrier/admin</td><td>May 2026</td><td class="g-done">Hecho</td></tr>
+  <tr><td>U4b–f</td><td>—</td><td>Precio, confianza, calificaciones, reputación tablero</td><td>010–014 SQL + UI</td><td>May 2026</td><td class="g-done">Hecho</td></tr>
+  <tr><td>U5</td><td>—</td><td>UX paridad Uber completa</td><td>Cubik móvil, cubicación, billetera, chat, incidentes</td><td>Jun 2026</td><td class="g-done"><strong>Hecho v0.0.90–0.0.125</strong></td></tr>
+  <tr><td>U7a</td><td>—</td><td>Cubik Saldo piloto 10/5</td><td>SQL 026, pilot-pay, badges, notif</td><td>Jun 2026</td><td class="g-done">Hecho v0.0.100–0.0.104</td></tr>
+  <tr><td>U7m</td><td>—</td><td>Multas + comprobante + banco obligatorio</td><td>SQL 022–025, bank-gate</td><td>May 2026</td><td class="g-done">Hecho v0.0.57</td></tr>
+  <tr><td>U13</td><td>—</td><td>QA automatizado + Laboratorio</td><td>Playwright, unit, CI, <code>/qa-lab</code></td><td>Jun 2026</td><td class="g-done">Hecho v0.0.125</td></tr>
+  <tr><td>U14</td><td>—</td><td>Notificaciones activas vs historial</td><td><code>notification-visibility.js</code></td><td>Jun 2026</td><td class="g-done">Hecho v0.0.125</td></tr>
+  <tr><td>U15</td><td>—</td><td>Memoria v4.3 + docs hub</td><td>Gantt, paridad MVP cerrada, plan comercial</td><td>10 jun 2026</td><td class="g-done">Hecho</td></tr>
+  <tr><td colspan="6" style="background:#fff8e1;font-weight:bold">En curso — comercial y piloto (sem 1–16)</td></tr>
+  <tr><td>C1</td><td>P0</td><td><strong>Demo comercial jueves</strong></td><td>Web prod + APK remoto; cuentas demo; guión <a href="DEMO-GUION.md">DEMO-GUION.md</a></td><td>Sem 1 (9–13 jun)</td><td class="g-doing"><strong>Esta semana</strong></td></tr>
+  <tr><td>C2</td><td>P0</td><td>Checklist demo (login, emparejar, qa:lab)</td><td>6 ítems canvas «Antes del jueves»</td><td>Sem 1</td><td class="g-doing">En curso</td></tr>
+  <tr><td>C3</td><td>P0</td><td>Onboarding piloto <strong>25 empresas + 50 transportistas</strong></td><td>KYC manual + banco; corredor RM–V</td><td>Sem 2–5</td><td class="g-doing">Siguiente</td></tr>
+  <tr><td>C4</td><td>P0</td><td>APK bundle firmado testers</td><td><code>cubik-android.apk</code> dedicado piloto</td><td>Sem 2–3</td><td class="g-doing">En cola</td></tr>
+  <tr><td>U6</td><td>P0</td><td>Piloto <strong>20 viajes</strong> corredor RM ↔ V/San Antonio</td><td>M2 — liquidez + densidad</td><td>Sem 6–13 (jul–ago)</td><td class="g-doing"><strong>P0 operación</strong></td></tr>
+  <tr><td>U6b</td><td>P1</td><td>KPIs marketplace M2 (semanal)</td><td>Match rate, tiempo, NPS — anexo piloto</td><td>Sem 6–13</td><td class="g-doing">Doc listo</td></tr>
+  <tr><td colspan="6" style="background:#f3f4f6;font-weight:bold">Cola P0/P1 — producto post-MVP</td></tr>
+  <tr><td>U7</td><td>P0</td><td>Cubik Saldo <strong>prod</strong> + escrow en ruta</td><td>Wallet, ledger, retención; tier $1M</td><td>Sem 2–8</td><td class="g-doing"><strong>En cola</strong></td></tr>
+  <tr><td>U7d</td><td>P0</td><td>Twilio Proxy llamadas</td><td><code>TWILIO_MATCH_PROXY_NUMBER</code></td><td>Sem 2–4</td><td class="g-doing">UI lista v0.0.98</td></tr>
+  <tr><td>C5</td><td>P1</td><td>Spike GPS background (Capacitor)</td><td>Plugin + servicio Android si piloto lo exige</td><td>Sem 4–9</td><td class="g-todo">Plan canvas</td></tr>
+  <tr><td>C6</td><td>P1</td><td>Validar push FCM en teléfono físico</td><td><code>push-test</code> + token registrado</td><td>Sem 1–3</td><td class="g-doing">Backend OK</td></tr>
+  <tr><td>U6c</td><td>P1</td><td>Reputación v0</td><td>Cancelaciones + incidentes por cuenta</td><td>Post 5 viajes</td><td class="g-todo">Plan</td></tr>
+  <tr><td>U6d</td><td>P1</td><td>Evidencia entrega</td><td>Foto + timestamp</td><td>Post-piloto corto</td><td class="g-todo">Plan</td></tr>
+  <tr><td colspan="6" style="background:#fafafa;font-weight:bold">Escala — sem 10+ (50+ empresas / 200 camiones)</td></tr>
+  <tr><td>C7</td><td>P1</td><td>Auditoría costo Maps 200 camiones</td><td>Presupuesto ~USD 2.100/mes infra</td><td>Sem 10–12</td><td class="g-todo">Plan</td></tr>
+  <tr><td>C8</td><td>P1</td><td>Decisión go/no-go nativo lite</td><td>Umbral: >40 camiones mapa o quejas GPS</td><td>Sem 12</td><td class="g-todo">Plan</td></tr>
+  <tr><td>C9</td><td>P2</td><td>Play Store closed testing / MDM</td><td>Distribución flota escala</td><td>Sem 10+</td><td class="g-todo">Plan</td></tr>
+  <tr><td colspan="6" style="background:#fafafa;font-weight:bold">Fuera de alcance inmediato</td></tr>
+  <tr><td>U4d</td><td>P2</td><td>PDF guía + validación SII/DTE</td><td>Storage + facturador</td><td>Post-piloto</td><td class="g-todo">Plan</td></tr>
+  <tr><td>U10</td><td>P2</td><td>Login Gmail + Apple + email (bloque E)</td><td>OAuth + Resend</td><td>Post-M2</td><td class="g-todo">Doc listo</td></tr>
+  <tr><td>U11</td><td>P1</td><td>Panel admin KPIs piloto</td><td>Viajes, GMV, NPS — ver pitch panel</td><td>Con M2</td><td class="g-todo">Diseño listo</td></tr>
+  <tr><td>U8</td><td>P2</td><td>KYC manual ampliado</td><td>Fase 3 operativa</td><td>Oct 2026+</td><td class="g-todo">Plan</td></tr>
   <tr><td>U9</td><td>P2</td><td>Match semi-auto corredor</td><td>Algoritmo v1</td><td>Feb 2027</td><td class="g-todo">Plan</td></tr>
 </table>
-<p><strong>No hacer aún:</strong> app móvil nativa, Open Finance, pricing dinámico completo, expansión multi-corredor, IA innecesaria. Priorizar <strong>rapidez operacional</strong> sobre más pantallas.</p>
+<p><strong>No hacer aún:</strong> rewrite 100 % nativo, Open Finance, pricing dinámico completo, expansión multi-corredor sin liquidez. Priorizar <strong>operación piloto</strong> sobre más pantallas.</p>
+
+<h3>Gantt plan comercial — 16 semanas (9 jun – 29 sep 2026)</h3>
+<p>Alineado a <code>canvases/cubik-plan-native-escala.canvas.tsx</code>. Barras ████ = ventana activa por semana (S1 = 9–13 jun).</p>
+<table class="gantt">
+  <tr>
+    <th>ID</th><th>Fase / tarea clave</th><th>Resp.</th><th>S1</th><th>S2</th><th>S3</th><th>S4</th><th>S5</th><th>S6</th><th>S7</th><th>S8</th><th>S9</th><th>S10</th><th>S11</th><th>S12</th><th>S13</th><th>S14</th><th>S15</th><th>S16</th><th>Estado</th>
+  </tr>
+  <tr><td>C1</td><td>Prep demo comercial (jueves)</td><td>E/O</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Esta semana</td></tr>
+  <tr><td>C2</td><td>Verificar prod login + Emparejar + APK remoto</td><td>E</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Checklist canvas</td></tr>
+  <tr><td>C3</td><td>Cuentas demo + viaje ejemplo embarcador/transportista</td><td>O</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
+  <tr><td>C4</td><td>Onboarding piloto 25 empresas + 50 transportistas</td><td>O/E</td><td></td><td>████</td><td>████</td><td>████</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Sem 2–5</td></tr>
+  <tr><td>C5</td><td>APK bundle firmado + link testers piloto</td><td>E</td><td></td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Sem 2–3</td></tr>
+  <tr><td>C6</td><td>Operación piloto + monitoreo Railway + soporte WhatsApp</td><td>O/E</td><td></td><td></td><td></td><td></td><td></td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td></td><td></td><td></td><td class="g-doing">Sem 6–13</td></tr>
+  <tr><td>U6</td><td>20 viajes <code>completed</code> corredor RM ↔ V (M2)</td><td>O</td><td></td><td></td><td></td><td></td><td></td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td></td><td></td><td></td><td class="g-doing">KPI M2</td></tr>
+  <tr><td>C7</td><td>Spike GPS background (Capacitor / nativo lite)</td><td>E</td><td></td><td></td><td></td><td>██</td><td>██</td><td>██</td><td>██</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Paralelo S4–9</td></tr>
+  <tr><td>U7</td><td>Wallet real + escrow en ruta</td><td>E</td><td></td><td>██</td><td>██</td><td>██</td><td>██</td><td>██</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">P0 prod</td></tr>
+  <tr><td>U7d</td><td>Twilio Proxy (Llamar enmascarado)</td><td>E</td><td></td><td>██</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Sem 2–4</td></tr>
+  <tr><td>C8</td><td>Prep escala 50+ empresas / 200 camiones</td><td>E/O</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td class="g-todo">Sem 10–16</td></tr>
+  <tr><td>C9</td><td>Auditoría costo Maps + decisión nativo (sem 12)</td><td>E</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>████</td><td></td><td></td><td></td><td></td><td class="g-todo">Go/no-go</td></tr>
+  <tr><td>—</td><td>QA + Laboratorio + notificaciones archivadas</td><td>E</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho v0.0.125</td></tr>
+</table>
 
 <h3>Gantt detallado por tarea (2026–2027)</h3>
-<p>Responsable: <strong>E</strong>=Equipo, <strong>O</strong>=Operaciones/piloto en app, <strong>L</strong>=Legal. Barras ████ = ventana planificada.</p>
+<p>Responsable: <strong>E</strong>=Equipo, <strong>O</strong>=Operaciones/piloto, <strong>L</strong>=Legal. Vista mensual complementaria al Gantt de 16 semanas.</p>
 <table class="gantt">
   <tr>
     <th>ID</th><th>Tarea</th><th>Resp.</th><th>Inicio</th><th>Fin</th>
     <th>Jun</th><th>Jul</th><th>Ago</th><th>Sep</th><th>Oct</th><th>Nov</th><th>Dic</th><th>Ene</th><th>Feb</th><th>Mar</th>
     <th>Estado</th>
   </tr>
+  <tr><td>C1</td><td>Demo comercial + pitch piloto 25/50</td><td>O/E</td><td>09-jun</td><td>13-jun</td><td>█</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Esta semana</td></tr>
+  <tr><td>C4</td><td>Onboarding piloto 25+50</td><td>O/E</td><td>16-jun</td><td>11-jul</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Planificado</td></tr>
   <tr><td>0.1</td><td>Entrevistas transportistas + PYME</td><td>O</td><td>01-jun</td><td>28-jun</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
   <tr><td>0.2</td><td>Validación precio / comisión 12–15%</td><td>O</td><td>15-jun</td><td>15-jul</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
-  <tr><td>0.3</td><td>Términos legales + seguro piloto</td><td>L</td><td>01-jun</td><td>30-jun</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Borrador v011 en app</td></tr>
-  <tr><td>2.11</td><td>Confianza carga + incidentes (011)</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
-  <tr><td>1.1</td><td>Mis cargas / mis ofertas (owner_user_id)</td><td>E</td><td>01-jun</td><td>30-jun</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
-  <tr><td>1.2</td><td>Refino UX flujo tipo Uber</td><td>E</td><td>15-jun</td><td>31-jul</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
-  <tr><td>1.3</td><td><strong>Piloto 20 viajes en la app</strong></td><td>O/E</td><td>01-jul</td><td>31-ago</td><td></td><td>████████</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
-  <tr><td>1.4</td><td>Informe piloto (métricas + pitch add-on)</td><td>E</td><td>15-ago</td><td>15-sep</td><td></td><td></td><td>██</td><td>█</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
-  <tr><td>2.1</td><td>Esquema BD Supabase (001–008)</td><td>E</td><td>01-ago</td><td>22-ago</td><td></td><td></td><td>███</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
-  <tr><td>2.2</td><td>API Express offers / loads / matches</td><td>E</td><td>15-ago</td><td>19-sep</td><td></td><td></td><td>██</td><td>███</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
-  <tr><td>2.3</td><td>Web carrier / shipper</td><td>E</td><td>01-sep</td><td>03-oct</td><td></td><td></td><td></td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
-  <tr><td>2.4</td><td>Panel matches + estados viaje</td><td>E</td><td>15-sep</td><td>25-oct</td><td></td><td></td><td></td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
-  <tr><td>2.5</td><td>Deploy Railway + /health</td><td>E</td><td>18-oct</td><td>25-oct</td><td></td><td></td><td></td><td></td><td>█</td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
-  <tr><td>2.x</td><td>Chat, acuerdo mutuo, notif, multas UI</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
-  <tr><td>2.10a</td><td>Banco + multas + comprobante (MVP)</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho (may 2026)</td></tr>
-  <tr><td>2.10b</td><td>Pasarela + tarjeta validada (tipo Uber)</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Pendiente prod.</td></tr>
+  <tr><td>0.3</td><td>Términos legales + seguro piloto</td><td>L</td><td>01-jun</td><td>30-jun</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Borrador v011</td></tr>
+  <tr><td>1.1</td><td>Mis cargas / mis ofertas (<code>owner_user_id</code>)</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
+  <tr><td>1.2</td><td>Refino UX flujo tipo Uber</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho v0.0.125</td></tr>
+  <tr><td>1.3</td><td><strong>Piloto 20 viajes en la app</strong> (M2)</td><td>O/E</td><td>07-jul</td><td>31-ago</td><td></td><td>████████</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing"><strong>P0</strong></td></tr>
+  <tr><td>1.4</td><td>Informe piloto (métricas + pitch)</td><td>E</td><td>15-ago</td><td>15-sep</td><td></td><td></td><td>██</td><td>█</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
+  <tr><td>2.x</td><td>MVP digital núcleo (API, UI, chat, multas, Cubik app)</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
+  <tr><td>2.11</td><td>Cubik Saldo piloto 10/5 + QA + notificaciones</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho v0.0.125</td></tr>
+  <tr><td>2.10b</td><td>Wallet prod + pasarela + escrow en ruta</td><td>E</td><td>16-jun</td><td>31-ago</td><td>██</td><td>████</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">P0</td></tr>
+  <tr><td>2.12</td><td>Twilio Proxy llamadas</td><td>E</td><td>16-jun</td><td>05-jul</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">UI lista</td></tr>
+  <tr><td>2.13</td><td>GPS background (nativo lite spike)</td><td>E</td><td>30-jun</td><td>31-ago</td><td>██</td><td>████</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Si piloto exige</td></tr>
   <tr><td>3.1</td><td>KYC + checklist vehículo</td><td>O/E</td><td>01-oct</td><td>15-nov</td><td></td><td></td><td></td><td></td><td>██</td><td>█</td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
-  <tr><td>3.2</td><td>Ratings bidireccionales</td><td>E</td><td>15-oct</td><td>29-nov</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho (may 2026)</td></tr>
+  <tr><td>3.2</td><td>Ratings bidireccionales</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
   <tr><td>3.3</td><td>Microseguro InsurTech POC</td><td>L/O</td><td>01-nov</td><td>31-dic</td><td></td><td></td><td></td><td></td><td></td><td>████</td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
-  <tr><td>3.4</td><td>100 viajes digitales</td><td>O</td><td>01-nov</td><td>31-ene</td><td></td><td></td><td></td><td></td><td></td><td>██</td><td>████</td><td></td><td></td><td class="g-todo">Plan</td></tr>
+  <tr><td>3.4</td><td>100 viajes digitales (M4)</td><td>O</td><td>01-nov</td><td>31-ene</td><td></td><td></td><td></td><td></td><td></td><td>██</td><td>████</td><td></td><td></td><td class="g-todo">Plan</td></tr>
   <tr><td>4.1</td><td>Match semi-auto corredor</td><td>E</td><td>01-feb</td><td>28-feb</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>██</td><td></td><td></td><td class="g-todo">Plan</td></tr>
   <tr><td>4.2</td><td>Dashboard embarcador SaaS</td><td>E</td><td>01-feb</td><td>31-mar</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>████</td><td class="g-todo">Plan</td></tr>
-  <tr><td>4.3</td><td>Informe red capacidad (data)</td><td>E</td><td>15-mar</td><td>31-mar</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td>█</td><td class="g-todo">Plan</td></tr>
+  <tr><td>C8</td><td>Prep escala 50+/200 camiones + auditoría Maps</td><td>E/O</td><td>15-sep</td><td>29-sep</td><td></td><td></td><td></td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Sem 10–16</td></tr>
 </table>
 
-<h3>Avance fase 2 — resumen</h3>
+<h3>Avance fase 2 — resumen (10 jun 2026)</h3>
 <ul>
-  <li>MVP digital núcleo: ~82% (incl. calificaciones 012–014 y UX Mis viajes)</li>
-  <li>Multas / cuenta (2.10a): ~90% (falta pasarela 2.10b)</li>
-  <li>Fase 3 ratings: ~40% (mutuo en app; falta M3 tablero + KYC)</li>
-  <li>Proyecto total (hasta M5): ~38%</li>
+  <li>MVP digital núcleo + paridad UX: <strong>~95%</strong> (cerrado para piloto)</li>
+  <li>Multas / cuenta (2.10a): <strong>~90%</strong> (falta wallet prod 2.10b)</li>
+  <li>Cubik Saldo piloto + QA: <strong>~85%</strong></li>
+  <li>Fase 3 ratings: <strong>~70%</strong> (mutuo en app; KYC ampliado pendiente)</li>
+  <li>Proyecto total (hasta M5): <strong>~50%</strong> — foco operación piloto</li>
 </ul>
 
 <h2>Bitácora de avance — 27 mayo 2026</h2>
@@ -680,6 +719,6 @@
   docs/            ← memoria HTML (este archivo)
   canvases/        ← estado de avance (Cursor)</code>
 
-<p class="meta"><em>Fin del documento — v4.2 (10 jun 2026): v0.0.125 QA automatizado + Laboratorio /qa-lab; notificaciones archivadas al cerrar viaje; APK remoto/bundle; plan comercial piloto 25/50; wallet real siguiente.</em></p>
+<p class="meta"><em>Fin del documento — v4.3 (10 jun 2026): paridad MVP cerrada; backlog vivo + Gantt 16 sem alineado a canvas piloto/escala; foco demo jueves → 25/50 → M2.</em></p>
 </body>
 </html>

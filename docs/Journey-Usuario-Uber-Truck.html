@@ -28,7 +28,7 @@
   <div class="doc-title-wrap">
     <h1>Journey de usuario — Uber Truck</h1>
     <p class="meta"><strong>Producto:</strong> App tipo Uber para carga por camión (backhaul).<br />
-    <strong>Versión:</strong> 2.9 · 25 may 2026 · Software app <strong>0.0.105</strong> · Canal: <strong>app Cubik</strong> (web PWA + APK Android)</p>
+    <strong>Versión:</strong> 3.0 · 10 jun 2026 · Software app <strong>0.0.125</strong> · Canal: <strong>app Cubik</strong> (web PWA + APK Android Capacitor)</p>
   </div>
 </div>
 
@@ -37,7 +37,7 @@
 <h2 id="acceso-testers">0. Cómo entrar a la app (jun 2026)</h2>
 <table>
   <tr><th>Dispositivo</th><th>Cómo acceder</th><th>Link / archivo</th></tr>
-  <tr><td><strong>Android</strong></td><td>APK instalado o PWA desde navegador</td><td><code>%USERPROFILE%\Downloads\cubik-android.apk</code> o <a href="https://uber-truck-production.up.railway.app/probar">/probar</a></td></tr>
+  <tr><td><strong>Android</strong></td><td>APK remoto (siempre prod) o bundle firmado para piloto</td><td><code>npm run android:install:remote</code> · <code>cubik-android.apk</code> · <a href="/probar">/probar</a></td></tr>
   <tr><td><strong>iPhone</strong></td><td>Safari → Abrir Cubik → Añadir a inicio</td><td><a href="https://uber-truck-production.up.railway.app/probar">https://uber-truck-production.up.railway.app/probar</a></td></tr>
   <tr><td><strong>PC / emulador</strong></td><td>Modo app en navegador</td><td><a href="https://uber-truck-production.up.railway.app/?app=1">/?app=1</a></td></tr>
   <tr><td><strong>Dos roles</strong></td><td>Dos cuentas (emails distintos) o dos emuladores API 37</td><td>Embarcador + transportista en paralelo</td></tr>
@@ -227,14 +227,24 @@
   <li><strong>«Califiqué pero el otro no puede»:</strong> usar cuenta distinta por rol; no reutilizar la misma sesión de embarcador para calificar como transportista sin cerrar sesión.</li>
 </ul>
 
-<h2>12. Corredor y liquidez (piloto M2)</h2>
+<h2>14. Notificaciones (v0.0.125)</h2>
+<ul>
+  <li><strong>Activas:</strong> campana muestra solo notificaciones de viajes abiertos o accionables.</li>
+  <li><strong>Historial:</strong> al completar o cancelar un match, las notificaciones pasan a historial (no molestan en activos).</li>
+  <li><strong>Chat:</strong> bloqueado si el emparejamiento está cerrado.</li>
+</ul>
+
+<h2>15. Piloto comercial (25 empresas + 50 transportistas)</h2>
+<p>Fase posterior a la demo comercial jun 2026. Mismo stack Capacitor híbrido; onboarding curado; corredor RM ↔ Valparaíso/San Antonio. Detalle: <a href="PLAN-COMERCIAL-PILOTO.md">PLAN-COMERCIAL-PILOTO.md</a>.</p>
+
+<h2>16. Corredor y liquidez (piloto M2)</h2>
 <ul>
   <li><strong>Enfoque:</strong> RM (origen) ↔ Valparaíso / San Antonio — no dispersar el piloto en rutas sin densidad.</li>
   <li><strong>Semanal:</strong> al menos 3 cargas y 2 ofertas activas en el mismo corredor.</li>
   <li><strong>Éxito M2:</strong> 20 viajes <code>completed</code> medidos con KPIs de marketplace (match rate, tiempo, cancelación, NPS).</li>
 </ul>
 
-<h2>13. KPIs marketplace (20 viajes)</h2>
+<h2>17. KPIs marketplace (20 viajes)</h2>
 <table>
   <tr><th>KPI</th><th>Meta M2</th></tr>
   <tr><td>Match rate</td><td>≥ 60%</td></tr>
@@ -248,12 +258,12 @@
 </table>
 <p>Definiciones y fuente de datos: <a href="Piloto-M2-Corredor-KPIs-Riesgos.html">anexo piloto M2</a>.</p>
 
-<h2>14. Riesgos y quién responde (resumen)</h2>
+<h2>18. Riesgos y quién responde (resumen)</h2>
 <p>Robo, carrier fantasma, retrasos y daños se mitigan con registro, términos, incidentes y (futuro) reputación y seguro. La <strong>app no sustituye</strong> al transportista ni paga la mercadería por defecto.</p>
 <p>Matriz completa y tabla de cobertura: <a href="Piloto-M2-Corredor-KPIs-Riesgos.html">Piloto M2 — riesgos</a> · <a href="Terminos-Confianza-Carga-Uber-Truck.html">Términos</a>.</p>
 
-<p class="meta">Modelo de negocio: <a href="Modelo-Negocio-Uber-Truck.html">Modelo-Negocio-Uber-Truck.html</a> · Gantt y backlog: <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica v3.6</a> · Multas: <a href="PENALTY-AND-SUPPORT.md">PENALTY-AND-SUPPORT.md</a> · Auth/correo: <a href="AUTH-AND-EMAIL-ROADMAP.md">AUTH-AND-EMAIL-ROADMAP.md</a> · Probar: <a href="Probar-Uber-Truck.html">Probar-Uber-Truck.html</a></p>
+<p class="meta">Modelo de negocio: <a href="Modelo-Negocio-Uber-Truck.html">Modelo-Negocio-Uber-Truck.html</a> · Gantt y backlog: <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica v4.2</a> · QA: <a href="QA-AUTOMATIZADO.md">QA-AUTOMATIZADO.md</a> · Probar: <a href="Probar-Uber-Truck.html">Probar-Uber-Truck.html</a></p>
 
-<p class="meta"><em>Fin del documento — v2.8 (25 may 2026): v0.0.98 paridad Uber; diseño Cubik Saldo 10%+5%, retención en ruta, tier $1M, checkout tipo Uber Eats; implementación pagos próxima semana.</em></p>
+<p class="meta"><em>Fin del documento — v3.0 (10 jun 2026): v0.0.125 notificaciones archivadas; QA Laboratorio /qa-lab; APK remoto; plan comercial piloto 25/50; Cubik Saldo piloto 10/5 operativo.</em></p>
 </body>
 </html>

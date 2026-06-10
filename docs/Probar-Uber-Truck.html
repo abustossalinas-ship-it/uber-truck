@@ -27,7 +27,7 @@
   <img src="/brand/logo-mark.png" width="72" height="72" alt="Cubik" />
   <div class="doc-title-wrap">
     <h1>Cómo probar Cubik Envíos Chile</h1>
-    <p class="meta">Para testers · 2 jun 2026 (v4.0) · App <strong>0.0.78</strong> · Sin Play Store ni App Store por ahora</p>
+    <p class="meta">Para testers · 10 jun 2026 (v5.0) · App <strong>0.0.125</strong> · Sin Play Store ni App Store por ahora</p>
   </div>
 </div>
 
@@ -44,7 +44,7 @@
   <tr>
     <td><strong>Android</strong></td>
     <td>
-      <strong>Opción A — APK:</strong> instala <code>cubik-android.apk</code> (WhatsApp o carpeta Descargas).<br />
+      <strong>Opción A — APK remoto (recomendado):</strong> desarrollador ejecuta <code>npm run android:install:remote</code> o instala <code>cubik-android.apk</code> (WhatsApp / Descargas). La app apunta a producción Railway.<br />
       <strong>Opción B — Web:</strong> abre el link <code>/probar</code> → <strong>Abrir Cubik</strong>.
     </td>
   </tr>
@@ -62,7 +62,8 @@
 <ol>
   <li>Terminal en la raíz del repo: <code>npm run cap:sync:bundle</code></li>
   <li><code>npm run android:apk</code> → archivo en <code>%USERPROFILE%\Downloads\cubik-android.apk</code></li>
-  <li>O en Android Studio: carpeta <code>android/</code> → <strong>Build → Build APK(s)</strong> → <code>app-debug.apk</code></li>
+  <li>Instalar en dispositivo conectado: <code>npm run android:install:remote</code> (UI remota prod) o adb manual</li>
+  <li>O en Android Studio: carpeta <code>android/</code> → <strong>Build → Build APK(s)</strong></li>
 </ol>
 
 <h2>3. Dos roles (embarcador + transportista)</h2>
@@ -79,17 +80,29 @@
   <li><strong>Transportista</strong> — Crear cuenta → Publicar oferta en ruta compatible.</li>
   <li><strong>Tablero / Emparejar</strong> — Propuesta → aceptar precio → viaje activo.</li>
   <li><strong>Mis viajes</strong> — En curso → completar → calificar mutuamente.</li>
+  <li><strong>Pago piloto</strong> — Embarcador «Pagar con Cubik Saldo» → transportista ve campana.</li>
 </ol>
 <p>Detalle paso a paso: <a href="Journey-Usuario-Uber-Truck.html">Journey de usuario</a> · Corredor piloto: <a href="Piloto-M2-Corredor-KPIs-Riesgos.html">RM ↔ Valparaíso / San Antonio</a>.</p>
 
-<h2>5. Links útiles</h2>
+<h2>5. QA automatizado (desarrollador)</h2>
+<table>
+  <tr><th>Comando</th><th>Qué hace</th></tr>
+  <tr><td><code>npm run qa:lab</code></td><td>Abre Laboratorio QA gráfico en <a href="/qa-lab">/qa-lab</a></td></tr>
+  <tr><td><code>npm run test:unit</code></td><td>14 tests unitarios</td></tr>
+  <tr><td><code>npm run test:e2e</code></td><td>Playwright E2E local</td></tr>
+  <tr><td><code>npm run test:e2e:prod</code></td><td>Smoke contra Railway prod</td></tr>
+</table>
+<p>Guía: <a href="QA-AUTOMATIZADO.md">QA-AUTOMATIZADO.md</a></p>
+
+<h2>6. Links útiles</h2>
 <ul>
   <li><a href="https://uber-truck-production.up.railway.app/probar">/probar</a> — landing testers</li>
   <li><a href="https://uber-truck-production.up.railway.app/?app=1">/?app=1</a> — app directa (modo móvil)</li>
   <li><a href="https://uber-truck-production.up.railway.app/health">/health</a> — versión servidor</li>
-  <li><a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica v3.7</a></li>
+  <li><a href="https://uber-truck-production.up.railway.app/qa-lab">/qa-lab</a> — Laboratorio QA</li>
+  <li><a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica v4.2</a></li>
 </ul>
 
-<p class="meta"><em>Fin — v4.0 (2 jun 2026). Cubik Envíos Chile · no requiere acceso a base de datos ni código.</em></p>
+<p class="meta"><em>Fin — v5.0 (10 jun 2026). Cubik Envíos Chile · no requiere acceso a base de datos ni código.</em></p>
 </body>
 </html>

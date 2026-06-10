@@ -1,4 +1,4 @@
-# Índice maestro — Uber Truck
+# Índice maestro — Uber Truck / Cubik
 
 **Producción:** https://uber-truck-production.up.railway.app  
 **Hub docs:** https://uber-truck-production.up.railway.app/docs/
@@ -11,9 +11,31 @@
 |-----------|--------|
 | **Memoria técnica** | [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html) |
 
-Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX, hitos, **Gantt**, **próximos pasos**, **bitácora de avance**, **Cubik Saldo piloto 10/5** (v0.0.100–0.0.105), **calibración tarifas** (v0.0.105), stack por capas, API y avance. **Última actualización:** 25 may 2026 · software **0.0.105** · memoria **v4.1**.
+Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX, hitos, **Gantt**, **próximos pasos**, **bitácora de avance**, **Cubik Saldo piloto**, **QA automatizado (v0.0.125)**, **plan comercial piloto 25/50 y escala 200 camiones**, stack por capas, API y avance. **Última actualización:** 10 jun 2026 · software **0.0.125** · memoria **v4.2**.
 
 No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitácora MVP digital (evita duplicados).
+
+---
+
+## Comercial y piloto (jun 2026)
+
+| Tema | Documento |
+|------|-----------|
+| Plan piloto 25 empresas + 50 transportistas · escala | [PLAN-COMERCIAL-PILOTO.md](./PLAN-COMERCIAL-PILOTO.md) · Canvas `cubik-plan-native-escala.canvas.tsx` |
+| Piloto M2 corredor, KPIs, riesgos | [Piloto-M2-Corredor-KPIs-Riesgos.html](./Piloto-M2-Corredor-KPIs-Riesgos.html) |
+| Próximos pasos estratégicos | [PROXIMOS-PASOS-ESTRATEGIA.md](./PROXIMOS-PASOS-ESTRATEGIA.md) |
+| Demo / pitch | [DEMO-GUION.md](./DEMO-GUION.md) |
+
+---
+
+## QA y Android
+
+| Tema | Documento |
+|------|-----------|
+| **QA automatizado** | [QA-AUTOMATIZADO.md](./QA-AUTOMATIZADO.md) · Laboratorio: `/qa-lab` (`npm run qa:lab`) |
+| UX app móvil | [CUBIK-APP-UX.md](./CUBIK-APP-UX.md) |
+| Play Store | [CUBIK-PLAY-STORE.md](./CUBIK-PLAY-STORE.md) |
+| Push FCM | [CUBIK-PUSH-FCM.md](./CUBIK-PUSH-FCM.md) |
 
 ---
 
@@ -22,16 +44,11 @@ No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitáco
 | Tema | HTML |
 |------|------|
 | Modelo de negocio | [Modelo-Negocio-Uber-Truck.html](./Modelo-Negocio-Uber-Truck.html) |
-| Journey usuario | [Journey-Usuario-Uber-Truck.html](./Journey-Usuario-Uber-Truck.html) (v2.9 · Cubik Saldo piloto, v0.0.105) |
-| Multas / soporte (MD) | [PENALTY-AND-SUPPORT.md](./PENALTY-AND-SUPPORT.md) |
-| Auth Gmail / Apple / correo (MD) | [AUTH-AND-EMAIL-ROADMAP.md](./AUTH-AND-EMAIL-ROADMAP.md) — pendiente producción |
-| Cubik — Play Store demo | [CUBIK-PLAY-STORE.md](./CUBIK-PLAY-STORE.md) |
-| Pitch vs WebCarga + panel admin | [PITCH-WEBCARGA-Y-PANEL-ADMIN.html](./PITCH-WEBCARGA-Y-PANEL-ADMIN.html) |
-| Resumen canvas | [Canvas-Resumen-Uber-Truck.html](./Canvas-Resumen-Uber-Truck.html) (v1.4 · 0.0.105) · Cursor: `canvases/estado-avance.canvas.tsx`, `canvases/comparacion-costos-transporte.canvas.tsx` |
+| Journey usuario | [Journey-Usuario-Uber-Truck.html](./Journey-Usuario-Uber-Truck.html) (v3.0 · 0.0.125) |
+| Resumen canvas | [Canvas-Resumen-Uber-Truck.html](./Canvas-Resumen-Uber-Truck.html) (v1.5) |
 | Cancelación / multas | [Politica-Cancelacion-Uber-Truck.html](./Politica-Cancelacion-Uber-Truck.html) · [Multas-Cuenta-Uber-Truck.html](./Multas-Cuenta-Uber-Truck.html) |
 | SQL Supabase | [Sql-Supabase-Uber-Truck.html](./Sql-Supabase-Uber-Truck.html) · [SQL-SUPABASE.md](./SQL-SUPABASE.md) |
 | Confianza y carga | [CARGO-TRUST.md](./CARGO-TRUST.md) · [Terminos-Confianza-Carga-Uber-Truck.html](./Terminos-Confianza-Carga-Uber-Truck.html) |
-| Piloto M2 (corredor, KPIs, riesgos) | [Piloto-M2-Corredor-KPIs-Riesgos.html](./Piloto-M2-Corredor-KPIs-Riesgos.html) |
 
 ---
 
@@ -39,10 +56,9 @@ No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitáco
 
 | Tema | Documento |
 |------|-----------|
-| **Probar sin instalar (testers)** | [Probar-Uber-Truck.html](./Probar-Uber-Truck.html) · [Journey](./Journey-Usuario-Uber-Truck.html) |
+| **Probar (testers)** | [Probar-Uber-Truck.html](./Probar-Uber-Truck.html) · [Journey](./Journey-Usuario-Uber-Truck.html) |
 | Deploy | [DEPLOY.md](./DEPLOY.md) |
-| Demo | [DEMO-GUION.md](./DEMO-GUION.md) |
-| Marca / logo | [BRAND.md](./BRAND.md) |
+| Marca | [BRAND.md](./BRAND.md) |
 
 ---
 
@@ -53,10 +69,12 @@ npm run export:memoria-docx
 npm run export:all-docs
 ```
 
-Salida: `docs/*.docx` y `Downloads/Proyecto Uber Truck/`
-
 ---
 
-## Canvas
+## Canvas (Cursor IDE)
 
-`canvases/estado-avance.canvas.tsx` (Cursor IDE)
+| Canvas | Uso |
+|--------|-----|
+| `estado-avance.canvas.tsx` | % fases, releases, hitos |
+| `comparacion-costos-transporte.canvas.tsx` | Tarifas sugeridas |
+| `cubik-plan-native-escala.canvas.tsx` | Piloto/escala, Gantt, costos, nativo vs híbrido |

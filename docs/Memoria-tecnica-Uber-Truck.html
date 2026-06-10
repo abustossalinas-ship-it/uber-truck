@@ -39,7 +39,7 @@
     <h1>Memoria técnica del proyecto</h1>
     <p class="meta"><strong>Producto:</strong> Uber Truck — marketplace de capacidad logística ociosa (backhaul), Chile.<br />
     <strong>Documento:</strong> memoria técnica viva del repositorio y del despliegue Railway.<br />
-    <strong>Versión documento:</strong> 4.1 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.106 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 25 may 2026</p>
+    <strong>Versión documento:</strong> 4.2 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.125 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 10 jun 2026</p>
   </div>
 </div>
 
@@ -71,13 +71,15 @@
   <tr><td>Iniciar sesión / registro</td><td>Email + contraseña (JWT)</td><td class="g-done">Hecho MVP</td></tr>
   <tr><td>Login Gmail / Apple</td><td>OAuth Google + Sign in with Apple</td><td class="g-todo">Pendiente producción — <a href="AUTH-AND-EMAIL-ROADMAP.md">bloque E</a></td></tr>
   <tr><td>Recuperar contraseña</td><td>Enlace por correo (Resend)</td><td class="g-todo">Código en repo; no activo en prod</td></tr>
-  <tr><td>Notificaciones</td><td>Campana in-app (JWT)</td><td class="g-done">Hecho</td></tr>
+  <tr><td>Notificaciones</td><td>Campana in-app (JWT); archivo automático al cerrar viaje</td><td class="g-done">Hecho (v0.0.125)</td></tr>
   <tr><td>Mis viajes</td><td>Pestaña <strong>Mis viajes</strong> + banner viaje activo</td><td class="g-done">Hecho (v012)</td></tr>
   <tr><td>Publicar / ofertar</td><td>Pestañas <strong>Pedir flete</strong> / <strong>Ofertar ruta</strong></td><td class="g-done">Hecho</td></tr>
   <tr><td>Buscando camiones</td><td>Sugerencias con estado «buscando…»</td><td class="g-done">Hecho</td></tr>
   <tr><td>Precio oferta/demanda</td><td>Rango embarcador + oferta transportista + aceptación</td><td class="g-done">Hecho (v010)</td></tr>
   <tr><td>Declaración de carga y confianza</td><td>Valor ref. CLP, guía, términos, incidentes</td><td class="g-done">Hecho (v011)</td></tr>
   <tr><td>Mapa / dirección</td><td>Google Maps origen–destino + distancia</td><td class="g-done">Hecho</td></tr>
+  <tr><td>QA automatizado</td><td>Playwright E2E + unit Node + CI GitHub + Laboratorio QA (<code>/qa-lab</code>)</td><td class="g-done">Hecho (v0.0.125)</td></tr>
+  <tr><td>App Android testers</td><td>APK bundle / remoto + verify <code>auth-ui.js</code></td><td class="g-done">Hecho (v0.0.125)</td></tr>
   <tr><td>Mapa en vivo / seguimiento GPS</td><td>Ubicación transportista + mapa en viaje activo</td><td class="g-done">Hecho (v0.0.34+)</td></tr>
   <tr><td>Pago en app (piloto)</td><td><strong>Cubik Saldo piloto</strong>: embarcador paga en Completados; transportista ve «Embarcador pagó» + cobro en gestión; notificación campana</td><td class="g-done">Hecho v0.0.100–0.0.104 (simulación)</td></tr>
   <tr><td>Pago en app (prod)</td><td>Wallet real + retención al «En ruta»; comisión 10% + 5%</td><td class="g-doing">Diseño cerrado; wallet/escrow siguiente</td></tr>
@@ -468,6 +470,18 @@
   <tr><td>Oferta transportista</td><td>Botón grande «Enviar propuesta» en emparejamientos activos</td><td><code>theme.css</code>, input ancho</td></tr>
 </table>
 
+<h2>Bitácora de avance — junio 2026 (v0.0.107–0.0.125 — QA, Android y comercial)</h2>
+<table>
+  <tr><th>Área</th><th>Entregado</th><th>Notas</th></tr>
+  <tr><td>Login welcome APK</td><td>Fix sintaxis <code>auth-ui.js</code> + <code>pointerup</code> en botones Comenzar</td><td>v0.0.125 · web prod y bundle Android</td></tr>
+  <tr><td>QA automatizado</td><td>Playwright (Pixel 5), 14 unit tests, workflow GitHub <code>QA</code>, smoke prod Railway</td><td><code>e2e/</code>, <code>tests/</code>, <code>.github/workflows/qa.yml</code></td></tr>
+  <tr><td>Laboratorio QA</td><td>Panel gráfico <code>/qa-lab</code> — tortas, barras, catálogo de pruebas</td><td><code>npm run qa:lab</code> · ver <a href="QA-AUTOMATIZADO.md">QA-AUTOMATIZADO.md</a></td></tr>
+  <tr><td>Android APK</td><td><code>cap:sync:bundle</code>, verify bundle, <code>android:install</code>, APK en Descargas</td><td>Remoto = UI Railway; bundle = release planificada</td></tr>
+  <tr><td>Notificaciones</td><td>Archivo al cerrar/cancelar viaje; historial separado de activos</td><td><code>notification-visibility.js</code> · emparejamientos cerrados fuera de activos</td></tr>
+  <tr><td>Plan comercial</td><td>Piloto 25 empresas + 50 transportistas; escala 50+/200 camiones; híbrido vs nativo</td><td>Canvas <code>cubik-plan-native-escala.canvas.tsx</code> · <a href="PLAN-COMERCIAL-PILOTO.md">PLAN-COMERCIAL-PILOTO.md</a></td></tr>
+</table>
+<p><strong>Deploy:</strong> commits <code>71de185</code> → <code>70723d1</code> · Railway <code>main</code> · presentación comercial jun 2026.</p>
+
 <h2>Modelo de monetización, Cubik Saldo y checkout (diseño may 2026)</h2>
 <p><strong>Estado jun 2026:</strong> <strong>piloto operativo</strong> (v0.0.100–0.0.104) con comisiones 10/5 y flujo pago post-completado simulado. <strong>Pendiente producción:</strong> wallet real, ledger, retención al «En ruta», recarga pasarela. GMV piloto no genera ingreso real (solo simulación en UI).</p>
 
@@ -527,13 +541,15 @@
 
 <h2>Próxima etapa (jun 2026)</h2>
 <ol>
-  <li><strong>P0 — Wallet real + escrow en ruta</strong> (piloto 10/5 ya validado en simulación).</li>
-  <li><strong>P0 — Twilio Proxy</strong>: llamadas enmascaradas (botón Llamar ya en v0.0.98).</li>
+  <li><strong>P0 — Presentación comercial</strong> (jun): demo prod + APK remoto; pitch piloto 25 embarcadores + 50 transportistas.</li>
   <li><strong>P0 — Piloto M2</strong>: 20 viajes <code>completed</code> corredor RM ↔ Valparaíso/San Antonio.</li>
-  <li><strong>P1 — Push FCM</strong>: validar <code>push-test</code> en celular físico (backend ya OK).</li>
-  <li><strong>P2 — Cubik Plus Empresa</strong>: suscripción + descuento fee; OAuth Gmail/Apple (bloque E).</li>
+  <li><strong>P0 — Nativo lite</strong>: GPS background (Capacitor/plugin) si el piloto lo exige — sin rewrite UI.</li>
+  <li><strong>P1 — Wallet real + escrow en ruta</strong> (piloto 10/5 ya validado en simulación).</li>
+  <li><strong>P1 — Twilio Proxy</strong>: llamadas enmascaradas (botón Llamar ya en v0.0.98).</li>
+  <li><strong>P2 — Push FCM</strong>: validar <code>push-test</code> en celular físico (backend ya OK).</li>
+  <li><strong>P2 — Escala 50+/200</strong>: presupuesto Maps + infra (~USD 2.1k/mes) antes de marketing masivo.</li>
 </ol>
-<p>Detalle estratégico: <a href="PROXIMOS-PASOS-ESTRATEGIA.md">PROXIMOS-PASOS-ESTRATEGIA.md</a> · UX app: <a href="CUBIK-APP-UX.md">CUBIK-APP-UX.md</a> · Play: <a href="CUBIK-PLAY-STORE.md">CUBIK-PLAY-STORE.md</a></p>
+<p>Detalle estratégico: <a href="PROXIMOS-PASOS-ESTRATEGIA.md">PROXIMOS-PASOS-ESTRATEGIA.md</a> · Plan comercial: <a href="PLAN-COMERCIAL-PILOTO.md">PLAN-COMERCIAL-PILOTO.md</a> · QA: <a href="QA-AUTOMATIZADO.md">QA-AUTOMATIZADO.md</a> · UX app: <a href="CUBIK-APP-UX.md">CUBIK-APP-UX.md</a></p>
 
 <div class="rule"></div>
 
@@ -564,7 +580,8 @@
 
 <h2>Capa 08 — Frontend web + app móvil Cubik</h2>
 <p><strong>Rol:</strong> <code>public/</code> — SPA web + modo app (<code>?app=1</code>, PWA, Capacitor). Shell móvil: <code>app-shell.js</code>, <code>app-shell.css</code>. API remota vía <code>api-base.js</code> cuando UI va en bundle APK. Marca Cubik: <code>brand-config.js</code>, <code>public/brand/</code>.</p>
-<p><strong>Android:</strong> Capacitor 7, package <code>cl.cubik.logistics</code>, carpeta <code>android/</code>. Distribución testers: <a href="https://uber-truck-production.up.railway.app/probar">/probar</a> + APK debug.</p>
+<p><strong>Android:</strong> Capacitor 7, package <code>cl.cubik.logistics</code>, carpeta <code>android/</code>. Scripts: <code>npm run android:apk</code>, <code>android:install:remote</code>, <code>android:verify</code>. Distribución: <a href="https://uber-truck-production.up.railway.app/probar">/probar</a> + APK bundle o remoto.</p>
+<p><strong>QA visual:</strong> <code>/qa-lab</code> — catálogo y gráficos de pruebas (<code>npm run qa:lab</code>).</p>
 
 <h2>Capa 09 — Experiencia producto (paridad Uber)</h2>
 <p><strong>Rol:</strong> flujos, copy y pantallas en <code>public/</code> alineados a «pedir → match → viaje activo → historial»; roles embarcador/transportista como pasajero/conductor. Piloto y validación <strong>solo dentro de esta app</strong>, no canales externos.</p>
@@ -573,7 +590,7 @@
 <p><strong>Rol:</strong> hosting, variables de entorno, healthcheck <code>/health</code>, deploy desde GitHub <code>main</code>.</p>
 
 <h2>Capa 11 — Git y GitHub</h2>
-<p><strong>Rol:</strong> versionado; nunca commitear <code>.env</code>. Workflow CI: validación (deploy vía integración Railway).</p>
+<p><strong>Rol:</strong> versionado; nunca commitear <code>.env</code>. Workflow CI: <code>.github/workflows/qa.yml</code> (unit + Playwright local + smoke prod en <code>main</code>).</p>
 
 <h2>Capa 12 — Documentación HTML</h2>
 <p><strong>Rol:</strong> memoria viva, Gantt y próximos pasos en un solo HTML; export Word vía <code>html-to-docx</code>. Hub: <code>/docs/index.html</code>.</p>
@@ -663,6 +680,6 @@
   docs/            ← memoria HTML (este archivo)
   canvases/        ← estado de avance (Cursor)</code>
 
-<p class="meta"><em>Fin del documento — v4.1 (25 may 2026): v0.0.105 calibración sugerencia flete (80k + 450/km + 22/kg); Cubik Saldo piloto 10/5 operativo; wallet real siguiente.</em></p>
+<p class="meta"><em>Fin del documento — v4.2 (10 jun 2026): v0.0.125 QA automatizado + Laboratorio /qa-lab; notificaciones archivadas al cerrar viaje; APK remoto/bundle; plan comercial piloto 25/50; wallet real siguiente.</em></p>
 </body>
 </html>

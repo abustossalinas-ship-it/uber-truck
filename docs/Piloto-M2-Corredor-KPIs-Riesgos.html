@@ -18,10 +18,10 @@
 <body>
   <p class="meta"><a href="/docs/">← Documentación</a> · <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica</a> · <a href="Journey-Usuario-Uber-Truck.html">Journey</a></p>
   <h1>Piloto M2 — Corredor, KPIs marketplace y riesgos</h1>
-  <p class="meta"><strong>Versión:</strong> 1.0 · mayo 2026 · Complementa memoria v3.4 y journey v2.3</p>
+  <p class="meta"><strong>Versión:</strong> 1.1 · 10 jun 2026 · Complementa memoria v4.2 y journey v3.0</p>
 
   <div class="warn">
-    <strong>Principio del piloto:</strong> validar <strong>liquidez</strong> (cargas y camiones activos al mismo tiempo) en <strong>un solo corredor</strong>, no ampliar features hasta tener 20 viajes completados en la app.
+    <strong>Dos niveles de piloto:</strong> (A) <strong>M2 operacional</strong> — 20 viajes <code>completed</code> en un corredor para validar liquidez y KPIs; (B) <strong>Piloto comercial</strong> — 25 empresas + 50 transportistas con onboarding curado (ver <a href="PLAN-COMERCIAL-PILOTO.md">PLAN-COMERCIAL-PILOTO.md</a>). No ampliar features hasta densidad en corredor.
   </div>
 
   <h2>1. Corredor único del piloto</h2>
@@ -74,7 +74,17 @@
     <tr><td>Microseguro por viaje</td><td>Beneficiario vía póliza</td><td>Contratante interés</td><td>Fase 3 — facilitador, no asegurador</td></tr>
   </table>
 
-  <h2>5. Roadmap inmediato (post-documentación)</h2>
+  <h2>5. Piloto comercial (25 empresas + 50 transportistas)</h2>
+  <table>
+    <tr><th>Parámetro</th><th>Definición</th></tr>
+    <tr><td><strong>Alcance</strong></td><td>25 embarcadores PYME + 50 transportistas verificados (KYC manual)</td></tr>
+    <tr><td><strong>Stack</strong></td><td>Capacitor híbrido + APK bundle firmado; misma UI web prod</td></tr>
+    <tr><td><strong>Corredor</strong></td><td>Mismo que M2: RM ↔ Valparaíso / San Antonio</td></tr>
+    <tr><td><strong>Infra estimada</strong></td><td>~USD 320/mes (Railway + Supabase + Maps básico)</td></tr>
+    <tr><td><strong>Éxito</strong></td><td>≥ 20 viajes M2 + NPS ≥ 7 + match rate ≥ 60%</td></tr>
+  </table>
+
+  <h2>6. Roadmap inmediato (post-documentación)</h2>
   <ol>
     <li>Operar 20 viajes en corredor RM ↔ Valparaíso/San Antonio.</li>
     <li>Medir KPIs tabla §2 cada semana.</li>
@@ -82,6 +92,6 @@
     <li>Evidencia entrega (foto + timestamp) antes de mapa tracking completo.</li>
   </ol>
 
-  <p class="meta"><em>Fin — anexo piloto M2 · derivado de revisión documentación operacional.</em></p>
+  <p class="meta"><em>Fin — anexo piloto M2 v1.1 (10 jun 2026) · plan comercial en PLAN-COMERCIAL-PILOTO.md</em></p>
 </body>
 </html>

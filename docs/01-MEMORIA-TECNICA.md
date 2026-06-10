@@ -1,9 +1,24 @@
-# Memoria técnica — Uber Truck / Cubik
+# Memoria técnica — puntero
 
-**Documento canónico:** [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html) (producción: `/docs/Memoria-tecnica-Uber-Truck.html`).
+**Documento canónico (HTML):** [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html)
 
-**Versión documento:** 4.0 · **Software:** 0.0.104 (Cubik app móvil + API Railway) · **Bitácora:** 5 jun 2026.
+| Campo | Valor |
+|-------|-------|
+| Versión documento | **v4.2** |
+| Software | **0.0.125** |
+| Última actualización | **10 jun 2026** |
 
-**Links testers:** https://uber-truck-production.up.railway.app/probar
+Incluye: visión, paridad Uber, hitos M1–M5, Gantt, bitácora, Cubik Saldo piloto, QA automatizado, plan comercial piloto/escala, stack por capas y API.
 
-Editar el HTML y exportar con `npm run export:memoria-docx`.
+## Exportar Word
+
+```bash
+npm run export:memoria-docx
+npm run export:all-docs
+```
+
+## Anexos relacionados
+
+- [QA automatizado](./QA-AUTOMATIZADO.md)
+- [Plan comercial piloto/escala](./PLAN-COMERCIAL-PILOTO.md)
+- [Índice maestro](./00-INDICE-DOCUMENTACION.md)

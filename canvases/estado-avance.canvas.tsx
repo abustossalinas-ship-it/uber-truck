@@ -16,19 +16,20 @@ import {
   useHostTheme,
 } from "cursor/canvas";
 
-const VERSION = "0.0.105";
-const MEMORIA = "v4.1";
-const FECHA = "25 may 2026";
+const VERSION = "0.0.125";
+const MEMORIA = "v4.2";
+const FECHA = "10 jun 2026";
 const PROD = "https://uber-truck-production.up.railway.app";
 const REPO = "https://github.com/abustossalinas-ship-it/uber-truck";
 
 const FASES = [
-  { label: "Fase 2 — MVP digital núcleo", pct: 94 },
+  { label: "Fase 2 — MVP digital núcleo", pct: 95 },
   { label: "Fase 2.10 — Multas y billetera", pct: 40 },
   { label: "Fase 2.11 — Cubik Saldo piloto 10/5", pct: 78 },
+  { label: "QA automatizado + Laboratorio", pct: 85 },
   { label: "Cubik Saldo prod (wallet + escrow)", pct: 8 },
   { label: "Push FCM (backend + token)", pct: 70 },
-  { label: "Proyecto total (→ M5 mar 2027)", pct: 48 },
+  { label: "Proyecto total (→ M5 mar 2027)", pct: 50 },
 ];
 
 const HITOS = [
@@ -39,12 +40,12 @@ const HITOS = [
 ];
 
 const RELEASES = [
-  { ver: "0.0.105", foco: "Calibración tarifas sugerencia flete RM–V", commit: "a4336d7" },
-  { ver: "0.0.104", foco: "Notif pago al día + campana rápida", commit: "7f09d15" },
-  { ver: "0.0.103", foco: "Badge embarcador pagó + notif visible", commit: "551c832" },
-  { ver: "0.0.102", foco: "Botón Pagar + drawer Cubik Saldo", commit: "96947cf" },
-  { ver: "0.0.101", foco: "Perf primera carga Mis viajes", commit: "5258886" },
-  { ver: "0.0.100", foco: "Cubik Saldo piloto UI + comisiones", commit: "a52f23d" },
+  { ver: "0.0.125", foco: "Login APK + notificaciones archivadas", commit: "70723d1" },
+  { ver: "0.0.120", foco: "Laboratorio QA gráfico /qa-lab", commit: "f86ebe7" },
+  { ver: "0.0.115", foco: "QA Playwright + CI GitHub", commit: "2acbfb9" },
+  { ver: "0.0.106", foco: "UX urgencia + emparejar", commit: "—" },
+  { ver: "0.0.105", foco: "Calibración tarifas RM–V", commit: "a4336d7" },
+  { ver: "0.0.104", foco: "Notif pago + campana rápida", commit: "7f09d15" },
 ];
 
 const FEATURES = [
@@ -56,7 +57,9 @@ const FEATURES = [
   { name: "GPS + mapa vivo + ETA", ok: true },
   { name: "Mis viajes + calificación mutua", ok: true },
   { name: "Billetera multi-cuenta bancaria", ok: true },
-  { name: "Cubik app Android (Capacitor)", ok: true },
+  { name: "Notificaciones activas vs historial", ok: true },
+  { name: "QA automatizado + Laboratorio /qa-lab", ok: true },
+  { name: "Android APK remoto + bundle", ok: true },
   { name: "Cubik Saldo piloto — Pagar + badges 10/5", ok: true },
   { name: "Notificación transportista (pilot_payment)", ok: true },
   { name: "Twilio Proxy (llamadas)", ok: false },
@@ -79,7 +82,7 @@ export default function EstadoAvanceUberTruck() {
   const segments = FASES.map((f, i) => ({
     label: f.label,
     value: f.pct,
-    color: (["blue", "orange", "green", "gray", "purple", "blue"] as const)[i],
+    color: (["blue", "orange", "green", "teal", "gray", "purple", "blue"] as const)[i],
   }));
 
   return (
@@ -96,8 +99,8 @@ export default function EstadoAvanceUberTruck() {
 
       <Grid columns={3} gap={theme.spacing.md}>
         <Stat label="Versión deploy" value={VERSION} />
-        <Stat label="MVP digital (Fase 2)" value="~94%" tone="positive" />
-        <Stat label="Cubik Saldo piloto" value="78%" tone="positive" />
+        <Stat label="MVP digital (Fase 2)" value="~95%" tone="positive" />
+        <Stat label="QA automatizado" value="85%" tone="positive" />
       </Grid>
 
       <Card>
@@ -174,10 +177,10 @@ export default function EstadoAvanceUberTruck() {
 
       <H2>Documentación</H2>
       <Text>
-        Memoria {MEMORIA} · Journey v2.9 · SQL RUN_026 · Siguiente: wallet real + Twilio + piloto M2
+        Memoria {MEMORIA} · Journey v3.0 · QA + plan comercial piloto 25/50 · Siguiente: wallet real + M2
       </Text>
       <Text color={theme.colors.textMuted}>
-        Fuente: docs/Memoria-tecnica-Uber-Truck.html · commits 96947cf → 7f09d15
+        Fuente: docs/Memoria-tecnica-Uber-Truck.html · commits 2acbfb9 → 70723d1
       </Text>
     </Stack>
   );

@@ -1,0 +1,10 @@
+# Forzar HTTPS y redirigir raíz getcubik.cl → www (HostGator public_html)
+RewriteEngine On
+
+# HTTP → HTTPS en el mismo host
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [R=301,L]
+
+# Apex → www (solo getcubik.cl sin www)
+RewriteCond %{HTTP_HOST} ^getcubik\.cl$ [NC]
+RewriteRule ^ https://www.getcubik.cl/ [R=301,L]

@@ -67,6 +67,31 @@ function wantsAppShell(req) {
   return req.query.app === '1' || req.query.app === 'true';
 }
 
+/** Railway / prod: forzar HTTPS en dominios públicos (evita caché HTTP en el navegador). */
+app.use((req, res, next) => {
+  if (process.env.NODE_ENV !== 'production') {
+    next();
+    return;
+  }
+  const proto = String(req.headers['x-forwarded-proto'] || req.protocol || 'http')
+    .split(',')[0]
+    .trim()
+    .toLowerCase();
+  if (proto === 'https') {
+    next();
+    return;
+  }
+  const host = requestHost(req);
+  const publicHosts = landingHosts();
+  publicHosts.add('uber-truck-production.up.railway.app');
+  if (!publicHosts.has(host)) {
+    next();
+    return;
+  }
+  const target = `https://${host}${req.originalUrl || '/'}`;
+  res.redirect(301, target);
+});
+
 app.use((req, res, next) => {
   const origin = req.headers.origin;
   if (

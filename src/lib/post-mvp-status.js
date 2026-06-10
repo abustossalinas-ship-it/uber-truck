@@ -24,7 +24,7 @@ function buildPostMvpStatus(ctx = {}) {
 
   return {
     updated: '2026-06-10',
-    software: '0.0.127',
+    software: '0.0.128',
     items: [
       {
         id: 'oauth',
@@ -51,17 +51,17 @@ function buildPostMvpStatus(ctx = {}) {
         order: 2,
         title: 'Recuperar contraseña',
         phase: 'post_pilot',
-        status: resendOk ? 'ready_to_validate' : 'blocked_env',
+        status: resendOk ? 'validated' : 'blocked_env',
         server_ready: resendOk,
         blocking_demo: false,
+        validated_at: resendOk ? '2026-06-10' : undefined,
         summary: resendOk
-          ? 'API + UI listos; Resend configurado'
+          ? 'Validado 10 jun 2026 — Resend + reset-password.html en prod'
           : 'UI lista; falta RESEND_API_KEY + EMAIL_FROM en Railway',
         env: { RESEND_API_KEY: resendOk, EMAIL_FROM: Boolean(process.env.EMAIL_FROM?.trim()) },
         validate: [
-          'Login → ¿Olvidaste tu contraseña? → email real',
-          'Abrir enlace reset-password.html',
-          'Marcar hecho cuando correo llegue en prod',
+          '✓ ¿Olvidaste tu contraseña? → correo Resend → enlace 1 h',
+          'Pendiente post-piloto: MFA (complejidad 8+ activa v0.0.128)',
         ],
       },
       {

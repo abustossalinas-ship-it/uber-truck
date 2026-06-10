@@ -21,6 +21,7 @@ const {
 } = require('../lib/password-reset');
 const mail = require('../services/mail');
 const supabase = require('../services/supabase');
+const { validatePassword } = require('../lib/password-policy');
 
 const router = express.Router();
 
@@ -29,8 +30,12 @@ const FORGOT_OK_MESSAGE =
 
 router.post('/register', async (req, res) => {
   const { email, password, full_name, role, company_name, phone, admin_key } = req.body || {};
-  if (!email?.trim() || !password || password.length < 6) {
-    return res.status(400).json({ ok: false, error: 'Email y contraseña (mín. 6) requeridos' });
+  if (!email?.trim() || !password) {
+    return res.status(400).json({ ok: false, error: 'Email y contraseña requeridos' });
+  }
+  const policy = validatePassword(password);
+  if (!policy.ok) {
+    return res.status(400).json({ ok: false, error: policy.error });
   }
   if (!full_name?.trim()) {
     return res.status(400).json({ ok: false, error: 'Nombre de contacto requerido' });
@@ -135,6 +140,10 @@ router.post('/reset-password', async (req, res) => {
   }
   if (password.length < 6) {
     return res.status(400).json({ ok: false, error: 'La contraseña debe tener al menos 6 caracteres' });
+  }
+  const policy = validatePassword(password);
+  if (!policy.ok) {
+    return res.status(400).json({ ok: false, error: policy.error });
   }
   try {
     await resetPasswordWithToken(token, password);

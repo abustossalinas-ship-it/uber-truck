@@ -1,6 +1,6 @@
 {
-  "version": "0.0.127",
+  "version": "0.0.128",
   "git_sha": "",
-  "ui": "post-mvp-checklist",
-  "note": "Push FCM validado 10 jun 2026 — ítem 5 Post-MVP cerrado"
+  "ui": "password-strength-change-pw",
+  "note": "Contraseña segura + fix cambiar clave en Cuenta app"
 }

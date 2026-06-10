@@ -3,6 +3,7 @@
 const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 const supabase = require('../services/supabase');
+const { validatePassword } = require('./password-policy');
 
 const TOKEN_TTL_MS = 60 * 60 * 1000;
 const lastForgotByEmail = new Map();
@@ -82,8 +83,25 @@ async function resetPasswordWithToken(token, newPassword) {
     e.status = 400;
     throw e;
   }
-  const password_hash = await bcrypt.hash(newPassword, 10);
+  const policy = validatePassword(newPassword);
+  if (!policy.ok) {
+    const e = new Error(policy.error);
+    e.status = 400;
+    throw e;
+  }
   const sb = supabase.getClient();
+  const { data: userRow, error: userFetchErr } = await sb
+    .from('users')
+    .select('password_hash')
+    .eq('id', row.user_id)
+    .maybeSingle();
+  if (userFetchErr) throw userFetchErr;
+  if (userRow?.password_hash && (await bcrypt.compare(newPassword, userRow.password_hash))) {
+    const e = new Error('La nueva contraseña debe ser distinta a la actual.');
+    e.status = 400;
+    throw e;
+  }
+  const password_hash = await bcrypt.hash(newPassword, 10);
   const { error: userErr } = await sb
     .from('users')
     .update({ password_hash })
@@ -106,6 +124,12 @@ async function changePassword(userId, currentPassword, newPassword) {
     e.status = 400;
     throw e;
   }
+  const policy = validatePassword(newPassword);
+  if (!policy.ok) {
+    const e = new Error(policy.error);
+    e.status = 400;
+    throw e;
+  }
   const sb = supabase.getClient();
   const { data, error } = await sb
     .from('users')
@@ -122,6 +146,11 @@ async function changePassword(userId, currentPassword, newPassword) {
   if (!ok) {
     const e = new Error('Contraseña actual incorrecta');
     e.status = 401;
+    throw e;
+  }
+  if (await bcrypt.compare(newPassword, data.password_hash)) {
+    const e = new Error('La nueva contraseña debe ser distinta a la actual.');
+    e.status = 400;
     throw e;
   }
   const password_hash = await bcrypt.hash(newPassword, 10);

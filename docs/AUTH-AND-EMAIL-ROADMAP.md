@@ -13,7 +13,8 @@
 |--------|-----------|--------|
 | **E1 — Google (Gmail)** | OAuth 2.0 / OpenID: «Continuar con Google» | Cuenta Google Workspace o @gmail.com; vincular o crear usuario en `users`; mismo flujo KYC posterior. |
 | **E2 — Apple** | Sign in with Apple | Obligatorio si hay app iOS en App Store; email relay de Apple; claves en Apple Developer. |
-| **E3 — Correo transaccional** | Recuperación de contraseña, avisos críticos | Resend (o similar) + migración SQL 017; variables `RESEND_API_KEY`, `EMAIL_FROM`. |
+| **E3 — Correo transaccional** | Recuperación de contraseña, avisos críticos | **Hecho 10 jun 2026** — Resend + SQL 017; variables `RESEND_API_KEY`, `EMAIL_FROM`. |
+| **E3b — Seguridad clave (post-piloto)** | Complejidad (8+ chars, letra+número) · MFA TOTP/SMS | Pendiente — hoy mín. 6 caracteres; no reutilizar la misma clave al resetear. |
 
 ### Integración esperada (diseño)
 

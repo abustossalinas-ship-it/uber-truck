@@ -690,6 +690,10 @@ document.getElementById('form-forgot')?.addEventListener('submit', async (e) => 
 
 document.getElementById('btn-change-password')?.addEventListener('click', () => {
   if (!Auth.user) return;
+  if (typeof AppShell?.openChangePassword === 'function') {
+    AppShell.openChangePassword();
+    return;
+  }
   document.getElementById('auth-panel')?.setAttribute('hidden', '');
   const panel = document.getElementById('change-password-panel');
   if (panel) {
@@ -702,6 +706,10 @@ document.getElementById('btn-change-password')?.addEventListener('click', () => 
 });
 
 document.getElementById('change-password-cancel')?.addEventListener('click', () => {
+  if (typeof AppShell?.closeChangePassword === 'function') {
+    AppShell.closeChangePassword();
+    return;
+  }
   document.getElementById('change-password-panel')?.setAttribute('hidden', '');
 });
 
@@ -718,6 +726,16 @@ document.getElementById('form-change-password')?.addEventListener('submit', asyn
       errEl.hidden = false;
     }
     return;
+  }
+  if (typeof PasswordPolicy !== 'undefined') {
+    const policy = PasswordPolicy.validate(next);
+    if (!policy.ok) {
+      if (errEl) {
+        errEl.textContent = policy.error;
+        errEl.hidden = false;
+      }
+      return;
+    }
   }
   if (errEl) errEl.hidden = true;
   try {
@@ -736,7 +754,8 @@ document.getElementById('form-change-password')?.addEventListener('submit', asyn
     }
     alert(json.message || 'Contraseña actualizada.');
     e.target.reset();
-    document.getElementById('change-password-panel')?.setAttribute('hidden', '');
+    if (typeof AppShell?.closeChangePassword === 'function') AppShell.closeChangePassword();
+    else document.getElementById('change-password-panel')?.setAttribute('hidden', '');
   } catch (err) {
     console.error(err);
     if (errEl) {
@@ -755,7 +774,11 @@ formAuth?.addEventListener(
     if (field?.name === 'email') {
       showAuthError('Ingresa un email válido.');
     } else if (field?.name === 'password') {
-      showAuthError('La contraseña debe tener al menos 6 caracteres.');
+      showAuthError(
+        authRegisterMode
+          ? 'La contraseña debe cumplir los requisitos de seguridad (8+ caracteres, letra, mayúscula y número).'
+          : 'Revisa email y contraseña.'
+      );
     } else if (authRegisterMode) {
       showAuthError('Completa los datos de registro marcados en el formulario.');
     } else {
@@ -787,6 +810,13 @@ formAuth?.addEventListener('submit', async (e) => {
     if (!body.role || !normalizeAuthIntentRole(body.role)) {
       showAuthError('Elige si eres transportista o empresa embarcadora');
       return;
+    }
+    if (typeof PasswordPolicy !== 'undefined') {
+      const policy = PasswordPolicy.validate(body.password);
+      if (!policy.ok) {
+        showAuthError(policy.error);
+        return;
+      }
     }
   } else {
     delete body.role;
@@ -852,4 +882,15 @@ if (urlIntent) setAuthIntentRole(urlIntent);
 if (document.body.classList.contains('cubik-app') && !Auth.user) {
   showWelcomeRoleStep();
 }
+
+(function initPasswordStrength() {
+  const registerPw = document.querySelector('#form-auth input[name="password"]');
+  const changePw = document.querySelector('#form-change-password input[name="new_password"]');
+  if (typeof PasswordStrengthUI === 'undefined') return;
+  if (registerPw) {
+    PasswordStrengthUI.attach(registerPw, { showWhen: () => authRegisterMode });
+  }
+  if (changePw) PasswordStrengthUI.attach(changePw);
+})();
+
 Auth.render();

@@ -293,6 +293,18 @@ body.cubik-app.app-authed .app-gate {
   cursor: pointer;
 }
 
+body.cubik-app.app-change-pw-open #change-password-panel:not([hidden]) {
+  display: flex !important;
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: var(--bg);
+}
+
+body.cubik-app #change-password-panel form button[type="submit"] {
+  width: 100%;
+}
+
 body.cubik-app #auth-panel,
 body.cubik-app #change-password-panel {
   position: fixed;

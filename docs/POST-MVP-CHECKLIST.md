@@ -11,7 +11,7 @@ Validar y cerrar cada ítem **en el orden de la tabla Post-MVP** de la memoria t
 | # | Ítem | Cuándo cerrar | Acción |
 |---|------|---------------|--------|
 | 1 | Login Gmail / Apple | Post-M2 | **Diferido** — no prometer en demo. Doc: [AUTH-AND-EMAIL-ROADMAP.md](./AUTH-AND-EMAIL-ROADMAP.md) |
-| 2 | Recuperar contraseña | Con Resend en Railway | App → ¿Olvidaste tu contraseña? → correo real → `reset-password.html` |
+| 2 | Recuperar contraseña | Con Resend en Railway | **Hecho 10 jun 2026** — Resend + reset en prod |
 | 3 | Pago en app (prod) | Sem 2–8 piloto | Wallet real + ledger; hoy piloto simulado OK |
 | 4 | Twilio Proxy | Sem 2–4 | `TWILIO_MATCH_PROXY_NUMBER` en Railway → Llamar en viaje activo |
 | 5 | Push FCM | Sem 1–3 | **Hecho 10 jun 2026** — segundo plano, acciones de viaje |

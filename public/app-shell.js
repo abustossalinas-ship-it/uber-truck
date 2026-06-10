@@ -67,6 +67,30 @@ const AppShell = {
     gate.dataset.authMounted = '1';
   },
 
+  openChangePassword() {
+    if (typeof Auth === 'undefined' || !Auth.user) return;
+    this.mountAuthInGate();
+    const panel = document.getElementById('change-password-panel');
+    if (!panel) return;
+    const gate = document.getElementById('app-gate');
+    if (gate?.contains(panel) && gate.hidden) {
+      document.body.appendChild(panel);
+    }
+    document.getElementById('auth-panel')?.setAttribute('hidden', '');
+    panel.hidden = false;
+    panel.removeAttribute('hidden');
+    document.body.classList.add('app-change-pw-open');
+    panel.querySelector('[name="current_password"]')?.focus();
+  },
+
+  closeChangePassword() {
+    const panel = document.getElementById('change-password-panel');
+    panel?.setAttribute('hidden', '');
+    document.body.classList.remove('app-change-pw-open');
+    document.getElementById('form-change-password')?.reset();
+    document.getElementById('change-password-error')?.setAttribute('hidden', '');
+  },
+
   initNativePlugins() {
     if (!this.isNative()) return;
     if (document.readyState === 'loading') {
@@ -125,6 +149,11 @@ const AppShell = {
           if (typeof handleAuthBackNavigation === 'function' && handleAuthBackNavigation()) {
             return;
           }
+          return;
+        }
+        const changePw = document.getElementById('change-password-panel');
+        if (changePw && !changePw.hidden && !changePw.hasAttribute('hidden')) {
+          this.closeChangePassword();
           return;
         }
         if (!canGoBack) Cap.Plugins.App?.exitApp?.();
@@ -266,9 +295,6 @@ const AppShell = {
   bindAccount() {
     document.getElementById('app-btn-logout')?.addEventListener('click', () => {
       document.getElementById('btn-auth')?.click();
-    });
-    document.getElementById('app-btn-change-pw')?.addEventListener('click', () => {
-      document.getElementById('btn-change-password')?.click();
     });
   },
 
@@ -594,7 +620,8 @@ const AppShell = {
           <span>Ayuda con un viaje</span>
         </button>`;
       menu.querySelector('#app-btn-change-pw')?.addEventListener('click', () => {
-        document.getElementById('btn-change-password')?.click();
+        if (typeof AppShell?.openChangePassword === 'function') AppShell.openChangePassword();
+        else document.getElementById('btn-change-password')?.click();
       });
       menu.querySelector('[data-profile-action="kyc"]')?.addEventListener('click', () => {
         document.getElementById('kyc-banner')?.scrollIntoView({ behavior: 'smooth' });

@@ -1,0 +1,252 @@
+{
+  "generated_at": "2026-06-09T23:40:22.905Z",
+  "version": "0.0.125",
+  "counts": {
+    "unit": 14,
+    "e2e": 16,
+    "e2e_optional": 0
+  },
+  "scripts": [
+    {
+      "name": "test",
+      "cmd": "npm run test:unit && npm run test:e2e"
+    },
+    {
+      "name": "test:unit",
+      "cmd": "node scripts/run-unit-tests.cjs"
+    },
+    {
+      "name": "test:e2e",
+      "cmd": "playwright test"
+    },
+    {
+      "name": "test:e2e:prod",
+      "cmd": "playwright test --config=playwright.prod.config.js"
+    },
+    {
+      "name": "test:qa",
+      "cmd": "node scripts/run-qa.cjs"
+    },
+    {
+      "name": "test:qa:prod",
+      "cmd": "node scripts/run-qa.cjs --prod"
+    },
+    {
+      "name": "test:e2e:ui",
+      "cmd": "playwright test --ui"
+    },
+    {
+      "name": "qa:install",
+      "cmd": "playwright install chromium"
+    },
+    {
+      "name": "qa:catalog",
+      "cmd": "node scripts/build-qa-catalog.cjs"
+    },
+    {
+      "name": "qa:lab",
+      "cmd": "node scripts/open-qa-lab.cjs"
+    },
+    {
+      "name": "qa:report",
+      "cmd": "playwright show-report"
+    }
+  ],
+  "unit": [
+    {
+      "file": "tests/android-bundle-sync.test.js",
+      "suite": "android-bundle-sync",
+      "kind": "unit",
+      "cases": [
+        {
+          "name": "android bundle auth-ui no está roto ni desactualizado",
+          "optional": false
+        }
+      ]
+    },
+    {
+      "file": "tests/auth-ui-syntax.test.js",
+      "suite": "auth-ui-syntax",
+      "kind": "unit",
+      "cases": [
+        {
+          "name": "auth-ui.js parsea sin errores (bloquea login en APK bundle)",
+          "optional": false
+        }
+      ]
+    },
+    {
+      "file": "tests/notification-visibility.test.js",
+      "suite": "notification-visibility",
+      "kind": "unit",
+      "cases": [
+        {
+          "name": "price_offer oculta si el match ya no está en propuesta",
+          "optional": false
+        },
+        {
+          "name": "price_offer oculta si la carga ya no está publicada (otro emparejamiento ganó)",
+          "optional": false
+        },
+        {
+          "name": "delivery_pending_confirm solo mientras espera confirmación del embarcador",
+          "optional": false
+        },
+        {
+          "name": "viaje completado oculta todo (incluye cierre y pago)",
+          "optional": false
+        },
+        {
+          "name": "support oculta cuando el chat ya está libre (agente atendió)",
+          "optional": false
+        },
+        {
+          "name": "match cancelado oculta todo",
+          "optional": false
+        },
+        {
+          "name": "isStaleProposal detecta carga ya emparejada",
+          "optional": false
+        }
+      ]
+    },
+    {
+      "file": "tests/trip-proximity.test.js",
+      "suite": "trip-proximity",
+      "kind": "unit",
+      "cases": [
+        {
+          "name": "arrival radius default 0.6 km",
+          "optional": false
+        },
+        {
+          "name": "delivery: en destino cuando distancia <= radio",
+          "optional": false
+        },
+        {
+          "name": "delivery: fuera de destino cuando distancia > radio",
+          "optional": false
+        },
+        {
+          "name": "pickup: en embarcadero dentro del radio",
+          "optional": false
+        },
+        {
+          "name": "haversineKm mismo punto es ~0",
+          "optional": false
+        }
+      ]
+    }
+  ],
+  "e2e": [
+    {
+      "file": "e2e/app-authed.spec.js",
+      "suite": "app-authed",
+      "kind": "e2e",
+      "cases": [
+        {
+          "name": "Transportista: Inicio muestra saludo y acceso a Emparejar",
+          "group": "Cubik app — sesión mock (sin backend)",
+          "optional": false
+        },
+        {
+          "name": "Transportista: atrás desde Emparejar vuelve a Inicio",
+          "group": "Cubik app — sesión mock (sin backend)",
+          "optional": false
+        },
+        {
+          "name": "Embarcador: Opciones muestra Publicar carga y Emparejar",
+          "group": "Cubik app — sesión mock (sin backend)",
+          "optional": false
+        },
+        {
+          "name": "Actividad muestra sección Mis viajes",
+          "group": "Cubik app — sesión mock (sin backend)",
+          "optional": false
+        },
+        {
+          "name": "Cuenta muestra perfil y cerrar sesión",
+          "group": "Cubik app — sesión mock (sin backend)",
+          "optional": false
+        },
+        {
+          "name": "Login transportista navega a Emparejar",
+          "group": "Cubik app — login real (QA_* en .env)",
+          "optional": false
+        }
+      ]
+    },
+    {
+      "file": "e2e/app-board.spec.js",
+      "suite": "app-board",
+      "kind": "e2e",
+      "cases": [
+        {
+          "name": "Demo seed carga tablero con cargas y ofertas",
+          "group": "Cubik app — tablero con datos (QA + Supabase)",
+          "optional": false
+        }
+      ]
+    },
+    {
+      "file": "e2e/app-welcome.spec.js",
+      "suite": "app-welcome",
+      "kind": "e2e",
+      "cases": [
+        {
+          "name": "Comenzar como Transportista abre login contextual",
+          "group": "Cubik app — welcome y login",
+          "optional": false
+        },
+        {
+          "name": "Comenzar como Empresa abre login contextual",
+          "group": "Cubik app — welcome y login",
+          "optional": false
+        },
+        {
+          "name": "Atrás con formulario vacío vuelve al welcome",
+          "group": "Cubik app — welcome y login",
+          "optional": false
+        },
+        {
+          "name": "Toggle cambia rol sin volver al welcome",
+          "group": "Cubik app — welcome y login",
+          "optional": false
+        },
+        {
+          "name": "Login transportista llega a Inicio",
+          "group": "Cubik app — login opcional (QA_* en .env)",
+          "optional": false
+        }
+      ]
+    },
+    {
+      "file": "e2e/prod-smoke.spec.js",
+      "suite": "prod-smoke",
+      "kind": "e2e",
+      "cases": [
+        {
+          "name": "deploy.json responde con versión",
+          "group": "Producción — welcome/login (APK remoto / web app)",
+          "optional": false
+        },
+        {
+          "name": "auth-ui.js en prod no tiene sintaxis rota",
+          "group": "Producción — welcome/login (APK remoto / web app)",
+          "optional": false
+        },
+        {
+          "name": "Comenzar Transportista abre login en prod",
+          "group": "Producción — welcome/login (APK remoto / web app)",
+          "optional": false
+        },
+        {
+          "name": "Comenzar Empresa abre login en prod",
+          "group": "Producción — welcome/login (APK remoto / web app)",
+          "optional": false
+        }
+      ]
+    }
+  ],
+  "report_available": true
+}

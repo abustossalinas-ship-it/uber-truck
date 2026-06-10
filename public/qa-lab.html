@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cubik — Laboratorio QA</title>
+  <style>
+    :root {
+      --bg: #f4f6fb;
+      --card: #fff;
+      --ink: #1a2744;
+      --muted: #5c6b85;
+      --accent: #e86f1a;
+      --accent-soft: #fff3ea;
+      --ok: #0d8a5b;
+      --line: #dde3ef;
+      --shadow: 0 8px 28px rgba(26, 39, 68, 0.08);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      line-height: 1.45;
+    }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 24px 16px 48px; }
+    header { margin-bottom: 24px; }
+    h1 { margin: 0 0 6px; font-size: 1.65rem; }
+    .lead { color: var(--muted); margin: 0; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+    .stat {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+    .stat strong { display: block; font-size: 1.6rem; color: var(--accent); }
+    .stat span { color: var(--muted); font-size: 0.9rem; }
+    section {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 18px 20px;
+      margin-bottom: 16px;
+      box-shadow: var(--shadow);
+    }
+    h2 { margin: 0 0 12px; font-size: 1.05rem; }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; }
+    .btn {
+      appearance: none;
+      border: 0;
+      border-radius: 999px;
+      padding: 10px 16px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.92rem;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-secondary { background: var(--accent-soft); color: var(--ink); }
+    .btn-ghost { background: #eef2f9; color: var(--ink); }
+    .btn[disabled] { opacity: 0.45; cursor: not-allowed; }
+    .hint {
+      margin-top: 12px;
+      padding: 12px 14px;
+      background: #eef8f3;
+      border-left: 4px solid var(--ok);
+      border-radius: 8px;
+      color: #234;
+      font-size: 0.92rem;
+    }
+    .warn {
+      background: #fff8ea;
+      border-left-color: #d4a017;
+    }
+    .suite { border-top: 1px solid var(--line); padding-top: 12px; margin-top: 12px; }
+    .suite:first-child { border-top: 0; padding-top: 0; margin-top: 0; }
+    .suite-head { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+    .suite-head h3 { margin: 0; font-size: 0.98rem; }
+    .badge {
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 3px 8px;
+      border-radius: 999px;
+      background: #eef2f9;
+      color: var(--muted);
+      white-space: nowrap;
+    }
+    .badge.e2e { background: #e8f0ff; color: #2952a3; }
+    .badge.unit { background: #eaf8f1; color: #0d8a5b; }
+    .badge.prod { background: #fff0e8; color: #b45309; }
+    ul.tests { margin: 8px 0 0; padding-left: 18px; }
+    ul.tests li { margin: 4px 0; }
+    .optional { color: var(--muted); font-style: italic; }
+    code, .cmd {
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 0.86rem;
+      background: #f0f3fa;
+      padding: 2px 6px;
+      border-radius: 6px;
+    }
+    .cmd-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+      padding: 8px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .cmd-row:last-child { border-bottom: 0; }
+    footer { margin-top: 20px; color: var(--muted); font-size: 0.85rem; text-align: center; }
+    .loading { color: var(--muted); padding: 24px; text-align: center; }
+    .err { color: #b42318; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>Laboratorio QA — Cubik</h1>
+      <p class="lead">Catálogo visual de pruebas. Ligero: no ejecuta tests, solo los lista y abre reportes.</p>
+    </header>
+
+    <div id="root" class="loading">Cargando catálogo…</div>
+    <footer id="foot"></footer>
+  </div>
+
+  <script>
+    function esc(s) {
+      return String(s)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;');
+    }
+
+    function renderSuite(s, kind) {
+      const badgeClass = s.file.includes('prod') ? 'prod' : kind;
+      const items = s.cases
+        .map((c) => {
+          const opt = c.optional ? ' <span class="optional">(opcional / requiere .env)</span>' : '';
+          const group = c.group ? `<span class="muted">${esc(c.group)} · </span>` : '';
+          return `<li>${group}${esc(c.name)}${opt}</li>`;
+        })
+        .join('');
+      return `
+        <article class="suite">
+          <div class="suite-head">
+            <h3>${esc(s.suite)}</h3>
+            <span class="badge ${badgeClass}">${esc(s.file)}</span>
+          </div>
+          <ul class="tests">${items}</ul>
+        </article>`;
+    }
+
+    async function boot() {
+      const root = document.getElementById('root');
+      const foot = document.getElementById('foot');
+      try {
+        const res = await fetch('/qa-catalog.json', { cache: 'no-store' });
+        if (!res.ok) throw new Error('No se pudo cargar qa-catalog.json');
+        const data = await res.json();
+
+        const reportBtn = data.report_available
+          ? `<a class="btn btn-primary" href="/qa-report/" target="_blank" rel="noopener">Ver último reporte Playwright</a>`
+          : `<button class="btn btn-primary" disabled>Sin reporte aún — corre test:e2e primero</button>`;
+
+        const scripts = (data.scripts || [])
+          .map(
+            (s) => `
+          <div class="cmd-row">
+            <code>npm run ${esc(s.name)}</code>
+            <span class="muted">${esc(s.cmd.replace(/^npm run \S+\s*/, ''))}</span>
+          </div>`
+          )
+          .join('');
+
+        root.innerHTML = `
+          <div class="stats">
+            <div class="stat"><strong>${data.counts.unit}</strong><span>Tests unitarios</span></div>
+            <div class="stat"><strong>${data.counts.e2e}</strong><span>Tests E2E</span></div>
+            <div class="stat"><strong>${data.counts.e2e_optional}</strong><span>E2E opcionales</span></div>
+            <div class="stat"><strong>v${esc(data.version)}</strong><span>Versión app</span></div>
+          </div>
+
+          <section>
+            <h2>Ver resultados (gráfico, sin PowerShell)</h2>
+            <div class="actions">
+              ${reportBtn}
+              <a class="btn btn-secondary" href="https://playwright.dev/docs/test-ui-mode" target="_blank" rel="noopener">Docs Playwright UI</a>
+            </div>
+            <div class="hint">
+              <strong>Recomendado:</strong> corre una vez <code>npm run test:e2e</code> y luego abre el reporte arriba.
+              Tiene capturas, video y timeline por test — mucho más liviano que dejar PowerShell pegado.
+            </div>
+            <div class="hint warn">
+              <strong>Playwright UI</strong> (<code>npm run test:e2e:ui</code>) es interactivo pero consume más RAM/CPU.
+              Úsalo solo para depurar un test puntual.
+            </div>
+          </section>
+
+          <section>
+            <h2>Comandos npm</h2>
+            ${scripts}
+          </section>
+
+          <section>
+            <h2>Unitarios (Node)</h2>
+            ${(data.unit || []).map((s) => renderSuite(s, 'unit')).join('')}
+          </section>
+
+          <section>
+            <h2>E2E (Playwright — celular simulado)</h2>
+            ${(data.e2e || []).map((s) => renderSuite(s, 'e2e')).join('')}
+          </section>`;
+
+        foot.textContent = `Catálogo generado ${new Date(data.generated_at).toLocaleString('es-CL')}`;
+      } catch (e) {
+        root.innerHTML = `<p class="err">Error: ${esc(e.message)}. Ejecuta <code>npm run qa:catalog</code> y abre con el servidor (<code>npm run dev</code>).</p>`;
+      }
+    }
+
+    boot();
+  </script>
+</body>
+</html>

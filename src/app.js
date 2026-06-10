@@ -66,6 +66,13 @@ app.get('/probar', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.sendFile(path.join(publicDir, 'probar.html'));
 });
+app.get('/qa-lab', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.sendFile(path.join(publicDir, 'qa-lab.html'));
+});
+if (process.env.NODE_ENV !== 'production') {
+  app.use('/qa-report', express.static(path.join(__dirname, '..', 'playwright-report')));
+}
 app.get('/', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.sendFile(path.join(publicDir, 'index.html'));

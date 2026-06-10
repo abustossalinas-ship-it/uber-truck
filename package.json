@@ -27,7 +27,11 @@
     "test:e2e:prod": "playwright test --config=playwright.prod.config.js",
     "test:qa": "node scripts/run-qa.cjs",
     "test:qa:prod": "node scripts/run-qa.cjs --prod",
-    "qa:install": "playwright install chromium"
+    "test:e2e:ui": "playwright test --ui",
+    "qa:install": "playwright install chromium",
+    "qa:catalog": "node scripts/build-qa-catalog.cjs",
+    "qa:lab": "node scripts/open-qa-lab.cjs",
+    "qa:report": "playwright show-report"
   },
   "engines": {
     "node": ">=20"

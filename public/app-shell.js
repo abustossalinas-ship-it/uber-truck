@@ -42,6 +42,9 @@ const AppShell = {
     if (this.isExplicitAppMode()) {
       document.body.classList.add('cubik-app-strict');
     }
+    if (this.isAppPath()) {
+      document.body.classList.add('cubik-app-route');
+    }
     const gate = document.getElementById('app-gate');
     if (gate) gate.hidden = false;
     this.mountAuthInGate();

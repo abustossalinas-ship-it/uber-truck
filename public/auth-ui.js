@@ -344,7 +344,7 @@ function syncAuthRoleFields(role) {
 function syncAuthRoleToggle(role) {
   const toggle = document.getElementById('auth-role-toggle');
   if (!toggle) return;
-  if (isCubikAppGuest()) {
+  if (isAppRouteGuest()) {
     toggle.hidden = true;
     toggle.setAttribute('hidden', '');
     delete toggle.dataset.active;
@@ -376,7 +376,7 @@ function syncAuthContext(role) {
   const ctx = document.getElementById('auth-context');
   const title = document.getElementById('auth-title');
   const panel = document.getElementById('auth-panel');
-  if (isCubikAppGuest()) {
+  if (isAppRouteGuest()) {
     if (ctx) {
       ctx.hidden = true;
       ctx.setAttribute('hidden', '');
@@ -469,6 +469,16 @@ function setPanelSectionVisible(el, visible) {
 
 function isCubikAppGuest() {
   return document.body.classList.contains('cubik-app') && !Auth.user;
+}
+
+function isAppRouteOnly() {
+  const path = (location.pathname || '/').replace(/\/$/, '') || '/';
+  return path === '/app';
+}
+
+/** Login simplificado solo en https://…/app (no en ?app=1 ni web principal). */
+function isAppRouteGuest() {
+  return isAppRouteOnly() && isCubikAppGuest();
 }
 
 function showAuthIntentStep(show) {
@@ -571,7 +581,7 @@ function blockAuthIntentMismatch(user) {
   const actualLabel = typeof roleLabel === 'function' ? roleLabel(actual) : actual;
   switchAuthIntentRole(actual);
   showAuthError(
-    isCubikAppGuest()
+    isAppRouteGuest()
       ? `Esta cuenta es de ${actualLabel}. Vuelve atrás, elige ese rol e ingresa de nuevo.`
       : `Esta cuenta es de ${actualLabel}. Cambiamos la pestaña de arriba — vuelve a ingresar tu contraseña.`
   );

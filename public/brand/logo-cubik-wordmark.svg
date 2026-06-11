@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 168 40" fill="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="cube-top" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#22d3ee"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    <linearGradient id="cube-left" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#164e63"/>
+      <stop offset="100%" stop-color="#0f172a"/>
+    </linearGradient>
+    <linearGradient id="cube-right" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#164e63"/>
+    </linearGradient>
+  </defs>
+  <g transform="translate(4 4)">
+    <path d="M16 4 L28 10 L28 22 L16 28 L4 22 L4 10 Z" fill="url(#cube-top)" opacity="0.95"/>
+    <path d="M4 10 L16 16 L16 28 L4 22 Z" fill="url(#cube-left)"/>
+    <path d="M16 16 L28 10 L28 22 L16 28 Z" fill="url(#cube-right)"/>
+    <path d="M8 8 L16 4 L24 8 L16 12 Z" fill="#f8fafc" opacity="0.35"/>
+    <path d="M10 11 L14 9 L18 11 L14 13 Z" fill="#22d3ee" opacity="0.9"/>
+  </g>
+  <text x="44" y="27" fill="#ffffff" font-family="Inter, system-ui, sans-serif" font-size="18" font-weight="800" letter-spacing="3">CUBIK</text>
+</svg>

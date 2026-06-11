@@ -19,14 +19,14 @@ test.describe('Landing v3 — transportistas y empresas', () => {
 
   test('Transportistas → app abre login carrier', async ({ page }) => {
     await page.goto('/transportistas');
-    await page.locator('a.lv3-btn-teal[href="/app?role=carrier"]').first().click();
+    await page.locator('.lv3-hero a.lv3-btn-teal[href="/app?role=carrier"]').click();
     await page.waitForURL(/\/app\?role=carrier/);
     await expectLoginOpenForRole(page, 'carrier');
   });
 
   test('Empresas → app abre login shipper', async ({ page }) => {
     await page.goto('/empresas');
-    await page.locator('a.lv3-btn-teal[href="/app?role=shipper"]').first().click();
+    await page.locator('.lv3-hero a.lv3-btn-teal[href="/app?role=shipper"]').click();
     await page.waitForURL(/\/app\?role=shipper/);
     await expectLoginOpenForRole(page, 'shipper');
   });

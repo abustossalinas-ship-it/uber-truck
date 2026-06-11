@@ -260,6 +260,13 @@ function showWelcomeRoleStep() {
   }
   bindWelcomeAuthButtons();
   refreshAuthIntentUi();
+  const role = readAuthIntentFromUrl();
+  const appEntry =
+    (location.pathname || '').replace(/\/$/, '') === '/app' ||
+    new URLSearchParams(location.search).get('app') === '1';
+  if (role && appEntry && isCubikAppGuest()) {
+    pickAuthIntent(role);
+  }
 }
 
 function setPanelSectionVisible(el, visible) {

@@ -128,10 +128,8 @@ if (process.env.NODE_ENV !== 'production') {
   app.use('/qa-report', express.static(path.join(__dirname, '..', 'playwright-report')));
 }
 app.get('/app', (req, res) => {
-  const q = new URLSearchParams(req.query);
-  q.set('app', '1');
-  const target = `/?${q.toString()}`;
-  res.redirect(302, target);
+  res.setHeader('Cache-Control', 'no-store');
+  res.sendFile(path.join(publicDir, 'index.html'));
 });
 app.get('/', (req, res) => {
   res.setHeader('Cache-Control', 'no-store');

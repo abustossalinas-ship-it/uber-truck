@@ -12,8 +12,14 @@ const AppShell = {
     return Boolean(window.Capacitor?.isNativePlatform?.());
   },
 
+  isAppPath() {
+    const path = (location.pathname || '/').replace(/\/$/, '') || '/';
+    return path === '/app';
+  },
+
   isAppMode() {
     if (this.isNative()) return true;
+    if (this.isAppPath()) return true;
     if (localStorage.getItem('cubik_force_app') === '1') return true;
     if (new URLSearchParams(location.search).get('app') === '1') return true;
     return (
@@ -24,6 +30,7 @@ const AppShell = {
 
   isExplicitAppMode() {
     if (this.isNative()) return true;
+    if (this.isAppPath()) return true;
     if (localStorage.getItem('cubik_force_app') === '1') return true;
     return new URLSearchParams(location.search).get('app') === '1';
   },

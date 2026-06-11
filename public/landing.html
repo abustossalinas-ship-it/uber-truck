@@ -13,6 +13,13 @@
   <title>Cubik — Optimiza tus envíos | getcubik.cl</title>
   <link rel="icon" href="/brand/logo.png" type="image/png" />
   <link rel="apple-touch-icon" href="/brand/logo.png" />
+  <link rel="prefetch" href="/theme.css?v=0.0.123" as="style" />
+  <link rel="prefetch" href="/app-shell.css?v=0.0.125" as="style" />
+  <link rel="prefetch" href="/role-welcome.css?v=0.0.125" as="style" />
+  <link rel="prefetch" href="/brand-config.js?v=0.0.76" as="script" />
+  <link rel="prefetch" href="/api-base.js?v=0.0.83" as="script" />
+  <link rel="prefetch" href="/app-shell.js?v=0.0.128" as="script" />
+  <link rel="prefetch" href="/auth-ui.js?v=0.0.129" as="script" />
   <style>
     :root {
       --navy: #0f2744;
@@ -218,6 +225,19 @@
       color: var(--muted);
     }
     footer a { color: var(--navy-mid); }
+    .landing-loading {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(244, 247, 251, 0.92);
+      color: var(--navy);
+      font-weight: 700;
+      font-size: 1rem;
+    }
+    .landing-loading[hidden] { display: none; }
   </style>
 </head>
 <body>
@@ -312,8 +332,17 @@
   </section>
 
   <footer>
-    <p><strong>Cubik</strong> · Optimiza tus envíos · <a href="https://getcubik.cl">getcubik.cl</a></p>
+    <p><strong>Cubik</strong> · Optimiza tus envíos · <a href="https://www.getcubik.cl">getcubik.cl</a></p>
     <p>Producto en evolución — piloto comercial Chile 2026.</p>
   </footer>
+  <div id="landing-loading" class="landing-loading" hidden aria-live="polite">Abriendo Cubik…</div>
+  <script>
+    document.querySelectorAll('a[href^="/app"]').forEach((link) => {
+      link.addEventListener('click', () => {
+        const el = document.getElementById('landing-loading');
+        if (el) el.hidden = false;
+      });
+    });
+  </script>
 </body>
 </html>

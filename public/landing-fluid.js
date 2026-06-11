@@ -440,6 +440,12 @@
     if (video) video.play().catch(() => {});
   }
 
+  function initHomeHeroVideo() {
+    if (!document.body.classList.contains('lv3-home') || reduced) return;
+    const video = document.querySelector('.lf-hero-home-video');
+    if (video) video.play().catch(() => {});
+  }
+
   function initHomeTruckMotion() {
     if (!document.body.classList.contains('lv3-home') || reduced) return;
     const canvas = document.getElementById('lf-home-truck-motion');
@@ -842,6 +848,7 @@
   initDepthLayers();
   initHeroVideo();
   initShipperProductVideo();
+  initHomeHeroVideo();
   initHomeTruckMotion();
   initCarrierPhoneVideo();
   initCarrierTruckGlow();

@@ -31,6 +31,14 @@ const Auth = {
   },
 
   logout() {
+    const token = this.token;
+    if (token && typeof apiFetch === 'function' && typeof getAuthDevicePayload === 'function') {
+      apiFetch('/api/auth/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(getAuthDevicePayload()),
+      }).catch(() => {});
+    }
     if (typeof clearRatedMatchIds === 'function') clearRatedMatchIds();
     this.token = null;
     this.user = null;
@@ -38,6 +46,7 @@ const Auth = {
     localStorage.removeItem('ut_user');
     if (typeof Comms !== 'undefined') Comms.resetUi();
     if (typeof Penalties !== 'undefined') Penalties.resetUi();
+    showAuthOtpStep(false);
     setAuthMode(false, false);
     clearAuthError();
     this.render();
@@ -93,6 +102,153 @@ const Auth = {
 let authRegisterMode = false;
 let authForgotMode = false;
 let pendingAuthRegister = false;
+let pendingOtp = null;
+let otpResendTimer = null;
+
+function authDeviceBody(extra = {}) {
+  const device =
+    typeof getAuthDevicePayload === 'function' ? getAuthDevicePayload() : { device_id: null };
+  return { ...device, ...extra };
+}
+
+function getOtpDigits() {
+  return Array.from(document.querySelectorAll('.auth-otp-digit'));
+}
+
+function readOtpCodeFromDigits() {
+  return getOtpDigits()
+    .map((el) => el.value.replace(/\D/g, ''))
+    .join('');
+}
+
+function clearOtpDigits() {
+  getOtpDigits().forEach((el) => {
+    el.value = '';
+  });
+  const err = document.getElementById('auth-otp-error');
+  if (err) {
+    err.textContent = '';
+    err.hidden = true;
+    err.setAttribute('hidden', '');
+  }
+}
+
+function showOtpError(message) {
+  const err = document.getElementById('auth-otp-error');
+  if (!err) return;
+  err.textContent = message;
+  err.hidden = false;
+  err.removeAttribute('hidden');
+}
+
+function clearOtpResendTimer() {
+  if (otpResendTimer) {
+    clearInterval(otpResendTimer);
+    otpResendTimer = null;
+  }
+}
+
+function updateOtpResendLabel(secondsLeft) {
+  const btn = document.getElementById('auth-otp-resend');
+  if (!btn) return;
+  if (secondsLeft > 0) {
+    btn.disabled = true;
+    btn.textContent = `Reenviar en ${secondsLeft} s`;
+  } else {
+    btn.disabled = false;
+    btn.textContent = 'Reenviar código';
+  }
+}
+
+function startOtpResendCooldown(seconds) {
+  clearOtpResendTimer();
+  let left = Math.max(0, Number(seconds) || 60);
+  updateOtpResendLabel(left);
+  if (left <= 0) return;
+  otpResendTimer = setInterval(() => {
+    left -= 1;
+    if (left <= 0) {
+      clearOtpResendTimer();
+      updateOtpResendLabel(0);
+      return;
+    }
+    updateOtpResendLabel(left);
+  }, 1000);
+}
+
+function showAuthOtpStep(show) {
+  const step = document.getElementById('auth-otp-step');
+  const form = document.getElementById('form-auth');
+  const footer = document.querySelector('#auth-form-wrap .auth-login-footer');
+  const toggle = document.getElementById('auth-role-toggle');
+  const context = document.getElementById('auth-context');
+  const title = document.getElementById('auth-title');
+  setPanelSectionVisible(step, show);
+  if (form) form.hidden = show;
+  if (footer) footer.hidden = show;
+  if (show) {
+    if (toggle) {
+      toggle.hidden = true;
+      toggle.setAttribute('hidden', '');
+    }
+    if (context) {
+      context.hidden = true;
+      context.setAttribute('hidden', '');
+    }
+    if (title) title.hidden = true;
+    setTimeout(() => getOtpDigits()[0]?.focus(), 50);
+  } else {
+    pendingOtp = null;
+    clearOtpDigits();
+    clearOtpResendTimer();
+    updateOtpResendLabel(0);
+    if (title) title.hidden = false;
+    refreshAuthIntentUi();
+  }
+}
+
+function openOtpStepFromLogin(json, email, password) {
+  pendingOtp = {
+    otp_id: json.otp_id,
+    email: email.trim(),
+    password,
+  };
+  const lead = document.getElementById('auth-otp-lead');
+  if (lead) {
+    lead.textContent =
+      json.message ||
+      `Enviamos un código de 4 dígitos a ${email}. Revisa bandeja y spam. Válido 10 minutos.`;
+  }
+  showAuthOtpStep(true);
+  startOtpResendCooldown(60);
+  if (json.dev_code) {
+    const digits = String(json.dev_code).replace(/\D/g, '').slice(0, 4);
+    getOtpDigits().forEach((el, i) => {
+      el.value = digits[i] || '';
+    });
+  }
+}
+
+async function finishAuthLogin(json, register) {
+  let userPayload = json.user;
+  try {
+    const meRes = await apiFetch('/api/auth/me', {
+      headers: { Authorization: `Bearer ${json.token}` },
+    });
+    const meJson = await meRes.json();
+    if (meRes.ok && meJson.user) userPayload = meJson.user;
+  } catch (_) {}
+  if (blockAuthIntentMismatch(userPayload)) return;
+  Auth.save(json.token, userPayload);
+  showAuthOtpStep(false);
+  document.getElementById('auth-panel').hidden = true;
+  if (register && Auth.user?.kyc_status === 'pending' && Auth.user?.role !== 'admin') {
+    alert(
+      'Cuenta creada. Quedó en revisión: un administrador debe aprobarla antes de publicar o emparejar.'
+    );
+  }
+  if (typeof Penalties !== 'undefined') Penalties.refresh();
+}
 
 const AUTH_INTENT_KEY = 'ut_auth_intent_role';
 
@@ -315,6 +471,12 @@ function isAuthFormEmpty() {
 function handleAuthBackNavigation() {
   const panel = document.getElementById('auth-panel');
   if (!panel || panel.hidden) return false;
+  const otpStep = document.getElementById('auth-otp-step');
+  if (otpStep && !otpStep.hidden) {
+    showAuthOtpStep(false);
+    setAuthMode(false, false);
+    return true;
+  }
   if (authForgotMode) {
     openAuthPanel(false, false);
     return true;
@@ -447,7 +609,13 @@ function authErrorMessage(res, json, register) {
   if (code === 'no_password') {
     return json?.error || 'Esta cuenta no tiene contraseña. Usa «¿Olvidaste tu contraseña?»';
   }
+  if (code === 'wrong_otp') {
+    return 'Código incorrecto. Revisa los 4 dígitos o pide uno nuevo.';
+  }
   let msg = json?.error || 'Error de autenticación';
+  if (res.status === 429 && json?.wait_seconds) {
+    return msg || `Espera ${json.wait_seconds} s antes de pedir otro código.`;
+  }
   if (res.status === 409 && register) {
     msg =
       'Ese email ya tiene cuenta. Pulsa «Ya tengo cuenta — iniciar sesión» e ingresa tu contraseña.';
@@ -497,6 +665,7 @@ function setAuthMode(register, forgot = false) {
   panel.classList.toggle('has-auth-intent', Boolean(intentRole) && !forgot);
   setRegisterFieldsRequired(register && !forgot);
   clearAuthError();
+  if (!forgot) showAuthOtpStep(false);
   refreshAuthIntentUi();
   const forgotErr = document.getElementById('auth-forgot-error');
   if (forgotErr) {
@@ -848,11 +1017,12 @@ formAuth?.addEventListener('submit', async (e) => {
     submitBtn.textContent = authRegisterMode ? 'Registrando…' : 'Entrando…';
   }
   const url = authRegisterMode ? '/api/auth/register' : '/api/auth/login';
+  const payload = authDeviceBody(body);
   try {
     const res = await apiFetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
+      body: JSON.stringify(payload),
     });
     let json = {};
     try {
@@ -865,23 +1035,11 @@ formAuth?.addEventListener('submit', async (e) => {
       notifyAuthFailure(msg);
       return;
     }
-    let userPayload = json.user;
-    try {
-      const meRes = await apiFetch('/api/auth/me', {
-        headers: { Authorization: `Bearer ${json.token}` },
-      });
-      const meJson = await meRes.json();
-      if (meRes.ok && meJson.user) userPayload = meJson.user;
-    } catch (_) {}
-    if (blockAuthIntentMismatch(userPayload)) return;
-    Auth.save(json.token, userPayload);
-    document.getElementById('auth-panel').hidden = true;
-    if (authRegisterMode && Auth.user?.kyc_status === 'pending' && Auth.user?.role !== 'admin') {
-      alert(
-        'Cuenta creada. Quedó en revisión: un administrador debe aprobarla antes de publicar o emparejar.'
-      );
+    if (!authRegisterMode && json.need_otp) {
+      openOtpStepFromLogin(json, body.email, body.password);
+      return;
     }
-    if (typeof Penalties !== 'undefined') Penalties.refresh();
+    await finishAuthLogin(json, authRegisterMode);
   } catch (err) {
     console.error(err);
     notifyAuthFailure('No se pudo conectar con el servidor. Revisa tu internet e intenta de nuevo.');
@@ -891,6 +1049,122 @@ formAuth?.addEventListener('submit', async (e) => {
       submitBtn.textContent = prevLabel || (authRegisterMode ? 'Registrarse' : 'Entrar');
     }
   }
+});
+
+async function submitOtpVerification() {
+  if (!pendingOtp?.otp_id) {
+    showOtpError('Vuelve a iniciar sesión para recibir un código nuevo.');
+    return;
+  }
+  const code = readOtpCodeFromDigits();
+  if (code.length !== 4) {
+    showOtpError('Ingresa los 4 dígitos del correo.');
+    return;
+  }
+  const btn = document.getElementById('auth-otp-submit');
+  const prev = btn?.textContent;
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = 'Verificando…';
+  }
+  try {
+    const res = await apiFetch('/api/auth/otp/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(
+        authDeviceBody({
+          otp_id: pendingOtp.otp_id,
+          code,
+          email: pendingOtp.email,
+          password: pendingOtp.password,
+        })
+      ),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      showOtpError(authErrorMessage(res, json, false));
+      return;
+    }
+    await finishAuthLogin(json, false);
+  } catch (err) {
+    console.error(err);
+    showOtpError('No se pudo conectar. Revisa tu internet e intenta de nuevo.');
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.textContent = prev || 'Siguiente →';
+    }
+  }
+}
+
+document.getElementById('auth-otp-submit')?.addEventListener('click', () => {
+  submitOtpVerification();
+});
+
+document.getElementById('auth-otp-back')?.addEventListener('click', () => {
+  showAuthOtpStep(false);
+  setAuthMode(false, false);
+});
+
+document.getElementById('auth-otp-resend')?.addEventListener('click', async () => {
+  if (!pendingOtp?.email || !pendingOtp?.password) return;
+  const btn = document.getElementById('auth-otp-resend');
+  if (btn?.disabled) return;
+  try {
+    const res = await apiFetch('/api/auth/otp/resend', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(
+        authDeviceBody({
+          email: pendingOtp.email,
+          password: pendingOtp.password,
+        })
+      ),
+    });
+    const json = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      showOtpError(authErrorMessage(res, json, false));
+      if (json.wait_seconds) startOtpResendCooldown(json.wait_seconds);
+      return;
+    }
+    pendingOtp.otp_id = json.otp_id;
+    const lead = document.getElementById('auth-otp-lead');
+    if (lead && json.message) lead.textContent = json.message;
+    clearOtpDigits();
+    startOtpResendCooldown(json.wait_seconds || 60);
+    if (json.dev_code) {
+      const digits = String(json.dev_code).replace(/\D/g, '').slice(0, 4);
+      getOtpDigits().forEach((el, i) => {
+        el.value = digits[i] || '';
+      });
+    }
+    getOtpDigits()[0]?.focus();
+  } catch (err) {
+    console.error(err);
+    showOtpError('No se pudo reenviar el código.');
+  }
+});
+
+getOtpDigits().forEach((input, idx, all) => {
+  input.addEventListener('input', () => {
+    const v = input.value.replace(/\D/g, '').slice(-1);
+    input.value = v;
+    if (v && idx < all.length - 1) all[idx + 1].focus();
+    if (readOtpCodeFromDigits().length === 4) submitOtpVerification();
+  });
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Backspace' && !input.value && idx > 0) all[idx - 1].focus();
+  });
+  input.addEventListener('paste', (e) => {
+    e.preventDefault();
+    const text = (e.clipboardData?.getData('text') || '').replace(/\D/g, '').slice(0, 4);
+    if (!text) return;
+    all.forEach((el, i) => {
+      el.value = text[i] || '';
+    });
+    all[Math.min(text.length, all.length - 1)]?.focus();
+    if (text.length === 4) submitOtpVerification();
+  });
 });
 
 setAuthMode(false, false);

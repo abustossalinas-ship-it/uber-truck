@@ -454,6 +454,78 @@ body.cubik-app #auth-panel .auth-context {
   display: none;
 }
 
+.auth-otp-step {
+  margin: 0.5rem 0 0;
+}
+
+.auth-otp-lead {
+  margin: 0 0 1rem;
+  line-height: 1.45;
+}
+
+.auth-otp-digits {
+  display: flex;
+  gap: 0.65rem;
+  justify-content: center;
+  margin: 0 0 1rem;
+}
+
+.auth-otp-digit {
+  width: 3.25rem;
+  height: 3.25rem;
+  text-align: center;
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  border: 2px solid var(--border, #cbd5e1);
+  border-radius: 12px;
+  background: #fff;
+  color: var(--brand-navy, #0f2744);
+  box-sizing: border-box;
+}
+
+.auth-otp-digit:focus {
+  outline: none;
+  border-color: var(--brand-orange, #f7941d);
+  box-shadow: 0 0 0 3px rgba(247, 148, 29, 0.25);
+}
+
+.auth-otp-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  justify-content: center;
+  margin: 0 0 1rem;
+}
+
+.auth-otp-submit {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  padding: 0.85rem 1rem;
+  font-size: 1rem;
+  font-weight: 800;
+  color: #fff;
+  background: var(--brand-navy, #0f2744);
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.auth-otp-submit:hover:not(:disabled) {
+  background: #16355a;
+}
+
+.auth-otp-submit:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+
+body.cubik-app #auth-panel .auth-otp-step:not([hidden]) ~ #form-auth,
+body.cubik-app #auth-panel .auth-otp-step:not([hidden]) ~ .auth-login-footer {
+  display: none !important;
+}
+
 .auth-user {
   font-size: 0.75rem;
 }

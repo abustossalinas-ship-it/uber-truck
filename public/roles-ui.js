@@ -1,5 +1,5 @@
 /** Única cuenta con acceso completo (todas las opciones en app y web). */
-const CUBIK_SUPER_ADMIN_EMAIL = 'admin@cubik.cl';
+const CUBIK_SUPER_ADMIN_EMAIL = 'admin@getcubik.cl';
 
 /** Etiquetas de rol en español (UI). Código interno: shipper | carrier */
 const ROLE_LABEL = {

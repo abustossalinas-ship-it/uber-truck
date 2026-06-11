@@ -24,6 +24,7 @@ async function resetGuestAppSession(page) {
     }
     localStorage.removeItem('ut_token');
     localStorage.removeItem('ut_user');
+    localStorage.setItem('cubik_device_id', 'qa-e2e-playwright');
     sessionStorage.removeItem('ut_auth_intent_role');
   });
   await page.reload({ waitUntil: 'load' });
@@ -81,7 +82,31 @@ async function loginViaWelcome(page, { email, password, role = 'carrier' }) {
   await openWelcomeRole(page, role);
   await page.fill('#form-auth [name="email"]', email);
   await page.fill('#form-auth [name="password"]', password);
+  const loginWait = page.waitForResponse(
+    (r) => r.url().includes('/api/auth/login') && r.request().method() === 'POST'
+  );
   await page.locator('#auth-submit').click();
+  const loginRes = await loginWait;
+  const loginJson = await loginRes.json();
+  if (loginJson.need_otp) {
+    await page.locator('#auth-otp-step').waitFor({ state: 'visible' });
+    const code = loginJson.dev_code;
+    if (!code) {
+      throw new Error(
+        'Login requiere OTP por dispositivo nuevo. En dev el API debe devolver dev_code o usar cuenta ya confiada.'
+      );
+    }
+    const digits = String(code).replace(/\D/g, '').slice(0, 4);
+    const inputs = page.locator('.auth-otp-digit');
+    for (let i = 0; i < 4; i++) {
+      await inputs.nth(i).fill(digits[i] || '');
+    }
+    const verifyWait = page.waitForResponse(
+      (r) => r.url().includes('/api/auth/otp/verify') && r.request().method() === 'POST'
+    );
+    await page.locator('#auth-otp-submit').click();
+    await verifyWait;
+  }
   await expectAuthedApp(page);
 }
 

@@ -5,7 +5,7 @@ const jwt = require('jsonwebtoken');
 const supabase = require('../services/supabase');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'uber-truck-dev-change-me';
-const JWT_EXPIRES = '7d';
+const JWT_EXPIRES = process.env.JWT_EXPIRES || '30d';
 
 function signToken(user) {
   return jwt.sign(
@@ -89,7 +89,7 @@ async function registerUser({ email, password, full_name, role, company_name, ph
   return { user: data, token: signToken(data) };
 }
 
-async function loginUser({ email, password }) {
+async function validateLoginCredentials(email, password) {
   if (!supabase.isConfigured()) {
     const err = new Error('Login requiere Supabase configurado');
     err.status = 503;
@@ -123,7 +123,7 @@ async function loginUser({ email, password }) {
     e.code = 'wrong_password';
     throw e;
   }
-  const user = {
+  return {
     id: data.id,
     email: data.email,
     full_name: data.full_name,
@@ -137,6 +137,10 @@ async function loginUser({ email, password }) {
     location_updated_at: data.location_updated_at || null,
     default_truck_type_id: data.default_truck_type_id || null,
   };
+}
+
+async function loginUser({ email, password }) {
+  const user = await validateLoginCredentials(email, password);
   return { user, token: signToken(user) };
 }
 
@@ -187,6 +191,7 @@ module.exports = {
   verifyToken,
   authMiddleware,
   registerUser,
+  validateLoginCredentials,
   loginUser,
   fetchUserById,
   updateUserProfile,

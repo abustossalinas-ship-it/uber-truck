@@ -81,7 +81,7 @@ La marca en APK, correos y UI sigue siendo **Cubik**; el dominio es infraestruct
 5. **Railway** → variables:
    ```env
    APP_PUBLIC_URL=https://getcubik.cl
-   EMAIL_FROM=Cubik <noreply@getcubik.cl>
+   EMAIL_FROM=Cubik <no_reply@getcubik.cl>
    ```
 6. **Redeploy** y probar forgot-password a Gmail tester.
 

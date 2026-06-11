@@ -12,9 +12,10 @@
   <link rel="icon" href="/brand/logo.png" type="image/png" />
   <link rel="manifest" href="/manifest.webmanifest" />
   <link rel="apple-touch-icon" href="/brand/logo.png" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.123" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.130" />
   <link rel="stylesheet" href="/app-shell.css?v=0.0.125" />
   <link rel="stylesheet" href="/role-welcome.css?v=0.0.125" />
+  <script src="/device-id.js?v=0.0.130" defer></script>
   <script src="/brand-config.js?v=0.0.76" defer></script>
   <script src="/api-base.js?v=0.0.83" defer></script>
 </head>
@@ -369,6 +370,22 @@
       </div>
     </div>
     <h2 id="auth-title">Iniciar sesión</h2>
+    <div id="auth-otp-step" class="auth-otp-step" hidden>
+      <h2 id="auth-otp-title" class="auth-title-sr">Verifica tu email</h2>
+      <p id="auth-otp-lead" class="muted auth-otp-lead"></p>
+      <div id="auth-otp-digits" class="auth-otp-digits" role="group" aria-label="Código de 4 dígitos">
+        <input type="text" inputmode="numeric" maxlength="1" class="auth-otp-digit" data-otp-idx="0" autocomplete="one-time-code" aria-label="Dígito 1" />
+        <input type="text" inputmode="numeric" maxlength="1" class="auth-otp-digit" data-otp-idx="1" aria-label="Dígito 2" />
+        <input type="text" inputmode="numeric" maxlength="1" class="auth-otp-digit" data-otp-idx="2" aria-label="Dígito 3" />
+        <input type="text" inputmode="numeric" maxlength="1" class="auth-otp-digit" data-otp-idx="3" aria-label="Dígito 4" />
+      </div>
+      <p id="auth-otp-error" class="auth-error" role="alert" hidden></p>
+      <p class="auth-otp-actions muted">
+        <button type="button" class="link-btn" id="auth-otp-resend">Reenviar código</button>
+        <button type="button" class="link-btn" id="auth-otp-back">← Volver al login</button>
+      </p>
+      <button type="button" id="auth-otp-submit" class="auth-otp-submit">Siguiente →</button>
+    </div>
     <form id="form-auth">
       <label>Email</label>
       <input name="email" type="email" required autocomplete="username" />
@@ -1228,7 +1245,7 @@
 
   <script src="/password-policy.js?v=0.0.128" defer></script>
   <script src="/password-strength-ui.js?v=0.0.128" defer></script>
-  <script src="/roles-ui.js?v=0.0.89" defer></script>
+  <script src="/roles-ui.js?v=0.0.130" defer></script>
   <script src="/app-shell.js?v=0.0.128" defer></script>
   <script src="/pwa-ui.js?v=0.0.64" defer></script>
   <script src="/kyc-ui.js?v=0.0.33" defer></script>
@@ -1244,7 +1261,7 @@
   <script src="/legal-terms-ui.js?v=0.0.86" defer></script>
   <script src="/load-form-validation.js?v=0.0.86" defer></script>
   <script src="/proposal-compare-ui.js?v=0.0.47" defer></script>
-  <script src="/auth-ui.js?v=0.0.129" defer></script>
+  <script src="/auth-ui.js?v=0.0.130" defer></script>
   <script src="/live-map-ui.js?v=0.0.123" defer></script>
   <script src="/tracking-ui.js?v=0.0.123" defer></script>
   <script src="/incident-ui.js?v=0.0.99" defer></script>

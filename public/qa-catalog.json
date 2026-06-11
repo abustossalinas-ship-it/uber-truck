@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-06-11T00:39:48.535Z",
+  "generated_at": "2026-06-11T01:34:00.422Z",
   "version": "0.0.129",
   "counts": {
-    "unit": 20,
+    "unit": 26,
     "e2e": 25,
     "e2e_optional": 3,
-    "required": 42,
+    "required": 48,
     "optional": 3,
-    "total": 45
+    "total": 51
   },
   "charts": {
     "by_kind": [
       {
         "label": "Unitarios (Node)",
-        "value": 20
+        "value": 26
       },
       {
         "label": "E2E (Playwright)",
@@ -23,7 +23,7 @@
     "by_coverage": [
       {
         "label": "Obligatorios (CI)",
-        "value": 42
+        "value": 48
       },
       {
         "label": "Opcionales (.env / Supabase)",
@@ -36,12 +36,12 @@
         "value": 17
       },
       {
-        "label": "Tablero / datos",
-        "value": 13
+        "label": "Otros",
+        "value": 14
       },
       {
-        "label": "Otros",
-        "value": 9
+        "label": "Tablero / datos",
+        "value": 13
       },
       {
         "label": "Navegación app",
@@ -49,13 +49,18 @@
       },
       {
         "label": "Smoke producción",
-        "value": 1
+        "value": 2
       }
     ],
     "by_suite": [
       {
         "label": "android-bundle-sync",
         "value": 1,
+        "kind": "unit"
+      },
+      {
+        "label": "auth-session-otp",
+        "value": 6,
         "kind": "unit"
       },
       {
@@ -198,6 +203,49 @@
           "optional": false,
           "area": "welcome",
           "area_label": "Welcome / login"
+        }
+      ]
+    },
+    {
+      "file": "tests/auth-session-otp.test.js",
+      "suite": "auth-session-otp",
+      "kind": "unit",
+      "cases": [
+        {
+          "name": "hashDeviceId es estable y distinto por device_id",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "hashDeviceId vacío devuelve null",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "sessionExpiresAt suma días de SESSION_TTL_DAYS",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "isSessionActive respeta revoked_at y expires_at",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "generateOtpCode produce 4 dígitos",
+          "optional": false,
+          "area": "prod",
+          "area_label": "Smoke producción"
+        },
+        {
+          "name": "hashOtp es determinístico",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
         }
       ]
     },
@@ -564,5 +612,5 @@
     }
   ],
   "report_available": true,
-  "last_run_at": "2026-06-11T00:39:39.439Z"
+  "last_run_at": "2026-06-11T01:33:47.994Z"
 }

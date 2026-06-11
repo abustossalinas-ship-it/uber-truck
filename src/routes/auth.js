@@ -3,11 +3,19 @@
 const express = require('express');
 const {
   registerUser,
-  loginUser,
+  validateLoginCredentials,
   authMiddleware,
   fetchUserById,
   updateUserProfile,
 } = require('../lib/auth');
+const { resolveLoginAfterPassword, verifyNewDeviceOtp, createNewDeviceOtp } = require('../lib/auth-otp');
+const {
+  deviceSessionsEnabled,
+  requestMeta,
+  revokeSession,
+  upsertSession,
+  SESSION_TTL_DAYS,
+} = require('../lib/device-session');
 const { TRUCK_TYPES } = require('../lib/truck-capacity');
 const { fetchKycStatus } = require('../lib/kyc-gate');
 const { getUserPresence } = require('../lib/carrier-presence');
@@ -54,7 +62,15 @@ router.post('/register', async (req, res) => {
       phone,
       admin_key,
     });
-    res.status(201).json({ ok: true, ...result });
+    const meta = requestMeta(req, req.body || {});
+    if (deviceSessionsEnabled() && meta.deviceHash) {
+      await upsertSession(result.user.id, meta);
+    }
+    res.status(201).json({
+      ok: true,
+      ...result,
+      session_expires_days: SESSION_TTL_DAYS,
+    });
   } catch (e) {
     console.error(e);
     res.status(e.status || 500).json({ ok: false, error: e.message || 'Error al registrar' });
@@ -67,7 +83,8 @@ router.post('/login', async (req, res) => {
     return res.status(400).json({ ok: false, error: 'Email y contraseña requeridos' });
   }
   try {
-    const result = await loginUser({ email, password });
+    const user = await validateLoginCredentials(email, password);
+    const result = await resolveLoginAfterPassword(user, req, req.body || {});
     res.json({ ok: true, ...result });
   } catch (e) {
     console.error(e);
@@ -75,7 +92,60 @@ router.post('/login', async (req, res) => {
       ok: false,
       error: e.message || 'Error al iniciar sesión',
       code: e.code || undefined,
+      wait_seconds: e.wait_seconds,
     });
+  }
+});
+
+router.post('/otp/verify', async (req, res) => {
+  const { otp_id, code, email, password } = req.body || {};
+  if (!otp_id || !code?.trim() || !email?.trim() || !password) {
+    return res.status(400).json({ ok: false, error: 'Datos de verificación incompletos' });
+  }
+  try {
+    const user = await validateLoginCredentials(email, password);
+    const meta = requestMeta(req, req.body || {});
+    const result = await verifyNewDeviceOtp({ otp_id, code, user, meta });
+    res.json({ ok: true, ...result });
+  } catch (e) {
+    console.error('[auth] otp/verify', e);
+    res.status(e.status || 500).json({
+      ok: false,
+      error: e.message || 'Error al verificar código',
+      code: e.code,
+    });
+  }
+});
+
+router.post('/otp/resend', async (req, res) => {
+  const { email, password } = req.body || {};
+  if (!email?.trim() || !password) {
+    return res.status(400).json({ ok: false, error: 'Email y contraseña requeridos' });
+  }
+  try {
+    const user = await validateLoginCredentials(email, password);
+    const meta = requestMeta(req, req.body || {});
+    const otp = await createNewDeviceOtp(user, meta);
+    res.json({ ok: true, ...otp });
+  } catch (e) {
+    res.status(e.status || 500).json({
+      ok: false,
+      error: e.message,
+      wait_seconds: e.wait_seconds,
+    });
+  }
+});
+
+router.post('/logout', authMiddleware, async (req, res) => {
+  try {
+    const meta = requestMeta(req, req.body || {});
+    if (meta.deviceHash) {
+      await revokeSession(req.user.sub, meta.deviceHash);
+    }
+    res.json({ ok: true, message: 'Sesión cerrada en este dispositivo.' });
+  } catch (e) {
+    console.error('[auth] logout', e);
+    res.status(500).json({ ok: false, error: 'Error al cerrar sesión' });
   }
 });
 

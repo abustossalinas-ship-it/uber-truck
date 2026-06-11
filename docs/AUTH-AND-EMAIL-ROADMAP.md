@@ -1,65 +1,99 @@
-# Auth, correo y login social — estado producción
+# Auth, sesiones y correo — Cubik
 
-**Software:** 0.0.129 · **Actualizado:** 25 may 2026
+## Resumen
 
----
+| Fase | Qué incluye | Estado |
+|------|-------------|--------|
+| **1 (actual)** | OTP **email** vía Resend en dispositivo nuevo; sesión **30 días** por dispositivo (web + APK) | Implementado |
+| **2 (prod)** | OTP **SMS/WhatsApp** (Twilio) además de email; mismo modelo de sesión | Roadmap |
 
-## Hoy en producción
+Comportamiento tipo Uber Freight:
 
-| Capacidad | Estado | Versión / notas |
-|-----------|--------|-----------------|
-| Registro / login email + contraseña | **Hecho** | JWT — `POST /api/auth/register`, `POST /api/auth/login` |
-| Roles shipper / carrier / admin | **Hecho** | KYC semi-curado |
-| Política de contraseña fuerte | **Hecho** | v0.0.128 — 8+ chars, letra, mayúscula, número |
-| UI fortaleza contraseña | **Hecho** | `password-strength-ui.js` en registro, reset y cambio |
-| Cambiar contraseña en app (APK) | **Hecho** | v0.0.128 — `AppShell.openChangePassword()` |
-| No reutilizar misma clave al resetear | **Hecho** | `password-reset.js` |
-| Recuperar contraseña (código) | **Hecho** | SQL 017 + Resend + rutas forgot/reset |
-| Recuperar contraseña (piloto multi-cuenta) | **Bloqueado** | Falta dominio verificado — ver [DOMAIN-AND-EMAIL.md](./DOMAIN-AND-EMAIL.md) |
-| Login Gmail / Apple | **Diferido** | Bloque E — post-piloto |
-| MFA TOTP / SMS | **Diferido** | Post-piloto |
+1. Email + contraseña.
+2. Si el dispositivo ya tiene sesión activa (< 30 días y sin «Cerrar sesión») → entra directo.
+3. Si es dispositivo nuevo → código **4 dígitos** al correo (10 min).
+4. Tras verificar → correo **«Nuevo inicio de sesión»** con datos del dispositivo.
 
 ---
 
-## Bloque E — login social (pendiente)
+## Resend + getcubik.cl (paso a paso)
 
-| Bloque | Capacidad | Notas |
-|--------|-----------|--------|
-| **E1 — Google** | OAuth 2.0 «Continuar con Google» | Vincular o crear usuario; mismo KYC posterior |
-| **E2 — Apple** | Sign in with Apple | Obligatorio con app iOS en App Store |
-| **E3 — Correo** | Reset + avisos transaccionales | Código listo; **pendiente dominio** |
-| **E3b — MFA** | TOTP / SMS | Post-piloto |
+### A) Verificar dominio en Resend
 
-### Integración esperada (diseño)
+1. Entra a [resend.com](https://resend.com) → **Domains** → **Add Domain** → `getcubik.cl`.
+2. Resend muestra registros DNS (SPF **TXT** + DKIM **CNAME**, a veces un MX opcional).
+3. **HostGator** → cPanel → **Zone Editor** / **Editor de zona DNS** de `getcubik.cl`.
+4. Agrega **todos** los registros que pide Resend (no borres los CNAME/A de Railway).
+5. En Resend → **Verify**. Puede tardar 15 min – 24 h.
+6. **API Keys** → crea o reutiliza una key → copia `re_...`.
 
-1. Botones Google y Apple en login/registro (además de email).
-2. Callback valida token → busca `users` por email o `oauth_provider` + `oauth_sub` (columnas futuras).
-3. Primera vez: completar razón social, rol y datos mínimos.
-4. Recuperación de clave: enlace por email (Resend + dominio propio).
+### B) Remitente transaccional (no_reply@)
 
-### Qué no hacer aún
+No necesitas buzón real para `no_reply@` — solo dominio verificado en Resend.
 
-- Proyectos OAuth en Google Cloud / Apple Developer sin política de privacidad y dominio.
-- Exponer secretos OAuth en el front (solo client id público).
+En **Railway** (proyecto uber-truck):
+
+```env
+RESEND_API_KEY=re_...
+EMAIL_FROM=Cubik <no_reply@getcubik.cl>
+APP_PUBLIC_URL=https://www.getcubik.cl
+SESSION_TTL_DAYS=30
+JWT_EXPIRES=30d
+```
+
+Redeploy y prueba:
+
+- Forgot password → Gmail tester.
+- Login en incógnito (dispositivo nuevo) → OTP 4 dígitos.
+
+> `onboarding@resend.dev` solo entrega al email de tu cuenta Resend. Con dominio verificado llega a cualquier destinatario.
+
+### C) Admin operativo (admin@getcubik.cl)
+
+| Uso | Dirección |
+|-----|-----------|
+| **Login super-admin Cubik** | `admin@getcubik.cl` (tabla `users`, role `admin`) |
+| **Correos automáticos OTP / reset** | `no_reply@getcubik.cl` vía Resend (no recibe respuestas) |
+
+**Buzón admin (opcional, para recibir mail):**
+
+1. HostGator cPanel → **Email Accounts** → crear `admin@getcubik.cl` (contraseña propia del buzón).
+2. Eso es **independiente** de Resend (MX de HostGator vs registros Resend para envío).
+3. En Supabase ejecuta `supabase/migrations/RUN_032_admin_getcubik_email.sql` para cambiar el email de la cuenta admin en la app (**misma contraseña de login** que tenías con `admin@cubik.cl`).
+4. Entra a Cubik con `admin@getcubik.cl` + tu contraseña anterior.
+
+El front reconoce super-admin por email exacto (`public/roles-ui.js` → `admin@getcubik.cl`).
 
 ---
 
-## Variables Railway (correo)
+## Supabase — SQL a ejecutar
 
-| Variable | Uso |
-|----------|-----|
-| `RESEND_API_KEY` | API Resend |
-| `EMAIL_FROM` | `Cubik <noreply@tudominio.com>` — **requiere dominio verificado** |
+Orden recomendado en **SQL Editor**:
 
-Hoy en sandbox: `onboarding@resend.dev` solo entrega al email de la cuenta Resend.
+| Orden | Archivo | Qué hace |
+|-------|---------|----------|
+| 1 | `supabase/migrations/RUN_031_AUTH_SESSIONS.sql` | Tablas `user_sessions` + `auth_otp_codes` |
+| 2 | `supabase/migrations/RUN_032_admin_getcubik_email.sql` | Admin → `admin@getcubik.cl` |
 
-Ver `.env.example` sección auth y correo.
+Si las tablas 031 no existen, el login sigue **sin OTP** (fallback).
 
 ---
 
-## Referencias
+## API
 
-- [DOMAIN-AND-EMAIL.md](./DOMAIN-AND-EMAIL.md) — dominios ocupados, checklist compra
-- [POST-MVP-CHECKLIST.md](./POST-MVP-CHECKLIST.md)
-- [PROXIMOS-PASOS-ESTRATEGIA.md](./PROXIMOS-PASOS-ESTRATEGIA.md)
-- [Memoria técnica](./Memoria-tecnica-Uber-Truck.html)
+| Método | Ruta | Uso |
+|--------|------|-----|
+| POST | `/api/auth/login` | `{ email, password, device_id, … }` → `token` o `need_otp` |
+| POST | `/api/auth/otp/verify` | `{ otp_id, code, email, password, device_id, … }` |
+| POST | `/api/auth/otp/resend` | Cooldown 60 s |
+| POST | `/api/auth/logout` | Bearer + `device_id` → revoca sesión del dispositivo |
+
+## Fase 2 — SMS / Twilio
+
+Reutilizar `auth_otp_codes.channel` (`sms`, `whatsapp`). Ver roadmap en `DOMAIN-AND-EMAIL.md`.
+
+## Desactivar OTP (solo dev)
+
+```env
+AUTH_DEVICE_SESSIONS=false
+```

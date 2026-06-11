@@ -114,19 +114,21 @@ const AUTH_CONTEXT_COPY = {
 };
 
 function normalizeAuthIntentRole(raw) {
-  if (typeof normalizeAppRole === 'function') return normalizeAppRole(raw);
-  const r = String(raw || '')
+  const r = String(raw ?? '')
     .toLowerCase()
     .trim();
-  if (r === 'carrier' || r === 'transportista') return 'carrier';
+  if (!r) return null;
+  if (r === 'carrier' || r === 'transportista' || r === 'transportador') return 'carrier';
   if (r === 'shipper' || r === 'embarcador' || r === 'embarcadora') return 'shipper';
-  return r === 'carrier' || r === 'shipper' ? r : null;
+  return null;
 }
 
 function readAuthIntentFromUrl() {
   try {
     const q = new URLSearchParams(window.location.search);
-    return normalizeAuthIntentRole(q.get('rol') || q.get('role'));
+    const raw = q.get('rol') ?? q.get('role');
+    if (raw == null || raw === '') return null;
+    return normalizeAuthIntentRole(raw);
   } catch (_) {
     return null;
   }
@@ -253,6 +255,11 @@ function refreshAuthIntentUi() {
 }
 
 function showWelcomeRoleStep() {
+  const welcome = document.getElementById('app-welcome');
+  if (welcome) {
+    welcome.hidden = false;
+    welcome.removeAttribute('hidden');
+  }
   const roles = document.getElementById('app-welcome-roles');
   if (roles) {
     roles.hidden = false;
@@ -888,6 +895,12 @@ formAuth?.addEventListener('submit', async (e) => {
 
 setAuthMode(false, false);
 bindAuthIntentPickers();
+try {
+  const stored = sessionStorage.getItem(AUTH_INTENT_KEY);
+  if (stored && !normalizeAuthIntentRole(stored)) {
+    sessionStorage.removeItem(AUTH_INTENT_KEY);
+  }
+} catch (_) {}
 const urlIntent = readAuthIntentFromUrl();
 if (urlIntent) setAuthIntentRole(urlIntent);
 if (document.body.classList.contains('cubik-app') && !Auth.user) {

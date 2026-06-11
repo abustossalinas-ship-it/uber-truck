@@ -16,7 +16,7 @@ const MOCK_PROFILES = {
 
 /** @param {import('@playwright/test').Page} page */
 async function resetGuestAppSession(page) {
-  await page.goto('/?app=1', { waitUntil: 'load' });
+  await page.goto('/app', { waitUntil: 'load' });
   await page.evaluate(async () => {
     if ('serviceWorker' in navigator) {
       const regs = await navigator.serviceWorker.getRegistrations();
@@ -87,7 +87,7 @@ async function loginViaWelcome(page, { email, password, role = 'carrier' }) {
 
 /** @param {import('@playwright/test').Page} page @param {'carrier'|'shipper'} role */
 async function loginAsMockUser(page, role = 'carrier') {
-  await page.goto('/?app=1', { waitUntil: 'load' });
+  await page.goto('/app', { waitUntil: 'load' });
   await page.waitForFunction(
     () => typeof Auth !== 'undefined' && typeof Auth.save === 'function'
   );

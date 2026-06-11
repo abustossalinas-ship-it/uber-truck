@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-06-10T00:20:06.810Z",
-  "version": "0.0.125",
+  "generated_at": "2026-06-11T00:39:48.535Z",
+  "version": "0.0.129",
   "counts": {
-    "unit": 14,
-    "e2e": 16,
+    "unit": 20,
+    "e2e": 25,
     "e2e_optional": 3,
-    "required": 27,
+    "required": 42,
     "optional": 3,
-    "total": 30
+    "total": 45
   },
   "charts": {
     "by_kind": [
       {
         "label": "Unitarios (Node)",
-        "value": 14
+        "value": 20
       },
       {
         "label": "E2E (Playwright)",
-        "value": 16
+        "value": 25
       }
     ],
     "by_coverage": [
       {
         "label": "Obligatorios (CI)",
-        "value": 27
+        "value": 42
       },
       {
         "label": "Opcionales (.env / Supabase)",
@@ -32,16 +32,24 @@
     ],
     "by_area": [
       {
+        "label": "Welcome / login",
+        "value": 17
+      },
+      {
         "label": "Tablero / datos",
         "value": 13
       },
       {
-        "label": "Welcome / login",
-        "value": 12
+        "label": "Otros",
+        "value": 9
       },
       {
         "label": "Navegación app",
         "value": 5
+      },
+      {
+        "label": "Smoke producción",
+        "value": 1
       }
     ],
     "by_suite": [
@@ -58,6 +66,16 @@
       {
         "label": "notification-visibility",
         "value": 7,
+        "kind": "unit"
+      },
+      {
+        "label": "password-policy",
+        "value": 3,
+        "kind": "unit"
+      },
+      {
+        "label": "post-mvp-status",
+        "value": 3,
         "kind": "unit"
       },
       {
@@ -81,12 +99,26 @@
         "kind": "e2e"
       },
       {
+        "label": "landing-pilot",
+        "value": 6,
+        "kind": "e2e"
+      },
+      {
         "label": "prod-smoke",
-        "value": 4,
+        "value": 7,
         "kind": "e2e"
       }
     ],
-    "last_run": null
+    "last_run": [
+      {
+        "label": "Pasaron",
+        "value": 15
+      },
+      {
+        "label": "Omitidos",
+        "value": 3
+      }
+    ]
   },
   "stacks": {
     "web_e2e": {
@@ -228,6 +260,56 @@
           "optional": false,
           "area": "board",
           "area_label": "Tablero / datos"
+        }
+      ]
+    },
+    {
+      "file": "tests/password-policy.test.js",
+      "suite": "password-policy",
+      "kind": "unit",
+      "cases": [
+        {
+          "name": "validatePassword acepta clave fuerte",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "validatePassword rechaza corta y sin mayúscula/número",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "checkPasswordStrength marca reglas",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        }
+      ]
+    },
+    {
+      "file": "tests/post-mvp-status.test.js",
+      "suite": "post-mvp-status",
+      "kind": "unit",
+      "cases": [
+        {
+          "name": "buildPostMvpStatus devuelve 8 ítems en orden",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "push_fcm marcado validated cuando FCM configurado",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "escrow depende de wallet_prod",
+          "optional": false,
+          "area": "prod",
+          "area_label": "Smoke producción"
         }
       ]
     },
@@ -376,6 +458,55 @@
       ]
     },
     {
+      "file": "e2e/landing-pilot.spec.js",
+      "suite": "landing-pilot",
+      "kind": "e2e",
+      "cases": [
+        {
+          "name": "Portada muestra headline y CTAs",
+          "group": "Landing getcubik — portada y navegación",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "Soy empresa abre login sin welcome duplicado",
+          "group": "Landing getcubik — portada y navegación",
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
+        },
+        {
+          "name": "Soy transportista abre login",
+          "group": "Landing getcubik — portada y navegación",
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
+        },
+        {
+          "name": "Atrás desde app no deja overlay Abriendo Cubik pegado",
+          "group": "Landing getcubik — portada y navegación",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "Página testers carga",
+          "group": "Piloto — /probar",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "Desde landing link a probar",
+          "group": "Piloto — /probar",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        }
+      ]
+    },
+    {
       "file": "e2e/prod-smoke.spec.js",
       "suite": "prod-smoke",
       "kind": "e2e",
@@ -407,10 +538,31 @@
           "optional": false,
           "area": "welcome",
           "area_label": "Welcome / login"
+        },
+        {
+          "name": "Portada / carga headline",
+          "group": "Producción — landing y piloto",
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
+        },
+        {
+          "name": "/probar carga para testers",
+          "group": "Producción — landing y piloto",
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
+        },
+        {
+          "name": "Landing → app → atrás sin overlay pegado",
+          "group": "Producción — landing y piloto",
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
         }
       ]
     }
   ],
   "report_available": true,
-  "last_run_at": null
+  "last_run_at": "2026-06-11T00:39:39.439Z"
 }

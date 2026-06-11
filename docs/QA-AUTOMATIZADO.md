@@ -1,6 +1,17 @@
 # QA automatizado — Cubik
 
-**Software:** 0.0.125 · **Jun 2026**
+**Software:** 0.0.129 · **May 2026**
+
+## Flujo obligatorio antes de deploy
+
+```
+1. npm run dev          → probar cambio en local
+2. npm run test:qa      → unit + E2E local (landing, app, piloto)
+3. npm run test:qa:prod → smoke contra www.getcubik.cl (opcional pre-push)
+4. git push main        → Railway despliega solo si CI/QA pasó
+```
+
+No hacer push a `main` sin `npm run test:qa` en verde.
 
 ## Resumen
 
@@ -8,7 +19,7 @@
 |------|-------------|---------|
 | Unitarios | Node test runner | `npm run test:unit` |
 | E2E app | Playwright (Pixel 5) | `npm run test:e2e` |
-| Smoke prod | Playwright → Railway | `npm run test:e2e:prod` |
+| Smoke prod | Playwright → www.getcubik.cl | `npm run test:e2e:prod` |
 | Suite completa | Script orquestador | `npm run test:qa` |
 | CI | GitHub Actions | workflow `QA` en push/PR a `main` |
 | Panel visual | Laboratorio QA | `npm run qa:lab` → `/qa-lab` |
@@ -36,6 +47,7 @@ Abre **http://127.0.0.1:3001/qa-lab** con:
 | `tests/notification-visibility.test.js` | Notificaciones obsoletas |
 | `tests/trip-proximity.test.js` | GPS proximidad embarcadero/destino |
 | `e2e/app-welcome.spec.js` | Welcome + login |
+| `e2e/landing-pilot.spec.js` | Portada getcubik + /probar + atrás sin overlay |
 | `e2e/app-authed.spec.js` | Navegación con sesión mock |
 | `e2e/app-board.spec.js` | Tablero + Supabase (opcional) |
 | `e2e/prod-smoke.spec.js` | Smoke Railway |

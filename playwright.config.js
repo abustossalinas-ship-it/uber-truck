@@ -40,6 +40,7 @@ module.exports = defineConfig({
           ...process.env,
           PORT: String(PORT),
           NODE_ENV: 'test',
+          LANDING_HOSTS: '127.0.0.1,localhost',
         },
       },
 });

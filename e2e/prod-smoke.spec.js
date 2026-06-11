@@ -11,7 +11,7 @@ const {
 } = require('./helpers');
 
 const PROD_ORIGIN =
-  process.env.PLAYWRIGHT_PROD_URL || 'https://uber-truck-production.up.railway.app';
+  process.env.PLAYWRIGHT_PROD_URL || 'https://www.getcubik.cl';
 
 test.describe('Producción — welcome/login (APK remoto / web app)', () => {
   test('deploy.json responde con versión', async ({ request }) => {
@@ -40,5 +40,27 @@ test.describe('Producción — welcome/login (APK remoto / web app)', () => {
     await resetGuestAppSession(page);
     await openWelcomeRole(page, 'shipper');
     await expectLoginOpenForRole(page, 'shipper');
+  });
+});
+
+test.describe('Producción — landing y piloto', () => {
+  test('Portada / carga headline', async ({ page }) => {
+    await page.goto('/');
+    await expect(page.locator('h1')).toContainText(/Menos viajes vacíos/i);
+    await expect(page.locator('#landing-loading')).toBeHidden();
+  });
+
+  test('/probar carga para testers', async ({ page }) => {
+    await page.goto('/probar');
+    await expect(page.locator('h1')).toContainText(/Cubik/i);
+  });
+
+  test('Landing → app → atrás sin overlay pegado', async ({ page }) => {
+    await page.goto('/');
+    await page.locator('.hero-actions a[href="/app?role=carrier"]').click();
+    await page.waitForURL(/\/app\?/);
+    await page.goBack();
+    await expect(page.locator('#landing-loading')).toBeHidden();
+    await expect(page.locator('h1')).toContainText(/Menos viajes vacíos/i);
   });
 });

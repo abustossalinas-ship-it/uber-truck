@@ -337,12 +337,29 @@
   </footer>
   <div id="landing-loading" class="landing-loading" hidden aria-live="polite">Abriendo Cubik…</div>
   <script>
-    document.querySelectorAll('a[href^="/app"]').forEach((link) => {
-      link.addEventListener('click', () => {
-        const el = document.getElementById('landing-loading');
-        if (el) el.hidden = false;
+    (function () {
+      const loading = document.getElementById('landing-loading');
+      function hideLoading() {
+        if (loading) loading.hidden = true;
+      }
+      function showLoading() {
+        if (loading) loading.hidden = false;
+      }
+      hideLoading();
+      window.addEventListener('pageshow', hideLoading);
+      window.addEventListener('pagehide', hideLoading);
+      window.addEventListener('popstate', hideLoading);
+      window.addEventListener('focus', hideLoading);
+      document.addEventListener('visibilitychange', function () {
+        if (document.visibilityState === 'visible') hideLoading();
       });
-    });
+      document.querySelectorAll('a[href^="/app"]').forEach(function (link) {
+        link.addEventListener('click', function () {
+          showLoading();
+          window.setTimeout(hideLoading, 12000);
+        });
+      });
+    })();
   </script>
 </body>
 </html>

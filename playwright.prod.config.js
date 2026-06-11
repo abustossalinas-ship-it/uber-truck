@@ -2,7 +2,7 @@
 const { defineConfig, devices } = require('@playwright/test');
 
 const prodURL =
-  process.env.PLAYWRIGHT_PROD_URL || 'https://uber-truck-production.up.railway.app';
+  process.env.PLAYWRIGHT_PROD_URL || 'https://www.getcubik.cl';
 
 module.exports = defineConfig({
   testDir: './e2e',

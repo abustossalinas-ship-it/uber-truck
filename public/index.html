@@ -68,8 +68,13 @@
   <script>
   (function () {
     try {
+      var path = (location.pathname || '/').replace(/\/$/, '') || '/';
       var q = new URLSearchParams(location.search);
-      if (q.get('app') === '1' || localStorage.getItem('cubik_force_app') === '1') {
+      if (
+        path === '/app' ||
+        q.get('app') === '1' ||
+        localStorage.getItem('cubik_force_app') === '1'
+      ) {
         document.documentElement.classList.add('cubik-app-root');
         document.body.classList.add('cubik-app', 'cubik-app-strict');
         var gate = document.getElementById('app-gate');

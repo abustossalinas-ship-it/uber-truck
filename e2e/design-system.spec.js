@@ -5,7 +5,7 @@ const PRIMARY = '#06b6d4';
 const DARK = '#0f172a';
 const BG = '#f8fafc';
 const NAV_INACTIVE = '#94a3b8';
-const CACHE = '151';
+const CACHE = '152';
 
 /** @param {import('@playwright/test').Page} page */
 async function readToken(page, name) {
@@ -131,5 +131,6 @@ test.describe('Cubik Brand 2.0 — design system', () => {
     const accentBorder = await accentCard.evaluate((el) => getComputedStyle(el).borderLeftColor);
     expect(colorClose(accentBorder, PRIMARY)).toBeTruthy();
     await expect(accentCard.locator('.app-quick-icon svg')).toBeVisible();
+    await expect(accentCard.locator('.app-quick-chevron')).toBeVisible();
   });
 });

@@ -242,11 +242,141 @@ html.lf-smooth { scroll-behavior: smooth; }
   font-weight: 700;
 }
 
+/* Ruta GPS hero */
+.lf-hero-route {
+  position: absolute;
+  left: 50%;
+  bottom: 12%;
+  z-index: 3;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.55);
+  border: 1px solid var(--cubik-accent-ring);
+  backdrop-filter: blur(8px);
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: rgba(248, 250, 252, 0.9);
+  pointer-events: none;
+}
+
+.lf-route-city {
+  white-space: nowrap;
+}
+
+.lf-route-track {
+  position: relative;
+  width: 5.5rem;
+  height: 2px;
+  background: rgba(148, 163, 184, 0.35);
+  border-radius: 2px;
+  overflow: visible;
+}
+
+.lf-route-glow {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, var(--cubik-teal), transparent);
+  animation: lf-route-pulse 2.4s ease-in-out infinite;
+}
+
+.lf-route-truck {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  transform: translate(-50%, -55%);
+  font-size: 0.85rem;
+  animation: lf-truck-move 4.5s linear infinite;
+  filter: drop-shadow(0 0 6px var(--cubik-teal));
+}
+
+@keyframes lf-route-pulse {
+  0%, 100% { opacity: 0.35; }
+  50% { opacity: 1; }
+}
+
+@keyframes lf-truck-move {
+  from { left: 0; }
+  to { left: 100%; }
+}
+
+.lf-kpi-val.lf-kpi-tick {
+  color: var(--cubik-teal-light);
+  transition: color 0.25s ease;
+}
+
+/* Empresas — mini chart control tower */
+.lf-mini-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 0.35rem;
+  height: 3.5rem;
+  margin-bottom: 0.65rem;
+  padding: 0.35rem 0.5rem;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.lf-mini-chart span {
+  flex: 1;
+  border-radius: 4px 4px 0 0;
+  background: linear-gradient(180deg, var(--cubik-teal-light), var(--cubik-teal));
+  animation: lf-bar-grow 1.2s ease-out both;
+}
+
+.lf-mini-chart span:nth-child(1) { height: 42%; animation-delay: 0.05s; }
+.lf-mini-chart span:nth-child(2) { height: 68%; animation-delay: 0.15s; }
+.lf-mini-chart span:nth-child(3) { height: 55%; animation-delay: 0.25s; }
+.lf-mini-chart span:nth-child(4) { height: 82%; animation-delay: 0.35s; }
+.lf-mini-chart span:nth-child(5) { height: 61%; animation-delay: 0.45s; }
+
+@keyframes lf-bar-grow {
+  from { transform: scaleY(0); transform-origin: bottom; }
+  to { transform: scaleY(1); }
+}
+
+/* Transportistas — viaje activo en dashboard */
+.lf-live-trip {
+  margin-bottom: 0.65rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  background: rgba(6, 182, 212, 0.08);
+  border: 1px solid var(--cubik-accent-ring);
+  font-size: 0.72rem;
+}
+
+.lf-live-trip strong {
+  display: block;
+  color: #fff;
+  font-size: 0.82rem;
+  margin-bottom: 0.35rem;
+}
+
+.lf-live-trip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: var(--cubik-muted);
+  margin-top: 0.2rem;
+}
+
+.lf-live-trip-row em {
+  font-style: normal;
+  color: var(--cubik-teal);
+  font-weight: 700;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .lf-hero-video,
   .lf-hero-particles,
   .lf-trip-float,
-  .lf-product {
+  .lf-product,
+  .lf-route-glow,
+  .lf-route-truck {
     animation: none !important;
   }
   .lf-scroll-section {

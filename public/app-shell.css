@@ -1,5 +1,5 @@
 /* Cubik — shell móvil (Brand 2.0) */
-@import url('/cubik-design-system.css?v=0.0.151');
+@import url('/cubik-design-system.css?v=0.0.152');
 
 html.cubik-app-root {
   overflow: hidden;
@@ -345,7 +345,7 @@ body.cubik-app #change-password-panel::before {
   width: min(100%, 14rem);
   height: 2.25rem;
   margin: 0 auto 0.85rem;
-  background: url('/brand/logo-cubik-nav-light.png?v=0.0.151') center / contain no-repeat;
+  background: url('/brand/logo-cubik-nav-light.png?v=0.0.152') center / contain no-repeat;
 }
 
 body.cubik-app #auth-panel #auth-title,

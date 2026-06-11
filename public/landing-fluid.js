@@ -243,11 +243,17 @@
     const canvas = document.getElementById('lf-hero-particles');
     if (!canvas || reduced) return;
     const ctx = canvas.getContext('2d');
-    const streaks = Array.from({ length: 40 }, () => ({
+    const nodes = Array.from({ length: 28 }, () => ({
+      x: Math.random(),
+      y: Math.random(),
+      r: 1.2 + Math.random() * 2.2,
+      pulse: Math.random() * Math.PI * 2,
+    }));
+    const streaks = Array.from({ length: 36 }, () => ({
       x: Math.random(),
       y: Math.random(),
       len: 0.04 + Math.random() * 0.12,
-      speed: 0.15 + Math.random() * 0.35,
+      speed: 0.12 + Math.random() * 0.28,
     }));
     let raf = 0;
 
@@ -257,11 +263,27 @@
       canvas.height = Math.floor(canvas.clientHeight * dpr);
     }
 
-    function draw() {
-      const accent = themeColors().accent;
+    function draw(ts) {
+      const colors = themeColors();
+      const accent = colors.accent;
       const w = canvas.width;
       const h = canvas.height;
       ctx.clearRect(0, 0, w, h);
+
+      nodes.forEach((n, i) => {
+        nodes.slice(i + 1, i + 4).forEach((m) => {
+          const dx = (n.x - m.x) * w;
+          const dy = (n.y - m.y) * h;
+          if (Math.hypot(dx, dy) > w * 0.22) return;
+          ctx.strokeStyle = accent + '18';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(n.x * w, n.y * h);
+          ctx.lineTo(m.x * w, m.y * h);
+          ctx.stroke();
+        });
+      });
+
       streaks.forEach((s) => {
         s.x += s.speed * 0.002;
         if (s.x > 1.2) s.x = -0.2;
@@ -269,7 +291,7 @@
         const y = s.y * h;
         const grad = ctx.createLinearGradient(x, y, x + s.len * w, y);
         grad.addColorStop(0, accent + '00');
-        grad.addColorStop(0.5, accent + '59');
+        grad.addColorStop(0.5, accent + '66');
         grad.addColorStop(1, accent + '00');
         ctx.strokeStyle = grad;
         ctx.lineWidth = 2;
@@ -278,12 +300,65 @@
         ctx.lineTo(x + s.len * w, y);
         ctx.stroke();
       });
+
+      const t = (ts || 0) / 1000;
+      nodes.forEach((n) => {
+        const pulse = 0.45 + Math.sin(t * 1.6 + n.pulse) * 0.35;
+        ctx.beginPath();
+        ctx.arc(n.x * w, n.y * h, n.r * pulse * 2, 0, Math.PI * 2);
+        ctx.fillStyle = accent + '33';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(n.x * w, n.y * h, n.r, 0, Math.PI * 2);
+        ctx.fillStyle = accent;
+        ctx.fill();
+      });
+
       raf = requestAnimationFrame(draw);
     }
 
     resize();
     window.addEventListener('resize', resize);
     raf = requestAnimationFrame(draw);
+  }
+
+  function initLiveKpis() {
+    document.querySelectorAll('.lf-kpi-val[data-count]').forEach((el) => {
+      const base = Number(el.dataset.count);
+      if (!Number.isFinite(base)) return;
+      const suffix = el.dataset.suffix || '';
+      const prefix = el.dataset.prefix || '';
+      if (reduced) {
+        el.textContent = prefix + base + suffix;
+        return;
+      }
+      let current = base;
+      el.textContent = prefix + current + suffix;
+      window.setInterval(() => {
+        if (Math.random() > 0.55) {
+          current += Math.random() > 0.82 ? 2 : 1;
+          el.textContent = prefix + current + suffix;
+          el.classList.add('lf-kpi-tick');
+          window.setTimeout(() => el.classList.remove('lf-kpi-tick'), 280);
+        }
+      }, 2400 + Math.random() * 1800);
+    });
+  }
+
+  function initHeroRoute() {
+    const hero = document.querySelector('.lv3-hero.has-fluid');
+    if (!hero || hero.querySelector('.lf-hero-route')) return;
+    const route = document.createElement('div');
+    route.className = 'lf-hero-route';
+    route.setAttribute('aria-hidden', 'true');
+    route.innerHTML = `
+      <span class="lf-route-city">Santiago</span>
+      <span class="lf-route-track">
+        <span class="lf-route-glow"></span>
+        <span class="lf-route-truck" aria-hidden="true">🚚</span>
+      </span>
+      <span class="lf-route-city">Antofagasta</span>`;
+    hero.appendChild(route);
   }
 
   function initTabs() {
@@ -322,5 +397,7 @@
   initScrollSections();
   initHeroParallax();
   initHeroParticles();
+  initHeroRoute();
+  initLiveKpis();
   initTabs();
 })();

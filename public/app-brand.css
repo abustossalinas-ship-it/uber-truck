@@ -1,0 +1,235 @@
+/**
+ * Cubik App — capa visual Brand 2.0
+ * Misma biblioteca que web: cards, botones, badges, sombras.
+ */
+body.cubik-app.app-authed.app-main-visible main {
+  background: var(--cubik-bg);
+  padding: 0.65rem 0.85rem 1.25rem;
+}
+
+body.cubik-app.app-authed.app-main-visible main .panel.active {
+  animation: app-view-in 0.22s ease-out;
+}
+
+/* —— Mis viajes / Actividad —— */
+body.cubik-app #panel-trips .card {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  margin: 0;
+}
+
+body.cubik-app #panel-trips .card > h2,
+body.cubik-app #panel-trips .card > p.muted {
+  display: none;
+}
+
+body.cubik-app #list-trips h3 {
+  margin: 1rem 0 0.55rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cubik-nav-inactive);
+  border-bottom: none;
+}
+
+body.cubik-app #list-trips h3:first-child {
+  margin-top: 0;
+}
+
+body.cubik-app .item.trip-card,
+body.cubik-app article.trip-card {
+  background: var(--cubik-card);
+  border: 1px solid var(--cubik-border);
+  border-radius: var(--cubik-radius-lg);
+  box-shadow: var(--cubik-card-shadow);
+  padding: 1rem 1.05rem;
+  margin-bottom: 0.75rem;
+  border-left: 4px solid transparent;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+body.cubik-app .trip-card:not(.trip-card-awaiting) {
+  border-left-color: var(--cubik-primary);
+}
+
+body.cubik-app .trip-card:active {
+  transform: scale(0.99);
+}
+
+body.cubik-app .trip-party-avatar {
+  background: linear-gradient(135deg, var(--cubik-dark) 0%, var(--cubik-primary) 100%);
+}
+
+body.cubik-app .trip-party-name {
+  color: var(--cubik-dark);
+  font-weight: 700;
+}
+
+body.cubik-app .trip-route-line {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--cubik-dark);
+  margin: 0.35rem 0;
+}
+
+body.cubik-app .pill {
+  font-size: 0.68rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  background: var(--cubik-accent-soft);
+  color: var(--cubik-primary);
+  font-weight: 700;
+  border: 1px solid var(--cubik-accent-ring);
+}
+
+body.cubik-app .trip-status-pill {
+  background: var(--cubik-accent-soft);
+  color: var(--cubik-primary);
+}
+
+body.cubik-app .pill-ok,
+body.cubik-app .trip-payment-ok {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--cubik-success);
+  border-color: rgba(16, 185, 129, 0.25);
+}
+
+body.cubik-app .pill-warn,
+body.cubik-app .trip-payment-hold {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--cubik-warning);
+  border-color: rgba(245, 158, 11, 0.25);
+}
+
+body.cubik-app .trip-payment-pilot {
+  background: var(--cubik-accent-soft);
+  color: var(--cubik-text-soft);
+  border: 1px solid var(--cubik-border);
+}
+
+body.cubik-app .trip-delivery-awaiting {
+  background: var(--cubik-surface-selected);
+  border: 1px solid var(--cubik-accent-ring);
+  border-radius: var(--cubik-radius);
+}
+
+body.cubik-app .trip-delivery-awaiting-title {
+  color: var(--cubik-primary);
+}
+
+body.cubik-app .tab,
+body.cubik-app .btn-secondary {
+  background: transparent;
+  border: 1px solid var(--cubik-border);
+  color: var(--cubik-dark);
+  border-radius: var(--cubik-radius);
+  font-weight: 600;
+  font-size: 0.82rem;
+  padding: 0.55rem 0.85rem;
+}
+
+body.cubik-app .tab:hover,
+body.cubik-app .btn-secondary:hover {
+  border-color: var(--cubik-primary);
+  color: var(--cubik-primary);
+}
+
+body.cubik-app .tab.active {
+  background: var(--cubik-dark);
+  border-color: var(--cubik-dark);
+  color: #fff;
+}
+
+body.cubik-app .btn-match-cta,
+body.cubik-app .btn-trip-rate,
+body.cubik-app button[type="submit"]:not(.tab-outline):not(.link-btn) {
+  background: var(--cubik-gradient-cta);
+  color: #fff;
+  border: none;
+  border-radius: var(--cubik-radius);
+  min-height: 2.75rem;
+  font-weight: 700;
+  padding: 0.65rem 1rem;
+  width: 100%;
+  margin-top: 0.35rem;
+}
+
+body.cubik-app .actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
+body.cubik-app .actions .tab,
+body.cubik-app .actions .btn-secondary {
+  width: 100%;
+  text-align: center;
+}
+
+body.cubik-app .trip-map-wrap {
+  border-radius: var(--cubik-radius);
+  overflow: hidden;
+  border: 1px solid var(--cubik-border);
+  margin: 0.5rem 0;
+}
+
+body.cubik-app .match-highlight {
+  box-shadow: 0 0 0 3px var(--cubik-accent-ring);
+}
+
+/* Tablero / emparejar en app */
+body.cubik-app .board-enterprise-card,
+body.cubik-app.app-main-visible main .card:not(#panel-trips .card) {
+  background: var(--cubik-card);
+  border: 1px solid var(--cubik-border);
+  border-radius: var(--cubik-radius-lg);
+  box-shadow: var(--cubik-card-shadow);
+}
+
+body.cubik-app .proposal-compare-panel {
+  border-left: 4px solid var(--cubik-primary);
+  border-radius: var(--cubik-radius-lg);
+}
+
+body.cubik-app .pill-rec {
+  background: var(--cubik-primary);
+  color: #fff;
+}
+
+/* Formularios deep en app */
+body.cubik-app.app-main-visible main form.card {
+  background: var(--cubik-card);
+  border-radius: var(--cubik-radius-lg);
+  box-shadow: var(--cubik-card-shadow);
+  border: 1px solid var(--cubik-border);
+}
+
+body.cubik-app input,
+body.cubik-app select,
+body.cubik-app textarea {
+  border-radius: var(--cubik-radius);
+  border-color: var(--cubik-border);
+  background: var(--cubik-card);
+}
+
+body.cubik-app input:focus,
+body.cubik-app select:focus,
+body.cubik-app textarea:focus {
+  outline: 2px solid var(--cubik-accent-ring);
+  border-color: var(--cubik-primary);
+}
+
+body.cubik-app #active-trip-banner {
+  background: var(--cubik-card);
+  border-bottom: 1px solid var(--cubik-border);
+  box-shadow: var(--cubik-card-shadow);
+}
+
+body.cubik-app .active-trip-tag {
+  color: var(--cubik-primary);
+}

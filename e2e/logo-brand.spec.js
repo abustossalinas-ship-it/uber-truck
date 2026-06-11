@@ -6,7 +6,7 @@ const {
   expectLoginOpenForRole,
 } = require('./helpers');
 
-const V = '0.0.151';
+const V = '0.0.152';
 
 test.describe('Logo Cubik — encuadre y assets', () => {
   test('asset demo/app es PNG maestro usuario (360×114, alpha)', async ({ request }) => {

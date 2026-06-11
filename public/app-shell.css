@@ -234,27 +234,22 @@ body.cubik-app .app-gate {
 
 .app-gate-logo {
   display: block;
-  height: 2.25rem;
-  width: auto;
-  max-width: min(100%, 14rem);
-  aspect-ratio: 360 / 114;
+  width: clamp(4.5rem, 22vw, 5.75rem);
+  height: clamp(4.5rem, 22vw, 5.75rem);
+  aspect-ratio: 1;
   object-fit: contain;
   object-position: center center;
-  margin: 0 auto 0.5rem;
+  margin: 0 auto 0.35rem;
   background: transparent;
   flex-shrink: 0;
 }
 
 .app-gate-brand {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+  margin: 0 0 0.15rem;
+  font-size: clamp(1.35rem, 5.5vw, 1.65rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  color: var(--text);
 }
 
 .app-gate-tagline {
@@ -1036,9 +1031,8 @@ body.cubik-app.app-deep main .card {
 /* iPhone pantallas bajas (SE, mini) — bienvenida y auth */
 @media (max-height: 740px) {
   .app-gate-logo {
-    width: min(100%, 12rem);
-    height: auto;
-    max-height: none;
+    width: clamp(3.75rem, 18vw, 4.5rem);
+    height: clamp(3.75rem, 18vw, 4.5rem);
   }
 
   .app-gate-lead {

@@ -344,6 +344,12 @@ function syncAuthRoleFields(role) {
 function syncAuthRoleToggle(role) {
   const toggle = document.getElementById('auth-role-toggle');
   if (!toggle) return;
+  if (isCubikAppGuest()) {
+    toggle.hidden = true;
+    toggle.setAttribute('hidden', '');
+    delete toggle.dataset.active;
+    return;
+  }
   if (role && !authForgotMode) {
     toggle.hidden = false;
     toggle.removeAttribute('hidden');
@@ -370,6 +376,23 @@ function syncAuthContext(role) {
   const ctx = document.getElementById('auth-context');
   const title = document.getElementById('auth-title');
   const panel = document.getElementById('auth-panel');
+  if (isCubikAppGuest()) {
+    if (ctx) {
+      ctx.hidden = true;
+      ctx.setAttribute('hidden', '');
+      delete ctx.dataset.role;
+    }
+    if (title && !authForgotMode) {
+      title.textContent = authRegisterMode ? 'Crear cuenta' : 'Iniciar sesión';
+      title.classList.remove('auth-title-sr');
+      title.hidden = false;
+    }
+    if (panel) {
+      if (role) panel.dataset.authRole = role;
+      else delete panel.dataset.authRole;
+    }
+    return;
+  }
   const cfg = role ? AUTH_CONTEXT_COPY[role] : null;
   if (!ctx) return;
   if (cfg && !authForgotMode) {
@@ -548,7 +571,9 @@ function blockAuthIntentMismatch(user) {
   const actualLabel = typeof roleLabel === 'function' ? roleLabel(actual) : actual;
   switchAuthIntentRole(actual);
   showAuthError(
-    `Esta cuenta es de ${actualLabel}. Cambiamos la pestaña de arriba — vuelve a ingresar tu contraseña.`
+    isCubikAppGuest()
+      ? `Esta cuenta es de ${actualLabel}. Vuelve atrás, elige ese rol e ingresa de nuevo.`
+      : `Esta cuenta es de ${actualLabel}. Cambiamos la pestaña de arriba — vuelve a ingresar tu contraseña.`
   );
   const pwdField = document.querySelector('#form-auth [name="password"]');
   if (pwdField) pwdField.value = '';

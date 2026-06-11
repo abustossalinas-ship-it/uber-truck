@@ -378,10 +378,15 @@ body.cubik-app #auth-panel::before,
 body.cubik-app #change-password-panel::before {
   content: '';
   display: block;
-  width: min(100%, 14rem);
-  height: 2.25rem;
+  width: min(100%, 16.5rem);
+  height: 3.25rem;
   margin: 0 auto 0.85rem;
-  background: url('/brand/logo-cubik-nav-light.png?v=0.0.152') center / contain no-repeat;
+  background: url('/brand/logo-cubik-official-light.png?v=0.0.160') center / contain no-repeat;
+}
+
+body.cubik-app #auth-panel .auth-role-toggle,
+body.cubik-app #auth-panel .auth-context {
+  display: none !important;
 }
 
 body.cubik-app #auth-panel #auth-title,

@@ -11,18 +11,18 @@
   <meta property="og:url" content="https://www.getcubik.cl/" />
   <link rel="canonical" href="https://www.getcubik.cl/" />
   <title>Cubik — Optimiza tus envíos | getcubik.cl</title>
-  <link rel="icon" href="/brand/logo-mark.png?v=0.0.155" type="image/png" />
-  <link rel="apple-touch-icon" href="/brand/logo-mark.png?v=0.0.155" />
+  <link rel="icon" href="/brand/logo-mark.png?v=0.0.156" type="image/png" />
+  <link rel="apple-touch-icon" href="/brand/logo-mark.png?v=0.0.156" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/landing-v3.css?v=0.0.155" />
-  <link rel="stylesheet" href="/landing-fluid.css?v=0.0.155" />
+  <link rel="stylesheet" href="/landing-v3.css?v=0.0.156" />
+  <link rel="stylesheet" href="/landing-fluid.css?v=0.0.156" />
 </head>
 <body class="lv3-page lv3-home">
   <header class="lv3-nav">
     <a class="lv3-brand" href="/" aria-label="Cubik inicio">
-      <img src="/brand/logo-cubik-nav.png?v=0.0.155" alt="Cubik" decoding="async" width="360" height="117" />
+      <img src="/brand/logo-cubik-nav.png?v=0.0.156" alt="Cubik" decoding="async" width="360" height="117" />
     </a>
     <nav class="lv3-nav-links" aria-label="Principal">
       <a href="/" class="active">Inicio</a>
@@ -58,8 +58,17 @@
       </div>
       <div class="lv3-hero-visual lv3-reveal">
         <div class="lf-hero-home-scene" id="lf-hero-product-wrap">
-          <img class="lf-hero-home-truck" src="/brand/landing/hero-home-truck.jpg?v=0.0.155" alt="" decoding="async" />
-          <img class="lf-hero-home-chart" src="/brand/landing/map-route-motion.svg?v=0.0.155" alt="" aria-hidden="true" />
+          <div class="lf-hero-home-layer">
+            <img class="lf-hero-home-truck" src="/brand/landing/hero-home-truck-dark.png?v=0.0.156" alt="" decoding="async" />
+            <div class="lf-hero-home-road" aria-hidden="true">
+              <span class="lf-hero-home-dash"></span>
+              <span class="lf-hero-home-dash lf-hero-home-dash--2"></span>
+              <span class="lf-hero-home-dash lf-hero-home-dash--3"></span>
+              <span class="lf-hero-home-dash lf-hero-home-dash--4"></span>
+            </div>
+            <div class="lf-hero-home-headlights" aria-hidden="true"></div>
+            <canvas id="lf-home-truck-motion" class="lf-hero-home-motion" aria-hidden="true"></canvas>
+          </div>
         </div>
       </div>
     </div>
@@ -148,7 +157,7 @@
   <footer class="lv3-footer">
     <div class="lv3-footer-grid">
       <div class="lv3-footer-brand">
-        <img src="/brand/logo-cubik-nav.png?v=0.0.155" alt="Cubik" decoding="async" width="360" height="117" />
+        <img src="/brand/logo-cubik-nav.png?v=0.0.156" alt="Cubik" decoding="async" width="360" height="117" />
         <p>Plataforma logística inteligente para transportistas y embarcadores en Chile.</p>
         <div class="lv3-social" aria-label="Redes sociales">
           <a href="https://www.linkedin.com" rel="noopener noreferrer" aria-label="LinkedIn">in</a>
@@ -189,8 +198,8 @@
   </footer>
 
   <div id="lv3-loading" class="lv3-loading" hidden aria-live="polite">Abriendo Cubik…</div>
-  <script src="/landing-v3.js?v=0.0.155" defer></script>
-  <script src="/landing-fluid.js?v=0.0.155" defer></script>
+  <script src="/landing-v3.js?v=0.0.156" defer></script>
+  <script src="/landing-fluid.js?v=0.0.156" defer></script>
   <script>
     (function () {
       document.querySelectorAll('a[href^="/app"]').forEach(function (link) {

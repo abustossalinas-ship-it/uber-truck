@@ -229,7 +229,7 @@
   }
 
   const HERO_CINE_SRC = {
-    'lv3-home': '/brand/landing/hero-home-truck.jpg',
+    'lv3-home': '/brand/landing/hero-home-truck-dark.png',
     'lv3-shipper': '/brand/landing/mockup-hero-bg.jpg',
     'lv3-carrier': '/brand/landing/hero-truck-night.jpg',
   };
@@ -438,6 +438,90 @@
     if (!document.body.classList.contains('lv3-shipper') || reduced) return;
     const video = document.querySelector('.lf-tablet-video');
     if (video) video.play().catch(() => {});
+  }
+
+  function initHomeTruckMotion() {
+    if (!document.body.classList.contains('lv3-home') || reduced) return;
+    const canvas = document.getElementById('lf-home-truck-motion');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    const streaks = Array.from({ length: 14 }, () => ({
+      y: 0.55 + Math.random() * 0.35,
+      x: Math.random(),
+      len: 0.06 + Math.random() * 0.14,
+      speed: 0.35 + Math.random() * 0.55,
+    }));
+    const nodes = Array.from({ length: 10 }, () => ({
+      x: 0.1 + Math.random() * 0.85,
+      y: 0.08 + Math.random() * 0.42,
+      pulse: Math.random() * Math.PI * 2,
+    }));
+    let raf = 0;
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      const rect = canvas.getBoundingClientRect();
+      canvas.width = Math.floor(rect.width * dpr);
+      canvas.height = Math.floor(rect.height * dpr);
+    }
+
+    function draw(ts) {
+      const colors = themeColors();
+      const w = canvas.width;
+      const h = canvas.height;
+      if (!w || !h) {
+        raf = requestAnimationFrame(draw);
+        return;
+      }
+      ctx.clearRect(0, 0, w, h);
+      const t = (ts || 0) / 1000;
+
+      nodes.forEach((n, i) => {
+        nodes.slice(i + 1, i + 3).forEach((m) => {
+          ctx.strokeStyle = colors.accent + '18';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(n.x * w, n.y * h);
+          ctx.lineTo(m.x * w, m.y * h);
+          ctx.stroke();
+        });
+      });
+
+      nodes.forEach((n) => {
+        const pulse = 0.5 + Math.sin(t * 1.8 + n.pulse) * 0.35;
+        ctx.beginPath();
+        ctx.arc(n.x * w, n.y * h, 3 * pulse, 0, Math.PI * 2);
+        ctx.fillStyle = colors.accent + '44';
+        ctx.fill();
+        ctx.beginPath();
+        ctx.arc(n.x * w, n.y * h, 1.5, 0, Math.PI * 2);
+        ctx.fillStyle = colors.accent;
+        ctx.fill();
+      });
+
+      streaks.forEach((s) => {
+        s.x += s.speed * 0.004;
+        if (s.x > 1.3) s.x = -0.25;
+        const x = s.x * w;
+        const y = s.y * h;
+        const grad = ctx.createLinearGradient(x, y, x + s.len * w, y);
+        grad.addColorStop(0, colors.accent + '00');
+        grad.addColorStop(0.45, colors.accent + '55');
+        grad.addColorStop(1, colors.accent + '00');
+        ctx.strokeStyle = grad;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + s.len * w, y);
+        ctx.stroke();
+      });
+
+      raf = requestAnimationFrame(draw);
+    }
+
+    resize();
+    window.addEventListener('resize', resize);
+    raf = requestAnimationFrame(draw);
   }
 
   function initCarrierPhoneVideo() {
@@ -758,6 +842,7 @@
   initDepthLayers();
   initHeroVideo();
   initShipperProductVideo();
+  initHomeTruckMotion();
   initCarrierPhoneVideo();
   initCarrierTruckGlow();
   initFloatingCards();

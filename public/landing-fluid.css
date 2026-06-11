@@ -245,7 +245,7 @@
   font-weight: 700;
 }
 
-/* Home — camión + línea de crecimiento (mockup) */
+/* Home — camión oscuro en movimiento (mockup imagen 2) */
 .lf-hero-home-scene {
   position: relative;
   width: 100%;
@@ -253,8 +253,16 @@
   margin-left: auto;
   border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.45);
+  box-shadow:
+    0 32px 80px rgba(0, 0, 0, 0.55),
+    0 0 0 1px rgba(6, 182, 212, 0.12);
   animation: lf-float 5.5s ease-in-out infinite;
+}
+
+.lf-hero-home-layer {
+  position: relative;
+  overflow: hidden;
+  background: #0a1628;
 }
 
 .lf-hero-home-truck {
@@ -263,24 +271,71 @@
   height: auto;
   aspect-ratio: 16 / 10;
   object-fit: cover;
-  object-position: 72% center;
+  object-position: 50% 42%;
+  transform-origin: 38% 72%;
+  animation: lf-truck-forward 5.5s ease-in-out infinite alternate;
+  filter: brightness(0.88) saturate(0.85) contrast(1.08);
+  will-change: transform;
 }
 
-.lf-hero-home-chart {
+.lf-hero-home-road {
   position: absolute;
-  left: 8%;
-  right: 8%;
-  top: 8%;
-  width: 84%;
-  height: auto;
+  inset: 0;
   pointer-events: none;
-  filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.45));
-  animation: lf-chart-glow 3s ease-in-out infinite;
+  overflow: hidden;
 }
 
-@keyframes lf-chart-glow {
-  0%, 100% { opacity: 0.75; transform: translateY(0); }
-  50% { opacity: 1; transform: translateY(-4px); }
+.lf-hero-home-dash {
+  position: absolute;
+  bottom: 22%;
+  left: -20%;
+  width: 22%;
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, rgba(148, 163, 184, 0.15), rgba(6, 182, 212, 0.55), rgba(148, 163, 184, 0.15), transparent);
+  animation: lf-road-streak 1.1s linear infinite;
+}
+
+.lf-hero-home-dash--2 { bottom: 18%; animation-duration: 0.95s; animation-delay: 0.25s; width: 16%; }
+.lf-hero-home-dash--3 { bottom: 14%; animation-duration: 1.25s; animation-delay: 0.5s; width: 20%; }
+.lf-hero-home-dash--4 { bottom: 26%; animation-duration: 0.85s; animation-delay: 0.15s; width: 14%; opacity: 0.7; }
+
+.lf-hero-home-headlights {
+  position: absolute;
+  left: 14%;
+  bottom: 28%;
+  width: 28%;
+  height: 18%;
+  background: radial-gradient(ellipse at 30% 50%, rgba(6, 182, 212, 0.35) 0%, rgba(6, 182, 212, 0.08) 45%, transparent 70%);
+  mix-blend-mode: screen;
+  animation: lf-headlight-pulse 2.4s ease-in-out infinite;
+  pointer-events: none;
+}
+
+.lf-hero-home-motion {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  opacity: 0.85;
+}
+
+@keyframes lf-truck-forward {
+  from { transform: scale(1.02) translate3d(-1.2%, 0.4%, 0); }
+  to { transform: scale(1.09) translate3d(2.8%, -0.6%, 0); }
+}
+
+@keyframes lf-road-streak {
+  from { transform: translate3d(0, 0, 0); opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  to { transform: translate3d(520%, 0, 0); opacity: 0; }
+}
+
+@keyframes lf-headlight-pulse {
+  0%, 100% { opacity: 0.65; }
+  50% { opacity: 1; }
 }
 
 /* Empresas — tablet con video dashboard */
@@ -798,6 +853,10 @@ html.lf-smooth { scroll-behavior: smooth; }
   .lf-trip-float,
   .lf-hero-product-wrap .lf-product,
   .lf-phone-mockup,
+  .lf-hero-home-truck,
+  .lf-hero-home-dash,
+  .lf-hero-home-headlights,
+  .lf-hero-home-motion,
   .lf-float-card,
   .lf-route-glow,
   .lf-route-truck,

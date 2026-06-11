@@ -187,6 +187,132 @@ function hasQaShipperCreds() {
   return Boolean(process.env.QA_SHIPPER_EMAIL && process.env.QA_SHIPPER_PASSWORD);
 }
 
+/**
+ * Verifica que el logo tenga tinta visible en todo el alto (detecta PNG recortado / mal generado).
+ * @param {import('@playwright/test').Page} page
+ * @param {string} imgSelector
+ */
+async function expectLogoInkCoverage(page, imgSelector) {
+  const result = await page.evaluate(async (sel) => {
+    const el = document.querySelector(sel);
+    if (!el || !(el instanceof HTMLImageElement)) {
+      return { ok: false, reason: 'img not found' };
+    }
+    if (typeof el.decode === 'function') {
+      try {
+        await el.decode();
+      } catch (_) {}
+    }
+    const w = el.naturalWidth || el.width || 168;
+    const h = el.naturalHeight || el.height || 40;
+    if (w < 8 || h < 8) {
+      return { ok: false, reason: 'dimensions too small', w, h };
+    }
+    const canvas = document.createElement('canvas');
+    canvas.width = w;
+    canvas.height = h;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return { ok: false, reason: 'no canvas' };
+    ctx.drawImage(el, 0, 0, w, h);
+    const data = ctx.getImageData(0, 0, w, h).data;
+    const bandHasInk = (y0, y1) => {
+      for (let y = y0; y < y1; y++) {
+        for (let x = 0; x < w; x++) {
+          if (data[(y * w + x) * 4 + 3] > 24) return true;
+        }
+      }
+      return false;
+    };
+    const top = bandHasInk(0, Math.max(1, Math.floor(h * 0.22)));
+    const mid = bandHasInk(Math.floor(h * 0.35), Math.floor(h * 0.65));
+    const bottom = bandHasInk(Math.floor(h * 0.78), h);
+    return { ok: top && mid && bottom, top, mid, bottom, w, h };
+  }, imgSelector);
+
+  expect(result, JSON.stringify(result)).toMatchObject({ ok: true });
+}
+
+/**
+ * @param {import('@playwright/test').Page} page
+ * @param {{ img: string, container: string, srcPattern?: RegExp, minNaturalWidth?: number, minRenderedHeight?: number, checkInk?: boolean }} opts
+ */
+async function expectLogoFramed(page, opts) {
+  const {
+    img: imgSelector,
+    container: containerSelector,
+    srcPattern = /logo-cubik-nav/,
+    minNaturalWidth = 140,
+    minRenderedHeight = 26,
+    checkInk = true,
+  } = opts;
+
+  const img = page.locator(imgSelector).first();
+  await expect(img).toBeVisible();
+  if (srcPattern) {
+    await expect(img).toHaveAttribute('src', srcPattern);
+  }
+
+  const result = await page.evaluate(
+    ({ imgSel, containerSel, minNatW, minRenderH }) => {
+      const el = document.querySelector(imgSel);
+      const container = document.querySelector(containerSel);
+      if (!el || !(el instanceof HTMLImageElement)) {
+        return { ok: false, reason: 'img not found' };
+      }
+      if (!container) {
+        return { ok: false, reason: 'container not found' };
+      }
+      const ir = el.getBoundingClientRect();
+      const cr = container.getBoundingClientRect();
+      const tol = 2;
+      const ratio = ir.width / Math.max(ir.height, 1);
+      const clipped =
+        ir.top < cr.top - tol ||
+        ir.bottom > cr.bottom + tol ||
+        ir.left < cr.left - tol ||
+        ir.right > cr.right + tol;
+
+      return {
+        ok:
+          el.complete &&
+          el.naturalWidth >= minNatW &&
+          ir.height >= minRenderH &&
+          !clipped &&
+          ratio >= 2.6 &&
+          ratio <= 3.6,
+        naturalWidth: el.naturalWidth,
+        naturalHeight: el.naturalHeight,
+        rendered: { w: ir.width, h: ir.height, top: ir.top, bottom: ir.bottom },
+        container: { top: cr.top, bottom: cr.bottom },
+        ratio,
+        clipped,
+        src: el.currentSrc || el.src,
+      };
+    },
+    {
+      imgSel: imgSelector,
+      containerSel: containerSelector,
+      minNatW: minNaturalWidth,
+      minRenderH: minRenderedHeight,
+    }
+  );
+
+  expect(result, JSON.stringify(result)).toMatchObject({ ok: true });
+  if (checkInk) {
+    await expectLogoInkCoverage(page, imgSelector);
+  }
+}
+
+/** @param {import('@playwright/test').APIRequestContext} request @param {string} assetPath */
+async function expectPngHasAlpha(request, assetPath) {
+  const res = await request.get(assetPath);
+  expect(res.ok()).toBeTruthy();
+  const buf = Buffer.from(await res.body());
+  expect(buf.slice(0, 8).toString('hex')).toBe('89504e470d0a1a0a');
+  const colorType = buf[25];
+  expect([4, 6]).toContain(colorType);
+}
+
 module.exports = {
   resetGuestAppSession,
   openWelcomeRole,
@@ -202,4 +328,7 @@ module.exports = {
   healthSnapshot,
   hasQaCarrierCreds,
   hasQaShipperCreds,
+  expectLogoFramed,
+  expectLogoInkCoverage,
+  expectPngHasAlpha,
 };

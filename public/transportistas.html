@@ -10,20 +10,21 @@
   <meta property="og:url" content="https://www.getcubik.cl/transportistas" />
   <link rel="canonical" href="https://www.getcubik.cl/transportistas" />
   <title>Transportistas — Cubik | getcubik.cl</title>
-  <link rel="icon" href="/brand/logo-cubik-3d.png" type="image/png" />
+  <link rel="icon" href="/brand/logo-mark.png?v=0.0.145" type="image/png" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/landing-v3.css?v=0.0.133" />
+  <link rel="stylesheet" href="/landing-v3.css?v=0.0.145" />
+  <link rel="stylesheet" href="/landing-fluid.css?v=0.0.145" />
 </head>
-<body class="lv3-page">
+<body class="lv3-page lv3-carrier">
   <header class="lv3-nav">
     <a class="lv3-brand" href="/" aria-label="Cubik inicio">
-      <img src="/brand/logo-cubik-wordmark.svg" width="148" height="36" alt="Cubik" />
+      <img src="/brand/logo-cubik-nav.png?v=0.0.145" alt="Cubik" decoding="async" width="360" height="117" />
     </a>
     <nav class="lv3-nav-links" aria-label="Principal">
       <a href="/">Inicio</a>
-      <a href="#beneficios">Soluciones</a>
+      <a href="#soluciones">Soluciones</a>
       <a href="/empresas">Para empresas</a>
       <a href="/transportistas" class="active">Transportistas</a>
       <a href="/probar">Recursos</a>
@@ -35,110 +36,112 @@
     </div>
   </header>
 
-  <section class="lv3-hero">
+  <section class="lv3-hero has-fluid">
+    <div class="lf-hero-media" aria-hidden="true">
+      <canvas id="lf-hero-particles" class="lf-hero-particles"></canvas>
+    </div>
     <div class="lv3-hero-bg" aria-hidden="true"></div>
     <div class="lv3-hero-overlay" aria-hidden="true"></div>
     <div class="lv3-hero-inner">
-      <div>
+      <div class="lv3-hero-copy">
         <p class="lv3-kicker">Plataforma para transportistas</p>
         <h1>Encuentra cargas todos los días y aumenta la rentabilidad de tu camión</h1>
         <p class="lv3-hero-lead">
-          Accede a oportunidades de carga en todo Chile, gestiona tus viajes y obtén visibilidad
-          total de tu operación — sin llamadas interminables ni coordinación manual.
+          Con Cubik accedes a cientos de oportunidades de carga, gestionas tus viajes y documentos,
+          y tienes visibilidad total de tu operación en una sola plataforma.
         </p>
         <div class="lv3-hero-actions">
           <a class="lv3-btn lv3-btn-teal lv3-btn-lg" href="/app?role=carrier">Encontrar cargas →</a>
           <a class="lv3-btn lv3-btn-ghost lv3-btn-lg lv3-btn-play" href="#tower">
-            <span class="lv3-play-dot" aria-hidden="true">
-              <svg><use href="/brand/landing/icons-sprite.svg#ico-play"/></svg>
-            </span>
+            <span class="lv3-play-dot" aria-hidden="true">▶</span>
             Ver cómo funciona
           </a>
         </div>
       </div>
-
-      <div class="lv3-hero-panel lv3-reveal" aria-hidden="true">
-        <div class="lv3-panel-side">
-          <button type="button" class="active" title="Inicio"><svg class="lv3-ico"><use href="/brand/landing/icons-sprite.svg#ico-route"/></svg></button>
-          <button type="button" title="Mapa"><svg class="lv3-ico"><use href="/brand/landing/icons-sprite.svg#ico-map"/></svg></button>
-          <button type="button" title="Cargas"><svg class="lv3-ico"><use href="/brand/landing/icons-sprite.svg#ico-truck"/></svg></button>
-          <button type="button" title="Pagos"><svg class="lv3-ico"><use href="/brand/landing/icons-sprite.svg#ico-wallet"/></svg></button>
-        </div>
-        <div class="lv3-panel-main">
-          <p class="lv3-panel-title">Resumen de tu operación</p>
-          <div class="lv3-panel-stats">
-            <div class="lv3-panel-stat"><strong>12</strong><span>Viajes en curso</span></div>
-            <div class="lv3-panel-stat"><strong>8</strong><span>Próximas cargas</span></div>
-            <div class="lv3-panel-stat"><strong>$12.450.000</strong><span>Ingresos del mes</span></div>
-            <div class="lv3-panel-stat">
-              <strong>4.8</strong>
-              <span class="lv3-stars" aria-hidden="true">
-                <svg><use href="/brand/landing/icons-sprite.svg#ico-star"/></svg>
-                <svg><use href="/brand/landing/icons-sprite.svg#ico-star"/></svg>
-                <svg><use href="/brand/landing/icons-sprite.svg#ico-star"/></svg>
-                <svg><use href="/brand/landing/icons-sprite.svg#ico-star"/></svg>
-                <svg><use href="/brand/landing/icons-sprite.svg#ico-star"/></svg>
-              </span>
-              <span>Calificación</span>
+      <div class="lv3-hero-visual lv3-reveal">
+        <div class="lf-hero-product-wrap" id="lf-hero-product-wrap">
+          <div class="lf-product" id="lf-hero-product" role="img" aria-label="Panel de operación Cubik con mapa y cargas en vivo">
+            <div class="lf-product-chrome">
+              <div class="lf-product-side" aria-hidden="true">
+                <span class="lf-side-dot active"></span>
+                <span class="lf-side-dot"></span>
+                <span class="lf-side-dot"></span>
+                <span class="lf-side-dot"></span>
+              </div>
+              <div class="lf-product-main">
+                <p class="lf-product-title">Resumen de tu operación</p>
+                <div class="lf-kpis">
+                  <div class="lf-kpi"><span class="lf-kpi-val" data-count="12">0</span><span>Viajes en curso</span></div>
+                  <div class="lf-kpi"><span class="lf-kpi-val" data-count="48">0</span><span>Cargas sugeridas</span></div>
+                  <div class="lf-kpi"><span class="lf-kpi-val">$2.4M</span><span>Ingresos mes</span></div>
+                  <div class="lf-kpi"><span class="lf-kpi-val" data-count="98" data-suffix="%">0</span><span>Puntualidad</span></div>
+                </div>
+                <div class="lf-map-wrap">
+                  <canvas id="lf-dash-map" width="400" height="168" aria-hidden="true"></canvas>
+                </div>
+                <ul class="lf-loads" id="lf-loads">
+                  <li>RM → Valparaíso <em>$420.000</em></li>
+                  <li>Concepción → Santiago <em>$890.000</em></li>
+                  <li>Antofagasta → La Serena <em>$1.2M</em></li>
+                </ul>
+              </div>
             </div>
           </div>
-          <div class="lv3-panel-map">
-            <object data="/brand/landing/map-chile-control.svg" type="image/svg+xml" tabindex="-1">Mapa Chile</object>
-          </div>
-          <div class="lv3-panel-list">
-            <h4>Próximas cargas</h4>
-            <div class="lv3-load-row"><span>RM → Valparaíso · 24 pallets</span><em>$420.000</em></div>
-            <div class="lv3-load-row"><span>Concepción → Temuco · 18 t</span><em>$680.000</em></div>
-            <div class="lv3-load-row"><span>Santiago → Rancagua · spot</span><em>$195.000</em></div>
-          </div>
+        </div>
+      </div>
+    </div>
+    <div class="lv3-hero-metrics lv3-reveal" aria-label="Métricas">
+      <div class="lv3-hero-metrics-inner">
+        <div class="lv3-metric">
+          <svg class="lv3-metric-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          <strong>+500</strong><span>Transportistas activos</span>
+        </div>
+        <div class="lv3-metric">
+          <svg class="lv3-metric-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11"/><path d="M15 18H2"/><path d="M15 18v3"/><path d="M19 18V8l3 3v7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+          <strong>+5.000</strong><span>Viajes gestionados cada mes</span>
+        </div>
+        <div class="lv3-metric">
+          <svg class="lv3-metric-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
+          <strong>98%</strong><span>Trazabilidad en tiempo real</span>
+        </div>
+        <div class="lv3-metric">
+          <svg class="lv3-metric-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+          <strong>24/7</strong><span>Soporte operativo</span>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="lv3-metrics" aria-label="Métricas de la plataforma">
-    <div class="lv3-metrics-inner lv3-reveal">
-      <div class="lv3-metric">
-        <div class="lv3-metric-ico"><svg class="lv3-ico-lg"><use href="/brand/landing/icons-sprite.svg#ico-truck"/></svg></div>
-        <strong>+500</strong><span>Transportistas activos</span>
-      </div>
-      <div class="lv3-metric">
-        <div class="lv3-metric-ico"><svg class="lv3-ico-lg"><use href="/brand/landing/icons-sprite.svg#ico-route"/></svg></div>
-        <strong>+5.000</strong><span>Viajes gestionados cada mes</span>
-      </div>
-      <div class="lv3-metric">
-        <div class="lv3-metric-ico"><svg class="lv3-ico-lg"><use href="/brand/landing/icons-sprite.svg#ico-shield"/></svg></div>
-        <strong>98%</strong><span>Trazabilidad en tiempo real</span>
-      </div>
-      <div class="lv3-metric">
-        <div class="lv3-metric-ico"><svg class="lv3-ico-lg"><use href="/brand/landing/icons-sprite.svg#ico-headset"/></svg></div>
-        <strong>24/7</strong><span>Soporte operativo</span>
-      </div>
-    </div>
-  </section>
-
-  <section class="lv3-features" id="beneficios">
+  <section class="lv3-features lf-scroll-section" id="soluciones">
     <div class="lv3-features-inner">
       <h2 class="lv3-reveal">Todo lo que necesitas, en un solo lugar</h2>
       <p class="lv3-features-sub lv3-reveal">Tecnología + operación + ingresos para tu camión.</p>
       <div class="lv3-feature-grid">
         <article class="lv3-feature lv3-reveal">
-          <div class="lv3-feature-icon"><svg class="lv3-ico-lg"><use href="/brand/landing/icons-sprite.svg#ico-search"/></svg></div>
+          <div class="lv3-feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          </div>
           <h3>Más cargas, más ingresos</h3>
           <p>Oportunidades diarias en rutas por todo Chile. Oferta tu capacidad y recibe sugerencias de carga en tu corredor.</p>
         </article>
         <article class="lv3-feature lv3-reveal">
-          <div class="lv3-feature-icon"><svg class="lv3-ico-lg"><use href="/brand/landing/icons-sprite.svg#ico-pin"/></svg></div>
+          <div class="lv3-feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 21s6-5.2 6-10a6 6 0 1 0-12 0c0 4.8 6 10 6 10Z"/><circle cx="12" cy="11" r="2.5"/></svg>
+          </div>
           <h3>Visibilidad total</h3>
           <p>Seguimiento en vivo de cada viaje para ti y tu cliente. Estados claros, GPS y confirmación de entrega.</p>
         </article>
         <article class="lv3-feature lv3-reveal">
-          <div class="lv3-feature-icon"><svg class="lv3-ico-lg"><use href="/brand/landing/icons-sprite.svg#ico-doc"/></svg></div>
+          <div class="lv3-feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"/><path d="M14 2v6h6"/><path d="M8 13h8"/><path d="M8 17h5"/></svg>
+          </div>
           <h3>Gestión simple</h3>
           <p>Documentos, estados y comunicación centralizados. Menos coordinación manual, más tiempo en la ruta.</p>
         </article>
         <article class="lv3-feature lv3-reveal">
-          <div class="lv3-feature-icon"><svg class="lv3-ico-lg"><use href="/brand/landing/icons-sprite.svg#ico-wallet"/></svg></div>
+          <div class="lv3-feature-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          </div>
           <h3>Pagos más rápidos</h3>
           <p>Procesos ágiles y transparentes. Propón tu precio en CLP y cierra acuerdos sin idas y vueltas.</p>
         </article>
@@ -146,60 +149,91 @@
     </div>
   </section>
 
-  <section class="lv3-tower" id="tower">
+  <section class="lv3-tower lf-scroll-section" id="tower">
     <div class="lv3-tower-inner">
       <div class="lv3-reveal">
         <h2>Operación inteligente en tiempo real</h2>
-        <p class="lv3-tower-lead">Centro de monitoreo tipo control tower: mapa en vivo, alertas y KPIs de tu flota en un solo panel.</p>
+        <p class="lv3-tower-lead">Mapa en vivo, alertas y estados de viaje en un panel tipo control tower.</p>
         <ul class="lv3-checklist">
-          <li><svg aria-hidden="true"><use href="/brand/landing/icons-sprite.svg#ico-check"/></svg>Mapa en vivo con rutas y alertas de desvío</li>
-          <li><svg aria-hidden="true"><use href="/brand/landing/icons-sprite.svg#ico-check"/></svg>Estados de viaje: carga asignada, en tránsito, entregado</li>
-          <li><svg aria-hidden="true"><use href="/brand/landing/icons-sprite.svg#ico-check"/></svg>Historial y KPIs por camión y conductor</li>
-          <li><svg aria-hidden="true"><use href="/brand/landing/icons-sprite.svg#ico-check"/></svg>Notificaciones y chat con el embarcador</li>
-          <li><svg aria-hidden="true"><use href="/brand/landing/icons-sprite.svg#ico-check"/></svg>Panel desde web o app Android</li>
+          <li><span class="lv3-check" aria-hidden="true">✓</span>Mapa en vivo con rutas y alertas de desvío</li>
+          <li><span class="lv3-check" aria-hidden="true">✓</span>Estados: carga asignada, en tránsito, entregado</li>
+          <li><span class="lv3-check" aria-hidden="true">✓</span>Historial y KPIs por camión y conductor</li>
+          <li><span class="lv3-check" aria-hidden="true">✓</span>Notificaciones y chat con el embarcador</li>
+          <li><span class="lv3-check" aria-hidden="true">✓</span>App web y Android</li>
         </ul>
       </div>
-      <div class="lv3-map-stage lv3-reveal" aria-hidden="true">
-        <span class="lv3-map-meta">Actualizado hace 2 min</span>
-        <object data="/brand/landing/map-chile-control.svg" type="image/svg+xml" tabindex="-1">Mapa de operación Chile</object>
-        <div class="lv3-trip-float">
-          <div class="lv3-trip-float-head">
-            <h4>Viaje en curso<br>Concepción → Santiago</h4>
-            <span class="lv3-tag-live">En tránsito</span>
+      <div class="lv3-map-visual lv3-reveal">
+        <div class="lf-tower-stage" role="img" aria-label="Mapa en vivo con viaje Concepción a Santiago">
+          <canvas id="lf-tower-canvas" width="1120" height="615" aria-hidden="true"></canvas>
+          <div class="lf-trip-float">
+            <strong>Viaje #CUB-2847</strong>
+            <p>Concepción → Santiago · En tránsito</p>
+            <span>ETA 4h 20min</span>
           </div>
-          <ul class="lv3-trip-steps">
-            <li class="done">Carga asignada</li>
-            <li class="done">Retiro confirmado</li>
-            <li class="active">En tránsito</li>
-            <li>Entrega programada</li>
-          </ul>
-          <p class="lv3-speed">Velocidad: 78 km/h · ETA 14:30</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="lv3-cta lv3-reveal" aria-labelledby="cta-title">
-    <h2 id="cta-title">Únete a Cubik y lleva tu operación al siguiente nivel</h2>
-    <p>Empieza gratis en el piloto y escala a más corredores en Chile.</p>
-    <a class="lv3-btn lv3-btn-teal lv3-btn-lg" href="/app?role=carrier">Regístrate gratis →</a>
-    <div class="lv3-cta-tags">
-      <span><svg aria-hidden="true"><use href="/brand/landing/icons-sprite.svg#ico-check"/></svg>Sin costo mensual</span>
-      <span><svg aria-hidden="true"><use href="/brand/landing/icons-sprite.svg#ico-check"/></svg>100% online</span>
-      <span><svg aria-hidden="true"><use href="/brand/landing/icons-sprite.svg#ico-check"/></svg>App web y Android</span>
+  <section class="lv3-network lv3-reveal lf-scroll-section">
+    <div class="lv3-network-inner">
+      <h2>Una red de transportistas en crecimiento en Chile</h2>
+      <p class="lv3-network-lead">
+        Accede a cargas de embarcadores verificados con precios transparentes en CLP.
+        Pasa más tiempo transportando y menos negociando por teléfono.
+      </p>
+      <div class="lv3-network-stats">
+        <div><strong>RM ↔ V</strong><span>Corredor piloto activo</span></div>
+        <div><strong>+500</strong><span>Transportistas en red</span></div>
+        <div><strong>98%</strong><span>Trazabilidad en vivo</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="lv3-channels lv3-reveal lf-scroll-section" id="canales">
+    <div class="lv3-channels-inner">
+      <h2>Lo que transportas, cuándo y cómo. La elección es tuya.</h2>
+      <div class="lv3-tabs" role="tablist" aria-label="Canales Cubik">
+        <button type="button" class="lv3-tab active" role="tab" aria-selected="true">App Android</button>
+        <button type="button" class="lv3-tab" role="tab">Web móvil</button>
+        <button type="button" class="lv3-tab" role="tab">Carga spot</button>
+        <button type="button" class="lv3-tab" role="tab">Rutas recurrentes</button>
+      </div>
+      <div class="lv3-tab-panel lf-tab-panel">
+        <h3>Reserva cargas cuando tu camión está listo</h3>
+        <ul class="lv3-checklist lv3-checklist-dark">
+          <li><span class="lv3-check" aria-hidden="true">✓</span>Visibilidad en tiempo real de tarifas y rutas</li>
+          <li><span class="lv3-check" aria-hidden="true">✓</span>Mantén tus camiones en movimiento con emparejamiento sugerido</li>
+          <li><span class="lv3-check" aria-hidden="true">✓</span>Oferta capacidad en corredores RM, V y expansión nacional</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="lv3-cta-band lv3-reveal" aria-labelledby="cta-title">
+    <div class="lv3-cta-band-inner">
+      <div>
+        <h2 id="cta-title">Únete a Cubik y lleva tu operación al siguiente nivel</h2>
+        <ul class="lv3-cta-list">
+          <li>Sin costo mensual en piloto</li>
+          <li>Sin permanencia</li>
+          <li>100% online</li>
+        </ul>
+      </div>
+      <a class="lv3-btn lv3-btn-teal lv3-btn-lg" href="/app?role=carrier">Regístrate gratis →</a>
     </div>
   </section>
 
   <footer class="lv3-footer">
     <div class="lv3-footer-grid">
       <div class="lv3-footer-brand">
-        <img src="/brand/logo-cubik-wordmark.svg" width="140" height="34" alt="Cubik" />
+        <img src="/brand/logo-cubik-nav.png?v=0.0.145" alt="Cubik" decoding="async" width="360" height="117" />
         <p>Plataforma logística inteligente para transportistas y embarcadores en Chile.</p>
         <div class="lv3-social" aria-label="Redes sociales">
-          <a href="https://www.linkedin.com" rel="noopener noreferrer" aria-label="LinkedIn"><svg><use href="/brand/landing/icons-sprite.svg#ico-linkedin"/></svg></a>
-          <a href="https://www.facebook.com" rel="noopener noreferrer" aria-label="Facebook"><svg><use href="/brand/landing/icons-sprite.svg#ico-facebook"/></svg></a>
-          <a href="https://www.instagram.com" rel="noopener noreferrer" aria-label="Instagram"><svg><use href="/brand/landing/icons-sprite.svg#ico-instagram"/></svg></a>
-          <a href="https://www.youtube.com" rel="noopener noreferrer" aria-label="YouTube"><svg><use href="/brand/landing/icons-sprite.svg#ico-youtube"/></svg></a>
+          <a href="https://www.linkedin.com" rel="noopener noreferrer" aria-label="LinkedIn">in</a>
+          <a href="https://www.facebook.com" rel="noopener noreferrer" aria-label="Facebook">f</a>
+          <a href="https://www.instagram.com" rel="noopener noreferrer" aria-label="Instagram">ig</a>
+          <a href="https://www.youtube.com" rel="noopener noreferrer" aria-label="YouTube">yt</a>
         </div>
       </div>
       <div class="lv3-footer-links">
@@ -223,19 +257,18 @@
         </div>
       </div>
       <div class="lv3-newsletter">
-        <div>
-          <label for="lv3-email">Recibe oportunidades de carga directo en tu correo</label>
-          <form class="lv3-newsletter-form" action="mailto:admin@getcubik.cl" method="get">
-            <input id="lv3-email" type="email" name="subject" placeholder="tu@correo.cl" autocomplete="email" />
-            <button type="submit" aria-label="Suscribirse">→</button>
-          </form>
-        </div>
+        <label for="lv3-email">Recibe oportunidades de carga directo en tu correo</label>
+        <form class="lv3-newsletter-form" action="mailto:admin@getcubik.cl" method="get">
+          <input id="lv3-email" type="email" name="subject" placeholder="tu@correo.cl" autocomplete="email" />
+          <button type="submit" aria-label="Suscribirse">→</button>
+        </form>
       </div>
       <p class="lv3-footer-copy">© Cubik · Optimiza tus envíos</p>
     </div>
   </footer>
 
   <div id="lv3-loading" class="lv3-loading" hidden aria-live="polite">Abriendo Cubik…</div>
-  <script src="/landing-v3.js?v=0.0.133" defer></script>
+  <script src="/landing-v3.js?v=0.0.139" defer></script>
+  <script src="/landing-fluid.js?v=0.0.139" defer></script>
 </body>
 </html>

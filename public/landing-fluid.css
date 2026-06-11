@@ -1,0 +1,256 @@
+/* Cubik landing — capa fluida (Uber Freight) */
+.lf-hero-media {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.lv3-hero.has-fluid .lv3-hero-overlay { z-index: 2; }
+
+.lf-hero-product-wrap {
+  width: 100%;
+  max-width: 36rem;
+  will-change: transform;
+}
+
+.lf-product {
+  animation: lf-float 6s ease-in-out infinite;
+}
+
+@keyframes lf-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-8px); }
+}
+
+.lf-hero-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transform: scale(1.08);
+  filter: brightness(0.45) saturate(0.85);
+}
+
+.lf-hero-particles {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.lv3-hero.has-video .lv3-hero-bg { display: none; }
+
+.lf-product {
+  position: relative;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+  border: 1px solid var(--cubik-accent-ring);
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.55);
+  background: rgba(8, 14, 28, 0.92);
+  backdrop-filter: blur(14px);
+  transform: translate3d(0, 0, 0);
+  will-change: transform;
+}
+
+.lf-product-chrome {
+  display: grid;
+  grid-template-columns: 2.75rem 1fr;
+  min-height: 22rem;
+}
+
+.lf-product-side {
+  background: var(--cubik-accent-soft);
+  border-right: 1px solid var(--cubik-accent-ring);
+  padding: 0.75rem 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+  align-items: center;
+}
+
+.lf-side-dot {
+  width: 2rem;
+  height: 2rem;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid transparent;
+}
+
+.lf-side-dot.active {
+  background: var(--cubik-accent-soft);
+  border-color: var(--cubik-accent-ring);
+  box-shadow: 0 0 16px var(--cubik-accent-ring);
+}
+
+.lf-product-main { padding: 1rem; }
+
+.lf-product-title {
+  margin: 0 0 0.75rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #fff;
+}
+
+.lf-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.45rem;
+  margin-bottom: 0.75rem;
+}
+
+.lf-kpi {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  border-radius: 10px;
+  padding: 0.5rem 0.6rem;
+}
+
+.lf-kpi-val {
+  display: block;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--cubik-teal);
+  line-height: 1.2;
+}
+
+.lf-kpi span:last-child {
+  font-size: 0.64rem;
+  color: var(--cubik-muted);
+}
+
+.lf-map-wrap {
+  position: relative;
+  border-radius: 10px;
+  overflow: hidden;
+  margin-bottom: 0.65rem;
+  background: var(--cubik-navy-dark);
+  border: 1px solid var(--cubik-accent-ring);
+}
+
+.lf-map-wrap canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.lf-loads {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lf-loads li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.38rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.08);
+  font-size: 0.72rem;
+  color: var(--cubik-text);
+  opacity: 0;
+  transform: translateX(12px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.lf-loads li.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+.lf-loads li em {
+  font-style: normal;
+  color: var(--cubik-teal);
+  font-weight: 600;
+}
+
+.lf-tower-stage {
+  position: relative;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid var(--cubik-accent-ring);
+  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.5);
+  background: var(--cubik-navy-dark);
+  min-height: 20rem;
+}
+
+.lf-tower-stage canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.lf-trip-float {
+  position: absolute;
+  right: 1rem;
+  bottom: 1rem;
+  left: auto;
+  width: min(17rem, calc(100% - 2rem));
+  background: rgba(10, 16, 30, 0.92);
+  border: 1px solid var(--cubik-accent-ring);
+  border-radius: 14px;
+  padding: 0.85rem 1rem;
+  backdrop-filter: blur(10px);
+  animation: lf-trip-in 0.8s ease 0.3s both;
+}
+
+@keyframes lf-trip-in {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: none; }
+}
+
+.lf-scroll-section {
+  opacity: 0;
+  transform: translateY(32px);
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1), transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.lf-scroll-section.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+.lf-tab-panel {
+  opacity: 1;
+  transition: opacity 0.35s ease;
+}
+
+.lf-tab-panel.is-fading {
+  opacity: 0;
+}
+
+html.lf-smooth { scroll-behavior: smooth; }
+
+.lf-trip-float strong {
+  display: block;
+  font-size: 0.88rem;
+  color: #fff;
+}
+
+.lf-trip-float p {
+  margin: 0.35rem 0;
+  font-size: 0.78rem;
+  color: var(--cubik-muted);
+}
+
+.lf-trip-float span:last-child {
+  font-size: 0.72rem;
+  color: var(--cubik-teal);
+  font-weight: 700;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lf-hero-video,
+  .lf-hero-particles,
+  .lf-trip-float,
+  .lf-product {
+    animation: none !important;
+  }
+  .lf-scroll-section {
+    opacity: 1;
+    transform: none;
+  }
+}

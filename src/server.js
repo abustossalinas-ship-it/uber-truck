@@ -5,7 +5,11 @@ const PORT = Number(process.env.PORT) || 3001;
 const HOST = process.env.HOST || '0.0.0.0';
 
 const server = app.listen(PORT, HOST, () => {
-  console.log(`Uber Truck listening on http://${HOST}:${PORT}`);
+  const local = `http://localhost:${PORT}`;
+  console.log(`Cubik dev → ${local}`);
+  console.log(`  Transportistas: ${local}/transportistas`);
+  console.log(`  Empresas:       ${local}/empresas`);
+  console.log(`  App:            ${local}/app`);
 });
 
 function shutdown() {

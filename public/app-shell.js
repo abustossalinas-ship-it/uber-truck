@@ -141,7 +141,7 @@ const AppShell = {
     try {
       const StatusBar = Cap.Plugins.StatusBar;
       if (StatusBar) {
-        await StatusBar.setBackgroundColor?.({ color: '#0f2744' });
+        await StatusBar.setBackgroundColor?.({ color: '#0f172a' });
         await StatusBar.setStyle?.({ style: 'DARK' });
       }
     } catch (_) {}

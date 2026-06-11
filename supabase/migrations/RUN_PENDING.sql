@@ -182,6 +182,108 @@ SET penalty_payment_status = 'settled_moderator'
 WHERE penalty_paid_at IS NOT NULL
   AND penalty_payment_status = 'pending';
 
--- 019 — Llegada automática al destino (GPS)
+-- 019b — Llegada automática al destino (GPS) — v0.0.123
 ALTER TABLE matches
   ADD COLUMN IF NOT EXISTS arrived_at_destination_at TIMESTAMPTZ;
+
+-- 026 — Cubik Saldo piloto
+ALTER TABLE matches
+  ADD COLUMN IF NOT EXISTS pilot_payment_status TEXT
+    CHECK (pilot_payment_status IS NULL OR pilot_payment_status IN ('in_settlement', 'released')),
+  ADD COLUMN IF NOT EXISTS pilot_payment_at TIMESTAMPTZ;
+
+CREATE INDEX IF NOT EXISTS idx_matches_pilot_payment ON matches (pilot_payment_status)
+  WHERE pilot_payment_status IS NOT NULL;
+
+-- 027 — Tarjetas sandbox + tokens FCM push
+CREATE TABLE IF NOT EXISTS user_payment_methods (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  provider TEXT NOT NULL DEFAULT 'sandbox',
+  provider_token TEXT NOT NULL,
+  card_brand TEXT,
+  card_last4 TEXT NOT NULL,
+  holder_name TEXT NOT NULL,
+  holder_rut TEXT NOT NULL,
+  verified_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  microcharge_clp BIGINT,
+  microcharge_status TEXT DEFAULT 'reversed',
+  is_default BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_payment_methods_user
+  ON user_payment_methods (user_id);
+
+CREATE TABLE IF NOT EXISTS device_tokens (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  platform TEXT NOT NULL DEFAULT 'android',
+  token TEXT NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+  UNIQUE (user_id, token)
+);
+
+CREATE INDEX IF NOT EXISTS idx_device_tokens_user ON device_tokens (user_id);
+
+-- 028 — Chat libre tras atención humana
+ALTER TABLE matches ADD COLUMN IF NOT EXISTS chat_human_at TIMESTAMPTZ;
+
+-- 029 — Camión habitual + pallets en oferta
+ALTER TABLE users ADD COLUMN IF NOT EXISTS default_truck_type_id TEXT;
+
+ALTER TABLE capacity_offers ADD COLUMN IF NOT EXISTS available_pallets INTEGER;
+ALTER TABLE capacity_offers ADD COLUMN IF NOT EXISTS pallet_type TEXT DEFAULT 'euro';
+ALTER TABLE capacity_offers ADD COLUMN IF NOT EXISTS cargo_stackable BOOLEAN DEFAULT FALSE;
+ALTER TABLE capacity_offers ADD COLUMN IF NOT EXISTS truck_type_id TEXT;
+ALTER TABLE capacity_offers ADD COLUMN IF NOT EXISTS truck_type_label TEXT;
+
+-- 030 — Billetera: varias cuentas bancarias
+CREATE TABLE IF NOT EXISTS user_bank_accounts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES users (id) ON DELETE CASCADE,
+  holder_name TEXT NOT NULL,
+  holder_rut TEXT NOT NULL,
+  bank_name TEXT NOT NULL,
+  account_type TEXT NOT NULL,
+  account_number TEXT NOT NULL,
+  label TEXT,
+  is_default BOOLEAN NOT NULL DEFAULT false,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_user_bank_accounts_user
+  ON user_bank_accounts (user_id);
+
+INSERT INTO user_bank_accounts (
+  user_id,
+  holder_name,
+  holder_rut,
+  bank_name,
+  account_type,
+  account_number,
+  is_default,
+  created_at
+)
+SELECT
+  u.id,
+  u.bank_holder_name,
+  u.bank_rut,
+  u.bank_name,
+  u.bank_account_type,
+  u.bank_account_number,
+  true,
+  COALESCE(u.bank_registered_at, now())
+FROM users u
+WHERE u.bank_holder_name IS NOT NULL
+  AND u.bank_rut IS NOT NULL
+  AND u.bank_name IS NOT NULL
+  AND u.bank_account_type IS NOT NULL
+  AND u.bank_account_number IS NOT NULL
+  AND NOT EXISTS (
+    SELECT 1 FROM user_bank_accounts b WHERE b.user_id = u.id
+  );
+
+-- Recargar API PostgREST (ignorar error si el payload no es reconocido)
+NOTIFY pgrst, 'reload schema';

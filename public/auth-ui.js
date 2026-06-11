@@ -212,6 +212,7 @@ function openOtpStepFromLogin(json, email, password) {
     otp_id: json.otp_id,
     email: email.trim(),
     password,
+    intent_role: getAuthIntentRole(),
   };
   const lead = document.getElementById('auth-otp-lead');
   if (lead) {
@@ -612,6 +613,13 @@ function authErrorMessage(res, json, register) {
   if (code === 'wrong_otp') {
     return 'Código incorrecto. Revisa los 4 dígitos o pide uno nuevo.';
   }
+  if (code === 'role_mismatch') {
+    if (json?.actual_role) switchAuthIntentRole(json.actual_role);
+    return (
+      json?.error ||
+      'Esta cuenta no coincide con la pestaña elegida. Cambiamos la pestaña — vuelve a ingresar tu contraseña.'
+    );
+  }
   let msg = json?.error || 'Error de autenticación';
   if (res.status === 429 && json?.wait_seconds) {
     return msg || `Espera ${json.wait_seconds} s antes de pedir otro código.`;
@@ -1006,6 +1014,8 @@ formAuth?.addEventListener('submit', async (e) => {
       }
     }
   } else {
+    const intent = getAuthIntentRole();
+    if (intent) body.intent_role = intent;
     delete body.role;
     delete body.company_name;
     delete body.full_name;
@@ -1032,10 +1042,16 @@ formAuth?.addEventListener('submit', async (e) => {
     }
     if (!res.ok) {
       const msg = authErrorMessage(res, json, authRegisterMode);
+      if (json?.code === 'role_mismatch') {
+        showAuthOtpStep(false);
+        const pwdField = document.querySelector('#form-auth [name="password"]');
+        if (pwdField) pwdField.value = '';
+      }
       notifyAuthFailure(msg);
       return;
     }
     if (!authRegisterMode && json.need_otp) {
+      if (blockAuthIntentMismatch(json.user)) return;
       openOtpStepFromLogin(json, body.email, body.password);
       return;
     }
@@ -1077,6 +1093,7 @@ async function submitOtpVerification() {
           code,
           email: pendingOtp.email,
           password: pendingOtp.password,
+          intent_role: pendingOtp.intent_role,
         })
       ),
     });
@@ -1118,6 +1135,7 @@ document.getElementById('auth-otp-resend')?.addEventListener('click', async () =
         authDeviceBody({
           email: pendingOtp.email,
           password: pendingOtp.password,
+          intent_role: pendingOtp.intent_role,
         })
       ),
     });

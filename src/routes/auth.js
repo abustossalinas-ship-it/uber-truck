@@ -31,6 +31,7 @@ const {
 const mail = require('../services/mail');
 const supabase = require('../services/supabase');
 const { validatePassword } = require('../lib/password-policy');
+const { assertLoginIntentRole } = require('../lib/auth-intent');
 
 const router = express.Router();
 
@@ -84,6 +85,7 @@ router.post('/login', async (req, res) => {
   }
   try {
     const user = await validateLoginCredentials(email, password);
+    assertLoginIntentRole(user, req.body || {});
     const result = await resolveLoginAfterPassword(user, req, req.body || {});
     res.json({ ok: true, ...result });
   } catch (e) {
@@ -92,6 +94,7 @@ router.post('/login', async (req, res) => {
       ok: false,
       error: e.message || 'Error al iniciar sesión',
       code: e.code || undefined,
+      actual_role: e.actual_role,
       wait_seconds: e.wait_seconds,
     });
   }
@@ -104,6 +107,7 @@ router.post('/otp/verify', async (req, res) => {
   }
   try {
     const user = await validateLoginCredentials(email, password);
+    assertLoginIntentRole(user, req.body || {});
     const meta = requestMeta(req, req.body || {});
     const result = await verifyNewDeviceOtp({ otp_id, code, user, meta });
     res.json({ ok: true, ...result });
@@ -113,6 +117,7 @@ router.post('/otp/verify', async (req, res) => {
       ok: false,
       error: e.message || 'Error al verificar código',
       code: e.code,
+      actual_role: e.actual_role,
     });
   }
 });
@@ -124,6 +129,7 @@ router.post('/otp/resend', async (req, res) => {
   }
   try {
     const user = await validateLoginCredentials(email, password);
+    assertLoginIntentRole(user, req.body || {});
     const meta = requestMeta(req, req.body || {});
     const otp = await createNewDeviceOtp(user, meta);
     res.json({ ok: true, ...otp });
@@ -131,6 +137,8 @@ router.post('/otp/resend', async (req, res) => {
     res.status(e.status || 500).json({
       ok: false,
       error: e.message,
+      code: e.code,
+      actual_role: e.actual_role,
       wait_seconds: e.wait_seconds,
     });
   }

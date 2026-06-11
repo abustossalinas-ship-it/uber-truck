@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-06-11T01:34:00.422Z",
+  "generated_at": "2026-06-11T02:14:19.724Z",
   "version": "0.0.129",
   "counts": {
-    "unit": 26,
+    "unit": 30,
     "e2e": 25,
     "e2e_optional": 3,
-    "required": 48,
+    "required": 52,
     "optional": 3,
-    "total": 51
+    "total": 55
   },
   "charts": {
     "by_kind": [
       {
         "label": "Unitarios (Node)",
-        "value": 26
+        "value": 30
       },
       {
         "label": "E2E (Playwright)",
@@ -23,7 +23,7 @@
     "by_coverage": [
       {
         "label": "Obligatorios (CI)",
-        "value": 48
+        "value": 52
       },
       {
         "label": "Opcionales (.env / Supabase)",
@@ -33,11 +33,11 @@
     "by_area": [
       {
         "label": "Welcome / login",
-        "value": 17
+        "value": 20
       },
       {
         "label": "Otros",
-        "value": 14
+        "value": 15
       },
       {
         "label": "Tablero / datos",
@@ -56,6 +56,11 @@
       {
         "label": "android-bundle-sync",
         "value": 1,
+        "kind": "unit"
+      },
+      {
+        "label": "auth-intent",
+        "value": 4,
         "kind": "unit"
       },
       {
@@ -203,6 +208,37 @@
           "optional": false,
           "area": "welcome",
           "area_label": "Welcome / login"
+        }
+      ]
+    },
+    {
+      "file": "tests/auth-intent.test.js",
+      "suite": "auth-intent",
+      "kind": "unit",
+      "cases": [
+        {
+          "name": "normalizeLoginIntentRole acepta sinónimos",
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
+        },
+        {
+          "name": "assertLoginIntentRole permite admin y coincidencia",
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
+        },
+        {
+          "name": "assertLoginIntentRole rechaza mismatch antes de OTP",
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
+        },
+        {
+          "name": "normalizeAccountRole unifica roles",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
         }
       ]
     },
@@ -612,5 +648,5 @@
     }
   ],
   "report_available": true,
-  "last_run_at": "2026-06-11T01:33:47.994Z"
+  "last_run_at": "2026-06-11T02:14:07.453Z"
 }

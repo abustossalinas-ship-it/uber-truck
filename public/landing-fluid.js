@@ -177,7 +177,7 @@
   }
 
   function initCounters() {
-    document.querySelectorAll('[data-count]').forEach((el) => {
+    document.querySelectorAll('[data-count]:not(.lf-kpi-val)').forEach((el) => {
       const target = Number(el.dataset.count);
       const suffix = el.dataset.suffix || '';
       const prefix = el.dataset.prefix || '';
@@ -228,15 +228,331 @@
     });
   }
 
+  const HERO_CINE_SRC = {
+    'lv3-home': '/brand/landing/hero-truck-mockup.jpg',
+    'lv3-shipper': '/brand/landing/mockup-hero-bg.jpg',
+    'lv3-carrier': '/brand/landing/hero-truck-night.jpg',
+  };
+
+  const HERO_VIDEO_SRC = {
+    'lv3-home': '/brand/landing/hero-home-cine.mp4',
+    'lv3-shipper': '/brand/landing/hero-shipper-cine.mp4',
+    'lv3-carrier': '/brand/landing/hero-carrier-cine.mp4',
+  };
+
+  function pageRole() {
+    return ['lv3-home', 'lv3-shipper', 'lv3-carrier'].find((c) => document.body.classList.contains(c)) || 'lv3-home';
+  }
+
   function initHeroParallax() {
     const wrap = document.getElementById('lf-hero-product-wrap');
     const hero = document.querySelector('.lv3-hero');
+    const bg = hero?.querySelector('.lv3-hero-bg');
+    const route = hero?.querySelector('.lf-hero-route--live');
+    const floats = hero?.querySelectorAll('.lf-float-card');
+    const truckGlow = hero?.querySelector('.lf-hero-truck-glow');
     if (!wrap || !hero || reduced) return;
-    window.addEventListener('scroll', () => {
-      const rect = hero.getBoundingClientRect();
-      const p = Math.min(1, Math.max(0, -rect.top / rect.height));
-      wrap.style.transform = `translate3d(0, ${p * 28}px, 0) scale(${1 - p * 0.04})`;
+
+    let mx = 0;
+    let my = 0;
+    hero.addEventListener('mousemove', (e) => {
+      const r = hero.getBoundingClientRect();
+      mx = (e.clientX - r.left) / r.width - 0.5;
+      my = (e.clientY - r.top) / r.height - 0.5;
     }, { passive: true });
+
+    function frame() {
+      const rect = hero.getBoundingClientRect();
+      const sp = Math.min(1, Math.max(0, -rect.top / rect.height));
+      wrap.style.transform = `translate3d(${mx * 14}px, ${sp * 32 + my * 10}px, 0) scale(${1 - sp * 0.045})`;
+      if (bg && !hero.classList.contains('has-cine')) {
+        bg.style.transform = `scale(1.1) translate3d(${mx * -22}px, ${my * -14 + sp * 24}px, 0)`;
+      }
+      if (route) {
+        route.style.transform = `translateX(-50%) translate3d(${mx * 8}px, ${my * 5}px, 0)`;
+      }
+      floats?.forEach((el, i) => {
+        const f = (i + 1) * 0.35;
+        el.style.transform = `translate3d(${mx * 18 * f}px, ${my * 12 * f + Math.sin(Date.now() / 1200 + i) * 4}px, 0)`;
+      });
+      if (truckGlow) {
+        truckGlow.style.transform = `translate3d(${mx * -28}px, ${my * -8}px, 0) scale(1.02)`;
+      }
+      requestAnimationFrame(frame);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  function initCinematicCanvas(hero, media, src, role) {
+    let canvas = document.getElementById('lf-hero-cine');
+    if (!canvas) {
+      canvas = document.createElement('canvas');
+      canvas.id = 'lf-hero-cine';
+      canvas.className = 'lf-hero-cine-canvas';
+      canvas.setAttribute('aria-hidden', 'true');
+      media.insertBefore(canvas, media.firstChild);
+    }
+
+    hero.classList.add('has-cine');
+    const img = new Image();
+    img.decoding = 'async';
+    img.src = src;
+    const ctx = canvas.getContext('2d');
+    let raf = 0;
+    let start = 0;
+    const isNight = role === 'lv3-carrier';
+
+    function resize() {
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(canvas.clientWidth * dpr);
+      canvas.height = Math.floor(canvas.clientHeight * dpr);
+    }
+
+    function draw(ts) {
+      if (!start) start = ts;
+      const t = (ts - start) / 1000;
+      const w = canvas.width;
+      const h = canvas.height;
+      if (!w || !h || !img.complete) {
+        raf = requestAnimationFrame(draw);
+        return;
+      }
+
+      const panX = Math.sin(t * 0.12) * 0.018 + Math.cos(t * 0.07) * 0.012;
+      const panY = Math.cos(t * 0.1) * 0.014;
+      const zoom = 1.06 + Math.sin(t * 0.08) * 0.035;
+      const iw = img.width;
+      const ih = img.height;
+      const scale = Math.max(w / iw, h / ih) * zoom;
+      const dw = iw * scale;
+      const dh = ih * scale;
+      const dx = (w - dw) / 2 + panX * w;
+      const dy = (h - dh) / 2 + panY * h;
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.drawImage(img, dx, dy, dw, dh);
+
+      const vignette = ctx.createRadialGradient(w * 0.5, h * 0.45, w * 0.15, w * 0.5, h * 0.5, w * 0.72);
+      vignette.addColorStop(0, 'rgba(15, 23, 42, 0)');
+      vignette.addColorStop(1, 'rgba(15, 23, 42, 0.55)');
+      ctx.fillStyle = vignette;
+      ctx.fillRect(0, 0, w, h);
+
+      const roadY = h * 0.78;
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.35)';
+      ctx.fillRect(0, roadY, w, h - roadY);
+
+      const accent = themeColors().accent;
+      for (let i = 0; i < 6; i += 1) {
+        const lane = ((t * (isNight ? 140 : 95) + i * 0.17) % 1) * w;
+        ctx.strokeStyle = accent + (isNight ? '55' : '33');
+        ctx.lineWidth = 2 * (window.devicePixelRatio || 1);
+        ctx.beginPath();
+        ctx.moveTo(lane, roadY + h * 0.04);
+        ctx.lineTo(lane + w * 0.08, roadY + h * 0.04);
+        ctx.stroke();
+      }
+
+      if (isNight) {
+        for (let i = 0; i < 5; i += 1) {
+          const bx = (0.15 + i * 0.18 + Math.sin(t * 0.5 + i) * 0.02) * w;
+          const by = (0.35 + Math.cos(t * 0.3 + i) * 0.04) * h;
+          const glow = ctx.createRadialGradient(bx, by, 0, bx, by, w * 0.12);
+          glow.addColorStop(0, accent + '44');
+          glow.addColorStop(1, accent + '00');
+          ctx.fillStyle = glow;
+          ctx.fillRect(bx - w * 0.12, by - w * 0.12, w * 0.24, w * 0.24);
+        }
+      }
+
+      raf = requestAnimationFrame(draw);
+    }
+
+    img.onload = () => {
+      resize();
+      if (!reduced) raf = requestAnimationFrame(draw);
+      else {
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      }
+    };
+    img.onerror = () => hero.classList.remove('has-cine');
+    window.addEventListener('resize', resize);
+    resize();
+  }
+
+  function initHeroVideo() {
+    const hero = document.querySelector('.lv3-hero.has-fluid');
+    const media = hero?.querySelector('.lf-hero-media');
+    if (!hero || !media) return;
+
+    const role = pageRole();
+    const poster = HERO_CINE_SRC[role];
+    const videoSrc = HERO_VIDEO_SRC[role];
+
+    function startCanvas() {
+      if (!reduced) initCinematicCanvas(hero, media, poster, role);
+    }
+
+    if (reduced) return;
+
+    fetch(videoSrc, { method: 'HEAD' })
+      .then((res) => {
+        if (!res.ok) throw new Error('no video');
+        const video = document.createElement('video');
+        video.className = 'lf-hero-video';
+        video.autoplay = true;
+        video.muted = true;
+        video.loop = true;
+        video.playsInline = true;
+        video.setAttribute('aria-hidden', 'true');
+        video.poster = poster;
+        const source = document.createElement('source');
+        source.src = videoSrc;
+        source.type = 'video/mp4';
+        video.appendChild(source);
+        media.insertBefore(video, media.firstChild);
+        hero.classList.add('has-video');
+        video.addEventListener('error', () => {
+          video.remove();
+          hero.classList.remove('has-video');
+          startCanvas();
+        });
+        video.play().catch(startCanvas);
+      })
+      .catch(startCanvas);
+  }
+
+  function initDepthLayers() {
+    const hero = document.querySelector('.lv3-hero.has-fluid');
+    if (!hero || hero.querySelector('.lf-hero-vignette')) return;
+    const vignette = document.createElement('div');
+    vignette.className = 'lf-hero-vignette';
+    vignette.setAttribute('aria-hidden', 'true');
+    const inner = hero.querySelector('.lv3-hero-inner');
+    if (inner) hero.insertBefore(vignette, inner);
+  }
+
+  function initCarrierTruckGlow() {
+    if (!document.body.classList.contains('lv3-carrier')) return;
+    const hero = document.querySelector('.lv3-hero.has-fluid');
+    if (!hero || hero.querySelector('.lf-hero-truck-glow')) return;
+    const glow = document.createElement('div');
+    glow.className = 'lf-hero-truck-glow';
+    glow.setAttribute('aria-hidden', 'true');
+    hero.appendChild(glow);
+  }
+
+  function initFloatingCards() {
+    const hero = document.querySelector('.lv3-hero.has-fluid');
+    if (!hero || reduced || hero.querySelector('.lf-float-card')) return;
+
+    const sets = {
+      'lv3-home': [
+        { l: 'Viajes activos', v: '127', live: true },
+        { l: 'En tránsito', v: '43', live: true },
+      ],
+      'lv3-shipper': [
+        { l: 'Ofertas hoy', v: '28', live: true },
+        { l: 'Envíos activos', v: '124', live: true },
+      ],
+      'lv3-carrier': [
+        { l: 'Ganancias hoy', v: '$184.200', live: true },
+        { l: 'Cargas en tu ruta', v: '12', live: true },
+        { l: 'Ruta activa', v: 'Santiago → Iquique', live: false },
+      ],
+    };
+
+    (sets[pageRole()] || sets['lv3-home']).forEach((card, i) => {
+      const el = document.createElement('div');
+      el.className = `lf-float-card lf-float-card--${i + 1}`;
+      el.setAttribute('aria-hidden', 'true');
+      el.innerHTML = `<span class="lf-float-card-label">${card.l}</span><strong class="lf-float-card-val"${card.live ? ' data-live="1"' : ''}>${card.v}</strong>`;
+      hero.appendChild(el);
+    });
+  }
+
+  function initDashboardLive() {
+    if (reduced) return;
+
+    const etaRow = document.querySelector('.lf-live-trip-row:last-child em');
+    if (etaRow && /h/.test(etaRow.textContent)) {
+      let mins = 5 * 60 + 12;
+      window.setInterval(() => {
+        mins = Math.max(0, mins - 1);
+        const h = Math.floor(mins / 60);
+        const m = mins % 60;
+        etaRow.textContent = `${h}h ${String(m).padStart(2, '0')}m`;
+        etaRow.classList.add('lf-kpi-tick');
+        window.setTimeout(() => etaRow.classList.remove('lf-kpi-tick'), 280);
+      }, 9000);
+    }
+
+    const list = document.getElementById('lf-loads');
+    if (list) {
+      const cycle = ['En tránsito', 'Asignado', 'Entregado', 'Nuevo'];
+      window.setInterval(() => {
+        const li = list.querySelector('li');
+        const em = li?.querySelector('em');
+        if (!em) return;
+        const idx = Math.max(0, cycle.indexOf(em.textContent));
+        em.textContent = cycle[(idx + 1) % cycle.length];
+        li.classList.add('lf-load-flash');
+        window.setTimeout(() => li.classList.remove('lf-load-flash'), 420);
+      }, 3200);
+    }
+
+    document.querySelectorAll('.lf-mini-chart span').forEach((bar, i) => {
+      window.setInterval(() => {
+        bar.style.height = `${38 + Math.random() * 48}%`;
+      }, 2600 + i * 350);
+    });
+
+    document.querySelectorAll('.lf-float-card-val[data-live]').forEach((el) => {
+      const raw = el.textContent.trim();
+      if (raw.startsWith('$')) {
+        let val = Number(raw.replace(/[^\d]/g, '')) || 184200;
+        window.setInterval(() => {
+          if (Math.random() > 0.45) {
+            val += Math.floor(Math.random() * 12000) + 3000;
+            el.textContent = `$${val.toLocaleString('es-CL')}`;
+            el.classList.add('lf-kpi-tick');
+            window.setTimeout(() => el.classList.remove('lf-kpi-tick'), 280);
+          }
+        }, 4200);
+        return;
+      }
+      const num = Number(raw.replace(/[^\d]/g, ''));
+      if (!Number.isFinite(num)) return;
+      let current = num;
+      window.setInterval(() => {
+        if (Math.random() > 0.4) {
+          current += 1;
+          el.textContent = String(current);
+          el.classList.add('lf-kpi-tick');
+          window.setTimeout(() => el.classList.remove('lf-kpi-tick'), 280);
+        }
+      }, 2800 + Math.random() * 1200);
+    });
+  }
+
+  function initMetricsLive() {
+    if (reduced) return;
+    document.querySelectorAll('.lv3-hero-metrics strong').forEach((el) => {
+      const raw = el.textContent.trim();
+      const plus = raw.startsWith('+');
+      const pct = raw.endsWith('%');
+      const digits = raw.replace(/[^\d]/g, '');
+      const base = Number(digits);
+      if (!Number.isFinite(base) || pct) return;
+      let current = base;
+      window.setInterval(() => {
+        if (Math.random() > 0.55) return;
+        current += Math.floor(Math.random() * 2) + 1;
+        el.textContent = plus ? `+${current.toLocaleString('es-CL')}` : String(current);
+        el.classList.add('lf-kpi-tick');
+        window.setTimeout(() => el.classList.remove('lf-kpi-tick'), 280);
+      }, 5200);
+    });
   }
 
   function initHeroParticles() {
@@ -335,30 +651,49 @@
       let current = base;
       el.textContent = prefix + current + suffix;
       window.setInterval(() => {
-        if (Math.random() > 0.55) {
-          current += Math.random() > 0.82 ? 2 : 1;
+        if (Math.random() > 0.35) {
+          current += Math.random() > 0.75 ? 2 : 1;
           el.textContent = prefix + current + suffix;
           el.classList.add('lf-kpi-tick');
           window.setTimeout(() => el.classList.remove('lf-kpi-tick'), 280);
         }
-      }, 2400 + Math.random() * 1800);
+      }, 1100 + Math.random() * 900);
     });
+  }
+
+  function buildRouteMarkup(dest) {
+    return `
+      <span class="lf-route-city"><span class="lf-route-dot" aria-hidden="true"></span>Santiago</span>
+      <span class="lf-route-track">
+        <span class="lf-route-line"></span>
+        <span class="lf-route-glow"></span>
+        <span class="lf-route-truck" aria-hidden="true">🚚</span>
+      </span>
+      <span class="lf-route-city">${dest}<span class="lf-route-dot lf-route-dot--end" aria-hidden="true"></span></span>`;
   }
 
   function initHeroRoute() {
     const hero = document.querySelector('.lv3-hero.has-fluid');
-    if (!hero || hero.querySelector('.lf-hero-route')) return;
+    if (!hero || hero.querySelector('.lf-hero-route--live')) return;
+    const role = pageRole();
+    const dest = role === 'lv3-carrier' ? 'Iquique' : 'Antofagasta';
     const route = document.createElement('div');
-    route.className = 'lf-hero-route';
+    route.className = 'lf-hero-route lf-hero-route--live';
     route.setAttribute('aria-hidden', 'true');
-    route.innerHTML = `
-      <span class="lf-route-city">Santiago</span>
-      <span class="lf-route-track">
-        <span class="lf-route-glow"></span>
-        <span class="lf-route-truck" aria-hidden="true">🚚</span>
-      </span>
-      <span class="lf-route-city">Antofagasta</span>`;
+    route.innerHTML = buildRouteMarkup(dest);
     hero.appendChild(route);
+
+    if (role === 'lv3-home') {
+      const copy = hero.querySelector('.lv3-hero-copy');
+      const h1 = copy?.querySelector('h1');
+      if (copy && h1 && !copy.querySelector('.lf-hero-route--copy')) {
+        const copyRoute = document.createElement('div');
+        copyRoute.className = 'lf-hero-route lf-hero-route--copy';
+        copyRoute.setAttribute('aria-hidden', 'true');
+        copyRoute.innerHTML = buildRouteMarkup(dest);
+        h1.insertAdjacentElement('afterend', copyRoute);
+      }
+    }
   }
 
   function initTabs() {
@@ -395,9 +730,15 @@
   initCounters();
   initLoadList();
   initScrollSections();
+  initDepthLayers();
+  initHeroVideo();
+  initCarrierTruckGlow();
+  initFloatingCards();
   initHeroParallax();
   initHeroParticles();
   initHeroRoute();
   initLiveKpis();
+  initDashboardLive();
+  initMetricsLive();
   initTabs();
 })();

@@ -1,13 +1,13 @@
 {
-  "generated_at": "2026-06-11T02:14:19.724Z",
+  "generated_at": "2026-06-11T02:30:03.786Z",
   "version": "0.0.129",
   "counts": {
     "unit": 30,
-    "e2e": 25,
+    "e2e": 29,
     "e2e_optional": 3,
-    "required": 52,
+    "required": 56,
     "optional": 3,
-    "total": 55
+    "total": 59
   },
   "charts": {
     "by_kind": [
@@ -17,13 +17,13 @@
       },
       {
         "label": "E2E (Playwright)",
-        "value": 25
+        "value": 29
       }
     ],
     "by_coverage": [
       {
         "label": "Obligatorios (CI)",
-        "value": 52
+        "value": 56
       },
       {
         "label": "Opcionales (.env / Supabase)",
@@ -37,7 +37,7 @@
       },
       {
         "label": "Otros",
-        "value": 15
+        "value": 19
       },
       {
         "label": "Tablero / datos",
@@ -114,6 +114,11 @@
         "kind": "e2e"
       },
       {
+        "label": "landing-v2",
+        "value": 4,
+        "kind": "e2e"
+      },
+      {
         "label": "prod-smoke",
         "value": 7,
         "kind": "e2e"
@@ -122,7 +127,11 @@
     "last_run": [
       {
         "label": "Pasaron",
-        "value": 15
+        "value": 19
+      },
+      {
+        "label": "Fallaron",
+        "value": 1
       },
       {
         "label": "Omitidos",
@@ -554,18 +563,18 @@
           "area_label": "Otros"
         },
         {
-          "name": "Soy empresa abre login sin welcome duplicado",
+          "name": "Soy empresa navega a landing y luego app",
           "group": "Landing getcubik — portada y navegación",
           "optional": false,
-          "area": "welcome",
-          "area_label": "Welcome / login"
+          "area": "other",
+          "area_label": "Otros"
         },
         {
-          "name": "Soy transportista abre login",
+          "name": "Soy transportista navega a landing y luego app",
           "group": "Landing getcubik — portada y navegación",
           "optional": false,
-          "area": "welcome",
-          "area_label": "Welcome / login"
+          "area": "other",
+          "area_label": "Otros"
         },
         {
           "name": "Atrás desde app no deja overlay Abriendo Cubik pegado",
@@ -587,6 +596,41 @@
           "optional": false,
           "area": "other",
           "area_label": "Otros"
+        }
+      ]
+    },
+    {
+      "file": "e2e/landing-v2.spec.js",
+      "suite": "landing-v2",
+      "kind": "e2e",
+      "cases": [
+        {
+          "name": "/transportistas carga hero y CTAs",
+          "group": "Landing v2 — transportistas y empresas",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "/empresas carga hero y CTAs",
+          "group": "Landing v2 — transportistas y empresas",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "Transportistas → app abre login carrier",
+          "group": "Landing v2 — transportistas y empresas",
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
+        },
+        {
+          "name": "Empresas → app abre login shipper",
+          "group": "Landing v2 — transportistas y empresas",
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
         }
       ]
     },
@@ -648,5 +692,5 @@
     }
   ],
   "report_available": true,
-  "last_run_at": "2026-06-11T02:14:07.453Z"
+  "last_run_at": "2026-06-11T02:29:50.704Z"
 }

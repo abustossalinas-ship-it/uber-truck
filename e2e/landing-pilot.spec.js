@@ -2,8 +2,8 @@
 const { test, expect } = require('@playwright/test');
 const { expectLoginOpenForRole } = require('./helpers');
 
-const heroShipper = '.hero-actions a[href="/app?role=shipper"]';
-const heroCarrier = '.hero-actions a[href="/app?role=carrier"]';
+const heroShipper = '.hero-actions a[href="/empresas"]';
+const heroCarrier = '.hero-actions a[href="/transportistas"]';
 
 test.describe('Landing getcubik — portada y navegación', () => {
   test('Portada muestra headline y CTAs', async ({ page }) => {
@@ -14,27 +14,31 @@ test.describe('Landing getcubik — portada y navegación', () => {
     await expect(page.locator('#landing-loading')).toBeHidden();
   });
 
-  test('Soy empresa abre login sin welcome duplicado', async ({ page }) => {
+  test('Soy empresa navega a landing y luego app', async ({ page }) => {
     await page.goto('/');
     await page.locator(heroShipper).click();
+    await page.waitForURL(/\/empresas/);
+    await page.locator('a[href="/app?role=shipper"]').first().click();
     await page.waitForURL(/\/app\?role=shipper/);
     await expectLoginOpenForRole(page, 'shipper');
   });
 
-  test('Soy transportista abre login', async ({ page }) => {
+  test('Soy transportista navega a landing y luego app', async ({ page }) => {
     await page.goto('/');
     await page.locator(heroCarrier).click();
+    await page.waitForURL(/\/transportistas/);
+    await page.locator('a[href="/app?role=carrier"]').first().click();
     await page.waitForURL(/\/app\?role=carrier/);
     await expectLoginOpenForRole(page, 'carrier');
   });
 
   test('Atrás desde app no deja overlay Abriendo Cubik pegado', async ({ page }) => {
-    await page.goto('/');
-    await page.locator(heroCarrier).click();
+    await page.goto('/transportistas');
+    await page.locator('a[href="/app?role=carrier"]').first().click();
     await page.waitForURL(/\/app\?/);
     await page.goBack();
-    await expect(page.locator('#landing-loading')).toBeHidden();
-    await expect(page.locator('h1')).toContainText(/Menos viajes vacíos/i);
+    await expect(page.locator('#lv2-loading')).toBeHidden();
+    await expect(page.locator('h1')).toContainText(/encuentra cargas/i);
   });
 });
 

@@ -1,0 +1,111 @@
+/* Tablero / propuestas — look empresarial (colores Cubik) */
+#panel-board .board-enterprise-card {
+  border: 1px solid #e2eaf3;
+  border-radius: 20px;
+  box-shadow: 0 16px 40px rgba(15, 39, 68, 0.08);
+  overflow: hidden;
+  margin-bottom: 1.25rem;
+}
+
+#panel-board .board-enterprise-card > h2 {
+  margin: 0;
+  padding: 1rem 1.25rem;
+  background: linear-gradient(90deg, #0f2744, #1a3d66);
+  color: #fff;
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+#panel-board .board-enterprise-card > p.muted,
+#panel-board .board-enterprise-card > .board-actor,
+#panel-board .board-enterprise-card > .active-proposal-banner {
+  margin-left: 1.25rem;
+  margin-right: 1.25rem;
+}
+
+#panel-board .match-form {
+  padding: 0 1.25rem 1.25rem;
+}
+
+#panel-board .match-form .step-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 1.25rem 0 0.5rem;
+  padding: 0.25rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(41, 171, 226, 0.12);
+  color: #1a3d66;
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+#panel-board .match-form .step-label::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #29abe2;
+}
+
+#panel-board .btn-match-cta,
+#panel-board button.btn-match-cta {
+  display: block;
+  width: 100%;
+  margin-top: 1rem;
+  padding: 0.95rem 1.25rem;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #f7941d, #ffba42);
+  color: #0f2744;
+  font-weight: 800;
+  font-size: 1rem;
+  cursor: pointer;
+  box-shadow: 0 10px 28px rgba(247, 148, 29, 0.35);
+  transition: transform 0.15s ease;
+}
+
+#panel-board .btn-match-cta:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+#panel-board .proposal-compare-panel {
+  border-radius: 18px;
+  border: 1px solid #e2eaf3;
+  border-top: 4px solid #f7941d;
+  box-shadow: 0 12px 32px rgba(15, 39, 68, 0.07);
+  padding: 1.15rem 1.25rem;
+  background: linear-gradient(180deg, #fafcfe 0%, #fff 100%);
+}
+
+#panel-board .proposal-compare-panel h3 {
+  color: #0f2744;
+  font-size: 1.05rem;
+}
+
+#panel-board .compare-table th {
+  background: #f4f7fb;
+  color: #0f2744;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+#panel-board .compare-row-top {
+  background: rgba(247, 148, 29, 0.08);
+}
+
+#panel-board .board-matches-block > h2 {
+  font-size: 1.1rem;
+  color: #0f2744;
+  margin-bottom: 0.75rem;
+}
+
+#panel-board .match-budget-hint {
+  padding: 0.65rem 0.85rem;
+  border-radius: 12px;
+  background: #f4f7fb;
+  border-left: 3px solid #29abe2;
+}

@@ -4,6 +4,8 @@ const { test, expect } = require('@playwright/test');
 const PRIMARY = '#06b6d4';
 const DARK = '#0f172a';
 const BG = '#f8fafc';
+const NAV_INACTIVE = '#94a3b8';
+const CACHE = '151';
 
 /** @param {import('@playwright/test').Page} page */
 async function readToken(page, name) {
@@ -32,21 +34,27 @@ function colorClose(cssColor, hex) {
 }
 
 test.describe('Cubik Brand 2.0 — design system', () => {
-  test('tokens CSS en sitio principal', async ({ page }) => {
-    await page.goto('/?v=149');
-    const primary = await readToken(page, '--cubik-primary');
-    const dark = await readToken(page, '--cubik-dark');
-    expect(primary.toLowerCase()).toBe(PRIMARY);
-    expect(dark.toLowerCase()).toBe(DARK);
+  test('sitio principal — landing v3 con hero oscuro', async ({ page }) => {
+    await page.goto(`/?v=${CACHE}`);
+    await expect(page.locator('body.lv3-home')).toBeVisible();
+    await expect(page.locator('.lv3-accent')).toContainText('mueve Chile');
 
-    const headerBg = await page.evaluate(() =>
-      getComputedStyle(document.querySelector('.site-header')).backgroundColor
+    const primary = await readToken(page, '--cubik-primary');
+    expect(primary.toLowerCase()).toBe(PRIMARY);
+
+    const navBg = await page.evaluate(() =>
+      getComputedStyle(document.querySelector('.lv3-nav')).backgroundColor
     );
-    expect(colorClose(headerBg, DARK)).toBeTruthy();
+    expect(colorClose(navBg, DARK)).toBeTruthy();
+
+    const ctaBg = await page.evaluate(() =>
+      getComputedStyle(document.querySelector('.lv3-btn-teal')).backgroundImage
+    );
+    expect(ctaBg).toMatch(/gradient|06b6d4|22d3ee/i);
   });
 
   test('tokens y nav oscuro en transportistas', async ({ page }) => {
-    await page.goto('/transportistas?v=149');
+    await page.goto(`/transportistas?v=${CACHE}`);
     const teal = await readToken(page, '--cubik-teal');
     expect(teal.toLowerCase()).toBe(PRIMARY);
 
@@ -61,16 +69,37 @@ test.describe('Cubik Brand 2.0 — design system', () => {
     expect(colorClose(featuresBg, BG)).toBeTruthy();
   });
 
+  test('header global idéntico en home, empresas y transportistas', async ({ page }) => {
+    for (const path of ['/', '/empresas', '/transportistas']) {
+      await page.goto(`${path}?v=${CACHE}`);
+      await expect(page.locator('.lv3-nav .lv3-btn-ghost')).toHaveText('Iniciar sesión');
+      await expect(page.locator('.lv3-nav .lv3-btn-teal')).toHaveText('Regístrate gratis');
+      const navH = await page.evaluate(() =>
+        getComputedStyle(document.querySelector('.lv3-nav')).minHeight
+      );
+      expect(navH).toBe('64px');
+    }
+  });
+
+  test('hero comparte CTA primario y secundario', async ({ page }) => {
+    for (const path of ['/', '/empresas', '/transportistas']) {
+      await page.goto(`${path}?v=${CACHE}`);
+      await expect(page.locator('.lv3-hero .lv3-btn-teal').first()).toBeVisible();
+      await expect(page.locator('.lv3-hero .lv3-btn-secondary').first()).toBeVisible();
+      await expect(page.locator('.lv3-hero-metrics-inner .lv3-metric')).toHaveCount(4);
+    }
+  });
+
   test('empresas comparte paleta con transportistas', async ({ page }) => {
-    await page.goto('/empresas?v=149');
+    await page.goto(`/empresas?v=${CACHE}`);
     const btn = page.locator('.lv3-btn-teal').first();
     await expect(btn).toBeVisible();
     const bg = await btn.evaluate((el) => getComputedStyle(el).backgroundImage);
     expect(bg).toMatch(/gradient|06b6d4|22d3ee/i);
   });
 
-  test('app — header oscuro y nav activo turquesa', async ({ page }) => {
-    await page.goto('/app?v=149');
+  test('app — header oscuro, nav activo/inactivo y cards inicio', async ({ page }) => {
+    await page.goto(`/app?v=${CACHE}`);
     await page.waitForSelector('body.cubik-app');
 
     const gateBg = await readToken(page, '--cubik-bg');
@@ -93,5 +122,14 @@ test.describe('Cubik Brand 2.0 — design system', () => {
       return item ? getComputedStyle(item).color : '';
     });
     if (activeColor) expect(colorClose(activeColor, PRIMARY)).toBeTruthy();
+
+    const inactiveColor = await readToken(page, '--cubik-nav-inactive');
+    expect(inactiveColor.toLowerCase()).toBe(NAV_INACTIVE);
+
+    const accentCard = page.locator('.app-quick-card.accent').first();
+    await expect(accentCard).toBeVisible();
+    const accentBorder = await accentCard.evaluate((el) => getComputedStyle(el).borderLeftColor);
+    expect(colorClose(accentBorder, PRIMARY)).toBeTruthy();
+    await expect(accentCard.locator('.app-quick-icon svg')).toBeVisible();
   });
 });

@@ -1,5 +1,5 @@
 /* Cubik — shell móvil (Brand 2.0) */
-@import url('/cubik-design-system.css?v=0.0.149');
+@import url('/cubik-design-system.css?v=0.0.151');
 
 html.cubik-app-root {
   overflow: hidden;
@@ -345,7 +345,7 @@ body.cubik-app #change-password-panel::before {
   width: min(100%, 14rem);
   height: 2.25rem;
   margin: 0 auto 0.85rem;
-  background: url('/brand/logo-cubik-nav-light.png?v=0.0.149') center / contain no-repeat;
+  background: url('/brand/logo-cubik-nav-light.png?v=0.0.151') center / contain no-repeat;
 }
 
 body.cubik-app #auth-panel #auth-title,
@@ -551,32 +551,48 @@ body.cubik-app[data-app-role='admin']:not([data-app-super-admin]) #app-opt-carri
 
 .app-quick-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0.5rem;
-  margin-bottom: 0.65rem;
+  grid-template-columns: 1fr;
+  gap: 0.65rem;
+  margin-bottom: 0.85rem;
 }
 
 .app-quick-card {
   display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 0.25rem;
-  padding: 0.7rem;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 1rem 1.1rem;
+  min-height: 4.5rem;
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: var(--cubik-radius-lg);
   background: var(--surface);
-  box-shadow: var(--shadow);
+  box-shadow: var(--cubik-card-shadow);
   cursor: pointer;
   text-align: left;
   font: inherit;
   color: var(--text);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.app-quick-card:hover {
+  transform: scale(1.02);
+  box-shadow: var(--cubik-shadow);
+}
+
+.app-quick-card > div,
+.app-quick-card-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  min-width: 0;
 }
 
 .app-quick-card strong {
   font-size: 0.88rem;
 }
 
-.app-quick-card span {
+.app-quick-card-copy span {
   font-size: 0.72rem;
   color: var(--text-muted);
 }
@@ -585,23 +601,57 @@ body.cubik-app[data-app-role='admin']:not([data-app-super-admin]) #app-opt-carri
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 2.35rem;
-  height: 2.35rem;
-  border-radius: 50%;
-  background: var(--brand-cyan);
-  color: #fff;
-  font-size: 1.1rem;
-  line-height: 1;
+  width: 2.75rem;
+  height: 2.75rem;
+  border-radius: 12px;
+  background: var(--cubik-accent-soft);
+  color: var(--cubik-primary);
+  flex-shrink: 0;
 }
 
-.app-quick-card:not(.accent) .app-quick-icon {
-  background: var(--brand-navy-mid);
+.app-quick-card .app-quick-icon svg {
+  width: 1.35rem;
+  height: 1.35rem;
+  stroke: currentColor;
 }
 
 .app-quick-card.accent {
   border: 1px solid var(--border);
   border-left: 4px solid var(--cubik-primary);
-  background: var(--surface-warm);
+  background: var(--cubik-surface-selected);
+}
+
+.app-quick-card.accent .app-quick-icon {
+  background: var(--cubik-gradient-cta);
+  color: #fff;
+}
+
+.app-quick-chevron {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin-left: auto;
+  color: var(--cubik-nav-inactive);
+}
+
+.app-quick-chevron svg {
+  width: 1.1rem;
+  height: 1.1rem;
+}
+
+.app-profile-row-end {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  flex-shrink: 0;
+}
+
+.app-profile-chevron {
+  width: 1rem;
+  height: 1rem;
+  color: var(--cubik-nav-inactive);
+  flex-shrink: 0;
 }
 
 .app-home-active {
@@ -648,6 +698,7 @@ body.cubik-app[data-app-role='admin']:not([data-app-super-admin]) #app-opt-carri
   text-align: center;
 }
 
+.app-option-tile.tile-accent,
 .app-option-tile.tile-orange,
 .app-option-tile.tile-blue {
   border-color: rgba(6, 182, 212, 0.45);
@@ -747,14 +798,27 @@ body.cubik-app[data-app-role='admin']:not([data-app-super-admin]) #app-opt-carri
   font-size: 1.2rem;
 }
 
+.app-account-group {
+  margin-bottom: 0.85rem;
+}
+
+.app-account-group-title {
+  margin: 0 0 0.45rem 0.15rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--cubik-nav-inactive);
+}
+
 .app-profile-menu {
   display: flex;
   flex-direction: column;
   border: 1px solid var(--border);
-  border-radius: 14px;
+  border-radius: var(--cubik-radius-lg);
   overflow: hidden;
   background: var(--surface);
-  margin-bottom: 0.75rem;
+  box-shadow: var(--cubik-card-shadow);
 }
 
 .app-profile-row {
@@ -858,7 +922,7 @@ body.cubik-app .app-account-penalties-slot #account-penalties-panel {
   padding: 0.35rem 0.25rem;
   border: none;
   background: transparent;
-  color: var(--brand-gray-500);
+  color: var(--cubik-nav-inactive);
   font-size: 0.65rem;
   font-weight: 700;
   cursor: pointer;
@@ -1065,4 +1129,58 @@ body.keyboard-open main {
     max-width: 100%;
     box-sizing: border-box;
   }
+}
+
+/* Pagos — estilo fintech en app */
+body.cubik-app .wallet-section {
+  margin: 0.75rem 0;
+  padding: var(--cubik-card-padding);
+  border: 1px solid var(--border);
+  border-radius: var(--cubik-radius-lg);
+  background: var(--surface);
+  box-shadow: var(--cubik-card-shadow);
+}
+
+body.cubik-app .wallet-section h3 {
+  margin: 0 0 0.35rem;
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--cubik-dark);
+}
+
+body.cubik-app .wallet-section h4 {
+  color: var(--cubik-text-soft);
+}
+
+body.cubik-app .cubik-balance-card {
+  border-radius: var(--cubik-radius-lg);
+  padding: 1.1rem 1.15rem;
+  box-shadow: var(--cubik-card-shadow);
+}
+
+body.cubik-app .cubik-balance-positive .cubik-balance-amount {
+  color: var(--cubik-success);
+}
+
+body.cubik-app .cubik-balance-negative .cubik-balance-amount {
+  color: var(--cubik-error);
+}
+
+body.cubik-app .wallet-row {
+  padding: 0.85rem 0;
+}
+
+body.cubik-app #account-penalties-panel .tab-sm:not(.tab-outline) {
+  background: var(--cubik-gradient-cta);
+  border: none;
+  color: #fff;
+  min-height: var(--cubik-btn-h);
+  border-radius: var(--cubik-radius);
+}
+
+body.cubik-app .app-account-actions .tab-outline {
+  border-color: var(--cubik-primary);
+  color: var(--cubik-primary);
+  min-height: var(--cubik-btn-h);
+  border-radius: var(--cubik-radius);
 }

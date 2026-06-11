@@ -9,17 +9,17 @@
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Cubik" />
   <title>Cubik — Optimiza tus envíos</title>
-  <link rel="icon" href="/brand/logo-mark.png?v=0.0.149" type="image/png" />
+  <link rel="icon" href="/brand/logo-mark.png?v=0.0.151" type="image/png" />
   <link rel="manifest" href="/manifest.webmanifest" />
-  <link rel="apple-touch-icon" href="/brand/logo-mark.png?v=0.0.149" />
+  <link rel="apple-touch-icon" href="/brand/logo-mark.png?v=0.0.151" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/cubik-design-system.css?v=0.0.149" />
-  <link rel="stylesheet" href="/theme.css?v=0.0.149" />
-  <link rel="stylesheet" href="/app-shell.css?v=0.0.149" />
-  <link rel="stylesheet" href="/board-enterprise.css?v=0.0.149" />
-  <link rel="stylesheet" href="/role-welcome.css?v=0.0.149" />
+  <link rel="stylesheet" href="/cubik-design-system.css?v=0.0.151" />
+  <link rel="stylesheet" href="/theme.css?v=0.0.151" />
+  <link rel="stylesheet" href="/app-shell.css?v=0.0.151" />
+  <link rel="stylesheet" href="/board-enterprise.css?v=0.0.151" />
+  <link rel="stylesheet" href="/role-welcome.css?v=0.0.151" />
   <script src="/device-id.js?v=0.0.130" defer></script>
   <script src="/brand-config.js?v=0.0.139" defer></script>
   <script src="/api-base.js?v=0.0.83" defer></script>
@@ -28,7 +28,7 @@
   <div id="app-gate" class="app-gate" hidden>
     <div id="app-welcome" class="app-gate-screen">
       <div class="app-gate-hero">
-        <img class="app-gate-logo" src="/brand/logo-cubik-nav-light.png?v=0.0.149" alt="Cubik" decoding="async" width="360" height="114" />
+        <img class="app-gate-logo" src="/brand/logo-cubik-nav-light.png?v=0.0.151" alt="Cubik" decoding="async" width="360" height="114" />
         <p class="app-gate-brand">Cubik</p>
         <p class="cubik-welcome-headline">Menos viajes vacíos. Más negocios.</p>
         <p class="cubik-welcome-sub app-gate-lead">La red logística para aprovechar cada kilómetro recorrido.</p>
@@ -105,24 +105,24 @@
         <p id="app-home-sub" class="app-home-sub"></p>
         <div class="app-quick-grid">
           <button type="button" class="app-quick-card accent" id="app-quick-board" data-app-quick="board">
-            <span class="app-quick-icon">⚡</span>
-            <strong>Emparejar</strong>
-            <span>Tablero y propuestas</span>
+            <span class="app-quick-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg></span>
+            <span class="app-quick-card-copy"><strong>Emparejar</strong><span>Tablero y propuestas</span></span>
+            <span class="app-quick-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
           </button>
           <button type="button" class="app-quick-card" id="app-quick-shipper" data-app-quick="shipper" hidden>
-            <span class="app-quick-icon">📦</span>
-            <strong>Publicar carga</strong>
-            <span>Nueva necesidad</span>
+            <span class="app-quick-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="M3.3 7l8.7 5 8.7-5"/><path d="M12 22V12"/></svg></span>
+            <span class="app-quick-card-copy"><strong>Publicar carga</strong><span>Nueva necesidad</span></span>
+            <span class="app-quick-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
           </button>
           <button type="button" class="app-quick-card" id="app-quick-carrier" data-app-quick="carrier" hidden>
-            <span class="app-quick-icon">🚛</span>
-            <strong>Ofertar ruta</strong>
-            <span>Capacidad disponible</span>
+            <span class="app-quick-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 18V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v11"/><path d="M15 18H2"/><path d="M19 18V8l3 3v7"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg></span>
+            <span class="app-quick-card-copy"><strong>Ofertar ruta</strong><span>Capacidad disponible</span></span>
+            <span class="app-quick-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
           </button>
           <button type="button" class="app-quick-card" data-app-quick="trips">
-            <span class="app-quick-icon">📋</span>
-            <strong>Mis viajes</strong>
-            <span>Estado y calificaciones</span>
+            <span class="app-quick-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/><path d="M9 12h6"/><path d="M9 16h6"/></svg></span>
+            <span class="app-quick-card-copy"><strong>Mis viajes</strong><span>Estado y calificaciones</span></span>
+            <span class="app-quick-chevron" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></span>
           </button>
         </div>
         <div id="app-home-active-slot" class="app-home-active card app-home-active"></div>
@@ -137,7 +137,7 @@
         <p class="muted app-section-lead">Operación según tu rol en Cubik.</p>
         <h3 class="app-options-heading">Emparejar y viajes</h3>
         <div class="app-options-grid">
-          <button type="button" class="app-option-tile tile-orange" data-app-action="shipper" id="app-opt-shipper">
+          <button type="button" class="app-option-tile tile-accent" data-app-action="shipper" id="app-opt-shipper">
             <svg viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><path d="M12 3v12m0 0l4-4m-4 4l-4-4M4 21h16"/></svg>
             <span>Publicar carga</span>
           </button>
@@ -145,7 +145,7 @@
             <svg viewBox="0 0 24 24" fill="none" stroke="#06b6d4" stroke-width="2"><rect x="2" y="7" width="16" height="10" rx="1"/><path d="M18 10h2l2 3v4h-4"/></svg>
             <span>Ofertar ruta</span>
           </button>
-          <button type="button" class="app-option-tile tile-orange" data-app-action="board">
+          <button type="button" class="app-option-tile tile-accent" data-app-action="board">
             <svg viewBox="0 0 24 24" fill="none" stroke="#0f172a" stroke-width="2"><path d="M4 6h16M4 12h10M4 18h14"/></svg>
             <span>Emparejar</span>
           </button>
@@ -173,7 +173,7 @@
       <section id="app-view-account" class="app-view" data-app-view="account">
         <div class="app-profile-hero" id="app-profile-hero"></div>
         <div class="app-profile-quick" id="app-profile-quick"></div>
-        <nav class="app-profile-menu" id="app-profile-menu" aria-label="Menú de cuenta"></nav>
+        <div id="app-profile-sections" aria-label="Menú de cuenta"></div>
         <p id="app-build-version" class="muted app-build-version"></p>
         <div class="app-account-card app-account-actions">
           <button type="button" class="tab tab-sm tab-outline" id="app-btn-logout">Cerrar sesión</button>
@@ -205,7 +205,7 @@
 
   <header class="site-header">
     <div class="brand-logo-wrap">
-      <img class="brand-logo" src="/brand/logo-cubik-nav.png?v=0.0.149" alt="Cubik — Optimiza tus envíos" decoding="async" width="360" height="117" />
+      <img class="brand-logo" src="/brand/logo-cubik-nav.png?v=0.0.151" alt="Cubik — Optimiza tus envíos" decoding="async" width="360" height="117" />
     </div>
     <div class="brand-copy">
       <h1 class="visually-hidden">Cubik</h1>

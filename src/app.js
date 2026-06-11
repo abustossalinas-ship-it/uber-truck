@@ -43,7 +43,11 @@ const CORS_ORIGINS = new Set([
 ]);
 
 function landingHosts() {
-  const fromEnv = (process.env.LANDING_HOSTS || 'getcubik.cl,www.getcubik.cl')
+  const defaults =
+    process.env.NODE_ENV === 'production'
+      ? 'getcubik.cl,www.getcubik.cl'
+      : 'getcubik.cl,www.getcubik.cl,localhost,127.0.0.1';
+  const fromEnv = (process.env.LANDING_HOSTS || defaults)
     .split(',')
     .map((h) => h.trim().toLowerCase())
     .filter(Boolean);

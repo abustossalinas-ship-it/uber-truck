@@ -6,7 +6,7 @@ const {
   expectLoginOpenForRole,
 } = require('./helpers');
 
-const V = '0.0.149';
+const V = '0.0.151';
 
 test.describe('Logo Cubik — encuadre y assets', () => {
   test('asset demo/app es PNG maestro usuario (360×114, alpha)', async ({ request }) => {
@@ -32,14 +32,14 @@ test.describe('Logo Cubik — encuadre y assets', () => {
     });
   });
 
-  test('/ — demo header oscuro con logo blanco', async ({ page }) => {
+  test('/ — sitio principal nav oscuro con logo blanco', async ({ page }) => {
     await page.goto(`/?v=${V}`);
-    const img = page.locator('.brand-logo').first();
+    const img = page.locator('.lv3-brand img').first();
     await expect(img).toBeVisible();
     await expect(img).toHaveAttribute('src', new RegExp(`logo-cubik-nav\\.png\\?v=${V}`));
     await expectLogoFramed(page, {
-      img: '.brand-logo',
-      container: '.site-header',
+      img: '.lv3-brand img',
+      container: '.lv3-nav',
       srcPattern: /logo-cubik-nav\.png/,
       minNaturalWidth: 300,
     });

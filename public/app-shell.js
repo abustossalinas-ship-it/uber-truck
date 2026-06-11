@@ -560,7 +560,7 @@ const AppShell = {
     const user = typeof Auth !== 'undefined' ? Auth.user : null;
     const hero = document.getElementById('app-profile-hero');
     const quick = document.getElementById('app-profile-quick');
-    const menu = document.getElementById('app-profile-menu');
+    const sections = document.getElementById('app-profile-sections');
     if (!user || !hero) return;
     const role =
       typeof roleLabel === 'function' ? roleLabel(user.role) : user.role;
@@ -607,40 +607,71 @@ const AppShell = {
         });
       });
     }
-    if (menu) {
+    if (sections) {
       const kyc = user.kyc_status || 'pending';
-      menu.innerHTML = `
-        <button type="button" class="app-profile-row" data-profile-action="kyc">
-          <span>Verificación KYC</span>
-          <span class="app-profile-row-meta">${kyc}</span>
-        </button>
-        <button type="button" class="app-profile-row" id="app-btn-change-pw">
-          <span>Seguridad · cambiar clave</span>
-        </button>
-        <button type="button" class="app-profile-row" data-profile-action="penalties">
-          <span>Multas y pagos</span>
-        </button>
-        <button type="button" class="app-profile-row" data-profile-action="notifications">
-          <span>Notificaciones</span>
-        </button>
-        <button type="button" class="app-profile-row" data-profile-action="help">
-          <span>Ayuda con un viaje</span>
-        </button>`;
-      menu.querySelector('#app-btn-change-pw')?.addEventListener('click', () => {
+      const chevron =
+        '<svg class="app-profile-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>';
+      sections.innerHTML = `
+        <section class="app-account-group">
+          <h3 class="app-account-group-title">Perfil</h3>
+          <nav class="app-profile-menu">
+            <button type="button" class="app-profile-row" data-profile-action="kyc">
+              <span>Verificación KYC</span>
+              <span class="app-profile-row-end"><span class="app-profile-row-meta">${kyc}</span>${chevron}</span>
+            </button>
+          </nav>
+        </section>
+        <section class="app-account-group">
+          <h3 class="app-account-group-title">Seguridad</h3>
+          <nav class="app-profile-menu">
+            <button type="button" class="app-profile-row" id="app-btn-change-pw">
+              <span>Cambiar contraseña</span>
+              <span class="app-profile-row-end">${chevron}</span>
+            </button>
+          </nav>
+        </section>
+        <section class="app-account-group">
+          <h3 class="app-account-group-title">Pagos</h3>
+          <nav class="app-profile-menu">
+            <button type="button" class="app-profile-row" data-profile-action="penalties">
+              <span>Multas y billetera</span>
+              <span class="app-profile-row-end">${chevron}</span>
+            </button>
+          </nav>
+        </section>
+        <section class="app-account-group">
+          <h3 class="app-account-group-title">Notificaciones</h3>
+          <nav class="app-profile-menu">
+            <button type="button" class="app-profile-row" data-profile-action="notifications">
+              <span>Centro de notificaciones</span>
+              <span class="app-profile-row-end">${chevron}</span>
+            </button>
+          </nav>
+        </section>
+        <section class="app-account-group">
+          <h3 class="app-account-group-title">Ayuda</h3>
+          <nav class="app-profile-menu">
+            <button type="button" class="app-profile-row" data-profile-action="help">
+              <span>Ayuda con un viaje</span>
+              <span class="app-profile-row-end">${chevron}</span>
+            </button>
+          </nav>
+        </section>`;
+      sections.querySelector('#app-btn-change-pw')?.addEventListener('click', () => {
         if (typeof AppShell?.openChangePassword === 'function') AppShell.openChangePassword();
         else document.getElementById('btn-change-password')?.click();
       });
-      menu.querySelector('[data-profile-action="kyc"]')?.addEventListener('click', () => {
+      sections.querySelector('[data-profile-action="kyc"]')?.addEventListener('click', () => {
         document.getElementById('kyc-banner')?.scrollIntoView({ behavior: 'smooth' });
       });
-      menu.querySelector('[data-profile-action="penalties"]')?.addEventListener('click', () => {
+      sections.querySelector('[data-profile-action="penalties"]')?.addEventListener('click', () => {
         document.getElementById('account-penalties-panel')?.scrollIntoView({ behavior: 'smooth' });
         if (typeof Penalties !== 'undefined') Penalties.refresh();
       });
-      menu.querySelector('[data-profile-action="notifications"]')?.addEventListener('click', () => {
+      sections.querySelector('[data-profile-action="notifications"]')?.addEventListener('click', () => {
         document.getElementById('btn-notifications')?.click();
       });
-      menu.querySelector('[data-profile-action="help"]')?.addEventListener('click', () => {
+      sections.querySelector('[data-profile-action="help"]')?.addEventListener('click', () => {
         this.openAction('help');
       });
     }

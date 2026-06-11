@@ -5,7 +5,7 @@ const PRIMARY = '#06b6d4';
 const DARK = '#0f172a';
 const BG = '#f8fafc';
 const NAV_INACTIVE = '#94a3b8';
-const CACHE = '154';
+const CACHE = '155';
 
 /** @param {import('@playwright/test').Page} page */
 async function readToken(page, name) {
@@ -37,7 +37,7 @@ test.describe('Cubik Brand 2.0 — design system', () => {
   test('sitio principal — landing v3 con hero oscuro', async ({ page }) => {
     await page.goto(`/?v=${CACHE}`);
     await expect(page.locator('body.lv3-home')).toBeVisible();
-    await expect(page.locator('.lv3-accent')).toContainText('mueve Chile');
+    await expect(page.locator('.lv3-accent')).toContainText('mueven Chile');
 
     const primary = await readToken(page, '--cubik-primary');
     expect(primary.toLowerCase()).toBe(PRIMARY);

@@ -245,6 +245,96 @@
   font-weight: 700;
 }
 
+/* Home — camión + línea de crecimiento (mockup) */
+.lf-hero-home-scene {
+  position: relative;
+  width: 100%;
+  max-width: 36rem;
+  margin-left: auto;
+  border-radius: 18px;
+  overflow: hidden;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.45);
+  animation: lf-float 5.5s ease-in-out infinite;
+}
+
+.lf-hero-home-truck {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  object-position: 72% center;
+}
+
+.lf-hero-home-chart {
+  position: absolute;
+  left: 8%;
+  right: 8%;
+  top: 8%;
+  width: 84%;
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 0 12px rgba(6, 182, 212, 0.45));
+  animation: lf-chart-glow 3s ease-in-out infinite;
+}
+
+@keyframes lf-chart-glow {
+  0%, 100% { opacity: 0.75; transform: translateY(0); }
+  50% { opacity: 1; transform: translateY(-4px); }
+}
+
+/* Empresas — tablet con video dashboard */
+.lf-hero-tablet-wrap {
+  max-width: 34rem;
+  margin-left: auto;
+}
+
+.lf-tablet-mockup {
+  animation: lf-float 5.5s ease-in-out infinite;
+  filter: drop-shadow(0 32px 64px rgba(0, 0, 0, 0.55));
+}
+
+.lf-tablet-frame {
+  position: relative;
+  padding: 0.65rem 0.55rem 0.75rem;
+  border-radius: 1.35rem;
+  background: linear-gradient(165deg, #334155 0%, #0f172a 50%, #020617 100%);
+  border: 2px solid rgba(148, 163, 184, 0.25);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 0 1px rgba(6, 182, 212, 0.15);
+}
+
+.lf-tablet-camera {
+  position: absolute;
+  top: 0.55rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 50%;
+  background: #1e293b;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  z-index: 2;
+}
+
+.lf-tablet-screen {
+  position: relative;
+  border-radius: 0.85rem;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: #0a1628;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.lf-tablet-video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+}
+
 .lf-hero-particles {
   position: absolute;
   inset: 0;
@@ -701,6 +791,7 @@ html.lf-smooth { scroll-behavior: smooth; }
 @media (prefers-reduced-motion: reduce) {
   .lf-hero-video,
   .lf-product-video,
+  .lf-tablet-video,
   .lf-phone-video,
   .lf-hero-particles,
   .lf-hero-cine-canvas,

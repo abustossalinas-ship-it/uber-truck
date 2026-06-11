@@ -229,18 +229,13 @@
   }
 
   const HERO_CINE_SRC = {
-    'lv3-home': '/brand/landing/hero-truck-mockup.jpg',
+    'lv3-home': '/brand/landing/hero-home-truck.jpg',
     'lv3-shipper': '/brand/landing/mockup-hero-bg.jpg',
     'lv3-carrier': '/brand/landing/hero-truck-night.jpg',
   };
 
   const HERO_VIDEO_SRC = {
-    'lv3-home': '/brand/landing/hero-home-cine.mp4',
     'lv3-carrier': '/brand/landing/hero-carrier-cine.mp4',
-  };
-
-  const HERO_PRODUCT_VIDEO_SRC = {
-    'lv3-shipper': '/brand/landing/hero-shipper-cine.mp4',
   };
 
   function pageRole() {
@@ -441,27 +436,8 @@
 
   function initShipperProductVideo() {
     if (!document.body.classList.contains('lv3-shipper') || reduced) return;
-    const main = document.querySelector('.lf-product-main');
-    const src = HERO_PRODUCT_VIDEO_SRC['lv3-shipper'];
-    if (!main || !src || main.querySelector('.lf-product-video')) return;
-
-    const wrap = document.createElement('div');
-    wrap.className = 'lf-product-video-wrap';
-    wrap.setAttribute('aria-hidden', 'true');
-    const video = document.createElement('video');
-    video.className = 'lf-product-video';
-    video.autoplay = true;
-    video.muted = true;
-    video.loop = true;
-    video.playsInline = true;
-    const source = document.createElement('source');
-    source.src = src;
-    source.type = 'video/mp4';
-    video.appendChild(source);
-    wrap.appendChild(video);
-    main.classList.add('lf-product-main--has-video');
-    main.insertBefore(wrap, main.firstChild);
-    video.play().catch(() => {});
+    const video = document.querySelector('.lf-tablet-video');
+    if (video) video.play().catch(() => {});
   }
 
   function initCarrierPhoneVideo() {

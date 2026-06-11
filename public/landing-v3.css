@@ -256,7 +256,12 @@
 }
 
 .lv3-home .lv3-hero-bg {
-  background-image: url('/brand/landing/hero-truck-mockup.jpg');
+  background-image: url('/brand/landing/hero-home-truck.jpg');
+  background-position: 68% center;
+}
+
+.lv3-home.has-fluid .lv3-hero-bg {
+  animation: lv3-hero-kenburns 28s ease-in-out infinite alternate;
 }
 
 .lv3-shipper .lv3-hero-bg {

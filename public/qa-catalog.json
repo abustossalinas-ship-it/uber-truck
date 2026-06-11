@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-06-11T02:30:03.786Z",
+  "generated_at": "2026-06-11T02:43:39.220Z",
   "version": "0.0.129",
   "counts": {
     "unit": 30,
@@ -128,10 +128,6 @@
       {
         "label": "Pasaron",
         "value": 19
-      },
-      {
-        "label": "Fallaron",
-        "value": 1
       },
       {
         "label": "Omitidos",
@@ -606,28 +602,28 @@
       "cases": [
         {
           "name": "/transportistas carga hero y CTAs",
-          "group": "Landing v2 — transportistas y empresas",
+          "group": "Landing v3 — transportistas y empresas",
           "optional": false,
           "area": "other",
           "area_label": "Otros"
         },
         {
           "name": "/empresas carga hero y CTAs",
-          "group": "Landing v2 — transportistas y empresas",
+          "group": "Landing v3 — transportistas y empresas",
           "optional": false,
           "area": "other",
           "area_label": "Otros"
         },
         {
           "name": "Transportistas → app abre login carrier",
-          "group": "Landing v2 — transportistas y empresas",
+          "group": "Landing v3 — transportistas y empresas",
           "optional": false,
           "area": "welcome",
           "area_label": "Welcome / login"
         },
         {
           "name": "Empresas → app abre login shipper",
-          "group": "Landing v2 — transportistas y empresas",
+          "group": "Landing v3 — transportistas y empresas",
           "optional": false,
           "area": "welcome",
           "area_label": "Welcome / login"
@@ -692,5 +688,5 @@
     }
   ],
   "report_available": true,
-  "last_run_at": "2026-06-11T02:29:50.704Z"
+  "last_run_at": "2026-06-11T02:43:22.541Z"
 }

@@ -1,0 +1,541 @@
+/* Cubik landing v3 — petróleo + turquesa (Uber Freight / Control Tower) */
+:root {
+  --cubik-ink: #0f172a;
+  --cubik-petrol: #164e63;
+  --cubik-teal: #06b6d4;
+  --cubik-teal-hover: #22d3ee;
+  --cubik-surface: #f8fafc;
+  --cubik-white: #ffffff;
+  --cubik-muted: #94a3b8;
+  --cubik-text: #e2e8f0;
+  --cubik-success: #10b981;
+  --cubik-warn: #f59e0b;
+  --cubik-danger: #ef4444;
+  --cubik-max: 1180px;
+  --cubik-radius: 16px;
+  --cubik-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.lv3-page {
+  margin: 0;
+  font-family: var(--cubik-font);
+  color: var(--cubik-ink);
+  background: var(--cubik-ink);
+  line-height: 1.55;
+}
+
+.lv3-page a { color: var(--cubik-teal); text-decoration: none; }
+.lv3-page a:hover { color: var(--cubik-teal-hover); }
+
+/* —— Nav —— */
+.lv3-nav {
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.85rem max(1.25rem, env(safe-area-inset-right)) 0.85rem max(1.25rem, env(safe-area-inset-left));
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(12px);
+  border-bottom: 1px solid rgba(6, 182, 212, 0.12);
+}
+
+.lv3-brand {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 800;
+  font-size: 1.05rem;
+  letter-spacing: 0.12em;
+  color: var(--cubik-white);
+  text-decoration: none;
+}
+
+.lv3-brand img { width: 36px; height: 36px; border-radius: 8px; }
+
+.lv3-nav-links {
+  display: none;
+  gap: 1.5rem;
+  font-size: 0.88rem;
+  font-weight: 500;
+}
+
+.lv3-nav-links a {
+  color: var(--cubik-muted);
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.lv3-nav-links a:hover,
+.lv3-nav-links a.active { color: var(--cubik-teal); }
+
+.lv3-nav-actions { display: flex; gap: 0.5rem; align-items: center; }
+
+@media (min-width: 900px) {
+  .lv3-nav-links { display: flex; }
+}
+
+.lv3-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  padding: 0.65rem 1.15rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 0.88rem;
+  border: none;
+  cursor: pointer;
+  text-decoration: none;
+  transition: transform 0.15s, background 0.15s;
+}
+
+.lv3-btn:hover { transform: translateY(-1px); }
+
+.lv3-btn-teal {
+  background: var(--cubik-teal);
+  color: var(--cubik-ink);
+}
+
+.lv3-btn-teal:hover { background: var(--cubik-teal-hover); color: var(--cubik-ink); }
+
+.lv3-btn-ghost {
+  background: transparent;
+  color: var(--cubik-text);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+.lv3-btn-ghost:hover { border-color: var(--cubik-teal); color: var(--cubik-teal); }
+
+.lv3-btn-lg { padding: 0.9rem 1.5rem; font-size: 0.95rem; border-radius: 12px; }
+
+/* —— Hero —— */
+.lv3-hero {
+  position: relative;
+  overflow: hidden;
+  min-height: min(92vh, 52rem);
+  background: linear-gradient(135deg, var(--cubik-ink) 0%, var(--cubik-petrol) 55%, rgba(6, 182, 212, 0.35) 100%);
+}
+
+.lv3-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(ellipse 70% 50% at 80% 60%, rgba(6, 182, 212, 0.15), transparent 55%),
+    linear-gradient(180deg, transparent 40%, rgba(15, 23, 42, 0.85) 100%);
+  pointer-events: none;
+}
+
+.lv3-hero-truck {
+  position: absolute;
+  inset: 0;
+  background:
+    url('/brand/welcome/route-chile.svg') no-repeat 70% 75% / 55% auto,
+    linear-gradient(90deg, rgba(15, 23, 42, 0.95) 0%, rgba(15, 23, 42, 0.4) 45%, transparent 70%);
+  opacity: 0.35;
+  pointer-events: none;
+}
+
+.lv3-hero-inner {
+  position: relative;
+  z-index: 2;
+  max-width: var(--cubik-max);
+  margin: 0 auto;
+  padding: 3rem 1.25rem 2rem;
+  display: grid;
+  gap: 2rem;
+  align-items: center;
+}
+
+@media (min-width: 960px) {
+  .lv3-hero-inner { grid-template-columns: 1fr 1.1fr; padding-top: 4rem; min-height: min(85vh, 48rem); }
+}
+
+.lv3-hero h1 {
+  margin: 0 0 1rem;
+  font-size: clamp(2rem, 4.5vw, 2.75rem);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--cubik-white);
+}
+
+.lv3-hero-lead {
+  margin: 0 0 1.5rem;
+  font-size: 1.05rem;
+  color: var(--cubik-muted);
+  max-width: 30rem;
+}
+
+.lv3-hero-actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 2rem; }
+
+/* —— Dashboard mock (control tower) —— */
+.lv3-dash {
+  background: rgba(15, 23, 42, 0.75);
+  border: 1px solid rgba(6, 182, 212, 0.25);
+  border-radius: 20px;
+  padding: 1rem;
+  box-shadow: 0 32px 80px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+}
+
+.lv3-dash-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.75rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.lv3-dash-header span { font-size: 0.75rem; color: var(--cubik-muted); font-weight: 600; }
+
+.lv3-dash-map {
+  position: relative;
+  height: 200px;
+  border-radius: 12px;
+  background: linear-gradient(160deg, #0c1929 0%, #164e63 100%);
+  overflow: hidden;
+  margin-bottom: 0.75rem;
+}
+
+.lv3-dash-map svg { width: 100%; height: 100%; opacity: 0.9; }
+
+.lv3-dash-route {
+  position: absolute;
+  inset: 0;
+  background: url('/brand/welcome/route-chile.svg') center 60% / 85% no-repeat;
+  opacity: 0.7;
+  animation: lv3-pulse-route 4s ease-in-out infinite;
+}
+
+@keyframes lv3-pulse-route {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 0.85; }
+}
+
+.lv3-dash-pin {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--cubik-teal);
+  box-shadow: 0 0 12px var(--cubik-teal);
+  animation: lv3-blink 2s ease-in-out infinite;
+}
+
+.lv3-dash-pin.a { top: 28%; left: 42%; }
+.lv3-dash-pin.b { top: 55%; left: 38%; animation-delay: 0.5s; }
+.lv3-dash-pin.c { top: 42%; left: 52%; background: var(--cubik-success); box-shadow: 0 0 12px var(--cubik-success); animation-delay: 1s; }
+
+@keyframes lv3-blink {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.25); }
+}
+
+.lv3-dash-kpis {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0.5rem;
+}
+
+.lv3-dash-kpi {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+}
+
+.lv3-dash-kpi strong {
+  display: block;
+  font-size: 1.1rem;
+  color: var(--cubik-teal);
+  font-weight: 800;
+}
+
+.lv3-dash-kpi span { font-size: 0.68rem; color: var(--cubik-muted); line-height: 1.2; }
+
+.lv3-dash-income {
+  margin-top: 0.5rem;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  font-size: 0.78rem;
+  color: var(--cubik-success);
+  font-weight: 600;
+}
+
+/* —— Metrics strip —— */
+.lv3-metrics {
+  position: relative;
+  z-index: 3;
+  margin-top: -2rem;
+  padding: 0 1.25rem 3rem;
+}
+
+.lv3-metrics-inner {
+  max-width: var(--cubik-max);
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1px;
+  background: rgba(6, 182, 212, 0.2);
+  border-radius: var(--cubik-radius);
+  overflow: hidden;
+  border: 1px solid rgba(6, 182, 212, 0.2);
+}
+
+@media (min-width: 700px) {
+  .lv3-metrics-inner { grid-template-columns: repeat(4, 1fr); }
+}
+
+.lv3-metric {
+  background: rgba(15, 23, 42, 0.92);
+  padding: 1.25rem 1rem;
+  text-align: center;
+}
+
+.lv3-metric strong {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--cubik-teal);
+  margin-bottom: 0.25rem;
+}
+
+.lv3-metric span { font-size: 0.78rem; color: var(--cubik-muted); line-height: 1.3; }
+
+/* —— Features (light band — contraste intencional) —— */
+.lv3-features {
+  background: var(--cubik-surface);
+  color: var(--cubik-ink);
+  padding: 4rem 1.25rem;
+}
+
+.lv3-features-inner { max-width: var(--cubik-max); margin: 0 auto; }
+
+.lv3-features h2 {
+  text-align: center;
+  margin: 0 0 0.5rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 800;
+}
+
+.lv3-features-sub {
+  text-align: center;
+  color: #64748b;
+  margin: 0 auto 2.5rem;
+  max-width: 32rem;
+}
+
+.lv3-feature-grid {
+  display: grid;
+  gap: 1.25rem;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+}
+
+.lv3-feature {
+  background: var(--cubik-white);
+  border-radius: var(--cubik-radius);
+  padding: 1.5rem;
+  border: 1px solid #e2e8f0;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.lv3-feature:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.08);
+}
+
+.lv3-feature-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(6, 182, 212, 0.12);
+  color: var(--cubik-petrol);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.35rem;
+  margin-bottom: 1rem;
+}
+
+.lv3-feature h3 { margin: 0 0 0.5rem; font-size: 1.05rem; }
+
+.lv3-feature p { margin: 0; font-size: 0.92rem; color: #64748b; }
+
+/* —— Control tower split —— */
+.lv3-tower {
+  background: linear-gradient(180deg, var(--cubik-ink) 0%, #0c1222 100%);
+  color: var(--cubik-text);
+  padding: 4rem 1.25rem;
+}
+
+.lv3-tower-inner {
+  max-width: var(--cubik-max);
+  margin: 0 auto;
+  display: grid;
+  gap: 2.5rem;
+  align-items: center;
+}
+
+@media (min-width: 900px) {
+  .lv3-tower-inner { grid-template-columns: 1fr 1.1fr; }
+}
+
+.lv3-tower h2 {
+  margin: 0 0 1rem;
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  color: var(--cubik-white);
+  font-weight: 800;
+}
+
+.lv3-checklist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lv3-checklist li {
+  position: relative;
+  padding-left: 1.75rem;
+  margin-bottom: 0.65rem;
+  font-size: 0.95rem;
+  color: var(--cubik-muted);
+}
+
+.lv3-checklist li::before {
+  content: '✓';
+  position: absolute;
+  left: 0;
+  color: var(--cubik-teal);
+  font-weight: 800;
+}
+
+.lv3-tower-panel {
+  background: rgba(22, 78, 99, 0.35);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  border-radius: 20px;
+  padding: 1rem;
+  min-height: 280px;
+}
+
+.lv3-trip-card {
+  background: rgba(15, 23, 42, 0.8);
+  border-radius: 12px;
+  padding: 1rem;
+  border: 1px solid rgba(6, 182, 212, 0.15);
+}
+
+.lv3-trip-card h4 { margin: 0 0 0.5rem; color: var(--cubik-white); font-size: 0.95rem; }
+
+.lv3-trip-steps { margin: 0; padding: 0; list-style: none; font-size: 0.8rem; }
+
+.lv3-trip-steps li {
+  padding: 0.35rem 0;
+  color: var(--cubik-muted);
+  border-left: 2px solid rgba(148, 163, 184, 0.2);
+  padding-left: 0.75rem;
+  margin-left: 0.25rem;
+}
+
+.lv3-trip-steps li.done { color: var(--cubik-success); border-color: var(--cubik-success); }
+.lv3-trip-steps li.active { color: var(--cubik-teal); border-color: var(--cubik-teal); }
+
+.lv3-speed {
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  color: var(--cubik-teal);
+  font-weight: 700;
+}
+
+/* —— CTA —— */
+.lv3-cta {
+  background: linear-gradient(135deg, var(--cubik-petrol) 0%, var(--cubik-ink) 100%);
+  text-align: center;
+  padding: 3.5rem 1.25rem;
+  border-top: 1px solid rgba(6, 182, 212, 0.15);
+}
+
+.lv3-cta h2 {
+  margin: 0 0 0.75rem;
+  color: var(--cubik-white);
+  font-size: clamp(1.35rem, 3vw, 1.85rem);
+}
+
+.lv3-cta p { margin: 0 auto 1.5rem; max-width: 28rem; color: var(--cubik-muted); }
+
+.lv3-cta-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  margin-top: 1.25rem;
+  font-size: 0.82rem;
+  color: var(--cubik-muted);
+}
+
+.lv3-cta-tags span::before { content: '✓ '; color: var(--cubik-success); }
+
+/* —— Footer —— */
+.lv3-footer {
+  background: #0a0f1a;
+  color: var(--cubik-muted);
+  padding: 2.5rem 1.25rem 2rem;
+  font-size: 0.85rem;
+}
+
+.lv3-footer-inner {
+  max-width: var(--cubik-max);
+  margin: 0 auto;
+  display: grid;
+  gap: 2rem;
+}
+
+@media (min-width: 700px) {
+  .lv3-footer-inner { grid-template-columns: 1.5fr 2fr; }
+}
+
+.lv3-footer-brand { font-weight: 800; letter-spacing: 0.1em; color: var(--cubik-white); }
+
+.lv3-footer-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 1rem;
+}
+
+.lv3-footer-links a { color: var(--cubik-muted); display: block; margin-bottom: 0.35rem; }
+
+.lv3-footer-copy {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding-top: 1.5rem;
+  border-top: 1px solid rgba(148, 163, 184, 0.1);
+  font-size: 0.78rem;
+}
+
+/* —— Reveal —— */
+.lv3-reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.lv3-reveal.is-visible { opacity: 1; transform: none; }
+
+.lv3-loading {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 23, 42, 0.92);
+  color: var(--cubik-teal);
+  font-weight: 700;
+}
+
+.lv3-loading[hidden] { display: none; }

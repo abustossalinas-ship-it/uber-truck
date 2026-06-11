@@ -37,8 +37,8 @@ test.describe('Landing getcubik — portada y navegación', () => {
     await page.locator('a[href="/app?role=carrier"]').first().click();
     await page.waitForURL(/\/app\?/);
     await page.goBack();
-    await expect(page.locator('#lv2-loading')).toBeHidden();
-    await expect(page.locator('h1')).toContainText(/encuentra cargas/i);
+    await expect(page.locator('#lv3-loading')).toBeHidden();
+    await expect(page.locator('h1')).toContainText(/rentabilidad de tu camión/i);
   });
 });
 

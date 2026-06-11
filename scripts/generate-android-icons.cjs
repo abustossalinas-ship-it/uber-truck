@@ -1,12 +1,14 @@
 /**
- * Genera iconos launcher + splash Android desde public/brand/logo-cubik-isotipo.png
+ * Genera iconos launcher + splash Android desde public/brand/logo-cubik-mark.png
+ * Logo horizontal oficial: public/brand/logo-cubik-official-light.png
  * Uso: node scripts/generate-android-icons.cjs
  */
 const fs = require('fs');
 const path = require('path');
 const sharp = require('sharp');
 
-const ISOTIPO = path.join(__dirname, '..', 'public', 'brand', 'logo-cubik-isotipo.png');
+const MARK = path.join(__dirname, '..', 'public', 'brand', 'logo-cubik-mark.png');
+const FULL = path.join(__dirname, '..', 'public', 'brand', 'logo-cubik-official-light.png');
 const RES = path.join(__dirname, '..', 'android', 'app', 'src', 'main', 'res');
 const BG = { r: 244, g: 247, b: 251, alpha: 1 };
 
@@ -34,14 +36,17 @@ const SPLASH_LAND = {
   'drawable-land-xxxhdpi': [1920, 1280],
 };
 
-async function loadIsotipo() {
-  return sharp(ISOTIPO).ensureAlpha().png().toBuffer();
+async function loadMark() {
+  return sharp(MARK).ensureAlpha().png().toBuffer();
 }
 
-/** Android 12: icono visible en círculo ~240dp sobre lienzo 432dp → ~52% máx */
-async function splashIcon(isotipo, size = 432) {
+async function loadFull() {
+  return sharp(FULL).ensureAlpha().png().toBuffer();
+}
+
+async function splashIcon(mark, size = 432) {
   const inner = Math.round(size * 0.5);
-  return sharp(isotipo)
+  return sharp(mark)
     .resize(inner, inner, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .extend({
       top: Math.round((size - inner) / 2),
@@ -54,9 +59,9 @@ async function splashIcon(isotipo, size = 432) {
     .toBuffer();
 }
 
-async function iconOnBg(isotipo, size, pad = 0.14) {
+async function iconOnBg(mark, size, pad = 0.12) {
   const inner = Math.round(size * (1 - pad * 2));
-  const resized = await sharp(isotipo)
+  const resized = await sharp(mark)
     .resize(inner, inner, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .png()
     .toBuffer();
@@ -68,9 +73,9 @@ async function iconOnBg(isotipo, size, pad = 0.14) {
     .toBuffer();
 }
 
-async function foregroundOnly(isotipo, size) {
+async function foregroundOnly(mark, size) {
   const inner = Math.round(size * 0.62);
-  return sharp(isotipo)
+  return sharp(mark)
     .resize(inner, inner, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .extend({
       top: Math.round((size - inner) / 2),
@@ -83,10 +88,10 @@ async function foregroundOnly(isotipo, size) {
     .toBuffer();
 }
 
-async function splashComposite(isotipo, width, height) {
-  const logoMax = Math.round(Math.min(width, height) * 0.34);
-  const logo = await sharp(isotipo)
-    .resize(logoMax, logoMax, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+async function splashComposite(fullBrand, width, height) {
+  const logoMaxW = Math.round(Math.min(width, height) * 0.62);
+  const logo = await sharp(fullBrand)
+    .resize(logoMaxW, null, { fit: 'inside' })
     .png()
     .toBuffer();
   return sharp({
@@ -97,28 +102,32 @@ async function splashComposite(isotipo, width, height) {
     .toBuffer();
 }
 
-async function writeSplashSet(isotipo, sizes) {
+async function writeSplashSet(fullBrand, sizes) {
   for (const [folder, [width, height]] of Object.entries(sizes)) {
     const dir = path.join(RES, folder);
     fs.mkdirSync(dir, { recursive: true });
-    const png = await splashComposite(isotipo, width, height);
+    const png = await splashComposite(fullBrand, width, height);
     await sharp(png).toFile(path.join(dir, 'splash.png'));
     console.log('wrote', folder, 'splash.png');
   }
 }
 
 async function main() {
-  if (!fs.existsSync(ISOTIPO)) {
-    console.error('Missing isotipo:', ISOTIPO);
+  if (!fs.existsSync(MARK)) {
+    console.error('Missing mark:', MARK);
+    process.exit(1);
+  }
+  if (!fs.existsSync(FULL)) {
+    console.error('Missing full logo:', FULL);
     process.exit(1);
   }
 
-  const isotipo = await loadIsotipo();
+  const mark = await loadMark();
+  const fullBrand = await loadFull();
 
-  const markSize = 512;
   const markPath = path.join(__dirname, '..', 'public', 'brand', 'logo-mark.png');
-  await sharp(isotipo)
-    .resize(markSize, markSize, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+  await sharp(mark)
+    .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
     .png()
     .toFile(markPath);
   console.log('wrote public/brand/logo-mark.png');
@@ -127,8 +136,8 @@ async function main() {
     const dir = path.join(RES, folder);
     fs.mkdirSync(dir, { recursive: true });
 
-    const launcher = await iconOnBg(isotipo, icon);
-    const foreground = await foregroundOnly(isotipo, fg);
+    const launcher = await iconOnBg(mark, icon);
+    const foreground = await foregroundOnly(mark, fg);
 
     await sharp(launcher).toFile(path.join(dir, 'ic_launcher.png'));
     await sharp(launcher).toFile(path.join(dir, 'ic_launcher_round.png'));
@@ -139,20 +148,20 @@ async function main() {
   const splashDir = path.join(RES, 'drawable');
   fs.mkdirSync(splashDir, { recursive: true });
 
-  const splashLogo = await sharp(isotipo)
-    .resize(512, 512, { fit: 'contain', background: { r: 0, g: 0, b: 0, alpha: 0 } })
+  const splashLogo = await sharp(fullBrand)
+    .resize(960, null, { fit: 'inside' })
     .png()
     .toBuffer();
   await sharp(splashLogo).toFile(path.join(splashDir, 'splash_logo.png'));
   console.log('wrote drawable/splash_logo.png');
 
-  const splashIconPng = await splashIcon(isotipo, 432);
+  const splashIconPng = await splashIcon(mark, 432);
   await sharp(splashIconPng).toFile(path.join(splashDir, 'splash_icon.png'));
   console.log('wrote drawable/splash_icon.png');
 
-  const splashPreview = await splashComposite(isotipo, 1280, 1920);
-  await writeSplashSet(isotipo, SPLASH_PORT);
-  await writeSplashSet(isotipo, SPLASH_LAND);
+  const splashPreview = await splashComposite(fullBrand, 1280, 1920);
+  await writeSplashSet(fullBrand, SPLASH_PORT);
+  await writeSplashSet(fullBrand, SPLASH_LAND);
 
   const splashBrandPath = path.join(__dirname, '..', 'public', 'brand', 'splash-brand.png');
   await sharp(splashPreview).toFile(splashBrandPath);

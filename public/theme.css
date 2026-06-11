@@ -1,52 +1,15 @@
-/* Cubik — design tokens v2026 (cyan SaaS, evolución gradual) */
+/* Cubik — design tokens v2026 (importa Brand 2.0) */
+@import url('/cubik-design-system.css?v=0.0.149');
+
 :root {
-  --brand-navy: #0f172a;
-  --brand-navy-mid: #164e63;
-  --brand-navy-dark: #0a1628;
-  --brand-cyan: #06b6d4;
-  --brand-cyan-hover: #0891b2;
-  --brand-cyan-light: #22d3ee;
-  /* aliases legacy → cyan (sin reescribir toda la app) */
-  --brand-orange: #06b6d4;
-  --brand-orange-dark: #0891b2;
-  --brand-orange-light: #22d3ee;
-  --brand-blue: #06b6d4;
-  --brand-blue-dark: #0891b2;
-  --brand-blue-light: #22d3ee;
-  --brand-white: #ffffff;
-  --brand-gray-50: #f8fafc;
-  --brand-gray-100: #f1f5f9;
-  --brand-gray-200: #e2e8f0;
-  --brand-gray-500: #94a3b8;
-  --brand-gray-700: #64748b;
-
-  --surface-warm: #f0fdff;
-  --surface-cool: rgba(6, 182, 212, 0.12);
-  --surface-navy: rgba(15, 23, 42, 0.05);
-  --surface-danger: rgba(239, 68, 68, 0.08);
-
-  --bg: #f8fafc;
-  --surface: #ffffff;
-  --card: #ffffff;
-  --border: #e2e8f0;
-  --text: #0f172a;
-  --text-muted: #64748b;
-  --text-on-dark: #ffffff;
-  --accent: var(--brand-cyan);
-  --accent-hover: var(--brand-cyan-hover);
   --accent-secondary: var(--brand-navy-mid);
   --accent-secondary-hover: #0e7490;
   --accent-soft: var(--surface-cool);
   --accent-blue-soft: var(--surface-cool);
-  --accent-gradient: linear-gradient(90deg, #06b6d4, #22d3ee);
-  --status-ok: #10b981;
+  --surface-navy: rgba(15, 23, 42, 0.05);
+  --surface-danger: rgba(239, 68, 68, 0.08);
   --status-ok-bg: rgba(16, 185, 129, 0.12);
-  --status-warn: #f59e0b;
   --status-warn-bg: rgba(245, 158, 11, 0.12);
-  --status-error: #ef4444;
-  --shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
-  --radius: 12px;
-  --font: "Segoe UI", Inter, system-ui, sans-serif;
 }
 
 .visually-hidden {
@@ -76,14 +39,59 @@ body {
 .site-header {
   display: flex;
   gap: 1.25rem;
-  align-items: flex-start;
+  align-items: center;
   flex-wrap: wrap;
-  padding: 1.25rem 1.5rem;
-  border-bottom: 3px solid transparent;
-  background:
-    linear-gradient(var(--surface), var(--surface)) padding-box,
-    linear-gradient(90deg, var(--brand-cyan) 0%, var(--brand-cyan-light) 45%, var(--brand-navy-mid) 100%) border-box;
-  box-shadow: var(--shadow);
+  padding: 0.85rem 1.5rem;
+  background: var(--cubik-dark);
+  color: var(--text-on-dark);
+  border-bottom: 1px solid rgba(6, 182, 212, 0.12);
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.15);
+}
+
+.site-header .lead {
+  color: rgba(248, 250, 252, 0.82);
+  margin: 0;
+  font-size: 0.88rem;
+  max-width: 28rem;
+}
+
+.site-header .hero-tag {
+  display: inline-block;
+  margin-top: 0.35rem;
+  padding: 0.2rem 0.55rem;
+  border-radius: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--cubik-primary-light);
+  background: var(--cubik-accent-soft);
+  border: 1px solid var(--cubik-accent-ring);
+}
+
+.site-header .tab {
+  background: var(--cubik-gradient-cta);
+  color: #fff;
+  border: none;
+}
+
+.site-header .tab-outline {
+  background: transparent;
+  color: var(--text-on-dark);
+  border: 1px solid rgba(148, 163, 184, 0.45);
+}
+
+.site-header .tab-outline:hover {
+  border-color: var(--cubik-primary);
+  color: var(--cubik-primary-light);
+}
+
+.site-header .notif-bell {
+  border-color: rgba(255, 255, 255, 0.35);
+  background: transparent;
+  color: var(--text-on-dark);
+}
+
+.site-header .auth-user {
+  color: rgba(248, 250, 252, 0.75);
 }
 
 .brand-logo-wrap {
@@ -173,7 +181,7 @@ body {
   gap: 0.5rem;
   align-items: center;
   padding: 0.65rem 1.5rem;
-  background: linear-gradient(90deg, var(--brand-navy) 0%, var(--brand-navy-mid) 55%, var(--brand-blue-dark) 100%);
+  background: var(--cubik-gradient-demo-bar);
   color: var(--text-on-dark);
   font-size: 0.85rem;
 }

@@ -1,0 +1,77 @@
+/**
+ * Cubik Brand 2.0 — design tokens (web + app)
+ * Una sola plataforma: turquesa + navy nocturno.
+ */
+:root {
+  --cubik-primary: #06b6d4;
+  --cubik-primary-hover: #0891b2;
+  --cubik-primary-light: #22d3ee;
+  --cubik-dark: #0f172a;
+  --cubik-dark-mid: #164e63;
+  --cubik-bg: #f8fafc;
+  --cubik-card: #ffffff;
+  --cubik-text: #0f172a;
+  --cubik-text-soft: #64748b;
+  --cubik-success: #10b981;
+  --cubik-warning: #f59e0b;
+  --cubik-error: #ef4444;
+  --cubik-border: #e2e8f0;
+  --cubik-radius: 12px;
+  --cubik-radius-lg: 16px;
+  --cubik-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --cubik-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+  --cubik-shadow-lg: 0 18px 44px rgba(15, 23, 42, 0.1);
+  --cubik-accent-soft: rgba(6, 182, 212, 0.12);
+  --cubik-accent-ring: rgba(6, 182, 212, 0.28);
+  --cubik-gradient-hero: linear-gradient(
+    105deg,
+    #0f172a 0%,
+    #164e63 48%,
+    rgba(6, 182, 212, 0.35) 100%
+  );
+  --cubik-gradient-cta: linear-gradient(90deg, #06b6d4, #22d3ee);
+  --cubik-gradient-demo-bar: linear-gradient(
+    90deg,
+    #0f172a 0%,
+    #164e63 55%,
+    #0891b2 100%
+  );
+
+  /* aliases → theme.css / app legacy */
+  --brand-navy: var(--cubik-dark);
+  --brand-navy-mid: var(--cubik-dark-mid);
+  --brand-navy-dark: #0a1628;
+  --brand-cyan: var(--cubik-primary);
+  --brand-cyan-hover: var(--cubik-primary-hover);
+  --brand-cyan-light: var(--cubik-primary-light);
+  --brand-orange: var(--cubik-primary);
+  --brand-orange-dark: var(--cubik-primary-hover);
+  --brand-orange-light: var(--cubik-primary-light);
+  --brand-blue: var(--cubik-primary);
+  --brand-blue-dark: var(--cubik-primary-hover);
+  --brand-blue-light: var(--cubik-primary-light);
+  --brand-white: #ffffff;
+  --brand-gray-50: var(--cubik-bg);
+  --brand-gray-100: #f1f5f9;
+  --brand-gray-200: var(--cubik-border);
+  --brand-gray-500: #94a3b8;
+  --brand-gray-700: var(--cubik-text-soft);
+  --bg: var(--cubik-bg);
+  --surface: var(--cubik-card);
+  --card: var(--cubik-card);
+  --border: var(--cubik-border);
+  --text: var(--cubik-text);
+  --text-muted: var(--cubik-text-soft);
+  --text-on-dark: #ffffff;
+  --accent: var(--cubik-primary);
+  --accent-hover: var(--cubik-primary-hover);
+  --accent-gradient: var(--cubik-gradient-cta);
+  --surface-warm: #f0fdff;
+  --surface-cool: var(--cubik-accent-soft);
+  --status-ok: var(--cubik-success);
+  --status-warn: var(--cubik-warning);
+  --status-error: var(--cubik-error);
+  --shadow: var(--cubik-shadow);
+  --radius: var(--cubik-radius);
+  --font: var(--cubik-font);
+}

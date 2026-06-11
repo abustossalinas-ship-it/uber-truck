@@ -1,4 +1,5 @@
-/* Cubik — shell móvil (Capacitor / PWA standalone) */
+/* Cubik — shell móvil (Brand 2.0) */
+@import url('/cubik-design-system.css?v=0.0.149');
 
 html.cubik-app-root {
   overflow: hidden;
@@ -344,7 +345,7 @@ body.cubik-app #change-password-panel::before {
   width: min(100%, 14rem);
   height: 2.25rem;
   margin: 0 auto 0.85rem;
-  background: url('/brand/logo-cubik-nav-light.png?v=0.0.148') center / contain no-repeat;
+  background: url('/brand/logo-cubik-nav-light.png?v=0.0.149') center / contain no-repeat;
 }
 
 body.cubik-app #auth-panel #auth-title,
@@ -598,7 +599,8 @@ body.cubik-app[data-app-role='admin']:not([data-app-super-admin]) #app-opt-carri
 }
 
 .app-quick-card.accent {
-  border: 2px solid var(--brand-cyan);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--cubik-primary);
   background: var(--surface-warm);
 }
 
@@ -649,6 +651,7 @@ body.cubik-app[data-app-role='admin']:not([data-app-super-admin]) #app-opt-carri
 .app-option-tile.tile-orange,
 .app-option-tile.tile-blue {
   border-color: rgba(6, 182, 212, 0.45);
+  border-left: 4px solid var(--cubik-primary);
   background: var(--surface-warm);
 }
 

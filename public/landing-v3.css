@@ -1,25 +1,27 @@
-/* Cubik landing v3 — paleta cyan SaaS 2026 */
+/* Cubik landing v3 — Brand 2.0 */
+@import url('/cubik-design-system.css?v=0.0.149');
+
 :root {
-  --cubik-ink: #0f172a;
-  --cubik-petrol: #164e63;
+  --cubik-ink: var(--cubik-dark);
+  --cubik-petrol: var(--cubik-dark-mid);
   --cubik-navy-dark: #0a1628;
-  --cubik-blue: #06b6d4;
-  --cubik-blue-hover: #0891b2;
-  --cubik-teal: #06b6d4;
-  --cubik-teal-hover: #0891b2;
-  --cubik-teal-light: #22d3ee;
+  --cubik-blue: var(--cubik-primary);
+  --cubik-blue-hover: var(--cubik-primary-hover);
+  --cubik-teal: var(--cubik-primary);
+  --cubik-teal-hover: var(--cubik-primary-hover);
+  --cubik-teal-light: var(--cubik-primary-light);
   --cubik-accent-soft: rgba(6, 182, 212, 0.16);
   --cubik-accent-ring: rgba(6, 182, 212, 0.28);
-  --cubik-surface: #f8fafc;
-  --cubik-white: #ffffff;
-  --cubik-muted: #64748b;
+  --cubik-surface: var(--cubik-bg);
+  --cubik-white: var(--cubik-card);
+  --cubik-muted: var(--cubik-text-soft);
   --cubik-text: #e8eef5;
-  --cubik-success: #10b981;
-  --cubik-warn: #f59e0b;
-  --cubik-danger: #ef4444;
+  --cubik-success: var(--cubik-success);
+  --cubik-warn: var(--cubik-warning);
+  --cubik-danger: var(--cubik-error);
   --cubik-max: 1180px;
   --cubik-radius: 16px;
-  --cubik-font: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --cubik-font: var(--font);
 }
 
 .lv3-page {
@@ -159,7 +161,7 @@
 
 .lv3-btn-teal,
 .lv3-page a.lv3-btn-teal {
-  background: linear-gradient(90deg, var(--cubik-teal), var(--cubik-teal-light));
+  background: var(--cubik-gradient-cta);
   color: #fff;
   font-weight: 700;
 }
@@ -223,8 +225,8 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(100deg, rgba(15, 39, 68, 0.92) 0%, rgba(15, 39, 68, 0.78) 38%, rgba(15, 39, 68, 0.45) 62%, rgba(15, 39, 68, 0.2) 100%),
-    linear-gradient(180deg, rgba(10, 28, 50, 0.15) 0%, rgba(15, 39, 68, 0.55) 72%, rgba(10, 28, 50, 0.98) 100%);
+    var(--cubik-gradient-hero),
+    linear-gradient(180deg, rgba(15, 23, 42, 0.15) 0%, rgba(15, 23, 42, 0.88) 72%, rgba(15, 23, 42, 0.98) 100%);
 }
 
 .lv3-hero-inner {

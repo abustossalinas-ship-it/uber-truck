@@ -5,7 +5,7 @@ const PRIMARY = '#06b6d4';
 const DARK = '#0f172a';
 const BG = '#f8fafc';
 const NAV_INACTIVE = '#94a3b8';
-const CACHE = '153';
+const CACHE = '154';
 
 /** @param {import('@playwright/test').Page} page */
 async function readToken(page, name) {

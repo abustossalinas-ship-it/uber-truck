@@ -236,8 +236,11 @@
 
   const HERO_VIDEO_SRC = {
     'lv3-home': '/brand/landing/hero-home-cine.mp4',
-    'lv3-shipper': '/brand/landing/hero-shipper-cine.mp4',
     'lv3-carrier': '/brand/landing/hero-carrier-cine.mp4',
+  };
+
+  const HERO_PRODUCT_VIDEO_SRC = {
+    'lv3-shipper': '/brand/landing/hero-shipper-cine.mp4',
   };
 
   function pageRole() {
@@ -380,6 +383,29 @@
     resize();
   }
 
+  function mountBgVideo(media, hero, videoSrc, poster, startCanvas) {
+    const video = document.createElement('video');
+    video.className = 'lf-hero-video';
+    video.autoplay = true;
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    video.setAttribute('aria-hidden', 'true');
+    video.poster = poster;
+    const source = document.createElement('source');
+    source.src = videoSrc;
+    source.type = 'video/mp4';
+    video.appendChild(source);
+    media.insertBefore(video, media.firstChild);
+    hero.classList.add('has-video');
+    video.addEventListener('error', () => {
+      video.remove();
+      hero.classList.remove('has-video');
+      startCanvas();
+    });
+    video.play().catch(startCanvas);
+  }
+
   function initHeroVideo() {
     const hero = document.querySelector('.lv3-hero.has-fluid');
     const media = hero?.querySelector('.lf-hero-media');
@@ -395,31 +421,54 @@
 
     if (reduced) return;
 
+    if (role === 'lv3-shipper') {
+      startCanvas();
+      return;
+    }
+
+    if (!videoSrc) {
+      startCanvas();
+      return;
+    }
+
     fetch(videoSrc, { method: 'HEAD' })
       .then((res) => {
         if (!res.ok) throw new Error('no video');
-        const video = document.createElement('video');
-        video.className = 'lf-hero-video';
-        video.autoplay = true;
-        video.muted = true;
-        video.loop = true;
-        video.playsInline = true;
-        video.setAttribute('aria-hidden', 'true');
-        video.poster = poster;
-        const source = document.createElement('source');
-        source.src = videoSrc;
-        source.type = 'video/mp4';
-        video.appendChild(source);
-        media.insertBefore(video, media.firstChild);
-        hero.classList.add('has-video');
-        video.addEventListener('error', () => {
-          video.remove();
-          hero.classList.remove('has-video');
-          startCanvas();
-        });
-        video.play().catch(startCanvas);
+        mountBgVideo(media, hero, videoSrc, poster, startCanvas);
       })
       .catch(startCanvas);
+  }
+
+  function initShipperProductVideo() {
+    if (!document.body.classList.contains('lv3-shipper') || reduced) return;
+    const main = document.querySelector('.lf-product-main');
+    const src = HERO_PRODUCT_VIDEO_SRC['lv3-shipper'];
+    if (!main || !src || main.querySelector('.lf-product-video')) return;
+
+    const wrap = document.createElement('div');
+    wrap.className = 'lf-product-video-wrap';
+    wrap.setAttribute('aria-hidden', 'true');
+    const video = document.createElement('video');
+    video.className = 'lf-product-video';
+    video.autoplay = true;
+    video.muted = true;
+    video.loop = true;
+    video.playsInline = true;
+    const source = document.createElement('source');
+    source.src = src;
+    source.type = 'video/mp4';
+    video.appendChild(source);
+    wrap.appendChild(video);
+    main.classList.add('lf-product-main--has-video');
+    main.insertBefore(wrap, main.firstChild);
+    video.play().catch(() => {});
+  }
+
+  function initCarrierPhoneVideo() {
+    if (!document.body.classList.contains('lv3-carrier') || reduced) return;
+    const video = document.querySelector('.lf-phone-video');
+    if (!video) return;
+    video.play().catch(() => {});
   }
 
   function initDepthLayers() {
@@ -732,6 +781,8 @@
   initScrollSections();
   initDepthLayers();
   initHeroVideo();
+  initShipperProductVideo();
+  initCarrierPhoneVideo();
   initCarrierTruckGlow();
   initFloatingCards();
   initHeroParallax();

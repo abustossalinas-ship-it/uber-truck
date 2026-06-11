@@ -74,8 +74,175 @@
   height: 100%;
   object-fit: cover;
   transform: scale(1.08);
-  filter: brightness(0.45) saturate(0.85);
+  filter: brightness(0.4) saturate(0.88);
   will-change: transform;
+}
+
+.lv3-home .lf-hero-video {
+  object-position: 72% 42%;
+  filter: brightness(0.36) saturate(0.9);
+}
+
+.lv3-carrier .lf-hero-video {
+  object-position: 18% 48%;
+  filter: brightness(0.32) saturate(0.82);
+}
+
+/* Empresas — video de gráficos dentro del dashboard */
+.lf-product-main--has-video {
+  position: relative;
+  overflow: hidden;
+}
+
+.lf-product-video-wrap {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  border-radius: 0 0 12px 0;
+}
+
+.lf-product-video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  filter: brightness(0.55) saturate(1.05);
+  transform: scale(1.02);
+}
+
+.lf-product-main--has-video > :not(.lf-product-video-wrap) {
+  position: relative;
+  z-index: 1;
+}
+
+.lv3-shipper .lf-product-main--has-video .lf-kpis,
+.lv3-shipper .lf-product-main--has-video .lf-loads {
+  background: rgba(8, 14, 28, 0.78);
+  backdrop-filter: blur(8px);
+  border-radius: 10px;
+}
+
+.lv3-shipper .lf-product-main--has-video .lf-mini-chart,
+.lv3-shipper .lf-product-main--has-video .lf-map-wrap {
+  background: rgba(8, 14, 28, 0.42);
+  backdrop-filter: blur(4px);
+}
+
+.lv3-shipper .lf-product-main--has-video .lf-product-title {
+  padding: 0.35rem 0.5rem;
+  border-radius: 8px;
+  display: inline-block;
+}
+
+/* Transportistas — mockup móvil con video */
+.lf-hero-phone-wrap {
+  max-width: 17rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+@media (min-width: 960px) {
+  .lf-hero-phone-wrap {
+    max-width: 19rem;
+    margin-right: 0;
+  }
+}
+
+.lf-phone-mockup {
+  animation: lf-float 5.5s ease-in-out infinite;
+  filter: drop-shadow(0 32px 64px rgba(0, 0, 0, 0.55));
+}
+
+.lf-phone-frame {
+  position: relative;
+  padding: 0.55rem 0.45rem 0.65rem;
+  border-radius: 2rem;
+  background: linear-gradient(160deg, #1e293b 0%, #0f172a 55%, #020617 100%);
+  border: 2px solid rgba(148, 163, 184, 0.22);
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06),
+    0 0 0 1px rgba(6, 182, 212, 0.12);
+}
+
+.lf-phone-notch {
+  position: absolute;
+  top: 0.5rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 4.2rem;
+  height: 0.42rem;
+  border-radius: 999px;
+  background: #020617;
+  z-index: 2;
+}
+
+.lf-phone-screen {
+  position: relative;
+  border-radius: 1.45rem;
+  overflow: hidden;
+  aspect-ratio: 9 / 18;
+  background: #0a1628;
+  border: 1px solid rgba(148, 163, 184, 0.15);
+}
+
+.lf-phone-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  filter: brightness(0.72) saturate(0.95);
+}
+
+.lf-phone-ui {
+  position: absolute;
+  inset: auto 0 0;
+  padding: 0.65rem 0.7rem 0.85rem;
+  background: linear-gradient(180deg, transparent 0%, rgba(8, 14, 28, 0.92) 38%, rgba(8, 14, 28, 0.98) 100%);
+}
+
+.lf-phone-ui-title {
+  margin: 0 0 0.45rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #fff;
+}
+
+.lf-phone-loads {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.lf-phone-loads li {
+  display: flex;
+  flex-direction: column;
+  gap: 0.12rem;
+  padding: 0.38rem 0;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+  font-size: 0.64rem;
+  color: var(--cubik-text);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.45s ease, transform 0.45s ease;
+}
+
+.lf-phone-loads li.is-in {
+  opacity: 1;
+  transform: none;
+}
+
+.lf-phone-loads li span {
+  font-weight: 600;
+  color: #f8fafc;
+}
+
+.lf-phone-loads li em {
+  font-style: normal;
+  color: var(--cubik-teal);
+  font-weight: 700;
 }
 
 .lf-hero-particles {
@@ -533,10 +700,13 @@ html.lf-smooth { scroll-behavior: smooth; }
 
 @media (prefers-reduced-motion: reduce) {
   .lf-hero-video,
+  .lf-product-video,
+  .lf-phone-video,
   .lf-hero-particles,
   .lf-hero-cine-canvas,
   .lf-trip-float,
   .lf-hero-product-wrap .lf-product,
+  .lf-phone-mockup,
   .lf-float-card,
   .lf-route-glow,
   .lf-route-truck,

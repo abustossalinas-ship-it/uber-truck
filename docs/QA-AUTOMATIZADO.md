@@ -2,6 +2,15 @@
 
 **Software:** 0.0.129 · **May 2026**
 
+## Preparación (una sola vez)
+
+```
+npm install
+npm run qa:install   → descarga Chromium para Playwright (E2E)
+```
+
+Sin Chromium instalado, `npm run test:e2e` / `npm run test:qa` fallan al lanzar el navegador.
+
 ## Flujo obligatorio antes de deploy
 
 ```
@@ -59,7 +68,17 @@ QA_CARRIER_EMAIL=...
 QA_CARRIER_PASSWORD=...
 ```
 
-Activa 3 tests E2E adicionales (login real + demo seed).
+Activa 3 tests E2E adicionales (login real + demo seed). Sin estas variables ni Supabase, esos specs (`app-board`, login real) se **omiten** automáticamente; el resto pasa contra el servidor local que Playwright levanta solo.
+
+## Probar la app en el navegador local
+
+El backend local sin Supabase usa `data/store.json` y no exige login (ver [README](../README.md#desarrollo-local)). Para que `http://localhost:3001/app` hable con ese backend local y no con producción, ejecuta en la consola del navegador (y tras cada reload):
+
+```js
+window.CUBIK_BRAND.productionUrl = location.origin;
+```
+
+Motivo: `public/brand-config.js` + `public/api-base.js` redirigen los `fetch` de `/api` y `/health` a `getcubik.cl` salvo que el origen coincida (necesario para el APK Capacitor).
 
 ## Android vs Playwright
 

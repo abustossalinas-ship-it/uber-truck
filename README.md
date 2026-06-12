@@ -31,6 +31,24 @@ npm run dev
 
 → http://localhost:3001 · `/health`
 
+### Desarrollo local
+
+- **Sin Supabase = store JSON.** Si `.env` no define `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY`, el servidor usa `data/store.json` (sembrado) y `/health` reporta `"storage":"json"`. En este modo la API local no exige login. Datos demo: `POST /api/demo/seed`.
+- **Login de desarrollo en el navegador:** sin Supabase no hay registro real. Inyecta una sesión mock en la consola con `Auth.save('<token>', { id, email, full_name, role: 'shipper'|'carrier', company_name, kyc_status: 'approved' })` (igual que `e2e/helpers.js`).
+- **Gotcha — la UI web local apunta a producción.** `public/brand-config.js` (`productionUrl`) + `public/api-base.js` reescriben los `fetch` de `/api`, `/health` y `/docs/` hacia `getcubik.cl` salvo que el origen coincida. Para que `http://localhost:3001/app` use el backend local, ejecuta en la consola del navegador (y tras cada reload): `window.CUBIK_BRAND.productionUrl = location.origin;`. Las llamadas por `curl` a `localhost` no se ven afectadas.
+- Sin claves de Google Maps / FCM / mail / WhatsApp / pasarela, esas integraciones quedan deshabilitadas y el servidor arranca igual.
+
+### QA / pruebas
+
+```bash
+npm run qa:install   # una sola vez: descarga Chromium para Playwright
+npm run test:unit    # pruebas unitarias (Node test runner)
+npm run test:e2e     # E2E app/landing (Playwright; levanta el server solo)
+npm run test:qa      # unit + E2E local
+```
+
+Los specs que requieren Supabase o credenciales `QA_*` se omiten automáticamente. Detalle en [docs/QA-AUTOMATIZADO.md](docs/QA-AUTOMATIZADO.md).
+
 ## Marca
 
 Logo: `public/brand/logo.png` · [docs/BRAND.md](docs/BRAND.md)

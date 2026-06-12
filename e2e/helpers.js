@@ -248,7 +248,7 @@ async function expectLogoInkCoverage(page, imgSelector) {
 
 /**
  * @param {import('@playwright/test').Page} page
- * @param {{ img: string, container: string, srcPattern?: RegExp, minNaturalWidth?: number, minRenderedHeight?: number, checkInk?: boolean }} opts
+ * @param {{ img: string, container: string, srcPattern?: RegExp, minNaturalWidth?: number, minRenderedHeight?: number, ratioMin?: number, ratioMax?: number, checkInk?: boolean }} opts
  */
 async function expectLogoFramed(page, opts) {
   const {
@@ -257,6 +257,8 @@ async function expectLogoFramed(page, opts) {
     srcPattern = /logo-cubik-nav/,
     minNaturalWidth = 140,
     minRenderedHeight = 26,
+    ratioMin = 2.6,
+    ratioMax = 3.6,
     checkInk = true,
   } = opts;
 
@@ -267,7 +269,7 @@ async function expectLogoFramed(page, opts) {
   }
 
   const result = await page.evaluate(
-    ({ imgSel, containerSel, minNatW, minRenderH }) => {
+    ({ imgSel, containerSel, minNatW, minRenderH, ratioLo, ratioHi }) => {
       const el = document.querySelector(imgSel);
       const container = document.querySelector(containerSel);
       if (!el || !(el instanceof HTMLImageElement)) {
@@ -292,8 +294,8 @@ async function expectLogoFramed(page, opts) {
           el.naturalWidth >= minNatW &&
           ir.height >= minRenderH &&
           !clipped &&
-          ratio >= 2.6 &&
-          ratio <= 3.6,
+          ratio >= ratioLo &&
+          ratio <= ratioHi,
         naturalWidth: el.naturalWidth,
         naturalHeight: el.naturalHeight,
         rendered: { w: ir.width, h: ir.height, top: ir.top, bottom: ir.bottom },
@@ -308,6 +310,8 @@ async function expectLogoFramed(page, opts) {
       containerSel: containerSelector,
       minNatW: minNaturalWidth,
       minRenderH: minRenderedHeight,
+      ratioLo: ratioMin,
+      ratioHi: ratioMax,
     }
   );
 

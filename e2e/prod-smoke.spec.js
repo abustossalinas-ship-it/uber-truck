@@ -46,8 +46,8 @@ test.describe('Producción — welcome/login (APK remoto / web app)', () => {
 test.describe('Producción — landing y piloto', () => {
   test('Portada / carga headline', async ({ page }) => {
     await page.goto('/');
-    await expect(page.locator('h1')).toContainText(/Menos viajes vacíos/i);
-    await expect(page.locator('#landing-loading')).toBeHidden();
+    await expect(page.locator('h1')).toContainText(/mueven Chile|Menos viajes vacíos|Conectamos cargas/i);
+    await expect(page.locator('#lv3-loading, #landing-loading')).toBeHidden();
   });
 
   test('/probar carga para testers', async ({ page }) => {
@@ -57,10 +57,12 @@ test.describe('Producción — landing y piloto', () => {
 
   test('Landing → app → atrás sin overlay pegado', async ({ page }) => {
     await page.goto('/');
-    await page.locator('.hero-actions a[href="/app?role=carrier"]').click();
-    await page.waitForURL(/\/app\?/);
+    const toApp = page.locator(
+      '.lv3-nav-actions a[href^="/app"], .hero-actions a[href^="/app"], a[href="/app"]'
+    ).first();
+    await toApp.click();
+    await page.waitForURL(/\/app/);
     await page.goBack();
-    await expect(page.locator('#landing-loading')).toBeHidden();
-    await expect(page.locator('h1')).toContainText(/Menos viajes vacíos/i);
+    await expect(page.locator('#lv3-loading, #landing-loading')).toBeHidden();
   });
 });

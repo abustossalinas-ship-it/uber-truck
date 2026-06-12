@@ -88,23 +88,47 @@ function buildPostMvpStatus(ctx = {}) {
         ],
       },
       {
-        id: 'twilio_proxy',
+        id: 'trip_contact',
         order: 4,
-        title: 'Llamadas enmascaradas',
+        title: 'Contacto en viaje',
         phase: 'pilot_p0',
-        status: twilioProxy ? 'ready_to_validate' : 'blocked_env',
+        status: 'validated',
+        server_ready: true,
+        blocking_demo: false,
+        validated_at: '2026-06-12',
+        summary:
+          'Piloto: chat in-app + WhatsApp comercial Cubik. Twilio Proxy opcional (voz PSTN enmascarada).',
+        env: {
+          in_app_chat: true,
+          whatsapp_cloud: Boolean(process.env.WHATSAPP_CLOUD_ENABLED),
+          twilio_proxy: Boolean(twilioProxy),
+        },
+        validate: [
+          '✓ Chat in-app en viaje aceptado/en ruta (canal principal piloto)',
+          '✓ WhatsApp Cubik para captación y soporte — WHATSAPP-META-CLOUD.md',
+          twilioProxy
+            ? 'Twilio configurado — probar botón Llamar'
+            : 'Twilio opcional P1 — no requerido si coordinan por chat',
+        ],
+      },
+      {
+        id: 'twilio_proxy',
+        order: 4.5,
+        title: 'Voz enmascarada (Twilio, opcional)',
+        phase: 'pilot_p1',
+        status: twilioProxy ? 'ready_to_validate' : 'deferred',
         server_ready: Boolean(twilioProxy),
         blocking_demo: false,
         summary: twilioProxy
           ? `Proxy ${twilioProxy.slice(0, 6)}… configurado`
-          : 'UI lista; falta TWILIO_MATCH_PROXY_NUMBER',
+          : 'Opcional — piloto OK con chat in-app; activar si exigen llamada PSTN tipo Uber',
         env: {
           TWILIO_MATCH_PROXY_NUMBER: Boolean(twilioProxy),
           TWILIO_ACCOUNT_SID: Boolean(process.env.TWILIO_ACCOUNT_SID?.trim()),
         },
         validate: [
-          'Viaje aceptado/en ruta → botón Llamar',
-          'Debe marcar tel: al proxy sin mostrar números reales',
+          'Viaje aceptado/en ruta → botón Llamar → tel: proxy sin números reales',
+          'No confundir con WhatsApp — Meta no ofrece proxy de voz equivalente',
         ],
       },
       {

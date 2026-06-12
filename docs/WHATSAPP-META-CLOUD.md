@@ -109,3 +109,16 @@ Próximo paso opcional: notificar a `admin@getcubik.cl` o panel admin cuando `aw
 - [ ] `CUBIK_WHATSAPP_E164` = mismo número que Meta
 - [ ] Deploy último commit
 - [ ] Prueba end-to-end desde landing
+
+## 8. WhatsApp vs Twilio — comunicación en viaje
+
+| Pregunta | Respuesta |
+|----------|-----------|
+| ¿Las llamadas en viaje deben ser Twilio? | **No** para el piloto. Twilio es **opcional** (voz PSTN enmascarada estilo Uber). |
+| ¿Se puede coordinar por WhatsApp? | **Sí**, como hace el mercado — pero el canal Cubik en viaje es el **chat in-app** (no expone números). |
+| ¿Para qué sirve WhatsApp en Cubik? | **Captación** (landing wa.me), **FAQ bot**, **soporte comercial** al número Cubik. |
+| ¿WhatsApp reemplaza Twilio? | **No** para voz enmascarada API→API. Las llamadas de WhatsApp son entre apps con identidad visible. |
+
+**Piloto recomendado:** embarcador y transportista coordinan en el **chat del match**. Dudas comerciales o leads → WhatsApp Cubik. Activar **Twilio Proxy** solo si el piloto exige botón «Llamar» con teléfono tradicional sin mostrar números reales.
+
+Ver [POST-MVP-CHECKLIST.md](./POST-MVP-CHECKLIST.md) ítem 4.

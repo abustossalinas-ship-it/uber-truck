@@ -4,13 +4,15 @@ const test = require('node:test');
 const assert = require('node:assert');
 const { buildPostMvpStatus } = require('../src/lib/post-mvp-status');
 
-test('buildPostMvpStatus devuelve 8 ítems en orden', () => {
+test('buildPostMvpStatus devuelve 9 ítems en orden', () => {
   const { items } = buildPostMvpStatus({ fcm_tokens: 0 });
-  assert.equal(items.length, 8);
+  assert.equal(items.length, 9);
   assert.equal(items[0].id, 'oauth');
-  assert.equal(items[4].id, 'push_fcm');
-  assert.equal(items[7].id, 'escrow_en_route');
-  assert.equal(items[7].blocked_by[0], 'wallet_prod');
+  assert.equal(items[3].id, 'trip_contact');
+  assert.equal(items[4].id, 'twilio_proxy');
+  assert.equal(items[5].id, 'push_fcm');
+  assert.equal(items[8].id, 'escrow_en_route');
+  assert.equal(items[8].blocked_by[0], 'wallet_prod');
 });
 
 test('push_fcm marcado validated cuando FCM configurado', () => {

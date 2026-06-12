@@ -39,7 +39,7 @@
     <h1>Memoria técnica del proyecto</h1>
     <p class="meta"><strong>Producto:</strong> Uber Truck — marketplace de capacidad logística ociosa (backhaul), Chile.<br />
     <strong>Documento:</strong> memoria técnica viva del repositorio y del despliegue Railway.<br />
-    <strong>Versión documento:</strong> 4.5 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.129 API · frontend captación v0.0.168 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 12 jun 2026 &nbsp;|&nbsp; <strong>Backlog/Gantt:</strong> vivo — revisar semanalmente</p>
+    <strong>Versión documento:</strong> 4.5.1 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.129 API · frontend captación v0.0.168 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 12 jun 2026 &nbsp;|&nbsp; <strong>Backlog/Gantt:</strong> vivo — revisar semanalmente</p>
   </div>
 </div>
 
@@ -52,7 +52,7 @@
 <h2>Visión de producto</h2>
 <p><strong>MVP final = una sola app web</strong> con funcionamiento lo más parecido posible a <strong>Uber</strong> (pedir → emparejar → viaje en curso → chat → cancelar → cuenta), adaptado a <strong>carga por camión</strong>. El usuario ya sabe usar Uber; la curva de aprendizaje debe ser mínima.</p>
 <p><strong>Objetivo comercial:</strong> ganar usuarios y viajes reales con esta app propia. <strong>Objetivo estratégico a futuro:</strong> demostrar tracción y ofrecer el producto como <strong>add-on / integración</strong> a plataformas grandes (ej. marketplace logístico o apps de movilidad), no reemplazarlas desde el día uno.</p>
-<p><strong>Descartado para el MVP:</strong> piloto paralelo con WhatsApp + Airtable fuera de la app. Todo el piloto y la operación van <strong>dentro de Uber Truck</strong>.</p>
+<p><strong>Descartado para el MVP:</strong> piloto paralelo con WhatsApp + Airtable <em>como sustituto de la app</em>. El marketplace (publicar, emparejar, viaje, chat, pagos piloto) va <strong>dentro de Cubik</strong>. WhatsApp sí se usa para <strong>captación comercial</strong> (landing + bot FAQ) — ver <a href="WHATSAPP-META-CLOUD.md">WHATSAPP-META-CLOUD.md</a>.</p>
 
 <h2>Resumen ejecutivo del stack</h2>
 <p>Embarcadores y transportistas usan la <strong>misma app</strong> (<code>public/</code>): publicar demanda u oferta, ver sugerencias de match, aceptar, seguir estados, chatear, cancelar y revisar multas/cuenta. Backend <strong>Node.js 20 + Express 4</strong>, datos en <strong>Supabase</strong>, auth <strong>JWT</strong>, deploy <strong>Railway</strong>, código en <strong>GitHub</strong>.</p>
@@ -93,15 +93,16 @@
   <tr><td>Captación comercial</td><td>Landing v3 por rol + «Agendar demo» (<code>prospectos</code>) + bot WhatsApp Meta + legal <code>/privacidad</code>·<code>/terminos</code></td><td class="g-done">Hecho v0.0.155–0.0.168</td></tr>
 </table>
 
-<h4>Post-MVP — no bloquea demo ni piloto 25/50</h4>
-<p><strong>Validar en orden:</strong> <a href="/post-mvp-checklist.html">Checklist interactivo Post-MVP</a> · <a href="POST-MVP-CHECKLIST.md">Guía MD</a> · API <code>GET /api/post-mvp/status</code></p>
+<h4>Post-MVP — backlog piloto/escala (no bloquea demo ni piloto 25/50)</h4>
+<p class="check"><strong>Importante:</strong> la tabla siguiente <strong>no son bugs del MVP</strong>. El MVP de flujo (tabla anterior) está <strong>cerrado</strong>. Aquí va el <strong>roadmap después del MVP</strong>: mejoras que se validan cuando priorices negocio/infra. Los ítems en naranja o gris son <strong>pendientes planificados</strong>, no fallos de producción.</p>
+<p><strong>Seguimiento (opcional):</strong> <a href="/post-mvp-checklist.html">Checklist interactivo</a> · <a href="POST-MVP-CHECKLIST.md">Guía MD</a> · API <code>GET /api/post-mvp/status</code> — para ir cerrando ítems en orden cuando toque.</p>
 <table>
   <tr><th>Flujo / capacidad</th><th>Uber Truck</th><th>Estado</th><th>Ventana</th></tr>
   <tr><td>Login Gmail / Apple</td><td>OAuth Google + Sign in with Apple</td><td class="g-todo">Bloque E — post-piloto</td><td>Q3 2026+</td></tr>
   <tr><td>Recuperar contraseña</td><td>Enlace por correo (Resend)</td><td class="g-doing">Código validado; <strong>piloto bloqueado</strong> sin dominio propio</td><td>P0 — <a href="DOMAIN-AND-EMAIL.md">dominio</a></td></tr>
   <tr><td>Política contraseña + cambio en app</td><td>8+ chars, mayúscula, número; Seguridad en Cuenta APK</td><td class="g-done">Hecho v0.0.128</td><td>—</td></tr>
   <tr><td>Pago en app (prod)</td><td>Wallet real + retención al «En ruta»; escrow 10/5</td><td class="g-doing"><strong>P0 siguiente</strong></td><td>Sem 2–8 piloto</td></tr>
-  <tr><td>Llamadas enmascaradas</td><td>Twilio Proxy — botón Llamar</td><td class="g-doing">UI lista v0.0.98; proxy pendiente</td><td>Sem 2–4</td></tr>
+  <tr><td>Contacto en viaje (voz)</td><td><strong>Piloto:</strong> chat in-app (hecho) + WhatsApp comercial Cubik. <strong>Opcional P1:</strong> voz enmascarada Twilio Proxy (botón Llamar)</td><td class="g-done">Piloto OK sin Twilio</td><td>Twilio solo si exigen llamada PSTN tipo Uber</td></tr>
   <tr><td>Push móvil (FCM)</td><td>Token Android + envío servidor</td><td class="g-done"><strong>Cerrado</strong> — 3 push en 2.º plano</td><td>—</td></tr>
   <tr><td>GPS background (app cerrada)</td><td>Plugin Capacitor / módulo nativo lite</td><td class="g-doing">Spike sem 4–9 si piloto lo exige</td><td>Ver canvas nativo</td></tr>
   <tr><td>App iOS nativa</td><td>TestFlight / App Store</td><td class="g-todo">Hoy PWA vía <code>/probar</code></td><td>Post escala</td></tr>

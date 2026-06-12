@@ -4,7 +4,6 @@ const {
   resetGuestAppSession,
   openWelcomeRole,
   expectLoginOpenForRole,
-  expectToggleRole,
   hasQaCarrierCreds,
   loginViaWelcome,
 } = require('./helpers');
@@ -14,13 +13,15 @@ test.describe('Cubik app — welcome y login', () => {
     await resetGuestAppSession(page);
   });
 
-  test('Comenzar como Transportista abre login contextual', async ({ page }) => {
+  test('Soy transportista abre login contextual', async ({ page }) => {
     await openWelcomeRole(page, 'carrier');
     await expectLoginOpenForRole(page, 'carrier');
-    await expect(page.locator('#auth-submit')).toContainText(/Entrar/i);
+    await expect(page.locator('#auth-app-role-badge')).toBeVisible();
+    await expect(page.locator('#auth-app-role-label')).toHaveText(/Transportista/i);
+    await expect(page.locator('#auth-submit')).toContainText(/Iniciar sesión/i);
   });
 
-  test('Comenzar como Empresa abre login contextual', async ({ page }) => {
+  test('Soy empresa abre login contextual', async ({ page }) => {
     await openWelcomeRole(page, 'shipper');
     await expectLoginOpenForRole(page, 'shipper');
   });
@@ -36,12 +37,16 @@ test.describe('Cubik app — welcome y login', () => {
     await expect(page.locator('#auth-panel')).toBeHidden();
   });
 
-  test('Toggle cambia rol sin volver al welcome', async ({ page }) => {
-    await openWelcomeRole(page, 'carrier');
+  test('Ingresar con rol previo abre login', async ({ page }) => {
+    await page.evaluate(() => sessionStorage.setItem('ut_auth_intent_role', 'carrier'));
+    await page.locator('#app-welcome-signin').click();
     await expectLoginOpenForRole(page, 'carrier');
-    await page.locator('#auth-toggle-shipper').click();
-    await expectToggleRole(page, 'shipper');
-    await expect(page.locator('#app-welcome')).toBeHidden();
+  });
+
+  test('Ingresar sin rol mantiene bienvenida', async ({ page }) => {
+    await page.locator('#app-welcome-signin').click();
+    await expect(page.locator('#app-welcome')).toBeVisible();
+    await expect(page.locator('#auth-panel')).toBeHidden();
   });
 });
 

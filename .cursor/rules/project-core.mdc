@@ -36,6 +36,6 @@ Producto: **marketplace de transporte por camión** (publicar carga, ofertar via
 
 ```bash
 npm install
-npm run dev
+npm run dev   # http://localhost:3001 — app en /app
 npm start
 ```

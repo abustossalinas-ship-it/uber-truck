@@ -50,7 +50,21 @@ async function expectLoginOpenForRole(page, role) {
   });
   await page.locator('#app-welcome').waitFor({ state: 'hidden' });
   await page.waitForSelector('#form-auth [name="email"]');
-  await expectToggleRole(page, role);
+  const isAppRoute = await page.evaluate(() => document.body.classList.contains('cubik-app-route'));
+  if (isAppRoute) {
+    await page.waitForFunction(
+      (r) => {
+        try {
+          return sessionStorage.getItem('ut_auth_intent_role') === r;
+        } catch (_) {
+          return false;
+        }
+      },
+      role
+    );
+  } else {
+    await expectToggleRole(page, role);
+  }
 }
 
 /** @param {import('@playwright/test').Page} page */

@@ -178,6 +178,11 @@ body.cubik-app .app-gate {
   overscroll-behavior: none;
 }
 
+body.cubik-app-route .app-gate {
+  overflow-y: hidden;
+  justify-content: center;
+}
+
 .app-gate-screen {
   flex: 1 0 auto;
   display: flex;
@@ -188,6 +193,19 @@ body.cubik-app .app-gate {
   box-sizing: border-box;
   justify-content: space-between;
   gap: 0.75rem;
+}
+
+body.cubik-app-route .app-gate-screen.app-welcome-minimal {
+  flex: 0 1 auto;
+  justify-content: center;
+  gap: 1.75rem;
+  min-height: auto;
+  width: min(100%, 20.5rem);
+}
+
+body.cubik-app-route .app-gate-role-step {
+  margin-top: 0;
+  padding-top: 0;
 }
 
 .app-gate-hero {
@@ -381,12 +399,17 @@ body.cubik-app #change-password-panel::before {
   width: min(100%, 16.5rem);
   height: 3.25rem;
   margin: 0 auto 0.85rem;
-  background: url('/brand/logo-cubik-official-light.png?v=0.0.160') center / contain no-repeat;
+  background: url('/brand/logo-cubik-official-light.png?v=0.0.166') center / contain no-repeat;
 }
 
 body.cubik-app-route #auth-panel .auth-role-toggle,
 body.cubik-app-route #auth-panel .auth-context {
   display: none !important;
+}
+
+body.cubik-app #auth-panel #auth-app-role-badge {
+  width: auto;
+  max-width: none;
 }
 
 body.cubik-app #auth-panel #auth-title,

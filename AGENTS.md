@@ -43,7 +43,7 @@ Word local: `npm run export:all-docs` → pack completo; `npm run export:memoria
 ## Comandos útiles
 
 ```bash
-npm run dev          # servidor local
+npm run dev          # servidor local → http://localhost:3001/app
 npm run test:qa      # unit + E2E local (obligatorio antes de deploy)
 npm run test:qa:prod # + smoke www.getcubik.cl
 npm run qa:lab       # Laboratorio QA gráfico

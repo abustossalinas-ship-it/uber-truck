@@ -195,6 +195,11 @@ function showAuthOtpStep(show) {
       context.hidden = true;
       context.setAttribute('hidden', '');
     }
+    const badge = document.getElementById('auth-app-role-badge');
+    if (badge) {
+      badge.hidden = true;
+      badge.setAttribute('hidden', '');
+    }
     if (title) title.hidden = true;
     setTimeout(() => getOtpDigits()[0]?.focus(), 50);
   } else {
@@ -269,6 +274,19 @@ const AUTH_CONTEXT_COPY = {
     flowSrc: '/brand/welcome/auth-flow-shipper.svg',
   },
 };
+
+const AUTH_ROLE_SVG = {
+  carrier:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4"/><path d="M3 17h2"/><path d="M19 17h2"/><path d="M5 17H3v-5l2-4h10v9"/><path d="M14 8h3l3 4v5h-2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg>',
+  shipper:
+    '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/></svg>',
+};
+
+function renderAuthRoleIcon(el, role) {
+  if (!el) return;
+  const normalized = normalizeAuthIntentRole(role);
+  el.innerHTML = normalized ? AUTH_ROLE_SVG[normalized] || '' : '';
+}
 
 function normalizeAuthIntentRole(raw) {
   const r = String(raw ?? '')
@@ -376,11 +394,33 @@ function syncAuthContext(role) {
   const ctx = document.getElementById('auth-context');
   const title = document.getElementById('auth-title');
   const panel = document.getElementById('auth-panel');
+  const badge = document.getElementById('auth-app-role-badge');
+  const badgeLabel = document.getElementById('auth-app-role-label');
+  const badgeIcon = document.getElementById('auth-app-role-icon');
+  const cfg = role ? AUTH_CONTEXT_COPY[role] : null;
+
   if (isAppRouteGuest()) {
     if (ctx) {
       ctx.hidden = true;
       ctx.setAttribute('hidden', '');
       delete ctx.dataset.role;
+    }
+    if (badge) {
+      if (cfg && !authForgotMode) {
+        badge.hidden = false;
+        badge.removeAttribute('hidden');
+        badge.dataset.role = role;
+        badge.classList.toggle('auth-app-role-badge--carrier', role === 'carrier');
+        badge.classList.toggle('auth-app-role-badge--shipper', role === 'shipper');
+        if (badgeLabel) badgeLabel.textContent = cfg.role;
+        renderAuthRoleIcon(badgeIcon, role);
+      } else {
+        badge.hidden = true;
+        badge.setAttribute('hidden', '');
+        delete badge.dataset.role;
+        badge.classList.remove('auth-app-role-badge--carrier', 'auth-app-role-badge--shipper');
+        if (badgeIcon) badgeIcon.innerHTML = '';
+      }
     }
     if (title && !authForgotMode) {
       title.textContent = authRegisterMode ? 'Crear cuenta' : 'Iniciar sesión';
@@ -393,7 +433,13 @@ function syncAuthContext(role) {
     }
     return;
   }
-  const cfg = role ? AUTH_CONTEXT_COPY[role] : null;
+  if (badge) {
+    badge.hidden = true;
+    badge.setAttribute('hidden', '');
+    delete badge.dataset.role;
+    badge.classList.remove('auth-app-role-badge--carrier', 'auth-app-role-badge--shipper');
+    if (badgeIcon) badgeIcon.innerHTML = '';
+  }
   if (!ctx) return;
   if (cfg && !authForgotMode) {
     ctx.hidden = false;
@@ -431,6 +477,9 @@ function refreshAuthIntentUi() {
     const pick = card.dataset.roleCard;
     card.classList.toggle('selected', Boolean(role) && pick === role);
   });
+  document.querySelectorAll('.app-welcome-role-btn[data-auth-intent]').forEach((btn) => {
+    btn.classList.toggle('selected', Boolean(role) && btn.dataset.authIntent === role);
+  });
   if (role) syncAuthRoleFields(role);
 }
 
@@ -446,6 +495,8 @@ function showWelcomeRoleStep() {
     roles.removeAttribute('hidden');
   }
   bindWelcomeAuthButtons();
+  bindWelcomeSignIn();
+  bindWelcomeRegister();
   refreshAuthIntentUi();
   const role = readAuthIntentFromUrl();
   const appEntry =
@@ -536,6 +587,52 @@ function pickAuthIntent(role) {
   openAuthPanel(pendingAuthRegister, false, normalized);
 }
 
+function openWelcomeSignIn() {
+  const role = getAuthIntentRole();
+  if (role) {
+    openAuthPanel(false, false, role);
+    return;
+  }
+  pulseWelcomeRolePick();
+}
+
+function openWelcomeRegister() {
+  const role = getAuthIntentRole();
+  if (role) {
+    openAuthPanel(true, false, role);
+    return;
+  }
+  pulseWelcomeRolePick();
+}
+
+function pulseWelcomeRolePick() {
+  const rolesEl = document.getElementById('app-welcome-roles');
+  if (rolesEl) {
+    rolesEl.classList.add('app-welcome-needs-role');
+    window.setTimeout(() => rolesEl.classList.remove('app-welcome-needs-role'), 2400);
+  }
+}
+
+function bindWelcomeSignIn() {
+  const btn = document.getElementById('app-welcome-signin');
+  if (!btn || btn.dataset.welcomeBound === '1') return;
+  btn.dataset.welcomeBound = '1';
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    openWelcomeSignIn();
+  });
+}
+
+function bindWelcomeRegister() {
+  const btn = document.getElementById('app-welcome-register');
+  if (!btn || btn.dataset.welcomeBound === '1') return;
+  btn.dataset.welcomeBound = '1';
+  btn.addEventListener('click', (e) => {
+    e.preventDefault();
+    openWelcomeRegister();
+  });
+}
+
 function bindWelcomeAuthButtons() {
   document.querySelectorAll('#app-welcome-roles [data-auth-intent]').forEach((btn) => {
     if (btn.dataset.welcomeBound === '1') return;
@@ -580,22 +677,25 @@ function blockAuthIntentMismatch(user) {
   if (actual === 'admin' || actual === intent) return false;
   const actualLabel = typeof roleLabel === 'function' ? roleLabel(actual) : actual;
   switchAuthIntentRole(actual);
-  showAuthError(
-    isAppRouteGuest()
-      ? `Esta cuenta es de ${actualLabel}. Vuelve atrás, elige ese rol e ingresa de nuevo.`
-      : `Esta cuenta es de ${actualLabel}. Cambiamos la pestaña de arriba — vuelve a ingresar tu contraseña.`
-  );
   const pwdField = document.querySelector('#form-auth [name="password"]');
   if (pwdField) pwdField.value = '';
+  if (isAppRouteGuest()) {
+    closeAuthPanel();
+    const rolesEl = document.getElementById('app-welcome-roles');
+    rolesEl?.classList.add('app-welcome-needs-role');
+    window.setTimeout(() => rolesEl?.classList.remove('app-welcome-needs-role'), 2400);
+    notifyAuthFailure(
+      `Esta cuenta es de ${actualLabel}. Pulsa «Soy ${actual === 'carrier' ? 'transportista' : 'empresa'}» e ingresa de nuevo.`
+    );
+    return true;
+  }
+  showAuthError(
+    `Esta cuenta es de ${actualLabel}. Cambiamos la pestaña de arriba — vuelve a ingresar tu contraseña.`
+  );
   const panel = document.getElementById('auth-panel');
   if (panel) {
     panel.hidden = false;
     panel.removeAttribute('hidden');
-  }
-  if (isCubikAppGuest()) {
-    document.getElementById('app-welcome')?.setAttribute('hidden', '');
-    const w = document.getElementById('app-welcome');
-    if (w) w.hidden = true;
   }
   return true;
 }
@@ -740,7 +840,9 @@ function setAuthMode(register, forgot = false) {
       title.classList.remove('auth-title-sr');
     }
     const submit = document.getElementById('auth-submit');
-    if (submit) submit.textContent = register ? 'Registrarse' : 'Entrar';
+    if (submit) {
+      submit.textContent = register ? 'Registrarse' : isAppRouteGuest() ? 'Iniciar sesión' : 'Entrar';
+    }
     if (register) updateRegisterLabels();
   }
 }
@@ -830,6 +932,22 @@ document.getElementById('auth-role-toggle')?.addEventListener('click', (e) => {
 
 document.getElementById('auth-intent-cancel')?.addEventListener('click', () => {
   closeAuthPanel();
+});
+
+document.getElementById('auth-app-back')?.addEventListener('click', () => {
+  if (typeof handleAuthBackNavigation === 'function') handleAuthBackNavigation();
+});
+
+document.getElementById('auth-password-toggle')?.addEventListener('click', () => {
+  const input = document.getElementById('auth-password');
+  const btn = document.getElementById('auth-password-toggle');
+  if (!input || !btn) return;
+  const show = input.type === 'password';
+  input.type = show ? 'text' : 'password';
+  btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+  btn.setAttribute('aria-label', show ? 'Ocultar contraseña' : 'Mostrar contraseña');
+  btn.querySelector('.auth-eye-open')?.toggleAttribute('hidden', show);
+  btn.querySelector('.auth-eye-closed')?.toggleAttribute('hidden', !show);
 });
 
 document.getElementById('btn-auth')?.addEventListener('click', () => {

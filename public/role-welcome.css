@@ -1,13 +1,358 @@
-/* Cubik — welcome premium (ilustración + CTAs sólidos) */
+/* Cubik — welcome premium (auth-intent-step web) + minimal /app gate */
 
 .cubik-welcome-headline {
-  margin: 0.15rem 0 0;
+  margin: 0.35rem 0 0;
   font-size: clamp(1.05rem, 4.6vw, 1.28rem);
   font-weight: 800;
   line-height: 1.25;
   color: var(--brand-navy);
   max-width: 20rem;
   text-wrap: balance;
+}
+
+.app-welcome-minimal .cubik-welcome-headline {
+  margin-top: 0.85rem;
+  max-width: 16.5rem;
+  font-size: clamp(1.15rem, 5vw, 1.42rem);
+  line-height: 1.3;
+}
+
+.app-welcome-minimal .app-gate-hero {
+  gap: 0.5rem;
+}
+
+.app-welcome-minimal .app-gate-logo {
+  width: min(100%, 18rem);
+  max-height: 4rem;
+}
+
+.app-welcome-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  width: 100%;
+  margin-top: 0.35rem;
+}
+
+.app-welcome-role-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  width: 100%;
+  min-height: 3.35rem;
+  padding: 0.95rem 1.1rem;
+  border: none;
+  border-radius: 14px;
+  font: inherit;
+  font-size: 1.02rem;
+  font-weight: 800;
+  letter-spacing: 0.01em;
+  color: var(--text-on-dark);
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 55%, #0891b2 100%);
+  box-shadow: 0 10px 24px rgba(6, 182, 212, 0.22);
+  transition: transform 0.12s ease, filter 0.12s ease, border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.app-welcome-role-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.45rem;
+  height: 1.45rem;
+  flex-shrink: 0;
+}
+
+.app-welcome-role-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.app-welcome-role-btn.selected {
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.35);
+}
+
+.app-welcome-role-btn--outline.selected {
+  border-color: var(--brand-cyan);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.2);
+}
+
+.app-welcome-role-btn:active {
+  transform: scale(0.98);
+}
+
+.app-welcome-role-btn--outline {
+  background: #fff;
+  color: var(--brand-navy);
+  border: 1.5px solid rgba(15, 23, 42, 0.88);
+  box-shadow: none;
+}
+
+.app-welcome-signin {
+  margin: 1.35rem 0 0;
+  text-align: center;
+  font-size: 0.92rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.app-welcome-signin .link-btn {
+  font-weight: 700;
+  color: #0ea5e9;
+  margin-left: 0.15rem;
+}
+
+.app-welcome-register {
+  margin: 0.55rem 0 0;
+  text-align: center;
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.app-welcome-register .link-btn {
+  font-weight: 700;
+  color: var(--brand-navy);
+  margin-left: 0.15rem;
+}
+
+.app-welcome-needs-role .app-welcome-role-btn {
+  animation: app-welcome-pulse 0.55s ease 2;
+}
+
+@keyframes app-welcome-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.02);
+    filter: brightness(1.05);
+  }
+}
+
+.auth-app-role-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0 0 0.75rem;
+  padding: 0.42rem 0.8rem;
+  border-radius: 999px;
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  text-transform: none;
+  background: rgba(6, 182, 212, 0.12);
+  border: 1px solid rgba(6, 182, 212, 0.28);
+  color: var(--brand-navy);
+}
+
+.auth-app-role-badge[hidden] {
+  display: none !important;
+}
+
+.auth-app-role-badge--carrier {
+  background: rgba(6, 182, 212, 0.12);
+  border-color: rgba(6, 182, 212, 0.28);
+}
+
+.auth-app-role-badge--carrier .auth-app-role-badge-icon {
+  color: #0891b2;
+}
+
+.auth-app-role-badge--shipper {
+  background: rgba(30, 58, 95, 0.08);
+  border-color: rgba(30, 58, 95, 0.18);
+}
+
+.auth-app-role-badge--shipper .auth-app-role-badge-icon {
+  color: var(--brand-navy-mid, #1e3a5f);
+}
+
+.auth-app-role-badge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.1rem;
+  height: 1.1rem;
+  flex-shrink: 0;
+}
+
+.auth-app-role-badge-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* Login /app — alineado al mockup */
+body.cubik-app-route #auth-panel::before {
+  display: none;
+}
+
+body.cubik-app-route #auth-panel {
+  justify-content: flex-start;
+  align-items: stretch;
+  padding-top: calc(var(--app-safe-top) + 0.35rem);
+}
+
+body.cubik-app-route #auth-panel #auth-form-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  width: min(100%, 22.5rem);
+  max-width: 22.5rem;
+  margin: 0 auto;
+}
+
+body:not(.cubik-app-route) .auth-app-header,
+body:not(.cubik-app-route) .auth-app-field-toggle {
+  display: none;
+}
+
+.auth-app-header {
+  margin: 0 0 0.85rem;
+}
+
+.auth-app-back {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--brand-navy);
+  font-size: 1.35rem;
+  line-height: 1;
+  cursor: pointer;
+}
+
+body.cubik-app-route #auth-panel #auth-title {
+  text-align: left;
+  font-size: clamp(1.55rem, 6.5vw, 1.85rem);
+  font-weight: 800;
+  margin: 0 0 1.15rem;
+  max-width: none;
+}
+
+body.cubik-app-route #auth-panel #auth-app-role-badge {
+  align-self: flex-start;
+  margin-left: 0;
+}
+
+body.cubik-app-route #auth-panel .auth-login-footer,
+body.cubik-app-route #auth-panel #auth-toggle-mode {
+  display: none !important;
+}
+
+.auth-app-label {
+  display: block;
+  margin: 0 0 0.4rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--brand-navy);
+}
+
+.auth-app-field {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin: 0 0 1rem;
+  padding: 0 0.85rem;
+  min-height: 3.1rem;
+  border: 1.5px solid rgba(148, 163, 184, 0.45);
+  border-radius: 14px;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.auth-app-field:focus-within {
+  border-color: rgba(6, 182, 212, 0.65);
+  box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.12);
+}
+
+.auth-app-field-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.15rem;
+  height: 1.15rem;
+  flex-shrink: 0;
+  color: #94a3b8;
+}
+
+.auth-app-field-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.auth-app-field input {
+  flex: 1 1 auto;
+  width: auto;
+  min-width: 0;
+  margin: 0;
+  padding: 0.65rem 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  font-size: 1rem;
+}
+
+.auth-app-field input:focus {
+  outline: none;
+  box-shadow: none;
+}
+
+.auth-app-field-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.35rem;
+  height: 1.35rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.auth-app-field-toggle svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.auth-app-forgot {
+  margin: -0.35rem 0 1.15rem;
+  text-align: left;
+}
+
+.auth-app-forgot .link-btn {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #0ea5e9;
+}
+
+body.cubik-app-route #auth-panel #auth-submit {
+  min-height: 3.2rem;
+  border-radius: 14px;
+  font-size: 1.02rem;
+  font-weight: 800;
+  background: linear-gradient(135deg, #0ea5e9 0%, #06b6d4 55%, #0891b2 100%);
+  box-shadow: 0 10px 24px rgba(6, 182, 212, 0.22);
+}
+
+.auth-panel.is-register .auth-app-forgot {
+  display: none;
 }
 
 .cubik-welcome-sub {

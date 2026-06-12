@@ -17,58 +17,45 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="/cubik-design-system.css?v=0.0.152" />
   <link rel="stylesheet" href="/theme.css?v=0.0.152" />
-  <link rel="stylesheet" href="/app-shell.css?v=0.0.162" />
+  <link rel="stylesheet" href="/app-shell.css?v=0.0.166" />
   <link rel="stylesheet" href="/app-brand.css?v=0.0.152" />
   <link rel="stylesheet" href="/board-enterprise.css?v=0.0.152" />
-  <link rel="stylesheet" href="/role-welcome.css?v=0.0.152" />
+  <link rel="stylesheet" href="/role-welcome.css?v=0.0.166" />
   <script src="/device-id.js?v=0.0.130" defer></script>
   <script src="/brand-config.js?v=0.0.139" defer></script>
   <script src="/api-base.js?v=0.0.83" defer></script>
 </head>
 <body>
   <div id="app-gate" class="app-gate" hidden>
-    <div id="app-welcome" class="app-gate-screen">
+    <div id="app-welcome" class="app-gate-screen app-welcome-minimal">
       <div class="app-gate-hero">
         <img class="app-gate-logo" src="/brand/logo-cubik-official-light.png?v=0.0.159" alt="Cubik" decoding="async" width="362" height="114" />
         <p class="app-gate-brand" aria-hidden="true">Cubik</p>
         <p class="cubik-welcome-headline">Menos viajes vacíos. Más negocios.</p>
-        <p class="cubik-welcome-sub app-gate-lead">La red logística para aprovechar cada kilómetro recorrido.</p>
-        <img class="cubik-welcome-bridge" src="/brand/welcome/story-bridge.svg?v=0.0.139" width="280" height="48" alt="" />
-        <ul class="cubik-welcome-trust" aria-label="Capacidades de Cubik">
-          <li>Matching en tiempo real</li>
-          <li>Geolocalización</li>
-          <li>Trazabilidad de viajes</li>
-          <li>Confirmación de entregas</li>
-        </ul>
-        <img class="cubik-welcome-route" src="/brand/welcome/route-chile.svg?v=0.0.139" width="280" height="72" alt="Ruta Santiago a Valparaiso con camion en transito" />
       </div>
       <div id="app-welcome-roles" class="app-gate-role-step">
-        <div class="role-premium-grid">
-          <article class="role-premium-card carrier" data-role-card="carrier">
-            <div class="role-premium-visual">
-              <img src="/brand/welcome/illus-carrier.svg?v=0.0.139" width="320" height="112" alt="" />
-            </div>
-            <div class="role-premium-body">
-              <p class="role-premium-kicker">Soy transportista</p>
-              <p class="role-premium-title">Encuentra carga para tu ruta</p>
-              <p class="role-premium-detail">Genera ingresos adicionales aprovechando tu ruta.</p>
-              <button type="button" class="role-premium-cta carrier" data-auth-intent="carrier">Comenzar como Transportista →</button>
-            </div>
-          </article>
-          <article class="role-premium-card shipper" data-role-card="shipper">
-            <div class="role-premium-visual">
-              <img src="/brand/welcome/illus-shipper.svg?v=0.0.139" width="320" height="112" alt="" />
-            </div>
-            <div class="role-premium-body">
-              <p class="role-premium-kicker">Soy empresa</p>
-              <p class="role-premium-title">Encuentra transporte disponible</p>
-              <p class="role-premium-detail">Encuentra capacidad disponible en minutos.</p>
-              <button type="button" class="role-premium-cta shipper" data-auth-intent="shipper">Comenzar como Empresa →</button>
-            </div>
-          </article>
+        <div class="app-welcome-actions">
+          <button type="button" class="app-welcome-role-btn" data-auth-intent="carrier">
+            <span class="app-welcome-role-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 17h4"/><path d="M3 17h2"/><path d="M19 17h2"/><path d="M5 17H3v-5l2-4h10v9"/><path d="M14 8h3l3 4v5h-2"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg>
+            </span>
+            <span>Soy transportista</span>
+          </button>
+          <button type="button" class="app-welcome-role-btn app-welcome-role-btn--outline" data-auth-intent="shipper">
+            <span class="app-welcome-role-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4"/><path d="M10 10h4"/><path d="M10 14h4"/></svg>
+            </span>
+            <span>Soy empresa</span>
+          </button>
         </div>
-        <p class="cubik-welcome-pilot"><strong>Piloto privado</strong><br />Próximamente en rutas seleccionadas</p>
-        <a class="cubik-welcome-demo" href="/docs/Journey-Usuario-Uber-Truck.html" target="_blank" rel="noopener">¿Quieres conocer Cubik? Ver demo →</a>
+        <p class="app-welcome-signin">
+          ¿Ya tienes cuenta?
+          <button type="button" class="link-btn" id="app-welcome-signin">Ingresar</button>
+        </p>
+        <p class="app-welcome-register">
+          ¿Primera vez?
+          <button type="button" class="link-btn" id="app-welcome-register">Crear cuenta</button>
+        </p>
       </div>
     </div>
   </div>
@@ -364,7 +351,10 @@
       <a class="cubik-welcome-demo" href="/docs/Journey-Usuario-Uber-Truck.html" target="_blank" rel="noopener">¿Quieres conocer Cubik? Ver demo →</a>
       <button type="button" class="link-btn auth-intent-cancel" id="auth-intent-cancel">Cancelar</button>
     </div>
-    <div id="auth-form-wrap">
+    <div id="auth-form-wrap" class="auth-form-wrap">
+    <div id="auth-app-header" class="auth-app-header">
+      <button type="button" class="auth-app-back" id="auth-app-back" aria-label="Volver">←</button>
+    </div>
     <div id="auth-role-toggle" class="auth-role-toggle" hidden role="tablist" aria-label="Tipo de cuenta">
       <span class="auth-role-toggle-pill" aria-hidden="true"></span>
       <button type="button" class="auth-role-toggle-btn" data-auth-toggle="carrier" role="tab" id="auth-toggle-carrier">Transportista</button>
@@ -377,6 +367,10 @@
         <p class="auth-context-role" id="auth-context-role">Transportista</p>
         <p class="auth-context-tagline" id="auth-context-tagline">Encuentra carga para aprovechar tu ruta</p>
       </div>
+    </div>
+    <div id="auth-app-role-badge" class="auth-app-role-badge" hidden>
+      <span class="auth-app-role-badge-icon" id="auth-app-role-icon" aria-hidden="true"></span>
+      <span id="auth-app-role-label">Transportista</span>
     </div>
     <h2 id="auth-title">Iniciar sesión</h2>
     <div id="auth-otp-step" class="auth-otp-step" hidden>
@@ -396,10 +390,27 @@
       <button type="button" id="auth-otp-submit" class="auth-otp-submit">Siguiente →</button>
     </div>
     <form id="form-auth">
-      <label>Email</label>
-      <input name="email" type="email" required autocomplete="username" />
-      <label>Contraseña</label>
-      <input name="password" type="password" minlength="8" required autocomplete="current-password" data-pw-strength data-pw-strength-register-only />
+      <label class="auth-app-label" for="auth-email">Correo electrónico</label>
+      <div class="auth-app-field">
+        <span class="auth-app-field-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m2 7 10 7 10-7"/></svg>
+        </span>
+        <input id="auth-email" name="email" type="email" required autocomplete="username" placeholder="ejemplo@correo.com" />
+      </div>
+      <label class="auth-app-label" for="auth-password">Contraseña</label>
+      <div class="auth-app-field">
+        <span class="auth-app-field-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        </span>
+        <input id="auth-password" name="password" type="password" minlength="8" required autocomplete="current-password" data-pw-strength data-pw-strength-register-only placeholder="••••••••" />
+        <button type="button" class="auth-app-field-toggle" id="auth-password-toggle" aria-label="Mostrar contraseña" aria-pressed="false">
+          <svg class="auth-eye-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="auth-eye-closed" hidden viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.88 9.88a3 3 0 1 0 4.24 4.24"/><path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68"/><path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61"/><line x1="2" x2="22" y1="2" y2="22"/></svg>
+        </button>
+      </div>
+      <p class="auth-app-forgot login-only">
+        <button type="button" class="link-btn" id="auth-forgot-link">¿Olvidaste tu contraseña?</button>
+      </p>
       <p id="auth-register-intro" class="register-only muted">
         Datos mínimos de tu empresa. Cada cuenta ve solo lo de su organización; el administrador ve todo.
       </p>
@@ -433,7 +444,6 @@
       <button type="submit" id="auth-forgot-submit">Enviar enlace</button>
     </form>
     <p class="muted auth-login-footer">
-      <button type="button" class="link-btn login-only" id="auth-forgot-link">¿Olvidaste tu contraseña?</button>
       <button type="button" class="link-btn" id="auth-toggle-mode">Crear cuenta</button>
       <button type="button" class="link-btn forgot-only" id="auth-back-login" hidden>Volver a iniciar sesión</button>
     </p>
@@ -1255,7 +1265,7 @@
   <script src="/password-policy.js?v=0.0.139" defer></script>
   <script src="/password-strength-ui.js?v=0.0.139" defer></script>
   <script src="/roles-ui.js?v=0.0.130" defer></script>
-  <script src="/app-shell.js?v=0.0.161" defer></script>
+  <script src="/app-shell.js?v=0.0.166" defer></script>
   <script src="/pwa-ui.js?v=0.0.64" defer></script>
   <script src="/kyc-ui.js?v=0.0.33" defer></script>
   <script src="/admin-ui.js?v=0.0.59" defer></script>
@@ -1270,7 +1280,7 @@
   <script src="/legal-terms-ui.js?v=0.0.86" defer></script>
   <script src="/load-form-validation.js?v=0.0.86" defer></script>
   <script src="/proposal-compare-ui.js?v=0.0.47" defer></script>
-  <script src="/auth-ui.js?v=0.0.161" defer></script>
+  <script src="/auth-ui.js?v=0.0.166" defer></script>
   <script src="/live-map-ui.js?v=0.0.123" defer></script>
   <script src="/tracking-ui.js?v=0.0.123" defer></script>
   <script src="/incident-ui.js?v=0.0.99" defer></script>

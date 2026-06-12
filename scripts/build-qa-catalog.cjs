@@ -12,6 +12,7 @@ const AREA_RULES = [
   { id: 'board', label: 'Tablero / datos', match: (s) => /board|proximity|notification|demo|seed/i.test(s) },
   { id: 'android', label: 'Android / APK', match: (s) => /android|bundle|apk/i.test(s) },
   { id: 'prod', label: 'Smoke producción', match: (s) => /prod/i.test(s) },
+  { id: 'landing', label: 'Landing / marca', match: (s) => /landing|design-system|logo-brand|prospect|whatsapp/i.test(s) },
 ];
 
 function readFile(rel) {
@@ -37,7 +38,7 @@ function classifyArea(suite, file, group) {
 function parseNodeTests(src, file) {
   const suite = path.basename(file, '.test.js');
   const cases = [];
-  for (const m of src.matchAll(/test\s*\(\s*['"`]([^'"`]+)['"`]/g)) {
+  for (const m of src.matchAll(/(?:test|it)\s*\(\s*['"`]([^'"`]+)['"`]/g)) {
     const area = classifyArea(suite, file, m[1]);
     cases.push({ name: m[1], optional: false, area: area.id, area_label: area.label });
   }

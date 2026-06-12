@@ -141,11 +141,53 @@ async function sendNewDeviceSignInEmail({
   });
 }
 
+function escapeHtml(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;');
+}
+
+async function sendProspectLeadEmail({ to, row }) {
+  const roleLabel = row.role === 'carrier' ? 'Transportista' : 'Empresa';
+  const tools = Array.isArray(row.current_tools) && row.current_tools.length
+    ? row.current_tools.join(', ')
+    : '—';
+  const html = `
+    <div style="font-family:system-ui,sans-serif;color:#111;max-width:560px;">
+      <h1 style="font-size:20px;margin:0 0 12px;">Nuevo lead — Agendar demo</h1>
+      <p>Llegó una solicitud desde la web de Cubik.</p>
+      <table style="border-collapse:collapse;width:100%;font-size:14px;line-height:1.5;">
+        <tr><td style="padding:6px 8px;color:#64748b;">Rol</td><td style="padding:6px 8px;"><strong>${escapeHtml(roleLabel)}</strong></td></tr>
+        <tr><td style="padding:6px 8px;color:#64748b;">Nombre</td><td style="padding:6px 8px;">${escapeHtml(row.full_name)}</td></tr>
+        <tr><td style="padding:6px 8px;color:#64748b;">Correo</td><td style="padding:6px 8px;"><a href="mailto:${escapeHtml(row.email)}">${escapeHtml(row.email)}</a></td></tr>
+        <tr><td style="padding:6px 8px;color:#64748b;">Empresa / flota</td><td style="padding:6px 8px;">${escapeHtml(row.company_name)}</td></tr>
+        <tr><td style="padding:6px 8px;color:#64748b;">WhatsApp</td><td style="padding:6px 8px;">${escapeHtml(row.phone)}</td></tr>
+        <tr><td style="padding:6px 8px;color:#64748b;">Equipo</td><td style="padding:6px 8px;">${escapeHtml(row.team_size ?? '—')}</td></tr>
+        <tr><td style="padding:6px 8px;color:#64748b;">Volumen mensual</td><td style="padding:6px 8px;">${escapeHtml(row.monthly_volume)}</td></tr>
+        <tr><td style="padding:6px 8px;color:#64748b;">Herramientas</td><td style="padding:6px 8px;">${escapeHtml(tools)}</td></tr>
+        <tr><td style="padding:6px 8px;color:#64748b;">Página</td><td style="padding:6px 8px;">${escapeHtml(row.source_page || '—')}</td></tr>
+        <tr><td style="padding:6px 8px;color:#64748b;">ID</td><td style="padding:6px 8px;font-size:12px;">${escapeHtml(row.id)}</td></tr>
+      </table>
+      <p style="margin-top:16px;">Responde al prospecto cuanto antes.</p>
+      <p style="color:#666;font-size:12px;">Cubik — getcubik.cl</p>
+    </div>
+  `;
+  return sendHtmlEmail({
+    to,
+    subject: `[Cubik] Demo ${roleLabel}: ${row.company_name}`,
+    html,
+    logLabel: 'Prospect lead',
+  });
+}
+
 module.exports = {
   isConfigured,
   publicAppUrl,
   sendPasswordResetEmail,
   sendLoginOtpEmail,
   sendNewDeviceSignInEmail,
+  sendProspectLeadEmail,
   statusPayload,
 };

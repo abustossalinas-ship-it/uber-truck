@@ -57,10 +57,7 @@ test.describe('Producción — landing y piloto', () => {
 
   test('Landing → app → atrás sin overlay pegado', async ({ page }) => {
     await page.goto('/');
-    const toApp = page.locator(
-      '.lv3-nav-actions a[href^="/app"], .hero-actions a[href^="/app"], a[href="/app"]'
-    ).first();
-    await toApp.click();
+    await page.locator('.lv3-nav-actions a.lv3-btn-teal[href="/app"]').click();
     await page.waitForURL(/\/app/);
     await page.goBack();
     await expect(page.locator('#lv3-loading, #landing-loading')).toBeHidden();

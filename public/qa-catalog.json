@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-06-11T02:43:39.220Z",
+  "generated_at": "2026-06-12T04:49:17.166Z",
   "version": "0.0.129",
   "counts": {
-    "unit": 30,
-    "e2e": 29,
+    "unit": 41,
+    "e2e": 42,
     "e2e_optional": 3,
-    "required": 56,
+    "required": 80,
     "optional": 3,
-    "total": 59
+    "total": 83
   },
   "charts": {
     "by_kind": [
       {
         "label": "Unitarios (Node)",
-        "value": 30
+        "value": 41
       },
       {
         "label": "E2E (Playwright)",
-        "value": 29
+        "value": 42
       }
     ],
     "by_coverage": [
       {
         "label": "Obligatorios (CI)",
-        "value": 56
+        "value": 80
       },
       {
         "label": "Opcionales (.env / Supabase)",
@@ -32,20 +32,24 @@
     ],
     "by_area": [
       {
+        "label": "Landing / marca",
+        "value": 30
+      },
+      {
         "label": "Welcome / login",
         "value": 20
       },
       {
-        "label": "Otros",
-        "value": 19
+        "label": "Tablero / datos",
+        "value": 14
       },
       {
-        "label": "Tablero / datos",
-        "value": 13
+        "label": "Otros",
+        "value": 11
       },
       {
         "label": "Navegación app",
-        "value": 5
+        "value": 6
       },
       {
         "label": "Smoke producción",
@@ -89,8 +93,18 @@
         "kind": "unit"
       },
       {
+        "label": "prospectos",
+        "value": 4,
+        "kind": "unit"
+      },
+      {
         "label": "trip-proximity",
         "value": 5,
+        "kind": "unit"
+      },
+      {
+        "label": "whatsapp-bot",
+        "value": 7,
         "kind": "unit"
       },
       {
@@ -105,7 +119,12 @@
       },
       {
         "label": "app-welcome",
-        "value": 5,
+        "value": 6,
+        "kind": "e2e"
+      },
+      {
+        "label": "design-system",
+        "value": 6,
         "kind": "e2e"
       },
       {
@@ -119,6 +138,11 @@
         "kind": "e2e"
       },
       {
+        "label": "logo-brand",
+        "value": 6,
+        "kind": "e2e"
+      },
+      {
         "label": "prod-smoke",
         "value": 7,
         "kind": "e2e"
@@ -127,7 +151,7 @@
     "last_run": [
       {
         "label": "Pasaron",
-        "value": 19
+        "value": 31
       },
       {
         "label": "Omitidos",
@@ -403,6 +427,37 @@
       ]
     },
     {
+      "file": "tests/prospectos.test.js",
+      "suite": "prospectos",
+      "kind": "unit",
+      "cases": [
+        {
+          "name": "valida payload mínimo",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "rechaza email inválido",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "arma url de WhatsApp Chile",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "no antepone 56 a numero Meta test US",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        }
+      ]
+    },
+    {
       "file": "tests/trip-proximity.test.js",
       "suite": "trip-proximity",
       "kind": "unit",
@@ -436,6 +491,55 @@
           "optional": false,
           "area": "board",
           "area_label": "Tablero / datos"
+        }
+      ]
+    },
+    {
+      "file": "tests/whatsapp-bot.test.js",
+      "suite": "whatsapp-bot",
+      "kind": "unit",
+      "cases": [
+        {
+          "name": "detecta rol transportista desde texto wa.me",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "detecta rol empresa desde texto wa.me",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "primer mensaje envía bienvenida y menú",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "opción 1 responde FAQ",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "humano escala a agente",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "deduplica por message id",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "parsea mensaje de texto del webhook",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
         }
       ]
     }
@@ -510,14 +614,14 @@
       "kind": "e2e",
       "cases": [
         {
-          "name": "Comenzar como Transportista abre login contextual",
+          "name": "Soy transportista abre login contextual",
           "group": "Cubik app — welcome y login",
           "optional": false,
           "area": "welcome",
           "area_label": "Welcome / login"
         },
         {
-          "name": "Comenzar como Empresa abre login contextual",
+          "name": "Soy empresa abre login contextual",
           "group": "Cubik app — welcome y login",
           "optional": false,
           "area": "welcome",
@@ -531,7 +635,14 @@
           "area_label": "Welcome / login"
         },
         {
-          "name": "Toggle cambia rol sin volver al welcome",
+          "name": "Ingresar con rol previo abre login",
+          "group": "Cubik app — welcome y login",
+          "optional": false,
+          "area": "welcome",
+          "area_label": "Welcome / login"
+        },
+        {
+          "name": "Ingresar sin rol mantiene bienvenida",
           "group": "Cubik app — welcome y login",
           "optional": false,
           "area": "welcome",
@@ -547,6 +658,55 @@
       ]
     },
     {
+      "file": "e2e/design-system.spec.js",
+      "suite": "design-system",
+      "kind": "e2e",
+      "cases": [
+        {
+          "name": "sitio principal — landing v3 con hero oscuro",
+          "group": "Cubik Brand 2.0 — design system",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "tokens y nav oscuro en transportistas",
+          "group": "Cubik Brand 2.0 — design system",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "header global idéntico en home, empresas y transportistas",
+          "group": "Cubik Brand 2.0 — design system",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "hero comparte CTA primario y secundario",
+          "group": "Cubik Brand 2.0 — design system",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "empresas comparte paleta con transportistas",
+          "group": "Cubik Brand 2.0 — design system",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "app — header oscuro, nav activo/inactivo y cards inicio",
+          "group": "Cubik Brand 2.0 — design system",
+          "optional": false,
+          "area": "nav",
+          "area_label": "Navegación app"
+        }
+      ]
+    },
+    {
       "file": "e2e/landing-pilot.spec.js",
       "suite": "landing-pilot",
       "kind": "e2e",
@@ -555,43 +715,43 @@
           "name": "Portada muestra headline y CTAs",
           "group": "Landing getcubik — portada y navegación",
           "optional": false,
-          "area": "other",
-          "area_label": "Otros"
+          "area": "landing",
+          "area_label": "Landing / marca"
         },
         {
           "name": "Soy empresa navega a landing y luego app",
           "group": "Landing getcubik — portada y navegación",
           "optional": false,
-          "area": "other",
-          "area_label": "Otros"
+          "area": "landing",
+          "area_label": "Landing / marca"
         },
         {
           "name": "Soy transportista navega a landing y luego app",
           "group": "Landing getcubik — portada y navegación",
           "optional": false,
-          "area": "other",
-          "area_label": "Otros"
+          "area": "landing",
+          "area_label": "Landing / marca"
         },
         {
           "name": "Atrás desde app no deja overlay Abriendo Cubik pegado",
           "group": "Landing getcubik — portada y navegación",
           "optional": false,
-          "area": "other",
-          "area_label": "Otros"
+          "area": "landing",
+          "area_label": "Landing / marca"
         },
         {
           "name": "Página testers carga",
           "group": "Piloto — /probar",
           "optional": false,
-          "area": "other",
-          "area_label": "Otros"
+          "area": "landing",
+          "area_label": "Landing / marca"
         },
         {
           "name": "Desde landing link a probar",
           "group": "Piloto — /probar",
           "optional": false,
-          "area": "other",
-          "area_label": "Otros"
+          "area": "landing",
+          "area_label": "Landing / marca"
         }
       ]
     },
@@ -604,26 +764,75 @@
           "name": "/transportistas carga hero y CTAs",
           "group": "Landing v3 — transportistas y empresas",
           "optional": false,
-          "area": "other",
-          "area_label": "Otros"
+          "area": "landing",
+          "area_label": "Landing / marca"
         },
         {
           "name": "/empresas carga hero y CTAs",
           "group": "Landing v3 — transportistas y empresas",
           "optional": false,
-          "area": "other",
-          "area_label": "Otros"
+          "area": "landing",
+          "area_label": "Landing / marca"
         },
         {
-          "name": "Transportistas → app abre login carrier",
+          "name": "Agendar demo abre modal en empresas",
           "group": "Landing v3 — transportistas y empresas",
           "optional": false,
-          "area": "welcome",
-          "area_label": "Welcome / login"
+          "area": "board",
+          "area_label": "Tablero / datos"
         },
         {
-          "name": "Empresas → app abre login shipper",
+          "name": "Clic fuera del modal no cierra con datos",
           "group": "Landing v3 — transportistas y empresas",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        }
+      ]
+    },
+    {
+      "file": "e2e/logo-brand.spec.js",
+      "suite": "logo-brand",
+      "kind": "e2e",
+      "cases": [
+        {
+          "name": "asset app oficial es PNG maestro (362×114, alpha)",
+          "group": "Logo Cubik — encuadre y assets",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "assets PNG nav oscuro tienen canal alpha",
+          "group": "Logo Cubik — encuadre y assets",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "/transportistas — logo nav blanco encuadrado",
+          "group": "Logo Cubik — encuadre y assets",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "/ — sitio principal nav oscuro con logo blanco",
+          "group": "Logo Cubik — encuadre y assets",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "/app — bienvenida logo oficial encuadrado",
+          "group": "Logo Cubik — encuadre y assets",
+          "optional": false,
+          "area": "landing",
+          "area_label": "Landing / marca"
+        },
+        {
+          "name": "/app?role=carrier — login contextual sin logo duplicado",
+          "group": "Logo Cubik — encuadre y assets",
           "optional": false,
           "area": "welcome",
           "area_label": "Welcome / login"
@@ -688,5 +897,5 @@
     }
   ],
   "report_available": true,
-  "last_run_at": "2026-06-11T02:43:22.541Z"
+  "last_run_at": "2026-06-12T02:25:10.699Z"
 }

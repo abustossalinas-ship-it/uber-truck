@@ -25,6 +25,13 @@ router.get('/config', (_req, res) => {
 router.post('/', async (req, res) => {
   try {
     const row = await prospectos.createProspecto(req.body || {});
+    const notifyTo = process.env.PROSPECT_NOTIFY_EMAIL?.trim() || 'admin@getcubik.cl';
+    if (notifyTo) {
+      const { sendProspectLeadEmail } = require('../services/mail');
+      sendProspectLeadEmail({ to: notifyTo, row }).catch((err) => {
+        console.error('[prospectos] notify email failed', err.message);
+      });
+    }
     res.status(201).json({
       ok: true,
       data: { id: row.id },

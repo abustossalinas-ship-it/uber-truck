@@ -39,7 +39,7 @@
     <h1>Memoria técnica del proyecto</h1>
     <p class="meta"><strong>Producto:</strong> Uber Truck — marketplace de capacidad logística ociosa (backhaul), Chile.<br />
     <strong>Documento:</strong> memoria técnica viva del repositorio y del despliegue Railway.<br />
-    <strong>Versión documento:</strong> 4.4 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.129 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 25 may 2026 &nbsp;|&nbsp; <strong>Backlog/Gantt:</strong> vivo — revisar semanalmente</p>
+    <strong>Versión documento:</strong> 4.5 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.129 API · frontend captación v0.0.168 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 12 jun 2026 &nbsp;|&nbsp; <strong>Backlog/Gantt:</strong> vivo — revisar semanalmente</p>
   </div>
 </div>
 
@@ -90,6 +90,7 @@
   <tr><td>QA automatizado</td><td>Unit + Playwright + CI GitHub + Laboratorio <code>/qa-lab</code></td><td class="g-done">Hecho v0.0.125</td></tr>
   <tr><td>App Android testers</td><td>Capacitor + APK remoto/bundle + verify login</td><td class="g-done">Hecho v0.0.125</td></tr>
   <tr><td>Distribución sin tienda</td><td><code>/probar</code> + APK + PWA iPhone</td><td class="g-done">Hecho jun 2026</td></tr>
+  <tr><td>Captación comercial</td><td>Landing v3 por rol + «Agendar demo» (<code>prospectos</code>) + bot WhatsApp Meta + legal <code>/privacidad</code>·<code>/terminos</code></td><td class="g-done">Hecho v0.0.155–0.0.168</td></tr>
 </table>
 
 <h4>Post-MVP — no bloquea demo ni piloto 25/50</h4>
@@ -468,6 +469,20 @@
   <tr><td>Checklist Post-MVP</td><td>API <code>push_fcm</code> → <code>validated</code>; panel <a href="/post-mvp-checklist.html">/post-mvp-checklist</a></td><td>Doc: <a href="CUBIK-PUSH-FCM.md">CUBIK-PUSH-FCM.md</a></td></tr>
 </table>
 
+<h2>Bitácora de avance — 12 junio 2026 (captación comercial, WhatsApp bot, legal y marca · frontend v0.0.155–0.0.168)</h2>
+<table>
+  <tr><th>Área</th><th>Entregado</th><th>Notas</th></tr>
+  <tr><td>Landing comercial v3</td><td>Portada rediseñada por rol (transportistas / empresas), hero oscuro, CTAs claros «Comenzar ahora» y «Agendar demo»</td><td><code>public/landing.html</code>, <code>transportistas.html</code>, <code>empresas.html</code>; <code>landing-v3.(css|js)</code>, <code>landing-fluid.*</code> v0.0.167</td></tr>
+  <tr><td>Captación de prospectos</td><td>Modal «Agendar demo» con cierre explícito (no pierde datos); <code>POST /api/prospectos</code> guarda lead (rol, empresa, contacto, volumen)</td><td>SQL 027 <code>prospectos</code>; <code>src/lib/prospectos.js</code>, <code>public/prospect-lead.(css|js)</code> v0.0.168</td></tr>
+  <tr><td>Aviso interno de lead</td><td>Email a <code>PROSPECT_NOTIFY_EMAIL</code> (default <code>admin@getcubik.cl</code>) al agendar demo; listado admin <code>GET /api/prospectos</code></td><td><code>sendProspectLeadEmail</code> en <code>services/mail.js</code>; <code>/health</code> verifica tabla <code>prospectos</code></td></tr>
+  <tr><td>Bot WhatsApp (Meta Cloud API)</td><td>Webhook <code>GET/POST /api/whatsapp/webhook</code> (verificación + firma <code>x-hub-signature-256</code>); respuestas FAQ automáticas, escalado a humano; CTAs <code>wa.me</code> por rol en landing</td><td><code>src/routes/whatsapp.js</code>, <code>services/whatsapp-cloud.js</code>, <code>lib/whatsapp-bot.js</code>; sin Twilio. Docs: <a href="WHATSAPP-META-CLOUD.md">WHATSAPP-META-CLOUD.md</a>, <a href="WHATSAPP-BOT-FAQ.md">WHATSAPP-BOT-FAQ.md</a></td></tr>
+  <tr><td>Páginas legales (Meta)</td><td><code>/privacidad</code> y <code>/terminos</code> públicas para validar la app de WhatsApp Business en Meta</td><td><code>public/privacidad.html</code>, <code>public/terminos.html</code></td></tr>
+  <tr><td>Marca / bienvenida</td><td>Logo oficial <strong>CUBIK</strong> (hexágono azul) en app e iconos Android; bienvenida minimal Fase 1 con iconos de rol y login alineado al mockup</td><td><code>logo-cubik-official-*</code>, <code>logo-mark.png</code>, <code>role-welcome.css</code> v0.0.159–0.0.166</td></tr>
+  <tr><td>Entorno de desarrollo (Cursor Cloud)</td><td>Notas de arranque local: store JSON sin Supabase, login mock en navegador, gotcha UI web → producción (<code>brand-config</code>), Chromium QA</td><td><code>AGENTS.md</code> § Cursor Cloud, <a href="../README.md">README</a>, <a href="QA-AUTOMATIZADO.md">QA-AUTOMATIZADO.md</a></td></tr>
+</table>
+<p><strong>Canal WhatsApp:</strong> es <strong>captación + soporte comercial</strong> (bot FAQ y agendar demo), <strong>no</strong> el producto marketplace. El flujo de carga/oferta sigue 100% dentro de la app Cubik.</p>
+<p><strong>SQL usuario:</strong> ejecutar <a href="RUN_027_payment_methods_fcm.sql">RUN_027</a> / <code>027_prospectos.sql</code> en Supabase; recargar esquema PostgREST (<code>NOTIFY pgrst, 'reload schema';</code>).</p>
+
 <h2>Bitácora de avance — 25 mayo 2026 (Cubik v0.0.97–0.0.98 + diseño pagos)</h2>
 <table>
   <tr><th>Área</th><th>Entregado / decidido</th><th>Notas</th></tr>
@@ -631,12 +646,14 @@
 <p><strong>Rol:</strong> <code>src/lib/</code> — match, cancelación (<code>match-cancel-reasons.js</code>), precio (<code>match-price.js</code>), <strong>confianza/carga</strong> (<code>cargo-trust.js</code>), <strong>multas</strong> (<code>penalty-ledger.js</code>, <code>penalty-payment.js</code>, <code>penalty-gate.js</code>, <code>bank-gate.js</code>, <code>payment-proof.js</code>), repositorio.</p>
 
 <h2>Capa 07 — Servicios</h2>
-<p><strong>Rol:</strong> <code>src/services/</code> — Supabase client, comms, integraciones futuras (mapas, pagos).</p>
+<p><strong>Rol:</strong> <code>src/services/</code> — Supabase client, comms, Google Maps, FCM, mail (Resend + aviso de leads), <strong>WhatsApp Cloud API</strong> (<code>whatsapp-cloud.js</code> + bot FAQ <code>lib/whatsapp-bot.js</code>), integraciones futuras (pagos).</p>
 
 <h2>Capa 08 — Frontend web + app móvil Cubik</h2>
 <p><strong>Rol:</strong> <code>public/</code> — SPA web + modo app (<code>?app=1</code>, PWA, Capacitor). Shell móvil: <code>app-shell.js</code>, <code>app-shell.css</code>. API remota vía <code>api-base.js</code> cuando UI va en bundle APK. Marca Cubik: <code>brand-config.js</code>, <code>public/brand/</code>.</p>
 <p><strong>Android:</strong> Capacitor 7, package <code>cl.cubik.logistics</code>, carpeta <code>android/</code>. Scripts: <code>npm run android:apk</code>, <code>android:install:remote</code>, <code>android:verify</code>. Distribución: <a href="https://uber-truck-production.up.railway.app/probar">/probar</a> + APK bundle o remoto.</p>
 <p><strong>QA visual:</strong> <code>/qa-lab</code> — catálogo y gráficos de pruebas (<code>npm run qa:lab</code>).</p>
+<p><strong>Landing comercial v3:</strong> <code>landing.html</code>, <code>transportistas.html</code>, <code>empresas.html</code> (<code>landing-v3.*</code>, <code>landing-fluid.*</code>); captación de leads <code>prospect-lead.js</code> (modal «Agendar demo»). <strong>Legal Meta:</strong> <code>/privacidad</code>, <code>/terminos</code>.</p>
+<p><strong>Desarrollo local:</strong> sin Supabase el backend usa <code>data/store.json</code>; la UI web del navegador apunta a producción salvo override (ver <a href="../README.md">README</a> § Desarrollo local y <code>AGENTS.md</code>).</p>
 
 <h2>Capa 09 — Experiencia producto (paridad Uber)</h2>
 <p><strong>Rol:</strong> flujos, copy y pantallas en <code>public/</code> alineados a «pedir → match → viaje activo → historial»; roles embarcador/transportista como pasajero/conductor. Piloto y validación <strong>solo dentro de esta app</strong>, no canales externos.</p>
@@ -662,7 +679,8 @@
 <div class="rule"></div>
 
 <h2>Modelo de datos (resumen)</h2>
-<p><strong>Entidades:</strong> users, vehicles, capacity_offers, load_requests, matches, match_messages, match_notifications, penalty_charges, <strong>match_incidents</strong>, <strong>match_ratings</strong> (012–014), trip_events (roadmap).</p>
+<p><strong>Entidades:</strong> users, vehicles, capacity_offers, load_requests, matches, match_messages, match_notifications, penalty_charges, <strong>match_incidents</strong>, <strong>match_ratings</strong> (012–014), <strong>prospectos</strong> (027), trip_events (roadmap).</p>
+<p><strong>Prospectos comerciales (027):</strong> tabla <code>prospectos</code> — <code>role</code> (carrier|shipper), <code>full_name</code>, <code>email</code>, <code>company_name</code>, <code>phone</code>, <code>team_size</code>, <code>monthly_volume</code>, <code>current_tools</code> (TEXT[]), <code>source_page</code>, <code>status</code> (new|contacted|qualified|archived). Captura leads de la landing (no es parte del marketplace).</p>
 <p><strong>Calificaciones (012–014):</strong> tabla <code>match_ratings</code> — <code>match_id</code>, <code>rater_role</code> (shipper|carrier), <code>stars</code>, <code>comment</code>, <code>tags</code> (TEXT[]), <code>tag_band</code> (low|mid|high), <code>rater_user_id</code> (opcional, 014). UNIQUE (<code>match_id</code>, <code>rater_role</code>). En <code>matches</code>: <code>delivery_note</code>, <code>completed_at</code>.</p>
 <p><strong>Precio:</strong> <code>load_requests.budget_min_clp</code>, <code>budget_max_clp</code>; en <code>matches</code>: copia del rango, <code>carrier_offer_clp</code>, <code>agreed_price_clp</code>, <code>price_status</code> (migración <code>010</code>).</p>
 <p><strong>Confianza / carga (011):</strong> en <code>load_requests</code>: <code>cargo_description</code>, <code>declared_cargo_value_clp</code>, <code>has_dispatch_guide</code>, <code>dispatch_guide_folio</code>, <code>requires_cargo_insurance</code>, <code>legal_terms_version</code>, <code>terms_accepted_at</code>. Tabla <code>match_incidents</code> (robo, daño, faltante, atraso, otro). Ver <a href="CARGO-TRUST.md">CARGO-TRUST.md</a> y <a href="Terminos-Confianza-Carga-Uber-Truck.html">términos HTML</a>.</p>
@@ -698,6 +716,10 @@
   <tr><td>GET</td><td>/api/matches/rating-tags/catalog</td><td>Catálogo chips por rol (JSON)</td></tr>
   <tr><td>POST</td><td>/api/matches/:id/rate</td><td>Calificar viaje completado (stars, comment, tags); 409 si ya calificó</td></tr>
   <tr><td>GET</td><td>/api/matches</td><td>Lista matches + <code>can_rate</code>, <code>my_rating</code>, reputación contraparte</td></tr>
+  <tr><td>POST</td><td>/api/prospectos</td><td>Alta de lead comercial desde landing (rol, empresa, contacto); notifica a <code>PROSPECT_NOTIFY_EMAIL</code></td></tr>
+  <tr><td>GET</td><td>/api/prospectos</td><td>Listado de prospectos (solo admin; filtros rol/status)</td></tr>
+  <tr><td>GET</td><td>/api/prospectos/config</td><td>Estado WhatsApp (bot/URLs <code>wa.me</code> por rol) para la landing</td></tr>
+  <tr><td>GET/POST</td><td>/api/whatsapp/webhook</td><td>Webhook Meta Cloud API: verificación (<code>hub.*</code>) y mensajes entrantes (firma <code>x-hub-signature-256</code>) → bot FAQ</td></tr>
 </table>
 
 <h2>Reglas de negocio MVP</h2>
@@ -735,6 +757,6 @@
   docs/            ← memoria HTML (este archivo)
   canvases/        ← estado de avance (Cursor)</code>
 
-<p class="meta"><em>Fin del documento — v4.4 (25 may 2026): paridad MVP cerrada; FCM + contraseña cerrados; dominio Resend P0; backlog vivo + Gantt 16 sem; foco dominio → demo → 25/50 → M2.</em></p>
+<p class="meta"><em>Fin del documento — v4.5 (12 jun 2026): + landing comercial v3, captación de prospectos (SQL 027), bot WhatsApp Meta Cloud API, páginas legales (privacidad/términos) y marca CUBIK oficial; entorno dev Cursor Cloud documentado. Paridad MVP sigue cerrada; foco dominio Resend → demo → 25/50 → M2.</em></p>
 </body>
 </html>

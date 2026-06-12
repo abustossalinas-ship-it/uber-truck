@@ -11,7 +11,7 @@
 |-----------|--------|
 | **Memoria técnica** | [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html) |
 
-Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX **MVP cerrada**, hitos, **Gantt 16 sem**, **backlog vivo**, Cubik Saldo piloto, QA automatizado, plan comercial piloto 25/50, auth/correo/dominio. **Última actualización:** 25 may 2026 · software **0.0.129** · memoria **v4.4**.
+Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX **MVP cerrada**, hitos, **Gantt 16 sem**, **backlog vivo**, Cubik Saldo piloto, QA automatizado, plan comercial piloto 25/50, auth/correo/dominio, **captación (landing v3 + prospectos + bot WhatsApp Meta)**. **Última actualización:** 12 jun 2026 · software **0.0.129** (frontend captación **v0.0.168**) · memoria **v4.5**.
 
 No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitácora MVP digital (evita duplicados).
 
@@ -33,6 +33,7 @@ No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitáco
 | Piloto M2 corredor, KPIs, riesgos | [Piloto-M2-Corredor-KPIs-Riesgos.html](./Piloto-M2-Corredor-KPIs-Riesgos.html) |
 | Próximos pasos estratégicos | [PROXIMOS-PASOS-ESTRATEGIA.md](./PROXIMOS-PASOS-ESTRATEGIA.md) |
 | Demo / pitch | [DEMO-GUION.md](./DEMO-GUION.md) |
+| **Captación / bot WhatsApp (Meta Cloud)** | [WHATSAPP-META-CLOUD.md](./WHATSAPP-META-CLOUD.md) · [WHATSAPP-BOT-FAQ.md](./WHATSAPP-BOT-FAQ.md) · landing `/transportistas`·`/empresas` → `prospectos` |
 
 ---
 

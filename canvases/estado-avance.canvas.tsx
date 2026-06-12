@@ -16,9 +16,9 @@ import {
   useHostTheme,
 } from "cursor/canvas";
 
-const VERSION = "0.0.125";
-const MEMORIA = "v4.2";
-const FECHA = "10 jun 2026";
+const VERSION = "0.0.168";
+const MEMORIA = "v4.5";
+const FECHA = "12 jun 2026";
 const PROD = "https://uber-truck-production.up.railway.app";
 const REPO = "https://github.com/abustossalinas-ship-it/uber-truck";
 
@@ -40,6 +40,9 @@ const HITOS = [
 ];
 
 const RELEASES = [
+  { ver: "0.0.168", foco: "Landing v3 + captación prospectos (Agendar demo)", commit: "b9314bd" },
+  { ver: "0.0.160", foco: "Bot WhatsApp Meta Cloud + legal privacidad/términos", commit: "d59191f" },
+  { ver: "0.0.155", foco: "Marca CUBIK oficial + bienvenida minimal Fase 1", commit: "4ac6ddc" },
   { ver: "0.0.125", foco: "Login APK + notificaciones archivadas", commit: "70723d1" },
   { ver: "0.0.120", foco: "Laboratorio QA gráfico /qa-lab", commit: "f86ebe7" },
   { ver: "0.0.115", foco: "QA Playwright + CI GitHub", commit: "2acbfb9" },
@@ -62,6 +65,9 @@ const FEATURES = [
   { name: "Android APK remoto + bundle", ok: true },
   { name: "Cubik Saldo piloto — Pagar + badges 10/5", ok: true },
   { name: "Notificación transportista (pilot_payment)", ok: true },
+  { name: "Landing v3 + captación prospectos (Agendar demo)", ok: true },
+  { name: "Bot WhatsApp Meta Cloud API (webhook + FAQ)", ok: true },
+  { name: "Páginas legales privacidad/términos (Meta)", ok: true },
   { name: "Twilio Proxy (llamadas)", ok: false },
   { name: "Wallet real + retención al En ruta", ok: false },
   { name: "Push FCM (recepción en teléfono)", ok: false },
@@ -177,7 +183,7 @@ export default function EstadoAvanceUberTruck() {
 
       <H2>Documentación</H2>
       <Text>
-        Memoria {MEMORIA} · Journey v3.0 · QA + plan comercial piloto 25/50 · Siguiente: wallet real + M2
+        Memoria {MEMORIA} · Journey v3.1 · captación landing v3 + WhatsApp · Siguiente: wallet real + M2
       </Text>
       <Text color={theme.colors.textMuted}>
         Fuente: docs/Memoria-tecnica-Uber-Truck.html · commits 2acbfb9 → 70723d1

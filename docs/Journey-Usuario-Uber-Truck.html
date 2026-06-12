@@ -28,7 +28,7 @@
   <div class="doc-title-wrap">
     <h1>Journey de usuario — Uber Truck</h1>
     <p class="meta"><strong>Producto:</strong> App tipo Uber para carga por camión (backhaul).<br />
-    <strong>Versión:</strong> 3.0 · 10 jun 2026 · Software app <strong>0.0.125</strong> · Canal: <strong>app Cubik</strong> (web PWA + APK Android Capacitor)</p>
+    <strong>Versión:</strong> 3.1 · 12 jun 2026 · Software app <strong>0.0.129</strong> (frontend captación v0.0.168) · Canal: <strong>app Cubik</strong> (web PWA + APK Android Capacitor) + landing comercial v3</p>
   </div>
 </div>
 
@@ -44,6 +44,16 @@
 </table>
 <p><strong>Nombre tienda (futuro):</strong> Cubik Envíos Chile · package Android <code>cl.cubik.logistics</code>.</p>
 
+<h2 id="captacion">0b. Captación comercial (landing v3 + WhatsApp)</h2>
+<p>Antes de entrar a la app, el prospecto llega a la <strong>landing comercial v3</strong> segmentada por rol (<a href="/transportistas">/transportistas</a>, <a href="/empresas">/empresas</a>). Dos caminos de conversión:</p>
+<table>
+  <tr><th>Acción</th><th>Qué pasa</th><th>Resultado</th></tr>
+  <tr><td><strong>Comenzar ahora</strong> (WhatsApp)</td><td>Abre <code>wa.me</code> con mensaje por rol; un <strong>bot Meta Cloud API</strong> responde FAQ y escala a humano</td><td>Conversación iniciada; soporte comercial</td></tr>
+  <tr><td><strong>Agendar demo</strong></td><td>Modal con datos (rol, empresa, contacto, volumen) → <code>POST /api/prospectos</code>; aviso por correo al equipo</td><td>Lead en tabla <code>prospectos</code>; «Te contactaremos pronto»</td></tr>
+  <tr><td><strong>Probar la app</strong></td><td>Link a <a href="/probar">/probar</a> (APK / PWA / <code>?app=1</code>)</td><td>Entra al journey de la app (secciones 3–4)</td></tr>
+</table>
+<p class="meta">El <strong>bot de WhatsApp</strong> es canal de <strong>captación y soporte</strong>, no el producto: publicar carga, ofertar y emparejar siguen 100% dentro de la app. Docs: <a href="WHATSAPP-META-CLOUD.md">WHATSAPP-META-CLOUD.md</a>, <a href="WHATSAPP-BOT-FAQ.md">WHATSAPP-BOT-FAQ.md</a> · Legal: <a href="/privacidad">/privacidad</a>, <a href="/terminos">/terminos</a>.</p>
+
 <h2>1. Propósito</h2>
 <p>Recorridos end-to-end de <strong>transportista</strong> y <strong>embarcador</strong> usando la misma lógica mental que Uber: publicar → emparejar → viaje activo → cerrar. Incluye emociones, fricciones y métricas por etapa.</p>
 <p><strong>Piloto M2:</strong> validar liquidez en <strong>un corredor</strong> (RM ↔ Valparaíso / San Antonio). Ver <a href="Piloto-M2-Corredor-KPIs-Riesgos.html">corredor, KPIs y riesgos</a>.</p>
@@ -55,7 +65,7 @@
   <tr><td><strong>Embarcador</strong></td><td>Publica carga, elige/acepta transportista</td><td>Pasajero / quien pide</td></tr>
   <tr><td><strong>Plataforma</strong></td><td>Match, estados, chat, notificaciones, multas, registro de incidentes</td><td>App Uber</td></tr>
 </table>
-<p>No hay operador externo ni WhatsApp como producto principal en el MVP.</p>
+<p>No hay operador externo ni WhatsApp como producto principal en el MVP. El bot de WhatsApp (Meta Cloud API) existe solo para <strong>captación y soporte</strong> comercial (ver §0b), no para operar el marketplace.</p>
 
 <h2>3. Journey transportista (oferta)</h2>
 <table>
@@ -264,6 +274,6 @@
 
 <p class="meta">Modelo de negocio: <a href="Modelo-Negocio-Uber-Truck.html">Modelo-Negocio-Uber-Truck.html</a> · Gantt y backlog: <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica v4.2</a> · QA: <a href="QA-AUTOMATIZADO.md">QA-AUTOMATIZADO.md</a> · Probar: <a href="Probar-Uber-Truck.html">Probar-Uber-Truck.html</a></p>
 
-<p class="meta"><em>Fin del documento — v3.0 (10 jun 2026): v0.0.125 notificaciones archivadas; QA Laboratorio /qa-lab; APK remoto; plan comercial piloto 25/50; Cubik Saldo piloto 10/5 operativo.</em></p>
+<p class="meta"><em>Fin del documento — v3.1 (12 jun 2026): + captación comercial (landing v3, «Agendar demo» → prospectos, bot WhatsApp Meta) y páginas legales privacidad/términos. Mantiene v0.0.125 notificaciones archivadas, QA Laboratorio /qa-lab, APK remoto, Cubik Saldo piloto 10/5.</em></p>
 </body>
 </html>

@@ -18,6 +18,7 @@ const EMPTY = {
   trip_events: [],
   support_cases: [],
   support_messages: [],
+  prospectos: [],
 };
 
 const SEED = {
@@ -87,6 +88,7 @@ function readStore() {
       trip_events: data.trip_events || [],
       support_cases: data.support_cases || [],
       support_messages: data.support_messages || [],
+      prospectos: data.prospectos || [],
     };
   } catch {
     return structuredClone(EMPTY);
@@ -131,8 +133,8 @@ function list(collection, filters = {}) {
   if (filters.opened_by_user_id) {
     rows = rows.filter((row) => row.opened_by_user_id === filters.opened_by_user_id);
   }
-  if (filters.status) {
-    rows = rows.filter((row) => row.status === filters.status);
+  if (filters.role) {
+    rows = rows.filter((row) => row.role === filters.role);
   }
   return rows.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
 }
@@ -161,7 +163,9 @@ function insert(collection, row) {
                   ? 'sc'
                   : collection === 'support_messages'
                     ? 'sm'
-                    : 'mt'
+                    : collection === 'prospectos'
+                      ? 'pro'
+                      : 'mt'
       ),
     created_at: row.created_at || new Date().toISOString(),
   };

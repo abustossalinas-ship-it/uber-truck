@@ -10,10 +10,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="/landing-v3.css?v=0.0.155" />
-  <link rel="stylesheet" href="/landing-fluid.css?v=0.0.155" />
+  <link rel="stylesheet" href="/landing-v3.css?v=0.0.167" />
+  <link rel="stylesheet" href="/landing-fluid.css?v=0.0.167" />
+  <link rel="stylesheet" href="/prospect-lead.css?v=0.0.167" />
 </head>
-<body class="lv3-page lv3-shipper">
+<body class="lv3-page lv3-shipper" data-prospect-role="shipper">
   <header class="lv3-nav">
     <a class="lv3-brand" href="/" aria-label="Cubik inicio">
       <img src="/brand/logo-cubik-nav.png?v=0.0.155" alt="Cubik" decoding="async" width="360" height="117" />
@@ -46,8 +47,8 @@
           Gestiona tus envíos, controla costos y mejora la experiencia de tus clientes en una sola plataforma.
         </p>
         <div class="lv3-hero-actions">
-          <a class="lv3-btn lv3-btn-teal lv3-btn-lg" href="/app?role=shipper">Solicitar demo →</a>
-          <a class="lv3-btn lv3-btn-secondary lv3-btn-lg" href="#tower">Conocer soluciones</a>
+          <a class="lv3-btn lv3-btn-teal lv3-btn-lg lv3-btn-whatsapp lv3-btn-icon" data-prospect-whatsapp href="#">Comenzar Ahora</a>
+          <button type="button" class="lv3-btn lv3-btn-secondary lv3-btn-lg lv3-btn-icon" data-prospect-demo>Agendar Demo</button>
         </div>
       </div>
       <div class="lv3-hero-visual lv3-reveal">
@@ -146,7 +147,7 @@
         <h2>Moderniza tu cadena de suministro con Cubik</h2>
         <ul class="lv3-cta-list"><li>Sin costo mensual piloto</li><li>100% online</li><li>Cuentas verificadas</li></ul>
       </div>
-      <a class="lv3-btn lv3-btn-teal lv3-btn-lg" href="/app?role=shipper">Solicitar demo →</a>
+      <button type="button" class="lv3-btn lv3-btn-teal lv3-btn-lg lv3-btn-icon" data-prospect-demo>Agendar Demo</button>
     </div>
   </section>
 
@@ -165,7 +166,8 @@
     </div>
   </footer>
   <div id="lv3-loading" class="lv3-loading" hidden aria-live="polite">Abriendo Cubik…</div>
-  <script src="/landing-v3.js?v=0.0.155" defer></script>
-  <script src="/landing-fluid.js?v=0.0.155" defer></script>
+  <script src="/landing-v3.js?v=0.0.167" defer></script>
+  <script src="/landing-fluid.js?v=0.0.167" defer></script>
+  <script src="/prospect-lead.js?v=0.0.167" defer></script>
 </body>
 </html>

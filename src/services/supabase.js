@@ -57,6 +57,7 @@ async function list(table, filters = {}) {
   if (filters.shipper_user_id) q = q.eq('shipper_user_id', filters.shipper_user_id);
   if (filters.carrier_user_id) q = q.eq('carrier_user_id', filters.carrier_user_id);
   if (filters.match_id) q = q.eq('match_id', filters.match_id);
+  if (filters.role) q = q.eq('role', filters.role);
   if (filters.region) {
     const r = filters.region.toUpperCase();
     q = q.or(`origin_region.eq.${r},destination_region.eq.${r}`);

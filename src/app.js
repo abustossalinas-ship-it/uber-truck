@@ -306,5 +306,6 @@ app.use('/api/admin', require('./routes/admin'));
 app.use('/api/carrier', require('./routes/carrier'));
 app.use('/api/realtime', require('./routes/realtime'));
 app.use('/api/support', require('./routes/support'));
+app.use('/api/prospectos', require('./routes/prospectos'));
 
 module.exports = app;

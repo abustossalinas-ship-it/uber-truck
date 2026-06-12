@@ -12,12 +12,14 @@ Proyecto **Uber Truck / Cubik**: marketplace de transporte por camión (carga �
 
 ## Documentación en producción (`/docs/`)
 
-| Documento | URL (Railway) |
-|-----------|----------------|
-| Hub | https://uber-truck-production.up.railway.app/docs/ |
-| Memoria técnica | https://uber-truck-production.up.railway.app/docs/Memoria-tecnica-Uber-Truck.html |
-| QA automatizado | https://uber-truck-production.up.railway.app/docs/QA-AUTOMATIZADO.md |
-| SQL Supabase | https://uber-truck-production.up.railway.app/docs/Sql-Supabase-Uber-Truck.html |
+| Documento | URL |
+|-----------|-----|
+| Hub | https://www.getcubik.cl/docs/ |
+| Índice MD | https://www.getcubik.cl/docs/00-INDICE-DOCUMENTACION.md |
+| Memoria técnica | https://www.getcubik.cl/docs/Memoria-tecnica-Uber-Truck.html |
+| QA automatizado | https://www.getcubik.cl/docs/QA-AUTOMATIZADO.md |
+| WhatsApp Meta | https://www.getcubik.cl/docs/WHATSAPP-META-CLOUD.md |
+| SQL Supabase | https://www.getcubik.cl/docs/Sql-Supabase-Uber-Truck.html |
 
 Word local: `npm run export:all-docs` → pack completo; `npm run export:memoria-docx` → solo memoria. Salida: `docs/*.docx` y `Downloads/Proyecto Uber Truck/`.
 
@@ -25,7 +27,7 @@ Word local: `npm run export:all-docs` → pack completo; `npm run export:memoria
 
 | Tarea | Archivos (cuando existan) |
 |-------|---------------------------|
-| **Memoria (Gantt, roadmap, próximos pasos)** | `docs/Memoria-tecnica-Uber-Truck.html`, `docs/01-MEMORIA-TECNICA.md` — **v4.4 / 0.0.129** |
+| **Memoria (Gantt, roadmap, próximos pasos)** | `docs/Memoria-tecnica-Uber-Truck.html`, `docs/01-MEMORIA-TECNICA.md` — **v4.5 / 0.0.129** |
 | **Dominio + correo piloto** | `docs/DOMAIN-AND-EMAIL.md`, `docs/AUTH-AND-EMAIL-ROADMAP.md`, `docs/POST-MVP-CHECKLIST.md` |
 | **Auth / contraseña** | `src/lib/password-policy.js`, `src/routes/auth.js`, `src/services/mail.js` |
 | **QA + Laboratorio** | `docs/QA-AUTOMATIZADO.md`, `public/qa-lab.html`, `e2e/`, `tests/`, `.github/workflows/qa.yml` |
@@ -33,6 +35,7 @@ Word local: `npm run export:all-docs` → pack completo; `npm run export:memoria
 | **Demo comercial** | `docs/DEMO-GUION.md` |
 | **Cubik Saldo piloto** | `src/lib/payment-simulation.js`, `pilot-pay-ui.js`, `docs/RUN_026_pilot_payment.sql` |
 | **Notificaciones** | `src/lib/notification-visibility.js`, `src/routes/match-comms.js` |
+| **Captación / WhatsApp** | `docs/WHATSAPP-META-CLOUD.md`, `src/routes/prospectos.js`, `public/prospect-lead.js` |
 | **Índice** | `docs/00-INDICE-DOCUMENTACION.md`, `docs/index.html` |
 | Canvas avance | `canvases/estado-avance.canvas.tsx` |
 | **SQL Supabase** | `docs/SQL-SUPABASE.md`, `supabase/migrations/RUN_PENDING.sql` |
@@ -72,3 +75,58 @@ Notas no obvias para desarrollar aquí:
 - **Publicar carga (`POST /api/load-requests`) exige declaración de confianza:** `cargo_description` (≥8 chars), `declared_cargo_value_clp`, `terms_cargo_accepted`, `has_dispatch_guide` y `pallets` **o** `volume_m3`. Faltar uno devuelve 400 con la lista de errores.
 - **E2E (Playwright):** requiere Chromium (`npm run qa:install`, ya cubierto por el update script). Los specs que necesitan Supabase o credenciales `QA_*` se saltan automáticamente; sin esas variables el resto pasa contra el servidor local que Playwright levanta solo.
 - **Sin secretos configurados** Google Maps, FCM, mail, WhatsApp y pasarela quedan deshabilitados; el server arranca igual y el picker de direcciones se vuelve texto libre.
+
+## Trabajar desde Cloud Agent (cursor.com/agents)
+
+Flujo para continuar desde el celular o navegador sin PC local.
+
+### Antes de cada sesión
+
+1. Abre https://cursor.com/agents con la misma cuenta Cursor.
+2. Repo: **abustossalinas-ship-it/uber-truck**, rama **main**.
+3. Usa el **Development environment** ya configurado (o crea uno nuevo si expiró).
+4. Opcional — Secrets en Environment (solo pruebas en la VM, **no** reemplazan Railway):
+   - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` si necesitas BD real en la nube.
+   - No commitear `.env`.
+
+### Prompt de inicio (copiar y pegar)
+
+```
+Repo: abustossalinas-ship-it/uber-truck, rama main.
+Lee AGENTS.md y docs/00-INDICE-DOCUMENTACION.md antes de codear.
+
+Tarea: [describe aquí]
+
+Al terminar:
+1. npm run test:qa (obligatorio si tocaste código)
+2. Si pasa: commit claro + push a main
+3. Si falla: corrige y NO hagas push
+4. Responde: archivos tocados, commit hash, qué revisar en https://www.getcubik.cl/health
+5. Si hay migración SQL nueva, indica archivo en supabase/migrations/ para ejecutar en Supabase (no auto-aplica)
+```
+
+### Cómo llega a producción
+
+```
+Cloud Agent edita → git push main → GitHub Actions (QA) → Railway auto-deploy → www.getcubik.cl
+```
+
+- **Docs:** `/docs/` se sirve desde la carpeta `docs/` del repo.
+- **Variables prod:** solo en Railway (Resend, WhatsApp, JWT, etc.).
+- **Migraciones SQL:** manual en Supabase SQL Editor.
+
+### Retomar en Cursor escritorio
+
+Tras push desde la nube, en el PC:
+
+```bash
+git pull origin main
+```
+
+Si cerraste la sesión cloud **sin push**, los cambios se pierden — vuelve a abrir esa sesión o rehaz la tarea.
+
+### Qué NO hacer en Cloud Agent
+
+- No asumir que Secrets de la VM = prod (Railway es aparte).
+- No olvidar push (sin push, prod no cambia).
+- No editar solo `docs/index.html` sin alinear `00-INDICE-DOCUMENTACION.md` si cambias el hub.

@@ -1,7 +1,8 @@
 # Índice maestro — Uber Truck / Cubik
 
-**Producción:** https://uber-truck-production.up.railway.app  
-**Hub docs:** https://uber-truck-production.up.railway.app/docs/
+**Producción:** https://www.getcubik.cl  
+**Hub docs:** https://www.getcubik.cl/docs/  
+**Railway directo:** https://uber-truck-production.up.railway.app/docs/
 
 ---
 
@@ -54,7 +55,7 @@ No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitáco
 | Tema | HTML |
 |------|------|
 | Modelo de negocio | [Modelo-Negocio-Uber-Truck.html](./Modelo-Negocio-Uber-Truck.html) |
-| Journey usuario | [Journey-Usuario-Uber-Truck.html](./Journey-Usuario-Uber-Truck.html) (v3.0 · 0.0.125) |
+| Journey usuario | [Journey-Usuario-Uber-Truck.html](./Journey-Usuario-Uber-Truck.html) (v3.1 · 12 jun 2026) |
 | Resumen canvas | [Canvas-Resumen-Uber-Truck.html](./Canvas-Resumen-Uber-Truck.html) (v1.5) |
 | Cancelación / multas | [Politica-Cancelacion-Uber-Truck.html](./Politica-Cancelacion-Uber-Truck.html) · [Multas-Cuenta-Uber-Truck.html](./Multas-Cuenta-Uber-Truck.html) |
 | SQL Supabase | [Sql-Supabase-Uber-Truck.html](./Sql-Supabase-Uber-Truck.html) · [SQL-SUPABASE.md](./SQL-SUPABASE.md) |

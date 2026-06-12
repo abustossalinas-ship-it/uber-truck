@@ -53,7 +53,7 @@ router.post('/webhook', async (req, res) => {
         await whatsappCloud.sendText(msg.from, text);
       }
     } catch (e) {
-      console.error('[whatsapp] Error procesando mensaje', msg.from, e.message || e);
+      console.error('[whatsapp] Error procesando mensaje', msg.from, e.message || e, e.details || '');
     }
   }
 });

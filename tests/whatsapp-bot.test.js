@@ -44,6 +44,12 @@ describe('whatsapp-bot', () => {
     assert.match(replies[0], /Publicar una carga|Encontrar cargas/i);
   });
 
+  it('opción 1 con emoji responde FAQ', () => {
+    handleInbound({ from: '56911112222', text: 'hola', messageId: 'm2b' });
+    const { replies } = handleInbound({ from: '56911112222', text: '1️⃣', messageId: 'm3b' });
+    assert.ok(replies.length >= 1);
+  });
+
   it('humano escala a agente', () => {
     handleInbound({ from: '56922222222', text: 'hola', messageId: 'm4' });
     const { replies } = handleInbound({ from: '56922222222', text: 'humano', messageId: 'm5' });

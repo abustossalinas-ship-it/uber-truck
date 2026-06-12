@@ -122,3 +122,49 @@ Próximo paso opcional: notificar a `admin@getcubik.cl` o panel admin cuando `aw
 **Piloto recomendado:** embarcador y transportista coordinan en el **chat del match**. Dudas comerciales o leads → WhatsApp Cubik. Activar **Twilio Proxy** solo si el piloto exige botón «Llamar» con teléfono tradicional sin mostrar números reales.
 
 Ver [POST-MVP-CHECKLIST.md](./POST-MVP-CHECKLIST.md) ítem 4.
+
+## 9. El bot no responde — qué revisar
+
+### ¿Hay que “activar” algo?
+
+**No hay código secreto.** El bot se activa cuando **tú escribes primero** al número (o abres wa.me desde la landing). Eso abre la **ventana de 24 horas** de Meta para respuestas gratis.
+
+| Acción | ¿Activa el bot? |
+|--------|----------------|
+| Abrir wa.me y enviar el mensaje | Sí |
+| Escribir `Hola` al número test | Sí |
+| Esperar sin escribir | No — nadie inicia la conversación |
+| Cubik te escribe primero (plantilla) | Requiere plantilla aprobada en Meta (no usamos en piloto) |
+
+### Por qué a veces respondió y después no
+
+1. **Token de Meta expirado** — los tokens temporales de Developers duran ~24 h. Si pasó un día, el webhook recibe tu mensaje pero **falla al enviar** la respuesta. Solución: token **permanente** (System User) en Railway → `WHATSAPP_ACCESS_TOKEN`.
+
+2. **Cada deploy en Railway borra la “memoria” del bot** — las sesiones viven en RAM. No impide responder, pero si escribes solo `1` tras un deploy puede repetir bienvenida en lugar de FAQ. Escribe **`Hola`** o el mensaje completo de wa.me de nuevo.
+
+3. **Número de prueba Meta (“Test Number”)** — solo responde a teléfonos **agregados como testers** en Meta Developers → WhatsApp → API Setup → “To” / phone numbers. Tu celular debe estar en la lista.
+
+4. **Menú numérico** — responde a `1`, `2`, … `5` o `1️⃣`…`5️⃣`. Texto libre fuera del menú → el bot repite opciones o pide *humano*.
+
+5. **Ventana 24 h cerrada** — si no escribes en 24 h, el bot no puede contestar con mensajes libres hasta que **vuelvas a escribir tú** (reabre ventana).
+
+6. **Escalado humano** — si antes escribiste *humano*, el bot solo acusa recibo hasta que un agente responda desde WhatsApp Business.
+
+### Comprobar que el servidor está OK
+
+```bash
+curl -s https://www.getcubik.cl/api/whatsapp/status | jq
+curl -s https://www.getcubik.cl/health | jq .whatsapp
+```
+
+Debe mostrar `"active": true`. Si el bot sigue mudo, revisa **logs de Railway** buscando `[whatsapp] Error` (token inválido, número no autorizado, etc.).
+
+### Prueba rápida (desde cero)
+
+1. Desde getcubik.cl/empresas → **Comenzar ahora** (wa.me).
+2. Envía el mensaje precargado (una sola vez).
+3. Debes recibir **bienvenida + menú**.
+4. Responde **`1`** (solo el número).
+5. Debes recibir la FAQ + menú otra vez.
+
+Si el paso 3 falla → token Meta, webhook o teléfono no autorizado en test.

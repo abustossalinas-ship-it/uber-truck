@@ -84,6 +84,14 @@ function isDuplicateMessageId(id) {
   return false;
 }
 
+function parseMenuChoice(body) {
+  const t = String(body || '').trim();
+  if (/^[1-5]$/.test(t)) return t;
+  const emoji = t.match(/^([1-5])\s*️⃣\s*$/u);
+  if (emoji) return emoji[1];
+  return null;
+}
+
 function pickFaq(session, token) {
   const role = roleOf(session);
   const map = FAQ[role];
@@ -128,9 +136,9 @@ function buildReplies(text, session) {
     return replies;
   }
 
-  const menuMatch = body.match(/^[1-5]$/);
-  if (menuMatch) {
-    const ans = pickFaq(session, menuMatch[0]);
+  const menuChoice = parseMenuChoice(body);
+  if (menuChoice) {
+    const ans = pickFaq(session, menuChoice);
     if (ans) {
       replies.push(ans, MENU[roleOf(session)]);
       return replies;

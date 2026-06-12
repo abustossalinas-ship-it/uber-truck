@@ -34,10 +34,10 @@ describe('prospectos', () => {
 
   it('arma url de WhatsApp', () => {
     const prev = process.env.CUBIK_WHATSAPP_E164;
-    process.env.CUBIK_WHATSAPP_E164 = '56912345678';
+    process.env.CUBIK_WHATSAPP_E164 = '56971419384';
     const url = buildWhatsAppUrl('shipper');
-    assert.ok(url?.includes('wa.me/56912345678'));
-    assert.ok(url?.includes(encodeURIComponent('empresa')));
+    assert.ok(url?.includes('wa.me/56971419384'));
+    assert.ok(url?.includes(encodeURIComponent('Bienvenido a Cubik')));
     if (prev == null) delete process.env.CUBIK_WHATSAPP_E164;
     else process.env.CUBIK_WHATSAPP_E164 = prev;
   });

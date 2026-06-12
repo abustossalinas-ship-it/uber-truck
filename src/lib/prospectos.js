@@ -84,21 +84,44 @@ async function createProspecto(body) {
   return repo.insert('prospectos', parsed.row);
 }
 
+const DEFAULT_WHATSAPP_E164 = '56971419384';
+
+const WHATSAPP_MESSAGES = {
+  shipper: `👋 Bienvenido a Cubik.
+Te ayudo a mover tu carga de forma más rápida y eficiente.
+Puedes preguntarme sobre:
+• Publicar una carga
+• Encontrar transportistas
+• Costos y pagos
+• Seguimiento de envíos
+• Soporte de la plataforma
+
+¿En qué te puedo ayudar?`,
+  carrier: `👋 Bienvenido a Cubik.
+Te ayudo a encontrar nuevas oportunidades de carga y sacar mayor provecho a tus rutas.
+Puedes preguntarme sobre:
+• Cargas disponibles
+• Cómo emparejar viajes
+• Pagos y liquidaciones
+• Estado de tus viajes
+• Soporte de la plataforma
+
+¿En qué te puedo ayudar?`,
+};
+
 async function listProspectos(filters = {}) {
   return repo.list('prospectos', filters);
 }
 
 function whatsappConfig() {
-  const raw = String(process.env.CUBIK_WHATSAPP_E164 || process.env.CUBIK_WHATSAPP_NUMBER || '')
-    .replace(/\D/g, '');
+  const raw = String(
+    process.env.CUBIK_WHATSAPP_E164 || process.env.CUBIK_WHATSAPP_NUMBER || DEFAULT_WHATSAPP_E164
+  ).replace(/\D/g, '');
   const e164 = raw.startsWith('56') ? raw : raw ? `56${raw}` : '';
   return {
     configured: Boolean(e164),
     e164,
-    messages: {
-      shipper: '¡Hola! ¿Qué es lo que Cubik puede hacer por mi empresa?',
-      carrier: '¡Hola! ¿Qué es lo que Cubik puede hacer por mi operación de transporte?',
-    },
+    messages: WHATSAPP_MESSAGES,
   };
 }
 

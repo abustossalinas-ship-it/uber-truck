@@ -88,15 +88,25 @@ const { WELCOME: WHATSAPP_MESSAGES } = require('./whatsapp-copy');
 
 const DEFAULT_WHATSAPP_E164 = '56971419384';
 
+/** E.164 digits only — no fuerza +56 si ya trae código de país (ej. Meta test +1). */
+function normalizeWhatsAppE164(raw) {
+  const digits = String(raw || '').replace(/\D/g, '');
+  if (!digits) return '';
+  if (digits.startsWith('56') && digits.length >= 11) return digits;
+  if (digits.startsWith('1') && digits.length === 11) return digits;
+  if (digits.length === 9 && digits.startsWith('9')) return `56${digits}`;
+  if (digits.length === 10) return `1${digits}`;
+  return digits;
+}
+
 async function listProspectos(filters = {}) {
   return repo.list('prospectos', filters);
 }
 
 function whatsappConfig() {
-  const raw = String(
+  const e164 = normalizeWhatsAppE164(
     process.env.CUBIK_WHATSAPP_E164 || process.env.CUBIK_WHATSAPP_NUMBER || DEFAULT_WHATSAPP_E164
-  ).replace(/\D/g, '');
-  const e164 = raw.startsWith('56') ? raw : raw ? `56${raw}` : '';
+  );
   const cloudEnabled = String(process.env.WHATSAPP_CLOUD_ENABLED || '').toLowerCase() === 'true';
   return {
     configured: Boolean(e164),

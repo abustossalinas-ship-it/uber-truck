@@ -2,7 +2,7 @@
 
 const { describe, it } = require('node:test');
 const assert = require('node:assert/strict');
-const { validatePayload, buildWhatsAppUrl } = require('../src/lib/prospectos');
+const { validatePayload, buildWhatsAppUrl, whatsappConfig } = require('../src/lib/prospectos');
 
 describe('prospectos', () => {
   it('valida payload mínimo', () => {
@@ -32,12 +32,22 @@ describe('prospectos', () => {
     assert.match(error, /correo/i);
   });
 
-  it('arma url de WhatsApp', () => {
+  it('arma url de WhatsApp Chile', () => {
     const prev = process.env.CUBIK_WHATSAPP_E164;
     process.env.CUBIK_WHATSAPP_E164 = '56971419384';
     const url = buildWhatsAppUrl('shipper');
     assert.ok(url?.includes('wa.me/56971419384'));
     assert.ok(url?.includes(encodeURIComponent('Bienvenido a Cubik')));
+    if (prev == null) delete process.env.CUBIK_WHATSAPP_E164;
+    else process.env.CUBIK_WHATSAPP_E164 = prev;
+  });
+
+  it('no antepone 56 a numero Meta test US', () => {
+    const prev = process.env.CUBIK_WHATSAPP_E164;
+    process.env.CUBIK_WHATSAPP_E164 = '5551976732';
+    assert.equal(whatsappConfig().e164, '15551976732');
+    const url = buildWhatsAppUrl('shipper');
+    assert.ok(url?.includes('wa.me/15551976732'));
     if (prev == null) delete process.env.CUBIK_WHATSAPP_E164;
     else process.env.CUBIK_WHATSAPP_E164 = prev;
   });

@@ -117,6 +117,17 @@ app.use((req, res, next) => {
   next();
 });
 
+app.use(
+  '/api/whatsapp',
+  express.json({
+    limit: '1mb',
+    verify: (req, _res, buf) => {
+      req.rawBody = buf;
+    },
+  }),
+  require('./routes/whatsapp')
+);
+
 app.use(express.json({ limit: '3mb' }));
 
 const publicDir = path.join(__dirname, '..', 'public');
@@ -159,6 +170,7 @@ const supabaseService = require('./services/supabase');
 const googleMaps = require('./services/google-maps');
 const fcmService = require('./services/fcm');
 const mailService = require('./services/mail');
+const whatsappCloud = require('./services/whatsapp-cloud');
 const { paymentConfig } = require('./lib/payment-config');
 const repo = require('./lib/repository');
 
@@ -273,6 +285,7 @@ app.get('/health', async (_req, res) => {
     maps: { configured: googleMaps.isConfigured(), interactive: googleMaps.interactiveMapsAvailable() },
     fcm: fcmService.statusPayload(),
     mail: mailService.statusPayload(),
+    whatsapp: whatsappCloud.statusPayload(),
     payment: paymentConfig(),
   });
 });

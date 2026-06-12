@@ -84,30 +84,9 @@ async function createProspecto(body) {
   return repo.insert('prospectos', parsed.row);
 }
 
+const { WELCOME: WHATSAPP_MESSAGES } = require('./whatsapp-copy');
+
 const DEFAULT_WHATSAPP_E164 = '56971419384';
-
-const WHATSAPP_MESSAGES = {
-  shipper: `👋 Bienvenido a Cubik.
-Te ayudo a mover tu carga de forma más rápida y eficiente.
-Puedes preguntarme sobre:
-• Publicar una carga
-• Encontrar transportistas
-• Costos y pagos
-• Seguimiento de envíos
-• Soporte de la plataforma
-
-¿En qué te puedo ayudar?`,
-  carrier: `👋 Bienvenido a Cubik.
-Te ayudo a encontrar nuevas oportunidades de carga y sacar mayor provecho a tus rutas.
-Puedes preguntarme sobre:
-• Cargas disponibles
-• Cómo emparejar viajes
-• Pagos y liquidaciones
-• Estado de tus viajes
-• Soporte de la plataforma
-
-¿En qué te puedo ayudar?`,
-};
 
 async function listProspectos(filters = {}) {
   return repo.list('prospectos', filters);
@@ -118,10 +97,12 @@ function whatsappConfig() {
     process.env.CUBIK_WHATSAPP_E164 || process.env.CUBIK_WHATSAPP_NUMBER || DEFAULT_WHATSAPP_E164
   ).replace(/\D/g, '');
   const e164 = raw.startsWith('56') ? raw : raw ? `56${raw}` : '';
+  const cloudEnabled = String(process.env.WHATSAPP_CLOUD_ENABLED || '').toLowerCase() === 'true';
   return {
     configured: Boolean(e164),
     e164,
     messages: WHATSAPP_MESSAGES,
+    bot: cloudEnabled,
   };
 }
 

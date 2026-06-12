@@ -8,10 +8,12 @@ const router = express.Router();
 
 router.get('/config', (_req, res) => {
   const cfg = prospectos.whatsappConfig();
+  const whatsappCloud = require('../services/whatsapp-cloud');
   res.json({
     ok: true,
     whatsapp: {
       configured: cfg.configured,
+      bot: cfg.bot && whatsappCloud.isConfigured(),
       urls: {
         shipper: prospectos.buildWhatsAppUrl('shipper'),
         carrier: prospectos.buildWhatsAppUrl('carrier'),

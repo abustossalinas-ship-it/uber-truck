@@ -1,8 +1,8 @@
 # Dominio y correo transaccional — Cubik
 
-**Software:** 0.0.129 · **Actualizado:** 25 may 2026
+**Software:** 0.0.129 · **Actualizado:** 12 jun 2026
 
-Bloque operacional para el **piloto con varias cuentas** (Gmail, Yahoo, corporativos): sin dominio propio verificado en Resend, el reset de contraseña solo llega al email de la cuenta Resend.
+Dominio **getcubik.cl** activo en Railway + Resend verificado. Reset de contraseña llega a **cualquier email** (Gmail, Yahoo, corporativo).
 
 ---
 
@@ -46,17 +46,18 @@ La marca en APK, correos y UI sigue siendo **Cubik**; el dominio es infraestruct
 
 ---
 
-## Estado Resend (may 2026)
+## Estado Resend (jun 2026)
 
 | Ítem | Estado |
 |------|--------|
 | Código forgot/reset en prod | **Hecho** v0.0.127+ |
 | `RESEND_API_KEY` en Railway | Configurado |
-| Prueba a cuenta Resend (`abustos.salinas@gmail.com`) | **OK** con `onboarding@resend.dev` |
-| Prueba a otras cuentas (`abustosps4@gmail.com`, testers) | **Bloqueado** — sandbox Resend sin dominio |
+| Dominio **getcubik.cl** en Resend | **Verificado** |
+| `EMAIL_FROM` prod | `Cubik <no_reply@getcubik.cl>` (sin sandbox) |
+| `/health` → `mail.sandbox_sender` | **false** (confirma dominio propio) |
+| Reset a Gmail / testers externos | **OK** — ya no limitado a cuenta Resend |
 | Errores Resend visibles en API | **Hecho** v0.0.129 |
 | Cooldown forgot-password (2 min) | **Hecho** v0.0.129 |
-| `mail` en `/health` | **Hecho** v0.0.129 |
 
 ---
 

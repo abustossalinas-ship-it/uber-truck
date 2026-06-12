@@ -1,6 +1,6 @@
 # Checklist Post-MVP — validación en orden
 
-**Memoria:** v4.5.1 · **Software:** 0.0.129 · **Panel:** [/post-mvp-checklist.html](/post-mvp-checklist.html) · **API:** `GET /api/post-mvp/status`
+**Memoria:** v4.5.2 · **Software:** 0.0.129 · **Panel:** [/post-mvp-checklist.html](/post-mvp-checklist.html) · **API:** `GET /api/post-mvp/status`
 
 ## ¿Qué es esta lista?
 
@@ -17,7 +17,7 @@ Validar y cerrar cada ítem **en orden** solo cuando negocio lo priorice.
 | # | Ítem | Estado | Notas |
 |---|------|--------|-------|
 | 1 | Login Gmail / Apple | **Diferido** | Post-M2 — [AUTH-AND-EMAIL-ROADMAP.md](./AUTH-AND-EMAIL-ROADMAP.md) |
-| 2 | Recuperar contraseña | **Código validado · piloto bloqueado** | Resend OK; multi-cuenta requiere dominio — [DOMAIN-AND-EMAIL.md](./DOMAIN-AND-EMAIL.md) |
+| 2 | Recuperar contraseña | **Cerrado** jun 2026 | getcubik.cl + Resend verificado — [DOMAIN-AND-EMAIL.md](./DOMAIN-AND-EMAIL.md) |
 | 2b | Política contraseña + cambio en app | **Cerrado** v0.0.128 | 8+ chars, mayúscula, número; APK Cuenta → Seguridad |
 | 3 | Pago en app (prod) | Pendiente | Wallet real + ledger; hoy piloto simulado OK |
 | 4 | Contacto en viaje | **Piloto cerrado sin Twilio** | Ver sección abajo — chat in-app + WhatsApp comercial |
@@ -53,12 +53,14 @@ Meta Cloud API **no ofrece** llamadas de voz enmascaradas entre dos usuarios com
 
 ---
 
-## Bloqueante piloto — correo (acción inmediata)
+## Siguiente P0 real (post dominio)
 
-1. Comprar dominio libre (variante Cubik) — ver lista en [DOMAIN-AND-EMAIL.md](./DOMAIN-AND-EMAIL.md).
-2. Verificar dominio en Resend (SPF/DKIM).
-3. Railway: `EMAIL_FROM=Cubik <noreply@tudominio>`.
-4. Probar reset a Gmail tester + corporativo.
+1. **Demo comercial (C1–C2)** — guión [DEMO-GUION.md](./DEMO-GUION.md), checklist canvas, login + emparejar + qa:lab.
+2. **Onboarding piloto 25/50 (C3)** — KYC manual + banco.
+3. **Wallet prod (ítem 3)** — Mercado Pago o transferencia + ledger.
+4. **20 viajes M2 (U6)** — operación corredor RM–V.
+
+~~Dominio + Resend~~ — **cerrado** (E0).
 
 ---
 

@@ -23,7 +23,7 @@ function buildPostMvpStatus(ctx = {}) {
   const walletPilot = payment.provider_mode === 'sandbox' || payment.sandbox_in_production;
 
   return {
-    updated: '2026-06-10',
+    updated: '2026-06-12',
     software: '0.0.128',
     items: [
       {
@@ -54,9 +54,9 @@ function buildPostMvpStatus(ctx = {}) {
         status: resendOk ? 'validated' : 'blocked_env',
         server_ready: resendOk,
         blocking_demo: false,
-        validated_at: resendOk ? '2026-06-10' : undefined,
+        validated_at: resendOk ? '2026-06-12' : undefined,
         summary: resendOk
-          ? 'Validado 10 jun 2026 — Resend + reset-password.html en prod'
+          ? 'Cerrado jun 2026 — getcubik.cl verificado en Resend (sandbox_sender: false en /health)'
           : 'UI lista; falta RESEND_API_KEY + EMAIL_FROM en Railway',
         env: { RESEND_API_KEY: resendOk, EMAIL_FROM: Boolean(process.env.EMAIL_FROM?.trim()) },
         validate: [

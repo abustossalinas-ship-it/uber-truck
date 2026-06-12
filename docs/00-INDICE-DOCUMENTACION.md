@@ -12,7 +12,7 @@
 |-----------|--------|
 | **Memoria técnica** | [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html) |
 
-Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX **MVP cerrada**, hitos, **Gantt 16 sem**, **backlog vivo**, Cubik Saldo piloto, QA automatizado, plan comercial piloto 25/50, auth/correo/dominio, **captación (landing v3 + prospectos + bot WhatsApp Meta)**. La tabla **Post-MVP** es backlog planificado (no bugs). **Última actualización:** 12 jun 2026 · software **0.0.129** (frontend captación **v0.0.168**) · memoria **v4.5.1**.
+Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX **MVP cerrada**, hitos, **Gantt 16 sem**, **backlog vivo**, Cubik Saldo piloto, QA automatizado, plan comercial piloto 25/50, auth/correo/dominio, **captación (landing v3 + prospectos + bot WhatsApp Meta)**. La tabla **Post-MVP** es backlog planificado (no bugs). **Última actualización:** 12 jun 2026 · software **0.0.129** (frontend captación **v0.0.168**) · memoria **v4.5.2**.
 
 No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitácora MVP digital (evita duplicados).
 

@@ -104,9 +104,9 @@
     modalEl.className = 'prospect-modal';
     modalEl.hidden = true;
     modalEl.innerHTML = `
-      <div class="prospect-modal-backdrop" data-prospect-close tabindex="-1"></div>
+      <div class="prospect-modal-backdrop" aria-hidden="true"></div>
       <div class="prospect-modal-card" role="dialog" aria-modal="true" aria-labelledby="prospect-modal-title">
-        <button type="button" class="prospect-modal-close" data-prospect-close aria-label="Cerrar">×</button>
+        <button type="button" class="prospect-modal-close" data-prospect-close aria-label="Cerrar formulario">×</button>
         <p class="prospect-modal-progress">Paso 1 de 1 · <span>100%</span>
           <span class="prospect-modal-progress-bar" aria-hidden="true"><span></span></span>
         </p>
@@ -137,9 +137,7 @@
       </div>`;
     document.body.appendChild(modalEl);
 
-    modalEl.querySelectorAll('[data-prospect-close]').forEach((el) => {
-      el.addEventListener('click', closeModal);
-    });
+    modalEl.querySelector('[data-prospect-close]')?.addEventListener('click', () => closeModal());
     modalEl.querySelector('#prospect-form')?.addEventListener('submit', onSubmit);
     return modalEl;
   }
@@ -154,8 +152,22 @@
     window.setTimeout(() => el.querySelector('#prospect-name')?.focus(), 50);
   }
 
-  function closeModal() {
-    if (!modalEl) return;
+  function formHasData() {
+    const form = modalEl?.querySelector('#prospect-form');
+    if (!form || form.hidden) return false;
+    const filled = [...form.querySelectorAll('input:not([type="checkbox"])')].some(
+      (el) => String(el.value || '').trim().length > 0
+    );
+    if (filled) return true;
+    return form.querySelectorAll('input[name="tools"]:checked').length > 0;
+  }
+
+  function closeModal(force) {
+    if (!modalEl || modalEl.hidden) return;
+    if (!force && formHasData()) {
+      const ok = window.confirm('¿Cerrar sin enviar? Los datos del formulario se perderán.');
+      if (!ok) return;
+    }
     modalEl.hidden = true;
     document.body.style.overflow = '';
   }
@@ -196,7 +208,7 @@
       okEl.hidden = false;
       form.hidden = true;
       window.setTimeout(() => {
-        closeModal();
+        closeModal(true);
         form.hidden = false;
         form.reset();
       }, 2800);
@@ -251,6 +263,9 @@
     bindDemoButtons();
     document.addEventListener('keydown', (e) => {
       if (e.key === 'Escape' && modalEl && !modalEl.hidden) closeModal();
+    });
+    modalEl.querySelector('.prospect-modal-card')?.addEventListener('click', (e) => {
+      e.stopPropagation();
     });
   }
 

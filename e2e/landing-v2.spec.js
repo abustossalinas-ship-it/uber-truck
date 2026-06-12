@@ -23,5 +23,18 @@ test.describe('Landing v3 — transportistas y empresas', () => {
     await page.locator('.lv3-hero [data-prospect-demo]').click();
     await expect(page.locator('#prospect-modal')).toBeVisible();
     await expect(page.locator('#prospect-modal-title')).toContainText(/Encantados/i);
+    await expect(page.locator('.prospect-modal-close')).toBeVisible();
+  });
+
+  test('Clic fuera del modal no cierra con datos', async ({ page }) => {
+    await page.goto('/empresas');
+    await page.locator('.lv3-hero [data-prospect-demo]').click();
+    await page.fill('#prospect-name', 'Juan QA');
+    await page.locator('.prospect-modal-backdrop').click({ position: { x: 8, y: 8 } });
+    await expect(page.locator('#prospect-modal')).toBeVisible();
+    await expect(page.locator('#prospect-name')).toHaveValue('Juan QA');
+    page.once('dialog', (dialog) => dialog.accept());
+    await page.locator('.prospect-modal-close').click();
+    await expect(page.locator('#prospect-modal')).toBeHidden();
   });
 });

@@ -22,6 +22,22 @@ Cubik (Node) → bot FAQ + escalamiento humano
 | Textos | `src/lib/whatsapp-copy.js` |
 | wa.me landing | `src/lib/prospectos.js` |
 
+## 0. Configuración básica de la app (obligatorio antes del webhook)
+
+En **Configuración de la app → Básica**, completa y **Guardar cambios**:
+
+| Campo Meta | Valor Cubik |
+|------------|-------------|
+| Dominios de la app | `getcubik.cl` y `www.getcubik.cl` |
+| URL política de privacidad | `https://www.getcubik.cl/privacidad` |
+| URL términos del servicio | `https://www.getcubik.cl/terminos` |
+| Eliminación de datos | `https://www.getcubik.cl/privacidad#eliminacion` |
+| Categoría | Negocios |
+| Ícono | logo Cubik 1024×1024 (puedes usar `/brand/logo-mark.png` escalado) |
+| Contacto delegado protección datos | Nombre Cubik, `admin@getcubik.cl`, Chile |
+
+**No necesitas publicar la app en modo Live** para probar el webhook con la cuenta **Test** de WhatsApp. Basta con guardar la configuración básica y dejar la app en **Desarrollo**.
+
 ## 1. Meta Business (una sola cuenta)
 
 1. [business.facebook.com](https://business.facebook.com) → crear **Portfolio comercial Cubik**.

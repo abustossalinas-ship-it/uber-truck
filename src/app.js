@@ -154,6 +154,14 @@ app.get('/empresas', (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.sendFile(path.join(publicDir, 'empresas.html'));
 });
+app.get('/privacidad', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.sendFile(path.join(publicDir, 'privacidad.html'));
+});
+app.get('/terminos', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.sendFile(path.join(publicDir, 'terminos.html'));
+});
 app.get('/', (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   const host = requestHost(req);

@@ -58,10 +58,15 @@ npm run android:install:remote  # APK apunta a prod
 - Instrucciones del usuario y copy de producto: **español** (Chile si aplica).
 - Código y variables: **inglés**.
 
+## Git (revisión)
+
+- Tras implementar: **commit** con mensaje claro (solo archivos del cambio).
+- Luego **push a `main`** para deploy en Railway, salvo que Ariel pida solo commit local o otra rama.
+- No commitear secretos, `.env`, ni basura temporal (`.tmp-*`, etc.).
+
 ## Lo que el agente no hace solo
 
 - Crear cuentas en Supabase, Railway, mapas, pagos.
-- Commits o push salvo petición explícita.
 
 ## Cursor Cloud specific instructions
 

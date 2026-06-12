@@ -2,6 +2,14 @@
 
 /** Textos compartidos: wa.me (prospectos) y bot Meta Cloud API */
 
+/** Mensaje corto al abrir wa.me desde la landing (sin emojis — evita caracteres rotos en el enlace). */
+const WA_ME_PREFILL = {
+  shipper:
+    'Hola Cubik, soy empresa. Quiero información sobre publicar cargas y encontrar transportistas.',
+  carrier:
+    'Hola Cubik, soy transportista. Quiero información sobre cargas disponibles para mi ruta.',
+};
+
 const WELCOME = {
   shipper: `👋 Bienvenido a Cubik.
 Te ayudo a mover tu carga de forma más rápida y eficiente.
@@ -99,6 +107,7 @@ const GENERIC = {
 };
 
 module.exports = {
+  WA_ME_PREFILL,
   WELCOME,
   MENU,
   HUMAN,

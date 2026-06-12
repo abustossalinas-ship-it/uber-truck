@@ -84,7 +84,7 @@ async function createProspecto(body) {
   return repo.insert('prospectos', parsed.row);
 }
 
-const { WELCOME: WHATSAPP_MESSAGES } = require('./whatsapp-copy');
+const { WELCOME: WHATSAPP_MESSAGES, WA_ME_PREFILL } = require('./whatsapp-copy');
 
 const DEFAULT_WHATSAPP_E164 = '56971419384';
 
@@ -112,6 +112,7 @@ function whatsappConfig() {
     configured: Boolean(e164),
     e164,
     messages: WHATSAPP_MESSAGES,
+    prefill: WA_ME_PREFILL,
     bot: cloudEnabled,
   };
 }
@@ -120,7 +121,8 @@ function buildWhatsAppUrl(role, e164) {
   const cfg = whatsappConfig();
   const digits = String(e164 || cfg.e164).replace(/\D/g, '');
   if (!digits) return null;
-  const msg = cfg.messages[normalizeRole(role) || 'shipper'] || cfg.messages.shipper;
+  const r = normalizeRole(role) || 'shipper';
+  const msg = cfg.prefill[r] || cfg.prefill.shipper;
   return `https://wa.me/${digits}?text=${encodeURIComponent(msg)}`;
 }
 

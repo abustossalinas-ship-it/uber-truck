@@ -37,7 +37,8 @@ describe('prospectos', () => {
     process.env.CUBIK_WHATSAPP_E164 = '56971419384';
     const url = buildWhatsAppUrl('shipper');
     assert.ok(url?.includes('wa.me/56971419384'));
-    assert.ok(url?.includes(encodeURIComponent('Bienvenido a Cubik')));
+    assert.ok(url?.includes(encodeURIComponent('Hola Cubik, soy empresa')));
+    assert.ok(!url?.includes(encodeURIComponent('👋')));
     if (prev == null) delete process.env.CUBIK_WHATSAPP_E164;
     else process.env.CUBIK_WHATSAPP_E164 = prev;
   });

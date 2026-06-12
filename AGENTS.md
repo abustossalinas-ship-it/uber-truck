@@ -59,3 +59,16 @@ npm run android:install:remote  # APK apunta a prod
 
 - Crear cuentas en Supabase, Railway, mapas, pagos.
 - Commits o push salvo petición explícita.
+
+## Cursor Cloud specific instructions
+
+Servidor único Node/Express (CommonJS). Comandos estándar en `package.json` y arriba (`npm run dev`, `npm run test:unit`, `npm run test:e2e`, `npm run test:qa`). El update script ya deja dependencias y Chromium de Playwright instalados.
+
+Notas no obvias para desarrollar aquí:
+
+- **Backend local sin Supabase = store JSON.** Si no hay `SUPABASE_URL`/`SUPABASE_SERVICE_ROLE_KEY` en `.env`, `src/lib/repository.js` usa un store JSON en `data/store.json` (sembrado). `/health` reporta `"storage":"json"`. En este modo la autenticación se relaja (`src/lib/require-auth.js` deja pasar sin JWT), así que la API local funciona sin login. Sembrar datos demo: `POST /api/demo/seed` (sin `DEMO_SEED_KEY` en dev).
+- **La UI web local apunta a PRODUCCIÓN por defecto (gotcha clave).** `public/brand-config.js` fija `productionUrl: https://www.getcubik.cl` y `public/api-base.js` reescribe todo `fetch` de `/api`, `/health`, `/docs/` hacia ese origen salvo que `location.origin` coincida. Por eso, abrir `http://localhost:3001/app` en el navegador habla con el backend de producción (errores CORS al escribir). Para que la UI use el backend local, ejecuta en la consola del navegador, **antes de cualquier llamada y de nuevo tras cada reload**: `window.CUBIK_BRAND.productionUrl = location.origin;`. Las llamadas directas por `curl` a `localhost:3001` no se ven afectadas.
+- **Login de desarrollo en el navegador:** no hay registro real sin Supabase. Inyecta una sesión mock con `Auth.save('<token>', { id, email, full_name, role: 'shipper'|'carrier', company_name, kyc_status: 'approved' })` (igual que `e2e/helpers.js` → `loginAsMockUser`).
+- **Publicar carga (`POST /api/load-requests`) exige declaración de confianza:** `cargo_description` (≥8 chars), `declared_cargo_value_clp`, `terms_cargo_accepted`, `has_dispatch_guide` y `pallets` **o** `volume_m3`. Faltar uno devuelve 400 con la lista de errores.
+- **E2E (Playwright):** requiere Chromium (`npm run qa:install`, ya cubierto por el update script). Los specs que necesitan Supabase o credenciales `QA_*` se saltan automáticamente; sin esas variables el resto pasa contra el servidor local que Playwright levanta solo.
+- **Sin secretos configurados** Google Maps, FCM, mail, WhatsApp y pasarela quedan deshabilitados; el server arranca igual y el picker de direcciones se vuelve texto libre.

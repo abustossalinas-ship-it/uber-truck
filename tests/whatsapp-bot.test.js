@@ -20,7 +20,10 @@ describe('whatsapp-bot', () => {
   });
 
   it('detecta rol empresa desde texto wa.me', () => {
-    assert.equal(detectRoleFromText('Te ayudo a mover tu carga'), 'shipper');
+    assert.equal(
+      detectRoleFromText('Hola Cubik, soy empresa. Quiero publicar cargas y encontrar transportistas.'),
+      'shipper'
+    );
   });
 
   it('primer mensaje envía bienvenida y menú', () => {

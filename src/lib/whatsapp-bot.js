@@ -30,18 +30,19 @@ function normalizePhone(raw) {
 
 function detectRoleFromText(text) {
   const t = String(text || '').toLowerCase();
+  if (/\bsoy\s+empresa\b|encontrar transportistas|publicar cargas|mover tu carga/.test(t)) {
+    return 'shipper';
+  }
+  if (/\bsoy\s+transportista\b/.test(t)) return 'carrier';
   if (
-    /transportista|camion|camión|flota|ruta|ofertar|viajes vac|rentabilidad/.test(t) ||
+    /\btransportistas?\b|\bcamion\b|\bcamión\b|\bflota\b|\bruta\b|ofertar|viajes vac|rentabilidad/.test(
+      t
+    ) ||
     /oportunidades de carga|cargas disponibles|emparejar viajes/.test(t)
   ) {
     return 'carrier';
   }
-  if (
-    /empresa|embarcador|publicar una carga|env[ií]os|log[ií]stica|transporte/.test(t) ||
-    /mover tu carga|encontrar transportistas/.test(t)
-  ) {
-    return 'shipper';
-  }
+  if (/empresa|embarcador|env[ií]os|log[ií]stica/.test(t)) return 'shipper';
   return null;
 }
 

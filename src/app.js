@@ -192,6 +192,8 @@ app.get('/health', async (_req, res) => {
   let ratingsTableError = null;
   let ratingsTagsOk = null;
   let ratingsTagsError = null;
+  let prospectosTableOk = null;
+  let prospectosTableError = null;
   if (supabaseReady) {
     try {
       const sb = supabaseService.getClient();
@@ -204,6 +206,9 @@ app.get('/health', async (_req, res) => {
       const { error: tErr } = await sb.from('match_ratings').select('id, tags, tag_band').limit(1);
       ratingsTagsOk = !tErr;
       if (tErr) ratingsTagsError = tErr.message;
+      const { error: pErr } = await sb.from('prospectos').select('id').limit(1);
+      prospectosTableOk = !pErr;
+      if (pErr) prospectosTableError = pErr.message;
     } catch (e) {
       supabaseOk = false;
       supabaseError = e.message;
@@ -211,6 +216,8 @@ app.get('/health', async (_req, res) => {
       ratingsTableError = e.message;
       ratingsTagsOk = false;
       ratingsTagsError = e.message;
+      prospectosTableOk = false;
+      prospectosTableError = e.message;
     }
   }
   const manifest = readDeployManifest();
@@ -289,6 +296,14 @@ app.get('/health', async (_req, res) => {
               'Ejecuta supabase/migrations/013_rating_tags.sql y Supabase → Settings → API → Reload schema.',
           }
         : {}),
+      ...(prospectosTableOk === false
+        ? {
+            prospectos_table: false,
+            prospectos_error: prospectosTableError,
+            prospectos_fix:
+              'Ejecuta supabase/migrations/027_prospectos.sql en el SQL Editor de Supabase.',
+          }
+        : { prospectos_table: prospectosTableOk === true }),
     },
     maps: { configured: googleMaps.isConfigured(), interactive: googleMaps.interactiveMapsAvailable() },
     fcm: fcmService.statusPayload(),

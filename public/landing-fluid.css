@@ -55,7 +55,6 @@
 .lf-hero-product-wrap {
   width: 100%;
   max-width: 36rem;
-  will-change: transform;
 }
 
 .lf-hero-product-wrap .lf-product {

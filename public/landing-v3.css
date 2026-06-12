@@ -703,11 +703,6 @@
   padding: var(--cubik-card-padding);
   border: none;
   box-shadow: none;
-  transition: transform 0.2s ease;
-}
-
-.lv3-feature:hover {
-  transform: scale(1.02);
 }
 
 .lv3-feature-icon {
@@ -1213,12 +1208,6 @@
   display: flex;
   flex-direction: column;
   gap: 0.65rem;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.lv3-role-card:hover {
-  transform: translateY(-2px) scale(1.02);
-  box-shadow: var(--cubik-shadow-lg);
 }
 
 .lv3-role-card h3 {

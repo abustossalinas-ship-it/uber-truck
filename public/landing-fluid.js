@@ -242,45 +242,6 @@
     return ['lv3-home', 'lv3-shipper', 'lv3-carrier'].find((c) => document.body.classList.contains(c)) || 'lv3-home';
   }
 
-  function initHeroParallax() {
-    const wrap = document.getElementById('lf-hero-product-wrap');
-    const hero = document.querySelector('.lv3-hero');
-    const bg = hero?.querySelector('.lv3-hero-bg');
-    const route = hero?.querySelector('.lf-hero-route--live');
-    const floats = hero?.querySelectorAll('.lf-float-card');
-    const truckGlow = hero?.querySelector('.lf-hero-truck-glow');
-    if (!wrap || !hero || reduced) return;
-
-    let mx = 0;
-    let my = 0;
-    hero.addEventListener('mousemove', (e) => {
-      const r = hero.getBoundingClientRect();
-      mx = (e.clientX - r.left) / r.width - 0.5;
-      my = (e.clientY - r.top) / r.height - 0.5;
-    }, { passive: true });
-
-    function frame() {
-      const rect = hero.getBoundingClientRect();
-      const sp = Math.min(1, Math.max(0, -rect.top / rect.height));
-      wrap.style.transform = `translate3d(${mx * 14}px, ${sp * 32 + my * 10}px, 0) scale(${1 - sp * 0.045})`;
-      if (bg && !hero.classList.contains('has-cine')) {
-        bg.style.transform = `scale(1.1) translate3d(${mx * -22}px, ${my * -14 + sp * 24}px, 0)`;
-      }
-      if (route) {
-        route.style.transform = `translateX(-50%) translate3d(${mx * 8}px, ${my * 5}px, 0)`;
-      }
-      floats?.forEach((el, i) => {
-        const f = (i + 1) * 0.35;
-        el.style.transform = `translate3d(${mx * 18 * f}px, ${my * 12 * f + Math.sin(Date.now() / 1200 + i) * 4}px, 0)`;
-      });
-      if (truckGlow) {
-        truckGlow.style.transform = `translate3d(${mx * -28}px, ${my * -8}px, 0) scale(1.02)`;
-      }
-      requestAnimationFrame(frame);
-    }
-    requestAnimationFrame(frame);
-  }
-
   function initCinematicCanvas(hero, media, src, role) {
     let canvas = document.getElementById('lf-hero-cine');
     if (!canvas) {
@@ -853,7 +814,6 @@
   initCarrierPhoneVideo();
   initCarrierTruckGlow();
   initFloatingCards();
-  initHeroParallax();
   initHeroParticles();
   initHeroRoute();
   initLiveKpis();

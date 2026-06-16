@@ -31,6 +31,7 @@ No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitáco
 | Tema | Documento |
 |------|-----------|
 | Plan piloto 25 empresas + 50 transportistas · escala | [PLAN-COMERCIAL-PILOTO.md](./PLAN-COMERCIAL-PILOTO.md) · Canvas `cubik-plan-native-escala.canvas.tsx` |
+| **Onboarding rubros, seguros, discurso captación** | [ONBOARDING-PILOTO-RUBROS.md](./ONBOARDING-PILOTO-RUBROS.md) |
 | Piloto M2 corredor, KPIs, riesgos | [Piloto-M2-Corredor-KPIs-Riesgos.html](./Piloto-M2-Corredor-KPIs-Riesgos.html) |
 | Próximos pasos estratégicos | [PROXIMOS-PASOS-ESTRATEGIA.md](./PROXIMOS-PASOS-ESTRATEGIA.md) |
 | Demo / pitch | [DEMO-GUION.md](./DEMO-GUION.md) |

@@ -18,6 +18,8 @@ Canvas interactivo (Gantt, costos, checklist nativo): `canvases/cubik-plan-nativ
 2. **Piloto:** mismo stack, onboarding curado, KPIs M2 (20 viajes corredor RM–V).
 3. **Escala:** presupuesto Maps/infra antes de crecer; nativo selectivo (GPS background), no rewrite completo.
 
+**Onboarding por rubros, seguros y discurso captación:** [ONBOARDING-PILOTO-RUBROS.md](./ONBOARDING-PILOTO-RUBROS.md) — registro transportista/empresa (identidad, licencia, seguro acotado, rubros), **10 camiones/rubro**, empresas ancla plan B, pitches comerciales.
+
 ## Cuándo invertir en nativo (Kotlin/Swift)
 
 - GPS confiable con app en background

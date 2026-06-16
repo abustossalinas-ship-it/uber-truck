@@ -39,7 +39,7 @@
     <h1>Memoria técnica del proyecto</h1>
     <p class="meta"><strong>Producto:</strong> Uber Truck — marketplace de capacidad logística ociosa (backhaul), Chile.<br />
     <strong>Documento:</strong> memoria técnica viva del repositorio y del despliegue Railway.<br />
-    <strong>Versión documento:</strong> 4.5.2 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.129 API · frontend captación v0.0.168 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 12 jun 2026 &nbsp;|&nbsp; <strong>Backlog/Gantt:</strong> vivo — revisar semanalmente</p>
+    <strong>Versión documento:</strong> 4.5.3 &nbsp;|&nbsp; <strong>Software:</strong> 0.0.129 API · frontend captación v0.0.170 (Cubik app móvil + API Railway) &nbsp;|&nbsp; <strong>Fecha:</strong> 25 may 2026 &nbsp;|&nbsp; <strong>Backlog/Gantt:</strong> vivo — revisar semanalmente</p>
   </div>
 </div>
 
@@ -91,6 +91,7 @@
   <tr><td>App Android testers</td><td>Capacitor + APK remoto/bundle + verify login</td><td class="g-done">Hecho v0.0.125</td></tr>
   <tr><td>Distribución sin tienda</td><td><code>/probar</code> + APK + PWA iPhone</td><td class="g-done">Hecho jun 2026</td></tr>
   <tr><td>Captación comercial</td><td>Landing v3 por rol + «Agendar demo» (<code>prospectos</code>) + bot WhatsApp Meta + legal <code>/privacidad</code>·<code>/terminos</code></td><td class="g-done">Hecho v0.0.155–0.0.168</td></tr>
+  <tr><td>Registro confianza (rubro, seguro, identidad)</td><td>CI + licencia + seguro A/B/C + rubro/flota; piloto manual WhatsApp + admin KYC</td><td class="g-doing">Manual piloto S2–6 · producto O1–O4</td></tr>
 </table>
 
 <h4>Post-MVP — backlog piloto/escala (no bloquea demo ni piloto 25/50)</h4>
@@ -290,6 +291,19 @@
 <p>La plataforma <strong>no transporta</strong> ni <strong>reembolsa</strong> el valor declarado de la mercadería por defecto. Transportista ejecuta el flete; embarcador declara con veracidad; Uber Truck facilita match, registro, chat, incidentes y reglas de cancelación.</p>
 <p>Tabla completa: <a href="Piloto-M2-Corredor-KPIs-Riesgos.html#">anexo piloto §4</a> · <a href="Terminos-Confianza-Carga-Uber-Truck.html">términos cargo-trust-v1</a>.</p>
 
+<h2>Onboarding piloto por rubros y confianza</h2>
+<p>Detalle completo: <a href="ONBOARDING-PILOTO-RUBROS.md">ONBOARDING-PILOTO-RUBROS.md</a>. El piloto exige registro más riguroso que email+contraseña para generar confianza bilateral.</p>
+<table>
+  <tr><th>Actor</th><th>Registro objetivo</th><th>Hoy en prod</th></tr>
+  <tr><td><strong>Transportista</strong></td><td>Facial + CI · licencia · seguro A/B/C · rubro + tipo flota · vehículo · banco · KYC admin</td><td>Email, empresa, banco, KYC manual; docs por WhatsApp en piloto</td></tr>
+  <tr><td><strong>Empresa</strong></td><td>Facial + CI · RUT · correo corporativo + cargo · términos carga · KYC admin</td><td>Email, empresa, términos; validación corporativa manual</td></tr>
+</table>
+<p><strong>Metas piloto:</strong> 25 empresas + 50 transportistas · <strong>10 camiones activos por rubro</strong> (construcción + retail/alimentos en RM–V) · <strong>1–2 empresas ancla plan B</strong> por rubro (modelo Cornershop si cae liquidez orgánica).</p>
+<ul>
+  <li><strong>Transportista:</strong> complemento en viaje de vuelta y capacidad ociosa — no reemplazar clientes fijos del rubro.</li>
+  <li><strong>Embarcador:</strong> publicar carga con menor costo marginal; variedad de camiones verificados por rubro y seguro.</li>
+</ul>
+
 <h2>Próximos pasos — backlog vivo (25 may 2026)</h2>
 <p>Prioridad: <strong>P0</strong> bloquea piloto; <strong>P1</strong> siguiente entrega; <strong>P2</strong> planificado. Actualizar al cerrar cada release o semana de piloto. Detalle comercial: <a href="PLAN-COMERCIAL-PILOTO.md">PLAN-COMERCIAL-PILOTO.md</a> · canvas <code>cubik-plan-native-escala</code>.</p>
 <table>
@@ -312,7 +326,16 @@
   <tr><td>E0</td><td>P0</td><td><strong>Dominio propio + Resend verificado</strong></td><td><code>getcubik.cl</code> · <code>EMAIL_FROM=no_reply@getcubik.cl</code> — <a href="DOMAIN-AND-EMAIL.md">DOMAIN-AND-EMAIL.md</a></td><td>Inmediato</td><td class="g-done"><strong>Cerrado</strong> jun 2026</td></tr>
   <tr><td>C1</td><td>P0</td><td><strong>Demo comercial jueves</strong></td><td>Web prod + APK remoto; cuentas demo; guión <a href="DEMO-GUION.md">DEMO-GUION.md</a></td><td>Sem 1 (9–13 jun)</td><td class="g-doing"><strong>Esta semana</strong></td></tr>
   <tr><td>C2</td><td>P0</td><td>Checklist demo (login, emparejar, qa:lab)</td><td>6 ítems canvas «Antes del jueves»</td><td>Sem 1</td><td class="g-doing">En curso</td></tr>
-  <tr><td>C3</td><td>P0</td><td>Onboarding piloto <strong>25 empresas + 50 transportistas</strong></td><td>KYC manual + banco; corredor RM–V</td><td>Sem 2–5</td><td class="g-doing">Siguiente</td></tr>
+  <tr><td>C2b</td><td>P0</td><td>Cuentas demo + viaje ejemplo embarcador/transportista</td><td>2 roles KYC approved + 1 match demo</td><td>Sem 1</td><td class="g-doing">En curso</td></tr>
+  <tr><td>C3</td><td>P0</td><td>Onboarding piloto <strong>25 empresas + 50 transportistas</strong></td><td>KYC manual + banco + rubros; corredor RM–V — <a href="ONBOARDING-PILOTO-RUBROS.md">ONBOARDING</a></td><td>Sem 2–5</td><td class="g-doing">Siguiente</td></tr>
+  <tr><td>C3a</td><td>P0</td><td>Checklist docs transportista (CI, licencia, seguro A/B/C, rubro)</td><td>Proceso manual WhatsApp + admin</td><td>Sem 2–3</td><td class="g-doing">Siguiente</td></tr>
+  <tr><td>C3b</td><td>P0</td><td><strong>10 camiones activos por rubro</strong> (construcción + retail/alimentos)</td><td>Pool verificado corredor piloto</td><td>Sem 2–5</td><td class="g-todo">Planificado</td></tr>
+  <tr><td>C3c</td><td>P0</td><td><strong>Empresas ancla plan B</strong> (1–2 por rubro, Cornershop)</td><td>Publicación respaldo si liquidez baja</td><td>Sem 2–6</td><td class="g-todo">Planificado</td></tr>
+  <tr><td>C3d</td><td>P1</td><td>Registro empresa: correo corporativo + cargo + CI</td><td>Validación embarcador (manual → app)</td><td>Sem 3–6</td><td class="g-todo">Planificado</td></tr>
+  <tr><td>O1</td><td>P1</td><td>Login facial + cédula (transportista y embarcador)</td><td>SDK verificación; piloto manual hasta entrega</td><td>Sem 4–10</td><td class="g-todo">Plan</td></tr>
+  <tr><td>O2</td><td>P1</td><td>Upload licencia + niveles seguro A/B/C</td><td>Reglas «qué puede ofertar»</td><td>Sem 4–10</td><td class="g-todo">Plan</td></tr>
+  <tr><td>O3</td><td>P1</td><td>Rubros + tipo flota + matching carga↔transportista</td><td>Filtro publicación/oferta; bloqueo cruce rubro</td><td>Sem 6–12</td><td class="g-todo">Plan</td></tr>
+  <tr><td>O4</td><td>P2</td><td>Panel admin: cola docs + rubro + nivel seguro</td><td>Extensión KYC admin existente</td><td>Con O1–O3</td><td class="g-todo">Plan</td></tr>
   <tr><td>C4</td><td>P0</td><td>APK bundle firmado testers</td><td><code>cubik-android.apk</code> dedicado piloto</td><td>Sem 2–3</td><td class="g-doing">En cola</td></tr>
   <tr><td>U6</td><td>P0</td><td>Piloto <strong>20 viajes</strong> corredor RM ↔ V/San Antonio</td><td>M2 — liquidez + densidad</td><td>Sem 6–13 (jul–ago)</td><td class="g-doing"><strong>P0 operación</strong></td></tr>
   <tr><td>U6b</td><td>P1</td><td>KPIs marketplace M2 (semanal)</td><td>Match rate, tiempo, NPS — anexo piloto</td><td>Sem 6–13</td><td class="g-doing">Doc listo</td></tr>
@@ -331,7 +354,7 @@
   <tr><td>U4d</td><td>P2</td><td>PDF guía + validación SII/DTE</td><td>Storage + facturador</td><td>Post-piloto</td><td class="g-todo">Plan</td></tr>
   <tr><td>U10</td><td>P2</td><td>Login Gmail + Apple (bloque E)</td><td>OAuth — post-piloto</td><td>Post-M2</td><td class="g-todo">Diferido</td></tr>
   <tr><td>U11</td><td>P1</td><td>Panel admin KPIs piloto</td><td>Viajes, GMV, NPS — ver pitch panel</td><td>Con M2</td><td class="g-todo">Diseño listo</td></tr>
-  <tr><td>U8</td><td>P2</td><td>KYC manual ampliado</td><td>Fase 3 operativa</td><td>Oct 2026+</td><td class="g-todo">Plan</td></tr>
+  <tr><td>U8</td><td>P1</td><td>Onboarding confianza O1–O4 (facial, licencia, seguro, rubros)</td><td>Producto tras piloto manual C3a–c</td><td>Jun–Ago 2026</td><td class="g-doing">Plan</td></tr>
   <tr><td>U9</td><td>P2</td><td>Match semi-auto corredor</td><td>Algoritmo v1</td><td>Feb 2027</td><td class="g-todo">Plan</td></tr>
 </table>
 <p><strong>No hacer aún:</strong> rewrite 100 % nativo, Open Finance, pricing dinámico completo, expansión multi-corredor sin liquidez. Priorizar <strong>operación piloto</strong> sobre más pantallas.</p>
@@ -344,9 +367,13 @@
   </tr>
   <tr><td>C1</td><td>Prep demo comercial (jueves)</td><td>E/O</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Esta semana</td></tr>
   <tr><td>C2</td><td>Verificar prod login + Emparejar + APK remoto</td><td>E</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Checklist canvas</td></tr>
-  <tr><td>C3</td><td>Cuentas demo + viaje ejemplo embarcador/transportista</td><td>O</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
-  <tr><td>C4</td><td>Onboarding piloto 25 empresas + 50 transportistas</td><td>O/E</td><td></td><td>████</td><td>████</td><td>████</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Sem 2–5</td></tr>
+  <tr><td>C2b</td><td>Cuentas demo + viaje ejemplo embarcador/transportista</td><td>O</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
+  <tr><td>C3</td><td>Onboarding piloto 25 empresas + 50 transportistas</td><td>O/E</td><td></td><td>████</td><td>████</td><td>████</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Sem 2–5</td></tr>
+  <tr><td>C3a</td><td>Checklist docs onboarding (CI, licencia, seguro, rubro)</td><td>O</td><td></td><td>████</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Sem 2–3</td></tr>
+  <tr><td>C3b</td><td>10 camiones activos por rubro (construcción + retail)</td><td>O</td><td></td><td>████</td><td>████</td><td>████</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Sem 2–5</td></tr>
+  <tr><td>C3c</td><td>Empresas ancla plan B (1–2 por rubro)</td><td>O</td><td></td><td>██</td><td>██</td><td>██</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Sem 2–6</td></tr>
   <tr><td>C5</td><td>APK bundle firmado + link testers piloto</td><td>E</td><td></td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Sem 2–3</td></tr>
+  <tr><td>O3</td><td>Rubros + matching carga↔flota (producto)</td><td>E</td><td></td><td></td><td></td><td></td><td></td><td>██</td><td>██</td><td>██</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Sem 6–10</td></tr>
   <tr><td>C6</td><td>Operación piloto + monitoreo Railway + soporte WhatsApp</td><td>O/E</td><td></td><td></td><td></td><td></td><td></td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td></td><td></td><td></td><td class="g-doing">Sem 6–13</td></tr>
   <tr><td>U6</td><td>20 viajes <code>completed</code> corredor RM ↔ V (M2)</td><td>O</td><td></td><td></td><td></td><td></td><td></td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td>████</td><td></td><td></td><td></td><td class="g-doing">KPI M2</td></tr>
   <tr><td>C7</td><td>Spike GPS background (Capacitor / nativo lite)</td><td>E</td><td></td><td></td><td></td><td>██</td><td>██</td><td>██</td><td>██</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Paralelo S4–9</td></tr>
@@ -366,7 +393,9 @@
     <th>Estado</th>
   </tr>
   <tr><td>C1</td><td>Demo comercial + pitch piloto 25/50</td><td>O/E</td><td>09-jun</td><td>13-jun</td><td>█</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Esta semana</td></tr>
-  <tr><td>C4</td><td>Onboarding piloto 25+50</td><td>O/E</td><td>16-jun</td><td>11-jul</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Planificado</td></tr>
+  <tr><td>C3</td><td>Onboarding piloto 25+50 + rubros</td><td>O/E</td><td>16-jun</td><td>11-jul</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Planificado</td></tr>
+  <tr><td>C3b</td><td>10 camiones/rubro + empresas ancla plan B</td><td>O</td><td>16-jun</td><td>25-jul</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Planificado</td></tr>
+  <tr><td>C3a</td><td>Checklist docs transportista (WhatsApp + admin)</td><td>O</td><td>16-jun</td><td>04-jul</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Sem 2–3</td></tr>
   <tr><td>0.1</td><td>Entrevistas transportistas + PYME</td><td>O</td><td>01-jun</td><td>28-jun</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
   <tr><td>0.2</td><td>Validación precio / comisión 12–15%</td><td>O</td><td>15-jun</td><td>15-jul</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">En curso</td></tr>
   <tr><td>0.3</td><td>Términos legales + seguro piloto</td><td>L</td><td>01-jun</td><td>30-jun</td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Borrador v011</td></tr>
@@ -379,7 +408,8 @@
   <tr><td>2.10b</td><td>Wallet prod + pasarela + escrow en ruta</td><td>E</td><td>16-jun</td><td>31-ago</td><td>██</td><td>████</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">P0</td></tr>
   <tr><td>2.12</td><td>Twilio Proxy llamadas</td><td>E</td><td>16-jun</td><td>05-jul</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">UI lista</td></tr>
   <tr><td>2.13</td><td>GPS background (nativo lite spike)</td><td>E</td><td>30-jun</td><td>31-ago</td><td>██</td><td>████</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Si piloto exige</td></tr>
-  <tr><td>3.1</td><td>KYC + checklist vehículo</td><td>O/E</td><td>01-oct</td><td>15-nov</td><td></td><td></td><td></td><td></td><td>██</td><td>█</td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
+  <tr><td>3.1</td><td>Onboarding confianza O1–O4 (facial, licencia, seguro, rubros)</td><td>E/O</td><td>16-jun</td><td>31-ago</td><td>██</td><td>████</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-doing">Tras piloto manual</td></tr>
+  <tr><td>O1–O2</td><td>Facial + CI + licencia + seguro A/B/C en app</td><td>E</td><td>01-jul</td><td>30-sep</td><td></td><td>██</td><td>██</td><td>██</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
   <tr><td>3.2</td><td>Ratings bidireccionales</td><td>E</td><td>—</td><td>—</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-done">Hecho</td></tr>
   <tr><td>3.3</td><td>Microseguro InsurTech POC</td><td>L/O</td><td>01-nov</td><td>31-dic</td><td></td><td></td><td></td><td></td><td></td><td>████</td><td></td><td></td><td></td><td class="g-todo">Plan</td></tr>
   <tr><td>3.4</td><td>100 viajes digitales (M4)</td><td>O</td><td>01-nov</td><td>31-ene</td><td></td><td></td><td></td><td></td><td></td><td>██</td><td>████</td><td></td><td></td><td class="g-todo">Plan</td></tr>

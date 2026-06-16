@@ -17,8 +17,8 @@ import {
 } from "cursor/canvas";
 
 const VERSION = "0.0.168";
-const MEMORIA = "v4.5";
-const FECHA = "12 jun 2026";
+const MEMORIA = "v4.5.3";
+const FECHA = "25 may 2026";
 const PROD = "https://uber-truck-production.up.railway.app";
 const REPO = "https://github.com/abustossalinas-ship-it/uber-truck";
 
@@ -34,7 +34,7 @@ const FASES = [
 
 const HITOS = [
   { id: "M3", name: "MVP digital producción", plan: "25-oct-2026", estado: "Hecho (adelantado)", tone: "positive" as const },
-  { id: "M1", name: "Descubrimiento + legal", plan: "28-jun-2026", estado: "En curso", tone: "neutral" as const },
+  { id: "M1", name: "Descubrimiento + legal + captación por rubro", plan: "28-jun-2026", estado: "En curso", tone: "neutral" as const },
   { id: "M2", name: "20 viajes piloto corredor", plan: "09-ago-2026", estado: "Pendiente — P0", tone: "neutral" as const },
   { id: "M4", name: "100 viajes digitales", plan: "31-ene-2027", estado: "Pendiente", tone: "neutral" as const },
 ];
@@ -68,6 +68,9 @@ const FEATURES = [
   { name: "Landing v3 + captación prospectos (Agendar demo)", ok: true },
   { name: "Bot WhatsApp Meta Cloud API (webhook + FAQ)", ok: true },
   { name: "Páginas legales privacidad/términos (Meta)", ok: true },
+  { name: "Onboarding rubros + seguro (manual piloto C3a–c)", ok: false },
+  { name: "Login facial + docs CI/licencia (producto O1–O2)", ok: false },
+  { name: "Matching rubro carga↔flota (producto O3)", ok: false },
   { name: "Twilio Proxy (llamadas)", ok: false },
   { name: "Wallet real + retención al En ruta", ok: false },
   { name: "Push FCM (recepción en teléfono)", ok: false },
@@ -183,7 +186,7 @@ export default function EstadoAvanceUberTruck() {
 
       <H2>Documentación</H2>
       <Text>
-        Memoria {MEMORIA} · Journey v3.1 · captación landing v3 + WhatsApp · Siguiente: wallet real + M2
+        Memoria {MEMORIA} · Journey v3.2 · onboarding rubros · Siguiente: wallet real + M2
       </Text>
       <Text color={theme.colors.textMuted}>
         Fuente: docs/Memoria-tecnica-Uber-Truck.html · commits 2acbfb9 → 70723d1

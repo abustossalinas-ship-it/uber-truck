@@ -4,12 +4,12 @@
 
 | Campo | Valor |
 |-------|-------|
-| Versión documento | **v4.5** |
+| Versión documento | **v4.5.3** |
 | Software | **0.0.129** API · frontend captación **v0.0.168** |
-| Última actualización | **12 jun 2026** |
+| Última actualización | **25 may 2026** |
 | Backlog / Gantt | **Vivo** — revisar semanalmente |
 
-Incluye: visión, paridad MVP **cerrada**, hitos M1–M5, Gantt 16 sem (canvas comercial), backlog vivo, Cubik Saldo piloto, QA, plan piloto 25/50, auth/correo/dominio, **captación (landing v3 + prospectos + bot WhatsApp Meta)**.
+Incluye: visión, paridad MVP **cerrada**, hitos M1–M5, Gantt 16 sem (canvas comercial), backlog vivo, Cubik Saldo piloto, QA, plan piloto 25/50, auth/correo/dominio, **captación (landing v3 + prospectos + bot WhatsApp Meta)**, **onboarding piloto por rubros y confianza (C3a–O4)**.
 
 ## Exportar Word
 
@@ -20,6 +20,7 @@ npm run export:all-docs
 
 ## Anexos relacionados
 
+- [Onboarding piloto por rubros](./ONBOARDING-PILOTO-RUBROS.md)
 - [Dominio y correo piloto](./DOMAIN-AND-EMAIL.md)
 - [Auth y email](./AUTH-AND-EMAIL-ROADMAP.md)
 - [Checklist Post-MVP](./POST-MVP-CHECKLIST.md)

@@ -28,7 +28,7 @@
   <div class="doc-title-wrap">
     <h1>Journey de usuario — Uber Truck</h1>
     <p class="meta"><strong>Producto:</strong> App tipo Uber para carga por camión (backhaul).<br />
-    <strong>Versión:</strong> 3.1 · 12 jun 2026 · Software app <strong>0.0.129</strong> (frontend captación v0.0.168) · Canal: <strong>app Cubik</strong> (web PWA + APK Android Capacitor) + landing comercial v3</p>
+    <strong>Versión:</strong> 3.2 · 25 may 2026 · Software app <strong>0.0.129</strong> (frontend captación v0.0.170) · Canal: <strong>app Cubik</strong> (web PWA + APK Android Capacitor) + landing comercial v3</p>
   </div>
 </div>
 
@@ -71,7 +71,7 @@
 <table>
   <tr><th>Etapa</th><th>Acción</th><th>En la app</th><th>Emoción</th><th>Éxito</th></tr>
   <tr><td>1. Descubrimiento</td><td>Referido en ruta / nodo industrial</td><td>Link <a href="https://uber-truck-production.up.railway.app/probar">/probar</a> o APK</td><td>«¿Me pagan el espacio vacío?»</td><td>Abre Cubik</td></tr>
-  <tr><td>2. Registro</td><td>Email + contraseña, rol transportista, empresa (<strong>Gmail/Apple: pendiente</strong>)</td><td>Registro / JWT</td><td>Desconfianza si es largo</td><td>Cuenta activa (KYC si piloto curado)</td></tr>
+  <tr><td>2. Registro</td><td>2a Cuenta (email + rol + empresa) · 2b Identidad facial + CI *(piloto: WhatsApp; producto: O1)* · 2c Licencia + seguro A/B/C *(O2)* · 2d Rubro + tipo flota *(O3)* · 2e Banco + KYC admin *(hoy)*</td><td>Registro / JWT + admin</td><td>Desconfianza si es largo</td><td><code>kyc_status=approved</code> + docs rubro</td></tr>
   <tr><td>3. Publicar capacidad</td><td>Origen, destino, pallets/m³, tipo camión, ventana (paridad con publicar carga)</td><td>Formulario transportista</td><td>«Que sea rápido»</td><td>Oferta publicada (&lt; 3 min)</td></tr>
   <tr><td>4. Propuesta + precio</td><td>Elige carga, envía <strong>oferta en CLP</strong> (puede estar fuera del rango del embarcador)</td><td>Tablero paso 3</td><td>«¿Me pagan bien el desvío?»</td><td>Oferta visible al embarcador</td></tr>
   <tr><td>5. Match</td><td>Embarcador <strong>acepta precio</strong> → match confirmado; pantalla <strong>Terminar y confirmar</strong> (ve solo comisión 5%)</td><td>Emparejamientos</td><td>«¿Cuánto recibo neto?»</td><td>Aceptado en &lt; 30 min</td></tr>
@@ -90,7 +90,7 @@
 <table>
   <tr><th>Etapa</th><th>Acción</th><th>En la app</th><th>Emoción</th><th>Éxito</th></tr>
   <tr><td>1. Necesidad</td><td>Carga urgente (ej. 2 pallets mañana)</td><td>Link <a href="https://uber-truck-production.up.railway.app/probar">/probar</a></td><td>«No hay camión»</td><td>Entra a Cubik</td></tr>
-  <tr><td>2. Registro</td><td>Email + contraseña, rol embarcador (<strong>Gmail/Apple: pendiente</strong>)</td><td>Registro / JWT</td><td>«¿Es confiable?»</td><td>Cuenta activa</td></tr>
+  <tr><td>2. Registro</td><td>2a Cuenta (email + rol + razón social) · 2b Identidad facial + CI *(piloto: WhatsApp; O1)* · 2c Correo corporativo + cargo *(C3d)* · 2d Términos confianza carga · 2e KYC admin *(hoy)*</td><td>Registro / JWT + admin</td><td>«¿Es confiable?»</td><td><code>kyc_status=approved</code></td></tr>
   <tr><td>3. Publicar carga</td><td>Maps (móvil OK), cubicación, términos, rango flete; requiere <strong>20% presupuesto máx.</strong> en Cubik Saldo (próx. semana)</td><td>Formulario embarcador</td><td>«¿Me cubren si pasa algo?»</td><td>Carga publicada con términos aceptados</td></tr>
   <tr><td>4. Propuesta</td><td>Ve ofertas; transportista envía precio</td><td>Tablero + sugerencias</td><td>«¿Es justo?»</td><td>Compara ofertas</td></tr>
   <tr><td>5. Aceptar precio</td><td><strong>Terminar y confirmar</strong> — resumen flete + Servicio Cubik <strong>10%</strong> (no ve el 5% del transportista)</td><td>Emparejamientos</td><td>«¿Cuánto pago al salir?»</td><td>Match aceptado</td></tr>
@@ -228,7 +228,9 @@
 <ul>
   <li><strong>Robo / pérdida:</strong> declaración + términos + incidentes en app; seguro integrado fase 3.</li>
   <li><strong>«¿La app paga?»:</strong> copy claro: intermediación; valor ref. para seguro entre partes.</li>
-  <li><strong>Confianza:</strong> KYC manual en piloto; <strong>reputación ★</strong> ya visible tras cada viaje completado.</li>
+  <li><strong>Confianza:</strong> KYC manual en piloto; documentos por rubro (CI, licencia, seguro); <strong>reputación ★</strong> ya visible tras cada viaje completado.</li>
+  <li><strong>Rubro incompatible:</strong> transportista solo ve cargas de su rubro y nivel de seguro; cruce bloqueado o revisión admin.</li>
+  <li><strong>Seguro insuficiente:</strong> no puede ofertar cargas que exigen nivel B/C; checklist manual en piloto.</li>
   <li><strong>Cancelaciones:</strong> política en app + acuerdo mutuo + multa con plazo y confirmación de pago.</li>
   <li><strong>«¿La app cobra sola?»:</strong> próxima semana con Cubik Saldo; retención al en ruta; hoy multas siguen transferencia manual.</li>
   <li><strong>«¿Por qué 20% al publicar?»:</strong> garantía de seriedad; el flete se retiene solo al salir en ruta.</li>
@@ -246,6 +248,18 @@
 
 <h2>15. Piloto comercial (25 empresas + 50 transportistas)</h2>
 <p>Fase posterior a la demo comercial jun 2026. Mismo stack Capacitor híbrido; onboarding curado; corredor RM ↔ Valparaíso/San Antonio. Detalle: <a href="PLAN-COMERCIAL-PILOTO.md">PLAN-COMERCIAL-PILOTO.md</a>.</p>
+
+<h2 id="onboarding-rubros">15b. Onboarding piloto por rubros</h2>
+<p>Registro riguroso para confianza bilateral. Documento completo: <a href="ONBOARDING-PILOTO-RUBROS.md">ONBOARDING-PILOTO-RUBROS.md</a>.</p>
+<table>
+  <tr><th>Meta piloto</th><th>Valor</th></tr>
+  <tr><td>Transportistas verificados</td><td>50 (multi-camión)</td></tr>
+  <tr><td>Empresas embarcadoras</td><td>25</td></tr>
+  <tr><td>Camiones activos por rubro</td><td>10 (construcción + retail/alimentos en RM–V)</td></tr>
+  <tr><td>Empresas ancla plan B</td><td>1–2 por rubro (modelo Cornershop si liquidez &lt; umbral)</td></tr>
+</table>
+<p><strong>Pitch transportista:</strong> monetizar viaje de vuelta y camión ocioso sin dejar clientes fijos del rubro.</p>
+<p><strong>Pitch embarcador:</strong> publicar carga a menor costo marginal; elegir entre camiones verificados por rubro y seguro.</p>
 
 <h2>16. Corredor y liquidez (piloto M2)</h2>
 <ul>

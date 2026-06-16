@@ -128,8 +128,10 @@ const GANTT_WEEKS = [
 const PHASES = [
   { name: "Prep demo jueves", start: 0, weeks: 1, tone: "info" as const },
   { name: "Piloto 25/50 — onboarding", start: 1, weeks: 4, tone: "warning" as const },
+  { name: "Onboarding rubros + docs (C3a–c)", start: 1, weeks: 4, tone: "warning" as const },
   { name: "Piloto operación + KPIs M2", start: 5, weeks: 8, tone: "success" as const },
   { name: "Nativo lite (GPS background)", start: 3, weeks: 6, tone: "danger" as const },
+  { name: "Rubros + matching producto (O3)", start: 5, weeks: 5, tone: "neutral" as const },
   { name: "Prep escala 50+/200", start: 10, weeks: 6, tone: "neutral" as const },
 ];
 
@@ -137,14 +139,18 @@ const PHASES = [
 function ganttSeries() {
   const demo = GANTT_WEEKS.map((_, i) => (i === 0 ? 1 : 0));
   const pilotoOn = GANTT_WEEKS.map((_, i) => (i >= 1 && i <= 4 ? 1 : 0));
+  const rubrosDocs = GANTT_WEEKS.map((_, i) => (i >= 1 && i <= 4 ? 1 : 0));
   const pilotoOp = GANTT_WEEKS.map((_, i) => (i >= 5 && i <= 12 ? 1 : 0));
   const nativo = GANTT_WEEKS.map((_, i) => (i >= 3 && i <= 8 ? 1 : 0));
+  const rubrosProducto = GANTT_WEEKS.map((_, i) => (i >= 5 && i <= 9 ? 1 : 0));
   const escala = GANTT_WEEKS.map((_, i) => (i >= 10 ? 1 : 0));
   return [
     { name: "Demo jueves", data: demo, tone: "info" as const },
     { name: "Onboarding piloto", data: pilotoOn, tone: "warning" as const },
+    { name: "Rubros + docs (manual)", data: rubrosDocs, tone: "warning" as const },
     { name: "Operación piloto", data: pilotoOp, tone: "success" as const },
     { name: "Nativo lite (paralelo)", data: nativo, tone: "danger" as const },
+    { name: "Matching rubros (O3)", data: rubrosProducto, tone: "neutral" as const },
     { name: "Prep escala", data: escala, tone: "neutral" as const },
   ];
 }
@@ -200,6 +206,8 @@ const COST_CHART_ESCALA = 2100;
 const DECISION_RULES = [
   "Jueves: mostrar web prod + APK remoto. No prometer app 100 % nativa aún.",
   "Cerrar piloto 25 embarcadores + 50 transportistas con híbrido + APK bundle firmado.",
+  "Onboarding por rubro: 10 camiones/rubro (construcción + retail) — ver ONBOARDING-PILOTO-RUBROS.md.",
+  "Plan B Cornershop: 1–2 empresas ancla por rubro si liquidez orgánica baja; retirar al ≥5 ofertas/semana por rubro.",
   "Disparador nativo: >30 % quejas GPS o >40 camiones simultáneos en mapa.",
   "Escala 200 camiones: presupuestar Maps + Railway antes de marketing masivo.",
   "No reescribir UI entera: módulo nativo solo tracking + push + background.",
@@ -215,11 +223,15 @@ const TAREAS_JUEVES = [
 ];
 
 const TAREAS_PILOTO = [
-  { id: "p1", label: "Onboarding KYC + banco para primeros 10+10 usuarios", status: "pending" as const },
-  { id: "p2", label: "APK bundle v0.0.x firmado + link descarga testers", status: "pending" as const },
-  { id: "p3", label: "Plugin GPS background (Capacitor) — spike 1 semana", status: "pending" as const },
-  { id: "p4", label: "Monitoreo: Railway logs + checklist 20 viajes M2 corredor RM", status: "pending" as const },
-  { id: "p5", label: "Acuerdo SLA soporte (WhatsApp agente Cubik piloto)", status: "pending" as const },
+  { id: "p1", label: "Checklist CI + licencia + seguro A/B/C + rubro (WhatsApp + admin)", status: "pending" as const },
+  { id: "p2", label: "10 camiones/rubro: construcción + retail/alimentos en RM–V", status: "pending" as const },
+  { id: "p3", label: "1–2 empresas ancla plan B por rubro (Cornershop)", status: "pending" as const },
+  { id: "p4", label: "Discurso captación transportista (viaje de vuelta, no reemplazar clientes)", status: "pending" as const },
+  { id: "p5", label: "Discurso captación embarcador (costo marginal, camiones verificados)", status: "pending" as const },
+  { id: "p6", label: "APK bundle v0.0.x firmado + link descarga testers", status: "pending" as const },
+  { id: "p7", label: "Plugin GPS background (Capacitor) — spike 1 semana", status: "pending" as const },
+  { id: "p8", label: "Monitoreo: Railway logs + checklist 20 viajes M2 corredor RM", status: "pending" as const },
+  { id: "p9", label: "Acuerdo SLA soporte (WhatsApp agente Cubik piloto)", status: "pending" as const },
 ];
 
 const TAREAS_ESCALA = [
@@ -244,6 +256,7 @@ export default function CubikPlanNativeEscala() {
         <Row gap={8} wrap>
           <Pill tone="info">Presentación: jueves</Pill>
           <Pill tone="warning">Piloto: 25 + 50</Pill>
+          <Pill tone="warning">10 camiones/rubro</Pill>
           <Pill tone="success">Escala: 50+ / 200</Pill>
         </Row>
       </Stack>

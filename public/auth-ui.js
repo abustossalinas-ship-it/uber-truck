@@ -86,6 +86,13 @@ const Auth = {
       return;
     }
     if (typeof renderKycBanner === 'function') renderKycBanner();
+    if (
+      document.body.classList.contains('cubik-app') &&
+      this.user?.role === 'carrier' &&
+      typeof refreshAuthProfile === 'function'
+    ) {
+      refreshAuthProfile().catch(() => {});
+    }
     if (typeof refreshAdminKycPanel === 'function') refreshAdminKycPanel();
     if (typeof refreshAdminHubNav === 'function') refreshAdminHubNav();
     if (typeof refreshAdminOpsPanel === 'function') refreshAdminOpsPanel();

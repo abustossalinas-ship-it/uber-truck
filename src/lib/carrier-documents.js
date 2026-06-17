@@ -258,8 +258,11 @@ async function listUserNotifications(userId, limit = 20) {
  * @param {object} parsed resultado de parseChileanDocument / readChileanDocumentFromImage
  */
 async function applyWhatsappDocumentExtract(userId, parsed) {
-  if (!userId || !parsed?.ok || !supabase.isConfigured()) {
+  if (!userId || !parsed?.ok) {
     return { ok: false, reason: parsed?.reason || 'invalid_input' };
+  }
+  if (!supabase.isConfigured()) {
+    return { ok: false, reason: 'no_db' };
   }
 
   const sb = supabase.getClient();
@@ -300,7 +303,12 @@ async function applyWhatsappDocumentExtract(userId, parsed) {
   }
 
   const { error: updErr } = await sb.from('users').update(patch).eq('id', userId);
-  if (updErr) throw updErr;
+  if (updErr) {
+    console.error('[carrier-docs] applyWhatsappDocumentExtract', userId, updErr.message);
+    const err = new Error(updErr.message);
+    err.code = updErr.code;
+    throw err;
+  }
 
   const merged = { ...user, ...patch, role: 'carrier' };
   const compliance = await syncUserDocumentCompliance(userId, merged);

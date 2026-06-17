@@ -23,7 +23,6 @@ async function processWhatsappDocumentMedia(msg, session = {}) {
     await whatsappCloud.sendText(msg.from, ocrNeedIdentity());
     return { ok: false, reason: 'no_linked_user' };
   }
-
   const hint = session.uploadTarget || null;
   const caption = String(msg.caption || msg.text || '').toLowerCase();
   let effectiveHint = hint;
@@ -49,9 +48,12 @@ async function processWhatsappDocumentMedia(msg, session = {}) {
   try {
     readResult = await readChileanDocumentFromImage(buffer, { hint: effectiveHint });
   } catch (e) {
-    console.error('[whatsapp-ocr] vision failed', msg.from, e.message || e);
-    await whatsappCloud.sendText(msg.from, ocrDocumentFailed({ reason: 'vision_error' }));
-    return { ok: false, reason: 'vision_error' };
+    console.error('[whatsapp-ocr] ocr failed', msg.from, e.message || e);
+    await whatsappCloud.sendText(
+      msg.from,
+      ocrDocumentFailed({ reason: e.code === 'PGRST204' ? 'db_error' : 'tesseract_error' })
+    );
+    return { ok: false, reason: 'ocr_failed' };
   }
 
   if (!readResult.ok) {

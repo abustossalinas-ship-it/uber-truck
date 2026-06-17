@@ -5,7 +5,7 @@ const whatsappCloud = require('../services/whatsapp-cloud');
 const whatsappBot = require('../lib/whatsapp-bot');
 const { lookupCarrierIdentity } = require('../lib/carrier-documents');
 const { processWhatsappDocumentMedia } = require('../lib/whatsapp-document-media');
-const { isDocumentOcrEnabled } = require('../lib/document-ocr');
+const { isDocumentOcrEnabled, ocrStatusPayload } = require('../lib/document-ocr');
 
 const router = express.Router();
 
@@ -72,7 +72,7 @@ router.get('/status', (_req, res) => {
   res.json({
     ok: true,
     whatsapp: whatsappCloud.statusPayload(),
-    document_ocr: { enabled: isDocumentOcrEnabled() },
+    document_ocr: ocrStatusPayload(),
   });
 });
 

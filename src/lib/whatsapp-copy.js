@@ -304,7 +304,7 @@ Reenvía con buena luz, sin reflejos y con *fecha de vencimiento* visible. Escri
     return `Leímos tu ${label}, pero falta ${reason === 'missing_rut' ? 'el RUT' : 'la fecha de vencimiento'} legible.
 Reenvía foto más nítida con todos los datos visibles.`;
   }
-  if (reason === 'vision_error' || reason === 'download_failed' || reason === 'db_error') {
+  if (reason === 'vision_error' || reason === 'download_failed' || reason === 'db_error' || reason === 'tesseract_error') {
     return `Recibimos tu archivo, pero hubo un error técnico al leerlo. Intenta de nuevo en 1 minuto o escribe *humano*.`;
   }
   return `No pudimos validar el documento automáticamente. Reenvía foto legible o escribe *humano* para revisión manual.`;

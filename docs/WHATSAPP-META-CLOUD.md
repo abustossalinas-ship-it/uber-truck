@@ -168,3 +168,74 @@ Debe mostrar `"active": true`. Si el bot sigue mudo, revisa **logs de Railway** 
 5. Debes recibir la FAQ + menú otra vez.
 
 Si el paso 3 falla → token Meta, webhook o teléfono no autorizado en test.
+
+## 10. Token permanente (System User) — paso a paso
+
+El token que copias en **WhatsApp → API Setup → Temporary access token** caduca en ~24 h. En logs verás:
+
+```json
+{ "error": { "message": "Authentication Error", "code": 190, "type": "OAuthException" } }
+```
+
+El webhook **sí recibe** tu mensaje; **falla al enviar** la respuesta. Necesitas un token que **no expire**.
+
+### A. Requisitos previos
+
+- Portfolio comercial en [business.facebook.com](https://business.facebook.com) (ej. Cubik).
+- App de WhatsApp en [developers.facebook.com](https://developers.facebook.com) vinculada a ese portfolio.
+- Rol **Administrador** en el Business Manager.
+
+### B. Crear System User
+
+1. Entra a [business.facebook.com/settings](https://business.facebook.com/settings).
+2. **Usuarios → Usuarios del sistema** (System users).
+3. **Agregar** → nombre ej. `cubik-whatsapp-api` → rol **Administrador** (o Empleado con permisos WhatsApp).
+4. Guarda. Haz clic en el usuario → **Generar token**.
+
+### C. Generar el token
+
+1. Selecciona la **app de WhatsApp** de Cubik (no otra app).
+2. Marca estos permisos (mínimo):
+   - `whatsapp_business_messaging`
+   - `whatsapp_business_management`
+3. **Generar token** → copia el string `EAA...` **una sola vez** (Meta no lo vuelve a mostrar).
+4. Duración: elige **Nunca expira** si la opción aparece; si no, el token de System User suele ser de larga duración (~60 días) y se renueva desde el mismo panel.
+
+### D. Asignar activos al System User
+
+En **Usuarios del sistema → cubik-whatsapp-api → Asignar activos**:
+
+| Activo | Permiso |
+|--------|---------|
+| App de WhatsApp Cubik | Control total |
+| Cuenta de WhatsApp Business (WABA) | Control total |
+| Número de teléfono Cubik | Control total |
+
+Sin esto el token existe pero no puede enviar mensajes.
+
+### E. Actualizar Railway
+
+1. Railway → servicio Cubik → **Variables**.
+2. Edita `WHATSAPP_ACCESS_TOKEN` → pega el token nuevo (sin comillas ni espacios).
+3. **Redeploy** (o espera el deploy automático al guardar).
+4. Verifica:
+   ```bash
+   curl -s https://www.getcubik.cl/health | jq .whatsapp
+   ```
+5. Escribe **Hola** al número desde WhatsApp → debe responder en segundos.
+
+### F. Errores frecuentes
+
+| Síntoma | Causa | Fix |
+|---------|-------|-----|
+| Code 190 OAuthException | Token temporal expirado o revocado | Token System User (sección B–E) |
+| Code 100 / permisos | System User sin WABA o número asignado | Asignar activos (sección D) |
+| Webhook OK, envío falla | `WHATSAPP_PHONE_NUMBER_ID` incorrecto | Copiar ID desde WhatsApp → API Setup |
+| Solo falla desde tu celular | Número test Meta | Agregar tu teléfono en testers (API Setup → To) |
+
+### G. Número de producción vs test
+
+- **Test Number** (Meta): sirve para desarrollo; celular debe estar en lista de testers.
+- **Número real Cubik (+56 9 …)**: cuando Meta verifique el número en la WABA, el mismo token permanente sirve; solo cambia `WHATSAPP_PHONE_NUMBER_ID` y `CUBIK_WHATSAPP_E164` al ID/número definitivos.
+
+**No commitear** el token en git. Solo Railway / `.env` local.

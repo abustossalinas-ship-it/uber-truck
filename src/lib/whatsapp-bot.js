@@ -1,7 +1,7 @@
 'use strict';
 
 const {
-  WELCOME,
+  welcomeWithMenu,
   MENU,
   HUMAN,
   FAQ,
@@ -397,7 +397,7 @@ async function buildReplies(text, session, deps = {}) {
     const role = session.role || detectedRole || 'shipper';
     session.role = role;
     session.welcomed = true;
-    replies.push(WELCOME[role], MENU[role]);
+    replies.push(welcomeWithMenu(role));
     return replies;
   }
 

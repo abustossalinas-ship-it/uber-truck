@@ -45,6 +45,12 @@ Puedes preguntarme sobre:
 ¿En qué te puedo ayudar?`,
 };
 
+function welcomeWithMenu(role) {
+  const key = role === 'carrier' ? 'carrier' : 'shipper';
+  const intro = WELCOME[key].replace(/\n\n¿En qué te puedo ayudar\?\s*$/, '');
+  return `${intro}\n\n${MENU[key]}`;
+}
+
 const MENU = {
   shipper: `¿En qué te ayudo?
 1️⃣ Cómo publicar una carga
@@ -327,6 +333,7 @@ module.exports = {
   WA_ME_PREFILL,
   DOCS_ROLE_PICK,
   WELCOME,
+  welcomeWithMenu,
   MENU,
   HUMAN,
   FAQ,

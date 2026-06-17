@@ -42,16 +42,17 @@ describe('whatsapp-bot', () => {
     );
   });
 
-  it('primer mensaje envía bienvenida y menú', async () => {
+  it('primer mensaje envía bienvenida y menú en un solo texto', async () => {
     const { replies, skipped } = await handleInbound({
       from: '56912345678',
       text: 'Hola',
       messageId: 'm1',
     });
     assert.equal(skipped, false);
-    assert.ok(replies.length >= 2);
+    assert.equal(replies.length, 1);
     assert.match(replies[0], /Bienvenido a Cubik/i);
-    assert.match(replies[1], /1️⃣/);
+    assert.match(replies[0], /1️⃣/);
+    assert.doesNotMatch(replies[0], /¿En qué te puedo ayudar\?[\s\S]*¿En qué te ayudo\?/);
   });
 
   it('opción 1 responde FAQ', async () => {

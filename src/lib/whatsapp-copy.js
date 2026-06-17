@@ -47,6 +47,7 @@ const MENU = {
 3️⃣ Pagos y liquidaciones
 4️⃣ Estado de mis viajes
 5️⃣ Registro en Cubik
+6️⃣ Enviar documentos (piloto)
 👤 Escribe *humano* para hablar con soporte`,
 };
 
@@ -91,8 +92,33 @@ En *Mis viajes* ves estado, chat con la empresa, mapa en ruta y cierre de entreg
     5: `*Registro*
 • App: getcubik.cl/app (rol transportista)
 • Demo: getcubik.cl/transportistas
-Necesitamos validar tu cuenta antes de ofertar.`,
+Tras registrarte, envía documentos (opción *6*).`,
+    6: `*Documentos piloto (C3a)*
+Envía por este WhatsApp (fotos legibles):
+1️⃣ Cédula de identidad (anverso y reverso)
+2️⃣ Licencia de conducir vigente
+3️⃣ SOAP al día
+4️⃣ Póliza RC / seguro carga (según tu rubro)
+5️⃣ Rubro principal + tipo de camión + patente(s)
+
+Indica el *mismo email* con el que te registraste en la app.
+Un agente marca el checklist y te aprueba en 24 h hábiles.`,
   },
+};
+
+const ONBOARDING_DOCS = {
+  carrier: `*Checklist transportista — piloto Cubik*
+Regístrate primero en getcubik.cl/app (rol transportista).
+
+Luego envía por WhatsApp:
+• Cédula (anverso/reverso)
+• Licencia vigente
+• SOAP + póliza RC/carga
+• Rubro (construcción / retail / frío) + patente del camión
+
+Usa el *mismo email* de la app. Escribe *6* para ver el detalle o *humano* para soporte.`,
+  shipper:
+    'Para empresas embarcadoras el registro es en getcubik.cl/app (rol empresa). Revisamos identidad y datos corporativos antes de publicar cargas.',
 };
 
 const GENERIC = {
@@ -112,5 +138,6 @@ module.exports = {
   MENU,
   HUMAN,
   FAQ,
+  ONBOARDING_DOCS,
   GENERIC,
 };

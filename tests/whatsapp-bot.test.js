@@ -56,6 +56,22 @@ describe('whatsapp-bot', () => {
     assert.match(replies[0], /ejecutivo|soporte/i);
   });
 
+  it('documentos responde checklist C3a transportista', () => {
+    handleInbound({ from: '56944444444', text: 'soy transportista', messageId: 'm6' });
+    const { replies } = handleInbound({
+      from: '56944444444',
+      text: 'quiero enviar documentos',
+      messageId: 'm7',
+    });
+    assert.match(replies[0], /Cédula|CI/i);
+  });
+
+  it('opción 6 menú transportista', () => {
+    handleInbound({ from: '56955555555', text: 'transportista', messageId: 'm8' });
+    const { replies } = handleInbound({ from: '56955555555', text: '6', messageId: 'm9' });
+    assert.match(replies[0], /Documentos piloto/i);
+  });
+
   it('deduplica por message id', () => {
     const first = handleInbound({ from: '56933333333', text: 'hola', messageId: 'dup-1' });
     const second = handleInbound({ from: '56933333333', text: 'hola', messageId: 'dup-1' });

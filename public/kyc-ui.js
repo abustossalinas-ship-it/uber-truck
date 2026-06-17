@@ -1,5 +1,19 @@
 /** Cuentas aprobadas — marketplace semi-curado */
 
+let carrierWhatsAppUrl = null;
+
+async function loadCarrierWhatsAppUrl() {
+  if (carrierWhatsAppUrl) return carrierWhatsAppUrl;
+  try {
+    const res = await fetch('/api/prospectos/config');
+    const json = await res.json();
+    carrierWhatsAppUrl = json?.whatsapp?.urls?.carrier || null;
+  } catch (_e) {
+    carrierWhatsAppUrl = null;
+  }
+  return carrierWhatsAppUrl;
+}
+
 function isOperatorApproved() {
   if (typeof Auth === 'undefined' || !Auth.user) return true;
   if (Auth.user.role === 'admin') return true;
@@ -12,7 +26,7 @@ function kycStatusLabel(status) {
   return 'En revisión';
 }
 
-function renderKycBanner() {
+async function renderKycBanner() {
   const el = document.getElementById('kyc-banner');
   if (!el) return;
   const user = typeof Auth !== 'undefined' ? Auth.user : null;
@@ -28,11 +42,18 @@ function renderKycBanner() {
   }
   el.hidden = false;
   document.body.classList.add('kyc-pending');
+  let extra = '';
+  if (user.role === 'carrier' && user.kyc_status === 'pending') {
+    const wa = await loadCarrierWhatsAppUrl();
+    extra = wa
+      ? `<p class="muted">Piloto: envía CI, licencia, SOAP y seguro por <a href="${wa}" target="_blank" rel="noopener">WhatsApp Cubik</a> (mismo email de la app). Escribe <strong>documentos</strong> al bot.</p>`
+      : '<p class="muted">Piloto: envía CI, licencia, SOAP y seguro por WhatsApp Cubik (mismo email de la app).</p>';
+  }
   const msg =
     user.kyc_status === 'rejected'
       ? 'Tu cuenta no está habilitada para operar en el piloto. Escríbenos si crees que es un error.'
       : 'Tu cuenta está <strong>en revisión</strong>. Puedes explorar la app, pero aún no puedes publicar cargas, ofertas ni emparejar hasta que un administrador te apruebe.';
-  el.innerHTML = `<div class="kyc-banner-inner"><p>${msg}</p><p class="muted">Estado: ${kycStatusLabel(user.kyc_status)}</p></div>`;
+  el.innerHTML = `<div class="kyc-banner-inner"><p>${msg}</p>${extra}<p class="muted">Estado: ${kycStatusLabel(user.kyc_status)}</p></div>`;
 }
 
 function assertCanOperate() {

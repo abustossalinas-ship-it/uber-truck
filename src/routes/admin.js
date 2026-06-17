@@ -6,8 +6,15 @@ const repo = require('../lib/repository');
 const { authMiddleware } = require('../lib/auth');
 const { normalizeOrgName } = require('../lib/ownership');
 const { buildAdminDashboard, listAdminTrips } = require('../lib/admin-metrics');
+const {
+  ONBOARDING_SELECT,
+  checklistProgress,
+  validateOnboardingPatch,
+} = require('../lib/carrier-onboarding');
 
 const router = express.Router();
+
+const USER_LIST_SELECT = `id, email, full_name, role, company_name, phone, kyc_status, created_at, ${ONBOARDING_SELECT}`;
 
 function requireAdmin(req, res, next) {
   if (req.user?.role !== 'admin') {
@@ -25,16 +32,62 @@ router.get('/users', authMiddleware, requireAdmin, async (req, res) => {
     const sb = supabase.getClient();
     let q = sb
       .from('users')
-      .select('id, email, full_name, role, company_name, phone, kyc_status, created_at')
+      .select(USER_LIST_SELECT)
       .neq('role', 'admin')
       .order('created_at', { ascending: false });
     if (status !== 'all') q = q.eq('kyc_status', status);
     const { data, error } = await q;
     if (error) throw error;
-    res.json({ ok: true, data: data || [] });
+    const rows = (data || []).map((u) => ({
+      ...u,
+      onboarding_progress:
+        u.role === 'carrier' ? checklistProgress(u) : null,
+    }));
+    res.json({ ok: true, data: rows });
   } catch (e) {
     console.error(e);
     res.status(500).json({ ok: false, error: 'Error al listar usuarios' });
+  }
+});
+
+router.patch('/users/:id/onboarding', authMiddleware, requireAdmin, async (req, res) => {
+  if (!supabase.isConfigured()) {
+    return res.status(503).json({ ok: false, error: 'Requiere Supabase' });
+  }
+  const parsed = validateOnboardingPatch(req.body || {});
+  if (parsed.error) {
+    return res.status(400).json({ ok: false, error: parsed.error });
+  }
+  if (!Object.keys(parsed.patch).length) {
+    return res.status(400).json({ ok: false, error: 'Sin cambios' });
+  }
+  try {
+    const sb = supabase.getClient();
+    const { data: existing, error: findErr } = await sb
+      .from('users')
+      .select('id, role')
+      .eq('id', req.params.id)
+      .maybeSingle();
+    if (findErr) throw findErr;
+    if (!existing) return res.status(404).json({ ok: false, error: 'Usuario no encontrado' });
+    if (existing.role !== 'carrier') {
+      return res.status(400).json({ ok: false, error: 'Checklist C3a solo aplica a transportistas' });
+    }
+    const { data, error } = await sb
+      .from('users')
+      .update(parsed.patch)
+      .eq('id', req.params.id)
+      .select(USER_LIST_SELECT)
+      .single();
+    if (error) throw error;
+    res.json({
+      ok: true,
+      data: { ...data, onboarding_progress: checklistProgress(data) },
+      message: 'Checklist onboarding guardado.',
+    });
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ ok: false, error: 'Error al guardar checklist' });
   }
 });
 
@@ -43,6 +96,7 @@ router.patch('/users/:id/kyc', authMiddleware, requireAdmin, async (req, res) =>
     return res.status(503).json({ ok: false, error: 'Requiere Supabase' });
   }
   const nextStatus = req.body?.kyc_status;
+  const force = req.body?.force === true;
   if (!['approved', 'rejected', 'pending'].includes(nextStatus)) {
     return res.status(400).json({
       ok: false,
@@ -51,16 +105,36 @@ router.patch('/users/:id/kyc', authMiddleware, requireAdmin, async (req, res) =>
   }
   try {
     const sb = supabase.getClient();
+    const { data: existing, error: findErr } = await sb
+      .from('users')
+      .select(USER_LIST_SELECT)
+      .eq('id', req.params.id)
+      .maybeSingle();
+    if (findErr) throw findErr;
+    if (!existing) return res.status(404).json({ ok: false, error: 'Usuario no encontrado' });
+
+    if (nextStatus === 'approved' && existing.role === 'carrier' && !force) {
+      const progress = checklistProgress(existing);
+      if (progress && !progress.complete) {
+        return res.status(409).json({
+          ok: false,
+          error: `Checklist C3a incompleto (${progress.done}/${progress.total}). Completa CI, licencia, SOAP, seguro, rubro, nivel y patentes — o reintenta con force: true.`,
+          onboarding_progress: progress,
+          code: 'onboarding_incomplete',
+        });
+      }
+    }
+
     const { data, error } = await sb
       .from('users')
       .update({ kyc_status: nextStatus })
       .eq('id', req.params.id)
-      .select('id, email, full_name, role, company_name, kyc_status')
+      .select(USER_LIST_SELECT)
       .single();
     if (error) throw error;
     res.json({
       ok: true,
-      data,
+      data: { ...data, onboarding_progress: checklistProgress(data) },
       message:
         nextStatus === 'approved'
           ? 'Cuenta aprobada. El usuario ya puede operar en el tablero.'

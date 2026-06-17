@@ -169,7 +169,7 @@ Total ~**10 camiones por rubro activo** antes de ampliar marketing masivo.
 | Capacidad | Hoy (0.0.129+) | Piloto manual | Producto |
 |-----------|----------------|---------------|----------|
 | Registro email + rol | Sí | — | — |
-| KYC admin `pending` → `approved` | Sí | Completar docs por WhatsApp | Panel con adjuntos |
+| KYC admin `pending` → `approved` | Sí | Completar docs por WhatsApp | Panel checklist C3a ([C3A-CHECKLIST-TRANSPORTISTA.md](./C3A-CHECKLIST-TRANSPORTISTA.md)) |
 | Banco / operar | Sí | — | — |
 | Login facial + CI | No | Foto por WhatsApp / Drive | SDK verificación (fase 3) |
 | Licencia conducir | No | Checklist admin | Upload + OCR manual |
@@ -212,6 +212,7 @@ Total ~**10 camiones por rubro activo** antes de ampliar marketing masivo.
 - [PLAN-COMERCIAL-PILOTO.md](./PLAN-COMERCIAL-PILOTO.md) — 25/50 y fases
 - [Piloto M2 KPIs](./Piloto-M2-Corredor-KPIs-Riesgos.html) — 20 viajes corredor
 - [SQL Supabase — KYC](./SQL-SUPABASE.md) — aprobación admin
+- [Checklist operativo C3a](./C3A-CHECKLIST-TRANSPORTISTA.md) — WhatsApp + panel admin
 - [CARGO-TRUST.md](./CARGO-TRUST.md) — declaración carga embarcador
 - [Journey usuario](./Journey-Usuario-Uber-Truck.html) — flujo actual app
 - [WHATSAPP-META-CLOUD.md](./WHATSAPP-META-CLOUD.md) — captación y soporte

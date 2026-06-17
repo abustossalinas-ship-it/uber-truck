@@ -3113,6 +3113,57 @@ body.kyc-pending #btn-create-match {
   color: var(--text-muted);
 }
 
+.admin-onboarding {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border: 1px solid var(--brand-gray-200);
+  border-radius: 8px;
+  background: var(--brand-gray-50, #f8fafc);
+}
+
+.admin-onboarding-title {
+  margin: 0 0 0.5rem;
+  font-size: 0.9rem;
+}
+
+.admin-onboarding-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(10rem, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.admin-onboarding-grid label,
+.admin-onboarding-notes {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-size: 0.85rem;
+}
+
+.admin-onboarding-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1rem;
+  margin: 0.5rem 0;
+  font-size: 0.85rem;
+}
+
+.pill-warn {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.pill-done {
+  background: #d4edda;
+  color: #155724;
+}
+
+.kyc-banner-inner a {
+  color: var(--brand-cyan, #0891b2);
+  font-weight: 600;
+}
+
 .admin-ops-panel {
   margin-top: 1rem;
   border-left: 4px solid var(--brand-navy-mid);

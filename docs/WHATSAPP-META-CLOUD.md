@@ -241,3 +241,10 @@ Sin esto el token existe pero no puede enviar mensajes.
 - **Número real Cubik (+56 9 …)**: cuando Meta verifique el número en la WABA, el mismo token permanente sirve; solo cambia `WHATSAPP_PHONE_NUMBER_ID` y `CUBIK_WHATSAPP_E164` al ID/número definitivos.
 
 **No commitear** el token en git. Solo Railway / `.env` local.
+
+## 11. Onboarding transportista (C3a)
+
+- Menú transportista incluye opción **6 — Enviar documentos**.
+- Palabras clave: *documentos*, *cédula*, *licencia*, *seguro*, *rubro*, *patente*.
+- El agente marca el checklist en panel admin → ver [C3A-CHECKLIST-TRANSPORTISTA.md](./C3A-CHECKLIST-TRANSPORTISTA.md).
+- API admin: `PATCH /api/admin/users/:id/onboarding` · SQL: [RUN_033_carrier_onboarding.sql](./RUN_033_carrier_onboarding.sql).

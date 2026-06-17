@@ -1,6 +1,6 @@
 'use strict';
 
-const { WELCOME, MENU, HUMAN, FAQ, GENERIC } = require('./whatsapp-copy');
+const { WELCOME, MENU, HUMAN, FAQ, GENERIC, ONBOARDING_DOCS } = require('./whatsapp-copy');
 
 const HUMAN_RE =
   /\b(humano|persona|ejecutivo|agente|soporte|hablar con|quiero hablar|atenci[oó]n)\b/i;
@@ -10,6 +10,8 @@ const PRICE_RE = /\b(precio|cu[aá]nto sale|costo|tarifa|comisi[oó]n)\b/i;
 const REGISTER_RE = /\b(registro|registr|cuenta|crear cuenta|inscrib)\b/i;
 const DEMO_RE = /\b(demo|agendar|reuni[oó]n|presentaci[oó]n)\b/i;
 const TECH_RE = /\b(error|bug|no carga|pantalla|olvid[eé]|contraseña|password)\b/i;
+const DOCS_RE =
+  /\b(document|documentos|papeles|cedula|c[eé]dula|licencia|seguro|soap|rubro|patente|validar cuenta|enviar foto)\b/i;
 
 /** @typedef {{ role: 'shipper'|'carrier'|null, welcomed: boolean, awaitingHuman: boolean, updatedAt: number }} Session */
 
@@ -86,8 +88,8 @@ function isDuplicateMessageId(id) {
 
 function parseMenuChoice(body) {
   const t = String(body || '').trim();
-  if (/^[1-5]$/.test(t)) return t;
-  const emoji = t.match(/^([1-5])\s*️⃣\s*$/u);
+  if (/^[1-6]$/.test(t)) return t;
+  const emoji = t.match(/^([1-6])\s*️⃣\s*$/u);
   if (emoji) return emoji[1];
   return null;
 }
@@ -150,7 +152,18 @@ function buildReplies(text, session) {
     return replies;
   }
   if (REGISTER_RE.test(lower)) {
+    if (roleOf(session) === 'carrier') {
+      replies.push(ONBOARDING_DOCS.carrier);
+      return replies;
+    }
     replies.push(GENERIC.register);
+    return replies;
+  }
+  if (DOCS_RE.test(lower)) {
+    replies.push(
+      roleOf(session) === 'carrier' ? ONBOARDING_DOCS.carrier : ONBOARDING_DOCS.shipper
+    );
+    if (roleOf(session) === 'carrier') replies.push(MENU.carrier);
     return replies;
   }
   if (DEMO_RE.test(lower)) {
@@ -173,7 +186,7 @@ function buildReplies(text, session) {
   }
 
   replies.push(
-    'No estoy seguro de entender. Elige una opción del menú (1–5) o escribe *humano* para un ejecutivo.',
+    'No estoy seguro de entender. Elige una opción del menú (1–6) o escribe *humano* para un ejecutivo.',
     MENU[roleOf(session)]
   );
   return replies;

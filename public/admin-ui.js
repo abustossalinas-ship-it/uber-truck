@@ -49,6 +49,22 @@ const ADMIN_KYC_EMPTY = {
   rejected: 'No hay cuentas rechazadas.',
 };
 
+const CARRIER_RUBROS = [
+  { id: '', label: '— Rubro —' },
+  { id: 'construccion', label: 'Construcción / materiales' },
+  { id: 'retail_alimentos', label: 'Retail / alimentos secos' },
+  { id: 'refrigerados', label: 'Refrigerados / congelados' },
+  { id: 'retail_general', label: 'Retail / carga general' },
+  { id: 'quimicos', label: 'Químicos / especial' },
+];
+
+const INSURANCE_LEVELS = [
+  { id: '', label: '— Seguro —' },
+  { id: 'A', label: 'A — Básico' },
+  { id: 'B', label: 'B — Rubro' },
+  { id: 'C', label: 'C — Especial' },
+];
+
 async function adminHeaders() {
   return typeof Auth !== 'undefined' ? Auth.headers() : {};
 }
@@ -83,6 +99,66 @@ function renderAdminKycActions(u, tab) {
       <button type="button" class="btn-secondary" data-kyc-pending="${u.id}">Volver a pendiente</button>`;
 }
 
+function onboardingProgressLabel(u) {
+  const p = u.onboarding_progress;
+  if (!p) return '';
+  const tone = p.complete ? 'pill-done' : 'pill-warn';
+  return `<span class="pill ${tone}">Checklist ${p.done}/${p.total}</span>`;
+}
+
+function renderCarrierOnboardingForm(u) {
+  if (u.role !== 'carrier') return '';
+  const rubroOpts = CARRIER_RUBROS.map(
+    (r) =>
+      `<option value="${r.id}" ${u.carrier_rubro === r.id ? 'selected' : ''}>${r.label}</option>`
+  ).join('');
+  const insOpts = INSURANCE_LEVELS.map(
+    (r) =>
+      `<option value="${r.id}" ${u.insurance_level === r.id ? 'selected' : ''}>${r.label}</option>`
+  ).join('');
+  const chk = (field) => (u[field] ? 'checked' : '');
+  return `
+    <div class="admin-onboarding" data-onboarding-card="${u.id}">
+      <p class="admin-onboarding-title"><strong>Checklist C3a</strong> — docs vía WhatsApp</p>
+      <div class="admin-onboarding-grid">
+        <label>Rubro <select data-onb-field="carrier_rubro">${rubroOpts}</select></label>
+        <label>Nivel seguro <select data-onb-field="insurance_level">${insOpts}</select></label>
+        <label>Tipo flota <input type="text" data-onb-field="carrier_fleet_type" value="${escapeHtml(u.carrier_fleet_type || '')}" placeholder="tolva, semi, furgón…" /></label>
+        <label>Patente(s) <input type="text" data-onb-field="onboarding_vehicle_plates" value="${escapeHtml(u.onboarding_vehicle_plates || '')}" placeholder="ABCD12, EFGH34" /></label>
+      </div>
+      <div class="admin-onboarding-checks">
+        <label><input type="checkbox" data-onb-field="onboarding_doc_ci" ${chk('onboarding_doc_ci')} /> CI</label>
+        <label><input type="checkbox" data-onb-field="onboarding_doc_license" ${chk('onboarding_doc_license')} /> Licencia</label>
+        <label><input type="checkbox" data-onb-field="onboarding_doc_soap" ${chk('onboarding_doc_soap')} /> SOAP</label>
+        <label><input type="checkbox" data-onb-field="onboarding_doc_insurance" ${chk('onboarding_doc_insurance')} /> Seguro RC/carga</label>
+      </div>
+      <label class="admin-onboarding-notes">Notas admin
+        <textarea data-onb-field="onboarding_notes" rows="2" placeholder="Link Drive, observaciones…">${escapeHtml(u.onboarding_notes || '')}</textarea>
+      </label>
+      <div class="actions">
+        <button type="button" class="btn-secondary" data-save-onboarding="${u.id}">Guardar checklist</button>
+      </div>
+    </div>`;
+}
+
+function escapeHtml(s) {
+  return String(s || '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/"/g, '&quot;');
+}
+
+function readOnboardingPayload(card) {
+  if (!card) return {};
+  const payload = {};
+  card.querySelectorAll('[data-onb-field]').forEach((el) => {
+    const key = el.dataset.onbField;
+    if (el.type === 'checkbox') payload[key] = el.checked;
+    else payload[key] = el.value;
+  });
+  return payload;
+}
+
 async function refreshAdminKycPanel() {
   const panel = document.getElementById('admin-kyc-panel');
   const list = document.getElementById('admin-kyc-list');
@@ -112,10 +188,12 @@ async function refreshAdminKycPanel() {
       .map(
         (u) => `
       <article class="item admin-kyc-item">
-        <strong>${u.company_name || '—'}</strong>
+        <strong>${escapeHtml(u.company_name || '—')}</strong>
         <span class="pill">${adminKycRoleLabel(u.role)}</span>
         <span class="pill pill-muted">${u.kyc_status}</span>
-        <p class="muted">${u.full_name} · ${u.email}</p>
+        ${onboardingProgressLabel(u)}
+        <p class="muted">${escapeHtml(u.full_name)} · ${escapeHtml(u.email)}${u.phone ? ` · ${escapeHtml(u.phone)}` : ''}</p>
+        ${renderCarrierOnboardingForm(u)}
         <div class="actions">
           ${renderAdminKycActions(u, adminKycTab)}
         </div>
@@ -128,13 +206,21 @@ async function refreshAdminKycPanel() {
   }
 }
 
-async function patchKyc(userId, kyc_status) {
+async function patchKyc(userId, kyc_status, force) {
   const res = await fetch(`/api/admin/users/${userId}/kyc`, {
     method: 'PATCH',
     headers: await adminHeaders(),
-    body: JSON.stringify({ kyc_status }),
+    body: JSON.stringify({ kyc_status, force: !!force }),
   });
   const json = await res.json();
+  if (res.status === 409 && json.code === 'onboarding_incomplete') {
+    const p = json.onboarding_progress;
+    const msg = `${json.error}\n\n¿Aprobar igual? (solo si falta un ítem menor)`;
+    if (confirm(msg)) {
+      return patchKyc(userId, kyc_status, true);
+    }
+    return;
+  }
   if (!res.ok) {
     alert(json.error || 'No se pudo actualizar');
     return;
@@ -142,6 +228,22 @@ async function patchKyc(userId, kyc_status) {
   alert(json.message || 'Actualizado');
   refreshAdminKycPanel();
   refreshAdminHubNav();
+}
+
+async function saveOnboarding(userId, card) {
+  const payload = readOnboardingPayload(card);
+  const res = await fetch(`/api/admin/users/${userId}/onboarding`, {
+    method: 'PATCH',
+    headers: await adminHeaders(),
+    body: JSON.stringify(payload),
+  });
+  const json = await res.json();
+  if (!res.ok) {
+    alert(json.error || 'No se pudo guardar');
+    return;
+  }
+  alert(json.message || 'Checklist guardado');
+  refreshAdminKycPanel();
 }
 
 document.getElementById('admin-kyc-tabs')?.addEventListener('click', (e) => {
@@ -171,6 +273,12 @@ document.getElementById('admin-kyc-list')?.addEventListener('click', (e) => {
   const approve = e.target.closest('[data-kyc-approve]');
   const reject = e.target.closest('[data-kyc-reject]');
   const pending = e.target.closest('[data-kyc-pending]');
+  const saveBtn = e.target.closest('[data-save-onboarding]');
+  if (saveBtn) {
+    const card = saveBtn.closest('[data-onboarding-card]');
+    saveOnboarding(saveBtn.dataset.saveOnboarding, card);
+    return;
+  }
   if (approve) patchKyc(approve.dataset.kycApprove, 'approved');
   if (reject) patchKyc(reject.dataset.kycReject, 'rejected');
   if (pending) patchKyc(pending.dataset.kycPending, 'pending');

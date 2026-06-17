@@ -5,6 +5,7 @@ const assert = require('node:assert/strict');
 const {
   checklistProgress,
   validateOnboardingPatch,
+  validateLegalDocumentation,
   rubroLabel,
   deriveCarrierKycPhase,
 } = require('../src/lib/carrier-onboarding');
@@ -48,6 +49,39 @@ describe('carrier-onboarding', () => {
 
   it('rubroLabel devuelve etiqueta legible', () => {
     assert.match(rubroLabel('construccion'), /Construcción/i);
+  });
+
+  it('validateLegalDocumentation exige fecha si documento marcado', () => {
+    const errors = validateLegalDocumentation({
+      role: 'carrier',
+      national_rut: '12345678-9',
+      onboarding_doc_ci: true,
+      onboarding_doc_license: true,
+      doc_license_expires_at: '2027-06-01',
+    });
+    assert.ok(errors.some((e) => /CI/i.test(e)));
+    assert.equal(errors.length, 1);
+  });
+
+  it('validateLegalDocumentation exige RUT si hay docs', () => {
+    const errors = validateLegalDocumentation({
+      role: 'carrier',
+      onboarding_doc_ci: true,
+      doc_ci_expires_at: '2027-01-01',
+    });
+    assert.ok(errors.some((e) => /RUT/i.test(e)));
+  });
+
+  it('validateLegalDocumentation ok cuando pares completos', () => {
+    const errors = validateLegalDocumentation({
+      role: 'carrier',
+      national_rut: '12345678-9',
+      onboarding_doc_ci: true,
+      doc_ci_expires_at: '2027-01-01',
+      onboarding_doc_license: true,
+      doc_license_expires_at: '2028-03-15',
+    });
+    assert.deepEqual(errors, []);
   });
 
   it('deriveCarrierKycPhase distingue docs y revisión', () => {

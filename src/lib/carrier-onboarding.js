@@ -15,6 +15,14 @@ const RUBROS = [
 
 const INSURANCE_LEVELS = ['A', 'B', 'C'];
 
+/** Checkbox C3a ↔ campo de vencimiento (fecha impresa en documento legal). */
+const LEGAL_DOC_PAIRS = [
+  { check: 'onboarding_doc_ci', expiry: 'doc_ci_expires_at', label: 'CI' },
+  { check: 'onboarding_doc_license', expiry: 'doc_license_expires_at', label: 'Licencia' },
+  { check: 'onboarding_doc_soap', expiry: 'doc_soap_expires_at', label: 'SOAP' },
+  { check: 'onboarding_doc_insurance', expiry: 'doc_insurance_expires_at', label: 'Seguro RC/carga' },
+];
+
 const ONBOARDING_SELECT = `${DOC_SELECT}, carrier_rubro, carrier_fleet_type, insurance_level, onboarding_doc_ci, onboarding_doc_license, onboarding_doc_soap, onboarding_doc_insurance, onboarding_vehicle_plates, onboarding_notes, onboarding_updated_at`;
 
 function rubroLabel(id) {
@@ -114,6 +122,39 @@ function validateOnboardingPatch(body) {
   return { patch };
 }
 
+/**
+ * Valida que RUT y fechas coincidan con documentación legal revisada (WhatsApp).
+ * @param {object|null|undefined} user
+ * @returns {string[]}
+ */
+function validateLegalDocumentation(user) {
+  if (!user || user.role !== 'carrier') return [];
+  const errors = [];
+  const anyDocChecked = LEGAL_DOC_PAIRS.some((p) => user[p.check]);
+  if (anyDocChecked && !String(user.national_rut || '').trim()) {
+    errors.push('RUT titular obligatorio — debe coincidir con la cédula recibida por WhatsApp.');
+  }
+  for (const pair of LEGAL_DOC_PAIRS) {
+    const checked = !!user[pair.check];
+    const expiry = String(user[pair.expiry] || '').trim();
+    if (checked && !expiry) {
+      errors.push(
+        `${pair.label}: documento marcado como recibido — ingresa la fecha de vencimiento impresa en el original legal.`
+      );
+    }
+    if (expiry && !checked) {
+      errors.push(
+        `${pair.label}: hay fecha de vencimiento pero el documento no está marcado como recibido/verificado.`
+      );
+    }
+  }
+  return errors;
+}
+
+function mergeOnboardingState(existing, patch) {
+  return { ...(existing || {}), ...(patch || {}) };
+}
+
 function deriveCarrierKycPhase(kycStatus, progress, docsCompliance) {
   if (docsCompliance === 'expired') return 'docs_expired';
   if (kycStatus === 'approved') return 'approved';
@@ -147,6 +188,9 @@ module.exports = {
   insuranceLabel,
   checklistProgress,
   validateOnboardingPatch,
+  validateLegalDocumentation,
+  mergeOnboardingState,
+  LEGAL_DOC_PAIRS,
   deriveCarrierKycPhase,
   attachOnboardingToUser,
 };

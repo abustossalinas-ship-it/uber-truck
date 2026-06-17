@@ -122,31 +122,48 @@ function renderCarrierOnboardingForm(u) {
       `<option value="${r.id}" ${u.insurance_level === r.id ? 'selected' : ''}>${r.label}</option>`
   ).join('');
   const chk = (field) => (u[field] ? 'checked' : '');
+  const dateVal = (field) => escapeHtml(u[field] || '');
+  const legalRows = [
+    { check: 'onboarding_doc_ci', expiry: 'doc_ci_expires_at', label: 'CI — cédula' },
+    { check: 'onboarding_doc_license', expiry: 'doc_license_expires_at', label: 'Licencia de conducir' },
+    { check: 'onboarding_doc_soap', expiry: 'doc_soap_expires_at', label: 'SOAP' },
+    { check: 'onboarding_doc_insurance', expiry: 'doc_insurance_expires_at', label: 'Seguro RC/carga' },
+  ]
+    .map(
+      (row) => `
+        <div class="admin-legal-doc-row">
+          <label class="admin-legal-doc-check">
+            <input type="checkbox" data-onb-field="${row.check}" ${chk(row.check)} />
+            ${row.label} <span class="muted">recibido y legible</span>
+          </label>
+          <label class="admin-legal-doc-date">Vence (fecha en documento)
+            <input type="date" data-onb-field="${row.expiry}" value="${dateVal(row.expiry)}" />
+          </label>
+        </div>`
+    )
+    .join('');
   return `
     <div class="admin-onboarding" data-onboarding-card="${u.id}">
       <p class="admin-onboarding-title"><strong>Checklist C3a</strong> — docs vía WhatsApp (piloto manual)</p>
-      <p class="muted admin-onboarding-lead">Marca ítems recibidos por WhatsApp. Próximo paso producto (O2): upload de póliza en app con clasificación automática A/B/C.</p>
-      <label>RUT titular <input type="text" data-onb-field="national_rut" value="${escapeHtml(u.national_rut || '')}" placeholder="12.345.678-9" /></label>
-      <div class="admin-onboarding-grid admin-onboarding-dates">
-        <label>Vence CI <input type="date" data-onb-field="doc_ci_expires_at" value="${escapeHtml(u.doc_ci_expires_at || '')}" /></label>
-        <label>Vence licencia <input type="date" data-onb-field="doc_license_expires_at" value="${escapeHtml(u.doc_license_expires_at || '')}" /></label>
-        <label>Vence seguro <input type="date" data-onb-field="doc_insurance_expires_at" value="${escapeHtml(u.doc_insurance_expires_at || '')}" /></label>
-        <label>Vence SOAP <input type="date" data-onb-field="doc_soap_expires_at" value="${escapeHtml(u.doc_soap_expires_at || '')}" /></label>
-      </div>
-      ${u.docs_compliance_status ? `<p class="muted">Compliance docs: <strong>${escapeHtml(u.docs_compliance_status)}</strong></p>` : ''}
+      <p class="muted admin-onboarding-lead">
+        <strong>Regla:</strong> RUT y fechas de vencimiento deben tomarse del <em>documento legal</em> recibido por WhatsApp (no inventar fechas).
+        Marca ☑ solo si revisaste la foto/PDF. OCR automático: roadmap O2.
+      </p>
+      <fieldset class="admin-legal-docs">
+        <legend>Documentación legal verificada</legend>
+        <label class="admin-legal-rut">RUT titular (como en cédula)
+          <input type="text" data-onb-field="national_rut" value="${escapeHtml(u.national_rut || '')}" placeholder="12.345.678-9" />
+        </label>
+        ${legalRows}
+      </fieldset>
+      ${u.docs_compliance_status ? `<p class="muted">Estado vencimientos: <strong>${escapeHtml(u.docs_compliance_status)}</strong></p>` : ''}
       <div class="admin-onboarding-grid">
         <label>Rubro <select data-onb-field="carrier_rubro">${rubroOpts}</select></label>
         <label>Nivel seguro <select data-onb-field="insurance_level">${insOpts}</select></label>
         <label>Tipo flota <input type="text" data-onb-field="carrier_fleet_type" value="${escapeHtml(u.carrier_fleet_type || '')}" placeholder="tolva, semi, furgón…" /></label>
         <label>Patente(s) <input type="text" data-onb-field="onboarding_vehicle_plates" value="${escapeHtml(u.onboarding_vehicle_plates || '')}" placeholder="ABCD12, EFGH34" /></label>
       </div>
-      <div class="admin-onboarding-checks">
-        <label><input type="checkbox" data-onb-field="onboarding_doc_ci" ${chk('onboarding_doc_ci')} /> CI</label>
-        <label><input type="checkbox" data-onb-field="onboarding_doc_license" ${chk('onboarding_doc_license')} /> Licencia</label>
-        <label><input type="checkbox" data-onb-field="onboarding_doc_soap" ${chk('onboarding_doc_soap')} /> SOAP</label>
-        <label><input type="checkbox" data-onb-field="onboarding_doc_insurance" ${chk('onboarding_doc_insurance')} /> Seguro RC/carga</label>
-      </div>
-      <label class="admin-onboarding-notes">Notas admin
+      <label class="admin-onboarding-notes">Notas admin (link Drive, nº póliza, observaciones legales)
         <textarea data-onb-field="onboarding_notes" rows="2" placeholder="Link Drive, observaciones…">${escapeHtml(u.onboarding_notes || '')}</textarea>
       </label>
       <div class="actions">
@@ -228,11 +245,14 @@ async function patchKyc(userId, kyc_status, force) {
   });
   const json = await res.json();
   if (res.status === 409 && json.code === 'onboarding_incomplete') {
-    const p = json.onboarding_progress;
     const msg = `${json.error}\n\n¿Aprobar igual? (solo si falta un ítem menor)`;
     if (confirm(msg)) {
       return patchKyc(userId, kyc_status, true);
     }
+    return;
+  }
+  if (res.status === 409 && json.code === 'legal_docs_incomplete') {
+    alert(json.error || 'Completa RUT y fechas según documentos legales antes de aprobar.');
     return;
   }
   if (!res.ok) {

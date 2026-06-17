@@ -10,6 +10,8 @@ const {
   ONBOARDING_SELECT,
   checklistProgress,
   validateOnboardingPatch,
+  validateLegalDocumentation,
+  mergeOnboardingState,
 } = require('../lib/carrier-onboarding');
 const { syncUserDocumentCompliance } = require('../lib/kyc-gate');
 
@@ -66,13 +68,23 @@ router.patch('/users/:id/onboarding', authMiddleware, requireAdmin, async (req, 
     const sb = supabase.getClient();
     const { data: existing, error: findErr } = await sb
       .from('users')
-      .select('id, role')
+      .select(USER_LIST_SELECT)
       .eq('id', req.params.id)
       .maybeSingle();
     if (findErr) throw findErr;
     if (!existing) return res.status(404).json({ ok: false, error: 'Usuario no encontrado' });
     if (existing.role !== 'carrier') {
       return res.status(400).json({ ok: false, error: 'Checklist C3a solo aplica a transportistas' });
+    }
+    const merged = mergeOnboardingState(existing, parsed.patch);
+    const legalErrors = validateLegalDocumentation(merged);
+    if (legalErrors.length) {
+      return res.status(400).json({
+        ok: false,
+        error: legalErrors.join(' '),
+        code: 'legal_docs_incomplete',
+        legal_errors: legalErrors,
+      });
     }
     const { data, error } = await sb
       .from('users')
@@ -123,6 +135,15 @@ router.patch('/users/:id/kyc', authMiddleware, requireAdmin, async (req, res) =>
           error: `Checklist C3a incompleto (${progress.done}/${progress.total}). Completa CI, licencia, SOAP, seguro, rubro, nivel y patentes — o reintenta con force: true.`,
           onboarding_progress: progress,
           code: 'onboarding_incomplete',
+        });
+      }
+      const legalErrors = validateLegalDocumentation(existing);
+      if (legalErrors.length) {
+        return res.status(409).json({
+          ok: false,
+          error: legalErrors.join(' '),
+          code: 'legal_docs_incomplete',
+          legal_errors: legalErrors,
         });
       }
     }

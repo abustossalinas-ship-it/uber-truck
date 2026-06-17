@@ -44,12 +44,16 @@ flowchart LR
 
 1. Entrar como `admin@getcubik.cl` → **Cuenta** → **Cuentas KYC**.
 2. Buscar transportista pendiente (mismo email).
-3. Completar **Checklist C3a**:
-   - ☑ CI · ☑ Licencia · ☑ SOAP · ☑ Seguro
+3. Completar **Checklist C3a** (contra documento legal recibido por WhatsApp):
+   - ☑ CI + **fecha vencimiento impresa en cédula**
+   - ☑ Licencia + **fecha en licencia**
+   - ☑ SOAP + **fecha en SOAP**
+   - ☑ Seguro + **fecha en póliza**
+   - **RUT titular** = mismo RUT de la cédula
    - Rubro + nivel A/B/C + patentes
-   - Notas (link Drive, observaciones)
-4. **Guardar checklist**.
-5. **Aprobar** (bloqueado si falta ítem — confirmar forzado solo excepciones).
+   - Notas (link Drive, nº póliza)
+4. **Guardar checklist** (el sistema rechaza ☑ sin fecha o fecha sin ☑).
+5. **Aprobar** (bloqueado si falta ítem legal — confirmar forzado solo excepciones).
 
 > **Nota:** cuentas aprobadas antes de C3a pueden mostrar checklist 0/7. Volver a *pendiente*, completar checklist y re-aprobar.
 

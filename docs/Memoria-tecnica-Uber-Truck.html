@@ -61,7 +61,7 @@
 <p>Priorizar <strong>paridad de flujo Uber</strong> y usuarios activos en la app antes que integraciones B2B o Open Finance. Pagos in-app y mapa en vivo entran cuando el flujo base ya se usa sin fricción.</p>
 
 <h3>Paridad UX — Uber vs Uber Truck (MVP final)</h3>
-<p><strong>Resumen jun 2026:</strong> el <strong>MVP final de flujo</strong> está <strong>cerrado en producción</strong> (v0.0.129). <strong>Dominio getcubik.cl + Resend</strong> verificado (<code>/health</code> → <code>mail.sandbox_sender: false</code>) — recuperar contraseña operativo a cualquier email. Post-MVP ítems <strong>FCM</strong>, <strong>contraseña fuerte</strong> y <strong>contacto en viaje (chat)</strong> cerrados. Foco operacional: <strong>demo comercial</strong> → piloto 25/50 → <strong>20 viajes M2</strong>. Canvas plan: <code>canvases/cubik-plan-native-escala.canvas.tsx</code>.</p>
+<p><strong>Resumen 25 may 2026:</strong> el <strong>MVP final de flujo</strong> está <strong>cerrado en producción</strong> (v0.0.129). <strong>Dominio getcubik.cl + Resend</strong> verificado (<code>/health</code> → <code>mail.sandbox_sender: false</code>) — recuperar contraseña operativo a cualquier email. Post-MVP ítems <strong>FCM</strong>, <strong>contraseña fuerte</strong> y <strong>contacto en viaje (chat)</strong> cerrados. Foco operacional: <strong>onboarding piloto por rubros (C3a–O4)</strong> → piloto 25/50 → <strong>20 viajes M2</strong>. Canvas plan: <code>canvases/cubik-plan-native-escala.canvas.tsx</code>.</p>
 
 <h4>MVP final — flujos core (cerrados)</h4>
 <table>
@@ -89,7 +89,7 @@
   <tr><td>Checkout UX (piloto)</td><td>Drawer «Pagar con Cubik Saldo» + desglose por rol</td><td class="g-done">Hecho v0.0.102+</td></tr>
   <tr><td>QA automatizado</td><td>Unit + Playwright + CI GitHub + Laboratorio <code>/qa-lab</code></td><td class="g-done">Hecho v0.0.125</td></tr>
   <tr><td>App Android testers</td><td>Capacitor + APK remoto/bundle + verify login</td><td class="g-done">Hecho v0.0.125</td></tr>
-  <tr><td>Distribución sin tienda</td><td><code>/probar</code> + APK + PWA iPhone</td><td class="g-done">Hecho jun 2026</td></tr>
+  <tr><td>Distribución sin tienda</td><td><code>/probar</code> + APK + PWA iPhone</td><td class="g-done">Hecho may 2026</td></tr>
   <tr><td>Captación comercial</td><td>Landing v3 por rol + «Agendar demo» (<code>prospectos</code>) + bot WhatsApp Meta + legal <code>/privacidad</code>·<code>/terminos</code></td><td class="g-done">Hecho v0.0.155–0.0.168</td></tr>
   <tr><td>Registro confianza (rubro, seguro, identidad)</td><td>CI + licencia + seguro A/B/C + rubro/flota; piloto manual WhatsApp + admin KYC</td><td class="g-doing">Manual piloto S2–6 · producto O1–O4</td></tr>
 </table>
@@ -100,7 +100,7 @@
 <table>
   <tr><th>Flujo / capacidad</th><th>Uber Truck</th><th>Estado</th><th>Ventana</th></tr>
   <tr><td>Login Gmail / Apple</td><td>OAuth Google + Sign in with Apple</td><td class="g-todo">Bloque E — post-piloto</td><td>Q3 2026+</td></tr>
-  <tr><td>Recuperar contraseña</td><td>Enlace por correo (Resend) — <code>getcubik.cl</code></td><td class="g-done"><strong>Cerrado</strong> — dominio verificado jun 2026</td><td>—</td></tr>
+  <tr><td>Recuperar contraseña</td><td>Enlace por correo (Resend) — <code>getcubik.cl</code></td><td class="g-done"><strong>Cerrado</strong> — dominio verificado may 2026</td><td>—</td></tr>
   <tr><td>Política contraseña + cambio en app</td><td>8+ chars, mayúscula, número; Seguridad en Cuenta APK</td><td class="g-done">Hecho v0.0.128</td><td>—</td></tr>
   <tr><td>Pago en app (prod)</td><td>Wallet real + retención al «En ruta»; escrow 10/5</td><td class="g-doing"><strong>P0 siguiente</strong></td><td>Sem 2–8 piloto</td></tr>
   <tr><td>Contacto en viaje (voz)</td><td><strong>Piloto:</strong> chat in-app (hecho) + WhatsApp comercial Cubik. <strong>Opcional P1:</strong> voz enmascarada Twilio Proxy (botón Llamar)</td><td class="g-done">Piloto OK sin Twilio</td><td>Twilio solo si exigen llamada PSTN tipo Uber</td></tr>
@@ -117,13 +117,13 @@
 <h2>Fase 0 — Descubrimiento y legal</h2>
 <h3>Objetivo</h3>
 <p>Entrevistas en nodo industrial (San Bernardo / RM), validación de precio/comisión y borrador legal + seguro piloto.</p>
-<h3>Estado (jun 2026)</h3>
+<h3>Estado (25 may 2026)</h3>
 <p class="check">En curso — paralelo al MVP digital ya desplegado y demo comercial.</p>
 
 <h2>Fase 1 — MVP final app tipo Uber (producto único)</h2>
 <h3>Objetivo</h3>
 <p>Cerrar la <strong>paridad de flujo</strong> en la misma app: mis viajes por cuenta, copy y pasos al estilo Uber, piloto con <strong>20 viajes reales</strong> hechos 100% en la plataforma (hito M2).</p>
-<h3>Estado jun 2026</h3>
+<h3>Estado 25 may 2026</h3>
 <p class="check"><strong>MVP flujo cerrado</strong> (v0.0.129). <strong>Dominio + correo Resend cerrados</strong> (getcubik.cl). Pendiente operacional: <strong>demo comercial</strong> → <strong>20 viajes M2</strong> + piloto 25 empresas / 50 transportistas — no más pantallas core.</p>
 <ul>
   <li><code>owner_user_id</code> — mis cargas / mis ofertas: <strong>hecho</strong>.</li>
@@ -163,7 +163,7 @@
 <div class="rule"></div>
 
 <h1>Cronograma del proyecto — vista Gantt</h1>
-<p>Las fechas son <strong>orientativas</strong> (jun 2026 – mar 2027). El Gantt detallado por mes está <strong>en este mismo documento</strong> (no hace falta abrir otro archivo).</p>
+<p>Las fechas son <strong>orientativas</strong> (may 2026 – mar 2027). El Gantt detallado por mes está <strong>en este mismo documento</strong> (no hace falta abrir otro archivo).</p>
 
 <h3>Leyenda</h3>
 <table>
@@ -232,9 +232,9 @@
 
 <h3>Hitos (milestones)</h3>
 <table>
-  <tr><th>Hito</th><th>Fecha plan</th><th>Estado real (10 jun 2026)</th></tr>
+  <tr><th>Hito</th><th>Fecha plan</th><th>Estado real (25 may 2026)</th></tr>
   <tr><td>M1 Descubrimiento + legal</td><td>28-jun-2026</td><td class="g-doing">En curso</td></tr>
-  <tr><td>M3 MVP digital en producción</td><td>25-oct-2026</td><td class="g-done"><strong>Hecho (adelantado jun 2026)</strong></td></tr>
+  <tr><td>M3 MVP digital en producción</td><td>25-oct-2026</td><td class="g-done"><strong>Hecho (adelantado may 2026)</strong></td></tr>
   <tr><td>M2b Demo comercial + plan piloto 25/50</td><td>13-jun-2026</td><td class="g-doing"><strong>Esta semana</strong></td></tr>
   <tr><td>M2 20 viajes en la app (piloto corredor)</td><td>31-ago-2026</td><td class="g-doing"><strong>P0 operación</strong></td></tr>
   <tr><td>M4 100 viajes digitales</td><td>31-ene-2027</td><td class="g-todo">Pendiente</td></tr>
@@ -250,7 +250,7 @@
   <tr><td>NPS transportista</td><td>≥ 7</td><td>≥ 8</td></tr>
 </table>
 
-<p><strong>Interpretación 12 jun 2026:</strong> MVP flujo <strong>cerrado</strong>; dominio <strong>getcubik.cl</strong> + Resend <strong>cerrados</strong>; FCM, contraseña fuerte y reset email <strong>cerrados</strong>; SQL prod <strong>23/23 OK</strong>; foco = <strong>demo comercial (C1–C2)</strong> → piloto 25/50 (C3) → 20 viajes M2 (U6). Wallet prod (U7) en cola P0; Twilio voz opcional; OAuth/iOS fuera de alcance inmediato.</p>
+<p><strong>Interpretación 25 may 2026:</strong> MVP flujo <strong>cerrado</strong>; dominio <strong>getcubik.cl</strong> + Resend <strong>cerrados</strong>; FCM, contraseña fuerte y reset email <strong>cerrados</strong>; SQL prod <strong>23/23 OK</strong>; foco = <strong>onboarding piloto por rubros (C3a–O4)</strong> → piloto 25/50 (C3) → 20 viajes M2 (U6). Wallet prod (U7) en cola P0; Twilio voz opcional; OAuth/iOS fuera de alcance inmediato.</p>
 
 <h2>Piloto M2 — corredor único (liquidez)</h2>
 <p>El cuello de botella del marketplace no es el código sino la <strong>oferta y demanda simultánea</strong>. El piloto M2 se concentra en un corredor para lograr densidad operacional.</p>
@@ -317,13 +317,13 @@
   <tr><td>U7m</td><td>—</td><td>Multas + comprobante + banco obligatorio</td><td>SQL 022–025, bank-gate</td><td>May 2026</td><td class="g-done">Hecho v0.0.57</td></tr>
   <tr><td>U13</td><td>—</td><td>QA automatizado + Laboratorio</td><td>Playwright, unit, CI, <code>/qa-lab</code></td><td>Jun 2026</td><td class="g-done">Hecho v0.0.125</td></tr>
   <tr><td>U14</td><td>—</td><td>Notificaciones activas vs historial</td><td><code>notification-visibility.js</code></td><td>Jun 2026</td><td class="g-done">Hecho v0.0.125</td></tr>
-  <tr><td>U15</td><td>—</td><td>Memoria v4.3 + docs hub</td><td>Gantt, paridad MVP cerrada, plan comercial</td><td>10 jun 2026</td><td class="g-done">Hecho</td></tr>
+  <tr><td>U15</td><td>—</td><td>Memoria v4.3 + docs hub</td><td>Gantt, paridad MVP cerrada, plan comercial</td><td>25 may 2026</td><td class="g-done">Hecho</td></tr>
   <tr><td>U16</td><td>—</td><td>Push FCM validado en teléfono físico</td><td>Segundo plano + acciones viaje</td><td>May 2026</td><td class="g-done">Cerrado</td></tr>
   <tr><td>U17</td><td>—</td><td>Contraseña fuerte + cambio clave APK</td><td><code>password-policy.js</code>, Seguridad Cuenta</td><td>v0.0.128</td><td class="g-done">Cerrado</td></tr>
   <tr><td>U18</td><td>—</td><td>Resend forgot/reset en prod</td><td>Errores visibles, cooldown 2 min, <code>/health</code> mail</td><td>v0.0.129</td><td class="g-done">Código cerrado</td></tr>
   <tr><td>U19</td><td>—</td><td>SQL verificación prod 23/23 + 014</td><td><code>RUN_VERIFY_ALL_MIGRATIONS.sql</code></td><td>May 2026</td><td class="g-done">Cerrado</td></tr>
   <tr><td colspan="6" style="background:#fff8e1;font-weight:bold">En curso — comercial y piloto (sem 1–16)</td></tr>
-  <tr><td>E0</td><td>P0</td><td><strong>Dominio propio + Resend verificado</strong></td><td><code>getcubik.cl</code> · <code>EMAIL_FROM=no_reply@getcubik.cl</code> — <a href="DOMAIN-AND-EMAIL.md">DOMAIN-AND-EMAIL.md</a></td><td>Inmediato</td><td class="g-done"><strong>Cerrado</strong> jun 2026</td></tr>
+  <tr><td>E0</td><td>P0</td><td><strong>Dominio propio + Resend verificado</strong></td><td><code>getcubik.cl</code> · <code>EMAIL_FROM=no_reply@getcubik.cl</code> — <a href="DOMAIN-AND-EMAIL.md">DOMAIN-AND-EMAIL.md</a></td><td>Inmediato</td><td class="g-done"><strong>Cerrado</strong> may 2026</td></tr>
   <tr><td>C1</td><td>P0</td><td><strong>Demo comercial jueves</strong></td><td>Web prod + APK remoto; cuentas demo; guión <a href="DEMO-GUION.md">DEMO-GUION.md</a></td><td>Sem 1 (9–13 jun)</td><td class="g-doing"><strong>Esta semana</strong></td></tr>
   <tr><td>C2</td><td>P0</td><td>Checklist demo (login, emparejar, qa:lab)</td><td>6 ítems canvas «Antes del jueves»</td><td>Sem 1</td><td class="g-doing">En curso</td></tr>
   <tr><td>C2b</td><td>P0</td><td>Cuentas demo + viaje ejemplo embarcador/transportista</td><td>2 roles KYC approved + 1 match demo</td><td>Sem 1</td><td class="g-doing">En curso</td></tr>
@@ -343,7 +343,7 @@
   <tr><td>U7</td><td>P0</td><td>Cubik Saldo <strong>prod</strong> + escrow en ruta</td><td>Wallet, ledger, retención; tier $1M</td><td>Sem 2–8</td><td class="g-doing"><strong>En cola</strong></td></tr>
   <tr><td>U7d</td><td>P1</td><td>Voz enmascarada Twilio (opcional)</td><td>Botón Llamar; piloto OK con chat in-app</td><td>Si piloto lo exige</td><td class="g-todo">Opcional — no bloqueante</td></tr>
   <tr><td>C5</td><td>P1</td><td>Spike GPS background (Capacitor)</td><td>Plugin + servicio Android si piloto lo exige</td><td>Sem 4–9</td><td class="g-todo">Plan canvas</td></tr>
-  <tr><td>C6</td><td>P1</td><td>Validar push FCM en teléfono físico</td><td>Segundo plano + acciones de viaje</td><td>Sem 1–3</td><td class="g-done">Hecho 10 jun 2026</td></tr>
+  <tr><td>C6</td><td>P1</td><td>Validar push FCM en teléfono físico</td><td>Segundo plano + acciones de viaje</td><td>Sem 1–3</td><td class="g-done">Hecho may 2026</td></tr>
   <tr><td>U6c</td><td>P1</td><td>Reputación v0</td><td>Cancelaciones + incidentes por cuenta</td><td>Post 5 viajes</td><td class="g-todo">Plan</td></tr>
   <tr><td>U6d</td><td>P1</td><td>Evidencia entrega</td><td>Foto + timestamp</td><td>Post-piloto corto</td><td class="g-todo">Plan</td></tr>
   <tr><td colspan="6" style="background:#fafafa;font-weight:bold">Escala — sem 10+ (50+ empresas / 200 camiones)</td></tr>
@@ -418,7 +418,7 @@
   <tr><td>C8</td><td>Prep escala 50+/200 camiones + auditoría Maps</td><td>E/O</td><td>15-sep</td><td>29-sep</td><td></td><td></td><td></td><td>████</td><td></td><td></td><td></td><td></td><td></td><td></td><td class="g-todo">Sem 10–16</td></tr>
 </table>
 
-<h3>Avance fase 2 — resumen (10 jun 2026)</h3>
+<h3>Avance fase 2 — resumen (25 may 2026)</h3>
 <ul>
   <li>MVP digital núcleo + paridad UX: <strong>~95%</strong> (cerrado para piloto)</li>
   <li>Multas / cuenta (2.10a): <strong>~90%</strong> (falta wallet prod 2.10b)</li>
@@ -579,10 +579,10 @@
   <tr><td>Notificaciones</td><td>Archivo al cerrar/cancelar viaje; historial separado de activos</td><td><code>notification-visibility.js</code> · emparejamientos cerrados fuera de activos</td></tr>
   <tr><td>Plan comercial</td><td>Piloto 25 empresas + 50 transportistas; escala 50+/200 camiones; híbrido vs nativo</td><td>Canvas <code>cubik-plan-native-escala.canvas.tsx</code> · <a href="PLAN-COMERCIAL-PILOTO.md">PLAN-COMERCIAL-PILOTO.md</a></td></tr>
 </table>
-<p><strong>Deploy:</strong> commits <code>71de185</code> → <code>70723d1</code> · Railway <code>main</code> · presentación comercial jun 2026.</p>
+<p><strong>Deploy:</strong> commits <code>71de185</code> → <code>70723d1</code> · Railway <code>main</code> · presentación comercial may 2026.</p>
 
 <h2>Modelo de monetización, Cubik Saldo y checkout (diseño may 2026)</h2>
-<p><strong>Estado jun 2026:</strong> <strong>piloto operativo</strong> (v0.0.100–0.0.104) con comisiones 10/5 y flujo pago post-completado simulado. <strong>Pendiente producción:</strong> wallet real, ledger, retención al «En ruta», recarga pasarela. GMV piloto no genera ingreso real (solo simulación en UI).</p>
+<p><strong>Estado 25 may 2026:</strong> <strong>piloto operativo</strong> (v0.0.100–0.0.104) con comisiones 10/5 y flujo pago post-completado simulado. <strong>Pendiente producción:</strong> wallet real, ledger, retención al «En ruta», recarga pasarela. GMV piloto no genera ingreso real (solo simulación en UI).</p>
 
 <h3>Comisiones (take rate dual)</h3>
 <table>
@@ -638,7 +638,7 @@
   <li>Pasarela: Mercado Pago / recarga saldo; multas migran a cargo wallet o tarjeta tokenizada.</li>
 </ul>
 
-<h2>Próxima etapa (jun 2026)</h2>
+<h2>Próxima etapa (may 2026)</h2>
 <ol>
   <li><strong>P0 — Presentación comercial</strong> (jun): demo prod + APK remoto; pitch piloto 25 embarcadores + 50 transportistas.</li>
   <li><strong>P0 — Piloto M2</strong>: 20 viajes <code>completed</code> corredor RM ↔ Valparaíso/San Antonio.</li>
@@ -757,7 +757,7 @@
 <ul>
   <li>Match: corredor origen–destino, cubicación, peso; sugerencias automáticas en UI.</li>
   <li><strong>Precio:</strong> embarcador publica rango orientativo; transportista <strong>oferta CLP</strong> (puede estar fuera del rango); embarcador <strong>acepta</strong> para confirmar. Puede <strong>ampliar rango</strong> salvo que ya exista precio acordado con otro transportista en la misma carga.</li>
-  <li><strong>Rango sugerido:</strong> <code>POST /api/maps/budget-estimate</code> — referencia por distancia, peso y urgencia (defaults calibrados jun 2026: base <strong>$80.000</strong>, <strong>$450/km</strong>, <strong>$22/kg</strong>; configurable vía <code>BUDGET_*</code> en Railway); no bloquea ofertas.</li>
+  <li><strong>Rango sugerido:</strong> <code>POST /api/maps/budget-estimate</code> — referencia por distancia, peso y urgencia (defaults calibrados may 2026: base <strong>$80.000</strong>, <strong>$450/km</strong>, <strong>$22/kg</strong>; configurable vía <code>BUDGET_*</code> en Railway); no bloquea ofertas.</li>
   <li>Dirección: con Maps configurado, origen/destino deben elegirse de la lista Google.</li>
   <li>Cancelación: motivos; multas sugeridas; acuerdo mutuo bilateral.</li>
   <li>Roles: shipper ve sus cargas + mercado de ofertas; carrier ve mercado de cargas + sus ofertas; admin ve todo.</li>
@@ -788,6 +788,6 @@
   docs/            ← memoria HTML (este archivo)
   canvases/        ← estado de avance (Cursor)</code>
 
-<p class="meta"><em>Fin del documento — v4.5.2 (12 jun 2026): dominio getcubik.cl + Resend cerrados; Post-MVP aclarado (backlog vs MVP); contacto viaje piloto por chat/WhatsApp comercial; Twilio voz opcional. Foco: demo C1–C2 → piloto 25/50 → M2.</em></p>
+<p class="meta"><em>Fin del documento — v4.5.3 (25 may 2026): onboarding piloto por rubros (C3a–O4), dominio getcubik.cl + Resend cerrados, captación WhatsApp Meta. Foco: onboarding rubros → piloto 25/50 → M2.</em></p>
 </body>
 </html>

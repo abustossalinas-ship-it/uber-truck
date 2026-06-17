@@ -1,6 +1,6 @@
 # Checklist Post-MVP — validación en orden
 
-**Memoria:** v4.5.2 · **Software:** 0.0.129 · **Panel:** [/post-mvp-checklist.html](/post-mvp-checklist.html) · **API:** `GET /api/post-mvp/status`
+**Memoria:** v4.5.3 · **Software:** 0.0.129 · **Actualizado:** 25 may 2026 · **Panel:** [/post-mvp-checklist.html](/post-mvp-checklist.html) · **API:** `GET /api/post-mvp/status`
 
 ## ¿Qué es esta lista?
 
@@ -17,7 +17,7 @@ Validar y cerrar cada ítem **en orden** solo cuando negocio lo priorice.
 | # | Ítem | Estado | Notas |
 |---|------|--------|-------|
 | 1 | Login Gmail / Apple | **Diferido** | Post-M2 — [AUTH-AND-EMAIL-ROADMAP.md](./AUTH-AND-EMAIL-ROADMAP.md) |
-| 2 | Recuperar contraseña | **Cerrado** jun 2026 | getcubik.cl + Resend verificado — [DOMAIN-AND-EMAIL.md](./DOMAIN-AND-EMAIL.md) |
+| 2 | Recuperar contraseña | **Cerrado** may 2026 | getcubik.cl + Resend verificado — [DOMAIN-AND-EMAIL.md](./DOMAIN-AND-EMAIL.md) |
 | 2b | Política contraseña + cambio en app | **Cerrado** v0.0.128 | 8+ chars, mayúscula, número; APK Cuenta → Seguridad |
 | 3 | Pago en app (prod) | Pendiente | Wallet real + ledger; hoy piloto simulado OK |
 | 4 | Contacto en viaje | **Piloto cerrado sin Twilio** | Ver sección abajo — chat in-app + WhatsApp comercial |

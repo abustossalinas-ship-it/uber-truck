@@ -1,6 +1,6 @@
 # Dominio y correo transaccional — Cubik
 
-**Software:** 0.0.129 · **Actualizado:** 12 jun 2026
+**Software:** 0.0.129 · **Actualizado:** 25 may 2026
 
 Dominio **getcubik.cl** activo en Railway + Resend verificado. Reset de contraseña llega a **cualquier email** (Gmail, Yahoo, corporativo).
 
@@ -46,7 +46,7 @@ La marca en APK, correos y UI sigue siendo **Cubik**; el dominio es infraestruct
 
 ---
 
-## Estado Resend (jun 2026)
+## Estado Resend (may 2026)
 
 | Ítem | Estado |
 |------|--------|

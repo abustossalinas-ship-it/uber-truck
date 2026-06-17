@@ -45,7 +45,7 @@ No perseguir la app perfecta en web: construir **operación tipo Uber** con mark
 | E | Login Gmail / Apple | Diferido — post-piloto |
 | F | Panel admin KPIs | F1–F2 hecho v0.0.58 |
 
-## Siguiente etapa inmediata (may–jun 2026)
+## Siguiente etapa inmediata (may 2026)
 
 1. **Dominio propio** — comprar variante Cubik; DNS Resend; `EMAIL_FROM` en Railway.
 2. **Presentación comercial** — demo web prod + APK; guión [DEMO-GUION.md](./DEMO-GUION.md).

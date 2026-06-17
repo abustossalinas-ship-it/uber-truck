@@ -120,7 +120,7 @@ export default function EstadoAvanceUberTruck() {
       </Card>
 
       <Card>
-        <CardHeader title="Releases recientes (jun 2026)" />
+        <CardHeader title="Releases recientes (may 2026)" />
         <CardBody>
           <Table
             columns={[

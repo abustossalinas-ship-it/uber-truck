@@ -3,6 +3,7 @@
 const express = require('express');
 const whatsappCloud = require('../services/whatsapp-cloud');
 const whatsappBot = require('../lib/whatsapp-bot');
+const { lookupCarrierIdentity } = require('../lib/carrier-documents');
 
 const router = express.Router();
 
@@ -47,7 +48,9 @@ router.post('/webhook', async (req, res) => {
       continue;
     }
     try {
-      const { replies, skipped } = whatsappBot.handleInbound(msg);
+      const { replies, skipped } = await whatsappBot.handleInbound(msg, {
+        lookupCarrierIdentity,
+      });
       if (skipped || !replies.length) continue;
       for (const text of replies) {
         await whatsappCloud.sendText(msg.from, text);

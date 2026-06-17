@@ -110,6 +110,12 @@ const Comms = {
         ? '<p class="muted">Sin notificaciones.</p>'
         : rows
             .map((n) => {
+              const isAccount =
+                n.scope === 'account' || n.type === 'doc_expiring' || n.type === 'doc_expired';
+              const importantBadge =
+                n.priority === 'important'
+                  ? '<span class="notif-important-badge">Importante</span>'
+                  : '';
               const mutual = n.type === 'mutual_cancel';
               const tripsTypes = new Set([
                 'pilot_payment',
@@ -126,10 +132,14 @@ const Comms = {
                       ? `<button type="button" class="link-btn" data-goto-trips="${n.match_id}">Ver en Mis viajes</button>`
                       : '';
               const boardLink =
-                n.type === 'chat' || n.type === 'incident' || tripsTypes.has(n.type)
-                  ? ''
-                  : `<button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver emparejamiento</button>`;
-              const actions = mutual
+                isAccount
+                  ? `<button type="button" class="link-btn" data-goto-account-kyc>Ver validación</button>`
+                  : n.type === 'chat' || n.type === 'incident' || tripsTypes.has(n.type)
+                    ? ''
+                    : `<button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver emparejamiento</button>`;
+              const actions = isAccount
+                ? `<div class="notif-actions">${boardLink}</div>`
+                : mutual
                 ? `<div class="notif-actions">
           <button type="button" class="tab tab-sm notif-cta" data-open-cancel="${n.match_id}">Confirmar acuerdo mutuo</button>
           <button type="button" class="link-btn" data-scroll-match="${n.match_id}">Ver emparejamiento</button>
@@ -148,12 +158,13 @@ const Comms = {
               const headWhen =
                 n.type === 'price_offer' && n.offer_lines?.length > 1 ? '' : when ? `<time class="notif-date">${when}</time>` : '';
               return `
-        <article class="notif-item ${n.read_at ? '' : 'unread'}" data-id="${n.id}" data-match="${n.match_id}">
+        <article class="notif-item ${n.read_at ? '' : 'unread'}${isAccount ? ' notif-item--account' : ''}" data-id="${n.id}" data-match="${n.match_id || ''}">
           <div class="notif-head">
             <strong>${n.title}</strong>
+            ${importantBadge}
             ${headWhen}
           </div>
-          ${offerBody}
+          ${isAccount ? `<p class="muted">${n.body}</p>` : offerBody}
           ${actions}
         </article>`;
             })
@@ -393,6 +404,14 @@ document.getElementById('notif-list')?.addEventListener('click', async (e) => {
     document.getElementById('notif-panel').hidden = true;
     if (typeof scrollToTripCard === 'function') await scrollToTripCard(id);
     else if (typeof showTab === 'function') showTab('trips');
+    return;
+  }
+  const accountBtn = e.target.closest('[data-goto-account-kyc]');
+  if (accountBtn) {
+    document.getElementById('notif-panel').hidden = true;
+    if (typeof AppShell?.showTab === 'function') AppShell.showTab('account');
+    else if (typeof showTab === 'function') showTab('account');
+    document.getElementById('kyc-banner')?.scrollIntoView({ behavior: 'smooth' });
     return;
   }
   const scrollBtn = e.target.closest('[data-scroll-match]');

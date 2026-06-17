@@ -7,8 +7,17 @@ const WA_ME_PREFILL = {
   shipper:
     'Hola Cubik, soy empresa. Quiero información sobre publicar cargas y encontrar transportistas.',
   carrier:
-    'Hola Cubik, soy transportista. Quiero información sobre cargas disponibles para mi ruta.',
+    'Hola Cubik, soy transportista. Quiero enviar documentos para validar mi cuenta (CI, licencia, SOAP, seguro).',
 };
+
+const DOCS_ROLE_PICK = `*Documentos de validación — Cubik*
+
+¿Eres *transportista* o *empresa*?
+
+• Escribe *soy transportista* → checklist CI, licencia, SOAP y seguro
+• Escribe *soy empresa* → registro embarcador en getcubik.cl/app
+
+Si ya te registraste como transportista, responde *soy transportista* y te guiamos paso a paso.`;
 
 const WELCOME = {
   shipper: `👋 Bienvenido a Cubik.
@@ -132,12 +141,112 @@ const GENERIC = {
     'Eso lo revisa un agente de Cubik para darte una respuesta exacta. Escribe *humano* con tu nombre y empresa o flota.',
 };
 
+function identityPrompt() {
+  return `*Validación de cuenta — Cubik*
+Indica tu *RUT* (ej. 12.345.678-9), el *email* con el que te registraste en la app o tu *nombre completo*.
+
+Con eso verificamos si tu cuenta existe, está pendiente o aprobada, y qué documentos debes enviar.`;
+}
+
+function identityNotFound() {
+  return `No encontramos una cuenta transportista con esos datos.
+
+1. Regístrate primero en getcubik.cl/app (rol *transportista*)
+2. Vuelve aquí con tu *RUT* o *email* registrado
+3. Escribe *documentos* para el checklist
+
+¿Necesitas ayuda? Escribe *humano*.`;
+}
+
+function identityAmbiguous(count) {
+  return `Encontramos *${count}* cuentas con ese nombre. Indica tu *RUT* o *email* exacto de la app para identificarte.`;
+}
+
+function identityWrongRole() {
+  return 'Esa cuenta es de *empresa embarcadora*. Para transportistas regístrate en getcubik.cl/app con rol transportista.';
+}
+
+function formatExpiryLine(label, dateStr) {
+  if (!dateStr) return `• ${label}: sin fecha registrada`;
+  return `• ${label}: vence ${dateStr}`;
+}
+
+function carrierDocStatusLines(user) {
+  return [
+    formatExpiryLine('CI', user.doc_ci_expires_at),
+    formatExpiryLine('Licencia', user.doc_license_expires_at),
+    formatExpiryLine('Seguro', user.doc_insurance_expires_at),
+    formatExpiryLine('SOAP', user.doc_soap_expires_at),
+  ].join('\n');
+}
+
+function carrierPendingDocsMessage(user) {
+  return `*Cuenta encontrada — pendiente de validación*
+${user.full_name || 'Transportista'} · ${user.email}
+
+Tu cuenta aún no está aprobada. Envía por este WhatsApp:
+• Cédula (anverso/reverso)
+• Licencia vigente
+• SOAP + póliza RC/carga
+• Rubro + patente(s)
+
+Indica el *mismo email* de la app. Un agente completa el checklist en 24 h hábiles.`;
+}
+
+function carrierApprovedDocsMessage(user, compliance) {
+  const lines = carrierDocStatusLines(user);
+  let lead = `*Cuenta aprobada* — ${user.full_name || 'Transportista'}`;
+  if (compliance?.status === 'expiring' && compliance.expiring?.length) {
+    const warn = compliance.expiring.map((d) => d.label).join(', ');
+    lead += `\n⚠️ Por vencer: ${warn}`;
+  } else {
+    lead += '\n✅ Documentación al día según registros Cubik.';
+  }
+  return `${lead}
+
+${lines}
+
+¿Necesitas *actualizar* algún documento? Responde: *CI*, *licencia*, *seguro* o *SOAP* y envía foto legible.`;
+}
+
+function carrierExpiredDocsMessage(user, compliance) {
+  const names = (compliance?.expired || []).map((d) => d.label).join(', ');
+  return `*Cuenta bloqueada — documentación vencida*
+${user.full_name || 'Transportista'} · ${user.email}
+
+Vencido: ${names || 'documentos registrados'}.
+No puedes operar en la app hasta regularizar.
+
+Envía por WhatsApp la foto *actualizada* del documento vencido (fecha legible).
+Responde qué actualizas: *CI*, *licencia*, *seguro* o *SOAP*.`;
+}
+
+function docRenewInstruction(kind) {
+  const map = {
+    ci: 'Envía foto legible de tu *cédula* (anverso y reverso) con fecha de vencimiento visible.',
+    license:
+      'Envía foto de tu *licencia de conducir* vigente (clase y fecha de vencimiento legibles).',
+    insurance: 'Envía foto o PDF de tu *póliza RC/carga* con vigencia visible.',
+    soap: 'Envía foto de tu *SOAP* al día con patente y vigencia visibles.',
+  };
+  return `${map[kind] || map.ci}\nUn agente actualizará tu registro y te avisará en la app.`;
+}
+
 module.exports = {
   WA_ME_PREFILL,
+  DOCS_ROLE_PICK,
   WELCOME,
   MENU,
   HUMAN,
   FAQ,
   ONBOARDING_DOCS,
   GENERIC,
+  identityPrompt,
+  identityNotFound,
+  identityAmbiguous,
+  identityWrongRole,
+  carrierPendingDocsMessage,
+  carrierApprovedDocsMessage,
+  carrierExpiredDocsMessage,
+  docRenewInstruction,
 };

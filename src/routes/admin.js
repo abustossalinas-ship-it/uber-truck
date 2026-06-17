@@ -11,6 +11,7 @@ const {
   checklistProgress,
   validateOnboardingPatch,
 } = require('../lib/carrier-onboarding');
+const { syncUserDocumentCompliance } = require('../lib/kyc-gate');
 
 const router = express.Router();
 
@@ -80,6 +81,7 @@ router.patch('/users/:id/onboarding', authMiddleware, requireAdmin, async (req, 
       .select(USER_LIST_SELECT)
       .single();
     if (error) throw error;
+    await syncUserDocumentCompliance(data.id, data);
     res.json({
       ok: true,
       data: { ...data, onboarding_progress: checklistProgress(data) },

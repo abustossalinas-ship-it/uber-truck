@@ -1,5 +1,10 @@
 'use strict';
 
+const supabase = require('../services/supabase');
+
+const { validateRut } = require('./rut-chile');
+const { validateDocDateField, DOC_SELECT } = require('./carrier-documents');
+
 const RUBROS = [
   { id: 'construccion', label: 'Construcción / materiales' },
   { id: 'retail_alimentos', label: 'Retail / alimentos secos' },
@@ -10,8 +15,7 @@ const RUBROS = [
 
 const INSURANCE_LEVELS = ['A', 'B', 'C'];
 
-const ONBOARDING_SELECT =
-  'carrier_rubro, carrier_fleet_type, insurance_level, onboarding_doc_ci, onboarding_doc_license, onboarding_doc_soap, onboarding_doc_insurance, onboarding_vehicle_plates, onboarding_notes, onboarding_updated_at';
+const ONBOARDING_SELECT = `${DOC_SELECT}, carrier_rubro, carrier_fleet_type, insurance_level, onboarding_doc_ci, onboarding_doc_license, onboarding_doc_soap, onboarding_doc_insurance, onboarding_vehicle_plates, onboarding_notes, onboarding_updated_at`;
 
 function rubroLabel(id) {
   return RUBROS.find((r) => r.id === id)?.label || id || '—';
@@ -82,10 +86,57 @@ function validateOnboardingPatch(body) {
   if (body.onboarding_notes !== undefined) {
     patch.onboarding_notes = String(body.onboarding_notes || '').trim().slice(0, 2000) || null;
   }
+  if (body.national_rut !== undefined) {
+    const raw = String(body.national_rut || '').trim();
+    if (!raw) {
+      patch.national_rut = null;
+    } else {
+      const rut = validateRut(raw);
+      if (!rut.ok) return { error: rut.error || 'RUT inválido' };
+      patch.national_rut = rut.rut;
+    }
+  }
+  for (const [field, label] of [
+    ['doc_ci_expires_at', 'Vencimiento CI'],
+    ['doc_license_expires_at', 'Vencimiento licencia'],
+    ['doc_insurance_expires_at', 'Vencimiento seguro'],
+    ['doc_soap_expires_at', 'Vencimiento SOAP'],
+  ]) {
+    if (body[field] !== undefined) {
+      const parsed = validateDocDateField(body[field], label);
+      if (!parsed.ok) return { error: parsed.error };
+      if (parsed.value !== undefined) patch[field] = parsed.value;
+    }
+  }
   if (Object.keys(patch).length) {
     patch.onboarding_updated_at = new Date().toISOString();
   }
   return { patch };
+}
+
+function deriveCarrierKycPhase(kycStatus, progress, docsCompliance) {
+  if (docsCompliance === 'expired') return 'docs_expired';
+  if (kycStatus === 'approved') return 'approved';
+  if (kycStatus === 'rejected') return 'rejected';
+  if (!progress || !progress.complete) return 'docs_pending';
+  return 'admin_review';
+}
+
+async function attachOnboardingToUser(userRow) {
+  if (!userRow || userRow.role !== 'carrier' || !supabase.isConfigured()) {
+    return userRow;
+  }
+  const sb = supabase.getClient();
+  const { data, error } = await sb
+    .from('users')
+    .select(ONBOARDING_SELECT)
+    .eq('id', userRow.id)
+    .maybeSingle();
+  if (error) {
+    console.warn('[onboarding] campos no disponibles:', error.message);
+    return userRow;
+  }
+  return { ...userRow, ...(data || {}) };
 }
 
 module.exports = {
@@ -96,4 +147,6 @@ module.exports = {
   insuranceLabel,
   checklistProgress,
   validateOnboardingPatch,
+  deriveCarrierKycPhase,
+  attachOnboardingToUser,
 };

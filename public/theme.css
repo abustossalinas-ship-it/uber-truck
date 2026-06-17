@@ -2091,6 +2091,135 @@ select.offer-picked {
   margin: 0.35rem 0;
 }
 
+.kyc-tour {
+  margin: 0.75rem 0;
+  padding: 0.75rem;
+  border-radius: 8px;
+  background: var(--surface-cool);
+  border: 1px solid var(--border);
+}
+
+.kyc-tour-head {
+  margin: 0 0 0.65rem;
+  font-size: 0.95rem;
+}
+
+.kyc-tour-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.55rem;
+}
+
+.kyc-tour-step {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  padding: 0.55rem 0.65rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  opacity: 0.72;
+}
+
+.kyc-tour-step--active {
+  opacity: 1;
+  border-color: var(--brand-orange);
+  box-shadow: 0 0 0 1px rgba(247, 148, 29, 0.25);
+}
+
+.kyc-tour-step--partial {
+  opacity: 1;
+  border-color: var(--brand-blue);
+}
+
+.kyc-tour-step--done {
+  opacity: 1;
+  border-color: rgba(16, 185, 129, 0.45);
+  background: var(--status-ok-bg);
+}
+
+.kyc-tour-num {
+  flex-shrink: 0;
+  width: 1.6rem;
+  height: 1.6rem;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+  font-weight: 800;
+  background: var(--brand-gray-100);
+  color: var(--text-muted);
+}
+
+.kyc-tour-step--active .kyc-tour-num {
+  background: var(--brand-orange);
+  color: #fff;
+}
+
+.kyc-tour-step--done .kyc-tour-num {
+  background: var(--status-ok);
+  color: #fff;
+}
+
+.kyc-tour-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.86rem;
+}
+
+.kyc-tour-tool {
+  color: var(--brand-blue-dark);
+  font-weight: 600;
+  font-size: 0.82rem;
+}
+
+.kyc-tour-hint,
+.kyc-tour-tip {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.kyc-tour-cta {
+  display: inline-block;
+  margin-top: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  border-radius: 6px;
+  background: var(--brand-cyan, #0891b2);
+  color: #fff !important;
+  font-weight: 700;
+  font-size: 0.82rem;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.kyc-tour-future {
+  margin: 0.65rem 0 0;
+  font-size: 0.78rem;
+}
+
+.notif-important-badge {
+  display: inline-block;
+  margin-left: 0.35rem;
+  padding: 0.1rem 0.45rem;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  background: var(--status-warn-bg);
+  color: var(--brand-orange);
+  border: 1px solid rgba(247, 148, 29, 0.45);
+  vertical-align: middle;
+}
+
+.notif-item--account {
+  border-left: 3px solid var(--brand-orange);
+}
+
 body.kyc-pending #form-load button[type="submit"],
 body.kyc-pending #form-offer button[type="submit"],
 body.kyc-pending #btn-create-match {
@@ -3147,6 +3276,10 @@ body.kyc-pending #btn-create-match {
   gap: 0.75rem 1rem;
   margin: 0.5rem 0;
   font-size: 0.85rem;
+}
+
+.admin-onboarding-dates {
+  margin-top: 0.5rem;
 }
 
 .pill-warn {

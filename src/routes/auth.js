@@ -20,6 +20,12 @@ const { TRUCK_TYPES } = require('../lib/truck-capacity');
 const { fetchKycStatus } = require('../lib/kyc-gate');
 const { getUserPresence } = require('../lib/carrier-presence');
 const {
+  checklistProgress,
+  deriveCarrierKycPhase,
+  attachOnboardingToUser,
+} = require('../lib/carrier-onboarding');
+const { syncUserDocumentCompliance } = require('../lib/kyc-gate');
+const {
   canRequestForgot,
   forgotCooldownRemainingMs,
   findUserByEmail,
@@ -275,8 +281,9 @@ router.get('/me', authMiddleware, async (req, res) => {
   try {
     let user = { ...req.user };
     if (supabase.isConfigured() && req.user?.sub) {
-      const row = await fetchUserById(req.user.sub);
+      let row = await fetchUserById(req.user.sub);
       if (row) {
+        row = await attachOnboardingToUser(row);
         user = {
           id: row.id,
           sub: row.id,
@@ -293,6 +300,18 @@ router.get('/me', authMiddleware, async (req, res) => {
           location_updated_at: row.location_updated_at || null,
           default_truck_type_id: row.default_truck_type_id || null,
         };
+        if (user.role === 'carrier') {
+          user.onboarding_progress = checklistProgress(row);
+          const compliance = await syncUserDocumentCompliance(row.id, row);
+          user.document_compliance = compliance;
+          user.docs_compliance_status =
+            compliance?.status || row.docs_compliance_status || 'unknown';
+          user.kyc_phase = deriveCarrierKycPhase(
+            user.kyc_status,
+            user.onboarding_progress,
+            user.docs_compliance_status
+          );
+        }
       } else {
         user.kyc_status = await fetchKycStatus(req.user.sub);
       }

@@ -1,6 +1,23 @@
 'use strict';
 
-const { WELCOME, MENU, HUMAN, FAQ, GENERIC, ONBOARDING_DOCS } = require('./whatsapp-copy');
+const {
+  WELCOME,
+  MENU,
+  HUMAN,
+  FAQ,
+  GENERIC,
+  ONBOARDING_DOCS,
+  DOCS_ROLE_PICK,
+  identityPrompt,
+  identityNotFound,
+  identityAmbiguous,
+  identityWrongRole,
+  carrierPendingDocsMessage,
+  carrierApprovedDocsMessage,
+  carrierExpiredDocsMessage,
+  docRenewInstruction,
+} = require('./whatsapp-copy');
+const { evaluateDocumentCompliance } = require('./carrier-documents');
 
 const HUMAN_RE =
   /\b(humano|persona|ejecutivo|agente|soporte|hablar con|quiero hablar|atenci[oó]n)\b/i;
@@ -11,9 +28,13 @@ const REGISTER_RE = /\b(registro|registr|cuenta|crear cuenta|inscrib)\b/i;
 const DEMO_RE = /\b(demo|agendar|reuni[oó]n|presentaci[oó]n)\b/i;
 const TECH_RE = /\b(error|bug|no carga|pantalla|olvid[eé]|contraseña|password)\b/i;
 const DOCS_RE =
-  /\b(document|documentos|papeles|cedula|c[eé]dula|licencia|seguro|soap|rubro|patente|validar cuenta|enviar foto)\b/i;
+  /\b(document|documentos|papeles|cedula|c[eé]dula|licencia|seguro|soap|rubro|patente|validar cuenta|enviar foto|actualizar)\b/i;
+const RENEW_CI_RE = /\b(ci|c[eé]dula|carnet)\b/i;
+const RENEW_LICENSE_RE = /\blicencia\b/i;
+const RENEW_INSURANCE_RE = /\b(seguro|p[oó]liza|rc)\b/i;
+const RENEW_SOAP_RE = /\bsoap\b/i;
 
-/** @typedef {{ role: 'shipper'|'carrier'|null, welcomed: boolean, awaitingHuman: boolean, updatedAt: number }} Session */
+/** @typedef {{ role: 'shipper'|'carrier'|null, welcomed: boolean, awaitingHuman: boolean, docsIntent: boolean, awaitingIdentity: boolean, linkedUser: object|null, updatedAt: number }} Session */
 
 /** @type {Map<string, Session>} */
 const sessions = new Map();
@@ -63,6 +84,9 @@ function getSession(phone) {
       role: null,
       welcomed: false,
       awaitingHuman: false,
+      docsIntent: false,
+      awaitingIdentity: false,
+      linkedUser: null,
       updatedAt: Date.now(),
     });
   }
@@ -102,12 +126,45 @@ function pickFaq(session, token) {
   return null;
 }
 
+function startCarrierIdentityFlow(session) {
+  session.role = 'carrier';
+  session.awaitingIdentity = true;
+  session.docsIntent = false;
+  session.welcomed = true;
+}
+
+function repliesForLinkedCarrier(user) {
+  const compliance = evaluateDocumentCompliance(user);
+  if (compliance.status === 'expired') {
+    return [carrierExpiredDocsMessage(user, compliance)];
+  }
+  if (user.kyc_status === 'approved') {
+    return [carrierApprovedDocsMessage(user, compliance)];
+  }
+  if (user.kyc_status === 'rejected') {
+    return [
+      `Tu cuenta (${user.email}) fue *rechazada*. Escribe *humano* si crees que es un error.`,
+    ];
+  }
+  return [carrierPendingDocsMessage(user)];
+}
+
+function parseRenewalKind(lower) {
+  if (RENEW_CI_RE.test(lower)) return 'ci';
+  if (RENEW_LICENSE_RE.test(lower)) return 'license';
+  if (RENEW_INSURANCE_RE.test(lower)) return 'insurance';
+  if (RENEW_SOAP_RE.test(lower)) return 'soap';
+  return null;
+}
+
 /**
  * @param {string} text
  * @param {Session} session
- * @returns {string[]}
+ * @param {{ lookupCarrierIdentity?: (q: string) => Promise<object> }} [deps]
+ * @returns {Promise<string[]>}
  */
-function buildReplies(text, session) {
+async function buildReplies(text, session, deps = {}) {
+  const lookup = deps.lookupCarrierIdentity || null;
   const body = String(text || '').trim();
   const lower = body.toLowerCase();
   const replies = [];
@@ -119,6 +176,7 @@ function buildReplies(text, session) {
 
   if (ESCALATE_RE.test(lower) || HUMAN_RE.test(lower)) {
     session.awaitingHuman = true;
+    session.awaitingIdentity = false;
     replies.push(HUMAN[roleOf(session)]);
     return replies;
   }
@@ -130,8 +188,72 @@ function buildReplies(text, session) {
     return replies;
   }
 
+  if (session.awaitingIdentity && lookup) {
+    try {
+      const result = await lookup(body);
+      session.awaitingIdentity = false;
+      if (!result.found) {
+        if (result.reason === 'ambiguous') {
+          replies.push(identityAmbiguous(result.count));
+          session.awaitingIdentity = true;
+          return replies;
+        }
+        replies.push(identityNotFound());
+        session.awaitingIdentity = true;
+        return replies;
+      }
+      if (result.wrongRole) {
+        replies.push(identityWrongRole());
+        return replies;
+      }
+      session.linkedUser = result.user;
+      session.role = 'carrier';
+      replies.push(...repliesForLinkedCarrier(result.user));
+      return replies;
+    } catch (_e) {
+      replies.push('No pudimos validar tu cuenta ahora. Intenta de nuevo o escribe *humano*.');
+      return replies;
+    }
+  }
+
+  if (session.linkedUser?.kyc_status === 'approved') {
+    const renew = parseRenewalKind(lower);
+    if (renew) {
+      replies.push(docRenewInstruction(renew));
+      return replies;
+    }
+  }
+
+  if (DOCS_RE.test(lower)) {
+    if (!session.role) {
+      session.docsIntent = true;
+      replies.push(DOCS_ROLE_PICK);
+      return replies;
+    }
+    if (session.role === 'carrier' && lookup) {
+      startCarrierIdentityFlow(session);
+      replies.push(identityPrompt());
+      return replies;
+    }
+    session.welcomed = true;
+    session.docsIntent = false;
+    if (session.role === 'carrier') {
+      replies.push(ONBOARDING_DOCS.carrier, MENU.carrier);
+    } else {
+      replies.push(ONBOARDING_DOCS.shipper);
+    }
+    return replies;
+  }
+
   if (!session.welcomed) {
-    const role = session.role || detectRoleFromText(body) || 'shipper';
+    const detected = detectRoleFromText(body);
+    if (detected) session.role = detected;
+    if (session.docsIntent && session.role === 'carrier' && lookup) {
+      startCarrierIdentityFlow(session);
+      replies.push(identityPrompt());
+      return replies;
+    }
+    const role = session.role || detected || 'shipper';
     session.role = role;
     session.welcomed = true;
     replies.push(WELCOME[role], MENU[role]);
@@ -140,6 +262,11 @@ function buildReplies(text, session) {
 
   const menuChoice = parseMenuChoice(body);
   if (menuChoice) {
+    if (menuChoice === '6' && roleOf(session) === 'carrier' && lookup) {
+      startCarrierIdentityFlow(session);
+      replies.push(identityPrompt());
+      return replies;
+    }
     const ans = pickFaq(session, menuChoice);
     if (ans) {
       replies.push(ans, MENU[roleOf(session)]);
@@ -152,18 +279,16 @@ function buildReplies(text, session) {
     return replies;
   }
   if (REGISTER_RE.test(lower)) {
+    if (roleOf(session) === 'carrier' && lookup) {
+      startCarrierIdentityFlow(session);
+      replies.push(identityPrompt());
+      return replies;
+    }
     if (roleOf(session) === 'carrier') {
       replies.push(ONBOARDING_DOCS.carrier);
       return replies;
     }
     replies.push(GENERIC.register);
-    return replies;
-  }
-  if (DOCS_RE.test(lower)) {
-    replies.push(
-      roleOf(session) === 'carrier' ? ONBOARDING_DOCS.carrier : ONBOARDING_DOCS.shipper
-    );
-    if (roleOf(session) === 'carrier') replies.push(MENU.carrier);
     return replies;
   }
   if (DEMO_RE.test(lower)) {
@@ -194,14 +319,14 @@ function buildReplies(text, session) {
 
 /**
  * @param {{ from: string, text: string, messageId?: string }} inbound
- * @returns {{ replies: string[], session: Session, skipped: boolean }}
+ * @param {{ lookupCarrierIdentity?: (q: string) => Promise<object> }} [deps]
  */
-function handleInbound(inbound) {
+async function handleInbound(inbound, deps = {}) {
   if (isDuplicateMessageId(inbound.messageId)) {
     return { replies: [], session: getSession(inbound.from), skipped: true };
   }
   const session = getSession(inbound.from);
-  const replies = buildReplies(inbound.text, session);
+  const replies = await buildReplies(inbound.text, session, deps);
   return { replies, session, skipped: false };
 }
 
@@ -216,4 +341,5 @@ module.exports = {
   getSession,
   resetSessionsForTests,
   normalizePhone,
+  buildReplies,
 };

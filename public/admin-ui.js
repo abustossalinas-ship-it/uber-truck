@@ -85,8 +85,13 @@ function adminKycRoleLabel(role) {
 
 function renderAdminKycActions(u, tab) {
   if (tab === 'pending') {
+    const incomplete =
+      u.role === 'carrier' && u.onboarding_progress && !u.onboarding_progress.complete;
+    const disabled = incomplete
+      ? ' disabled title="Completa checklist C3a (7/7) antes de aprobar"'
+      : '';
     return `
-      <button type="button" class="btn-secondary" data-kyc-approve="${u.id}">Aprobar</button>
+      <button type="button" class="btn-secondary" data-kyc-approve="${u.id}"${disabled}>Aprobar</button>
       <button type="button" class="btn-danger" data-kyc-reject="${u.id}">Rechazar</button>`;
   }
   if (tab === 'approved') {
@@ -119,7 +124,16 @@ function renderCarrierOnboardingForm(u) {
   const chk = (field) => (u[field] ? 'checked' : '');
   return `
     <div class="admin-onboarding" data-onboarding-card="${u.id}">
-      <p class="admin-onboarding-title"><strong>Checklist C3a</strong> — docs vía WhatsApp</p>
+      <p class="admin-onboarding-title"><strong>Checklist C3a</strong> — docs vía WhatsApp (piloto manual)</p>
+      <p class="muted admin-onboarding-lead">Marca ítems recibidos por WhatsApp. Próximo paso producto (O2): upload de póliza en app con clasificación automática A/B/C.</p>
+      <label>RUT titular <input type="text" data-onb-field="national_rut" value="${escapeHtml(u.national_rut || '')}" placeholder="12.345.678-9" /></label>
+      <div class="admin-onboarding-grid admin-onboarding-dates">
+        <label>Vence CI <input type="date" data-onb-field="doc_ci_expires_at" value="${escapeHtml(u.doc_ci_expires_at || '')}" /></label>
+        <label>Vence licencia <input type="date" data-onb-field="doc_license_expires_at" value="${escapeHtml(u.doc_license_expires_at || '')}" /></label>
+        <label>Vence seguro <input type="date" data-onb-field="doc_insurance_expires_at" value="${escapeHtml(u.doc_insurance_expires_at || '')}" /></label>
+        <label>Vence SOAP <input type="date" data-onb-field="doc_soap_expires_at" value="${escapeHtml(u.doc_soap_expires_at || '')}" /></label>
+      </div>
+      ${u.docs_compliance_status ? `<p class="muted">Compliance docs: <strong>${escapeHtml(u.docs_compliance_status)}</strong></p>` : ''}
       <div class="admin-onboarding-grid">
         <label>Rubro <select data-onb-field="carrier_rubro">${rubroOpts}</select></label>
         <label>Nivel seguro <select data-onb-field="insurance_level">${insOpts}</select></label>

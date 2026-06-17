@@ -477,8 +477,38 @@ async function markNotificationRead(id) {
     .eq('id', id)
     .select()
     .single();
-  if (error) throw error;
+  if (error) {
+    if (error.code === 'PGRST116') return null;
+    throw error;
+  }
   return rowToApi(data);
+}
+
+async function markUserNotificationRead(id, userId) {
+  if (!userId) return null;
+  if (useJson()) return null;
+  const sb = supabase.getClient();
+  const { data, error } = await sb
+    .from('user_notifications')
+    .update({ read_at: new Date().toISOString() })
+    .eq('id', id)
+    .eq('user_id', userId)
+    .select()
+    .single();
+  if (error) {
+    if (error.code === 'PGRST116') return null;
+    throw error;
+  }
+  return {
+    id: data.id,
+    type: data.type,
+    title: data.title,
+    body: data.body,
+    read_at: data.read_at,
+    created_at: data.created_at,
+    scope: 'account',
+    priority: data.priority,
+  };
 }
 
 async function markReadForMatchTypes(forRole, matchId, types) {
@@ -556,6 +586,7 @@ module.exports = {
   buildPriceOfferDisplay,
   enrichPriceOfferNotification,
   markNotificationRead,
+  markUserNotificationRead,
   markReadForMatchTypes,
   markAllReadForMatch,
   unreadCount,

@@ -1,6 +1,11 @@
 'use strict';
 
 const supabase = require('../services/supabase');
+const {
+  evaluateDocumentCompliance,
+  docsBlockMessage,
+  syncUserDocumentCompliance,
+} = require('./carrier-documents');
 
 function kycEnforced() {
   if (!supabase.isConfigured()) return false;
@@ -9,38 +14,71 @@ function kycEnforced() {
   return process.env.NODE_ENV === 'production';
 }
 
-async function fetchKycStatus(userId) {
-  if (!userId || !supabase.isConfigured()) return 'approved';
+async function fetchOperatorGate(userId) {
+  if (!userId || !supabase.isConfigured()) {
+    return { kyc_status: 'approved', docs_compliance_status: 'unknown', compliance: null };
+  }
   const sb = supabase.getClient();
   const { data, error } = await sb
     .from('users')
-    .select('kyc_status')
+    .select(
+      'kyc_status, role, doc_ci_expires_at, doc_license_expires_at, doc_insurance_expires_at, doc_soap_expires_at, docs_compliance_status'
+    )
     .eq('id', userId)
     .maybeSingle();
   if (error) throw error;
-  return data?.kyc_status || 'pending';
+  if (!data) return { kyc_status: 'pending', docs_compliance_status: 'unknown', compliance: null };
+  const compliance =
+    data.role === 'carrier' ? evaluateDocumentCompliance(data) : null;
+  return {
+    kyc_status: data.kyc_status || 'pending',
+    docs_compliance_status: data.docs_compliance_status || compliance?.status || 'unknown',
+    compliance,
+  };
 }
 
-function kycBlockMessage(status) {
+async function fetchKycStatus(userId) {
+  const gate = await fetchOperatorGate(userId);
+  return gate.kyc_status;
+}
+
+function kycBlockMessage(status, compliance) {
+  if (compliance?.status === 'expired') {
+    return docsBlockMessage(compliance);
+  }
   if (status === 'rejected') {
     return 'Tu cuenta no fue aprobada para operar en el piloto. Contacta a soporte.';
   }
   return 'Tu cuenta está en revisión. Un administrador debe aprobarla antes de publicar o emparejar.';
 }
 
-/** Bloquea operaciones de marketplace si KYC no está aprobado (admin y demo sin JWT exentos). */
+/** Bloquea operaciones de marketplace si KYC no está aprobado o docs vencidos. */
 async function requireApprovedOperator(req, res, next) {
   if (!kycEnforced()) return next();
   if (!req.user?.sub) return next();
   if (req.user.role === 'admin') return next();
   try {
-    const status = await fetchKycStatus(req.user.sub);
-    req.user.kyc_status = status;
-    if (status === 'approved') return next();
+    const gate = await fetchOperatorGate(req.user.sub);
+    req.user.kyc_status = gate.kyc_status;
+    req.user.docs_compliance_status = gate.docs_compliance_status;
+    req.user.document_compliance = gate.compliance;
+
+    if (gate.compliance?.status === 'expired') {
+      return res.status(403).json({
+        ok: false,
+        error: docsBlockMessage(gate.compliance),
+        kyc_status: gate.kyc_status,
+        docs_compliance_status: 'expired',
+        docs_blocked: true,
+      });
+    }
+
+    if (gate.kyc_status === 'approved') return next();
     return res.status(403).json({
       ok: false,
-      error: kycBlockMessage(status),
-      kyc_status: status,
+      error: kycBlockMessage(gate.kyc_status, gate.compliance),
+      kyc_status: gate.kyc_status,
+      docs_compliance_status: gate.docs_compliance_status,
     });
   } catch (e) {
     console.error(e);
@@ -51,6 +89,8 @@ async function requireApprovedOperator(req, res, next) {
 module.exports = {
   kycEnforced,
   fetchKycStatus,
+  fetchOperatorGate,
   kycBlockMessage,
   requireApprovedOperator,
+  syncUserDocumentCompliance,
 };

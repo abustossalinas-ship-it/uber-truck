@@ -228,3 +228,16 @@ Total ~**10 camiones por rubro activo** antes de ampliar marketing masivo.
 | Landing transportistas | https://www.getcubik.cl/transportistas |
 | Landing empresas | https://www.getcubik.cl/empresas |
 | App | https://www.getcubik.cl/app |
+
+---
+
+## 10. Roadmap verificación (O1–O4)
+
+| ID | Entrega | Descripción |
+|----|---------|-------------|
+| **O1** | CI + reconocimiento facial | SDK tipo BCI Mach / Onfido / Verifik; piloto C3a usa WhatsApp + checklist manual |
+| **O2** | Licencia + póliza en app | Upload, OCR, match datos; clasificación seguro A/B/C automática sugerida |
+| **O3** | Rubros + matching | Restricciones por rubro y nivel de seguro en emparejamientos |
+| **O4** | Cola docs admin | Panel con fotos/PDFs, estados y auditoría (sustituye checkboxes) |
+
+**Tour app (jun 2026):** transportista pendiente ve pasos 1–4 con herramienta correcta (app vs WhatsApp) y progreso 0/7 hasta aprobación.

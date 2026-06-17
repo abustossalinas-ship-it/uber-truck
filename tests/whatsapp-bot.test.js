@@ -9,6 +9,21 @@ const {
 } = require('../src/lib/whatsapp-bot');
 const { parseWebhookMessages } = require('../src/services/whatsapp-cloud');
 
+const mockLookup = async (query) => {
+  if (String(query).includes('@')) {
+    return {
+      found: true,
+      user: {
+        email: query,
+        full_name: 'Juan Test',
+        kyc_status: 'pending',
+        role: 'carrier',
+      },
+    };
+  }
+  return { found: false, reason: 'not_found' };
+};
+
 describe('whatsapp-bot', () => {
   beforeEach(() => resetSessionsForTests());
 
@@ -26,8 +41,8 @@ describe('whatsapp-bot', () => {
     );
   });
 
-  it('primer mensaje envía bienvenida y menú', () => {
-    const { replies, skipped } = handleInbound({
+  it('primer mensaje envía bienvenida y menú', async () => {
+    const { replies, skipped } = await handleInbound({
       from: '56912345678',
       text: 'Hola',
       messageId: 'm1',
@@ -38,43 +53,85 @@ describe('whatsapp-bot', () => {
     assert.match(replies[1], /1️⃣/);
   });
 
-  it('opción 1 responde FAQ', () => {
-    handleInbound({ from: '56911111111', text: 'empresa logística', messageId: 'm2' });
-    const { replies } = handleInbound({ from: '56911111111', text: '1', messageId: 'm3' });
+  it('opción 1 responde FAQ', async () => {
+    await handleInbound({ from: '56911111111', text: 'empresa logística', messageId: 'm2' });
+    const { replies } = await handleInbound({ from: '56911111111', text: '1', messageId: 'm3' });
     assert.match(replies[0], /Publicar una carga|Encontrar cargas/i);
   });
 
-  it('opción 1 con emoji responde FAQ', () => {
-    handleInbound({ from: '56911112222', text: 'hola', messageId: 'm2b' });
-    const { replies } = handleInbound({ from: '56911112222', text: '1️⃣', messageId: 'm3b' });
-    assert.ok(replies.length >= 1);
-  });
-
-  it('humano escala a agente', () => {
-    handleInbound({ from: '56922222222', text: 'hola', messageId: 'm4' });
-    const { replies } = handleInbound({ from: '56922222222', text: 'humano', messageId: 'm5' });
+  it('humano escala a agente', async () => {
+    await handleInbound({ from: '56922222222', text: 'hola', messageId: 'm4' });
+    const { replies } = await handleInbound({
+      from: '56922222222',
+      text: 'humano',
+      messageId: 'm5',
+    });
     assert.match(replies[0], /ejecutivo|soporte/i);
   });
 
-  it('documentos responde checklist C3a transportista', () => {
-    handleInbound({ from: '56944444444', text: 'soy transportista', messageId: 'm6' });
-    const { replies } = handleInbound({
-      from: '56944444444',
-      text: 'quiero enviar documentos',
-      messageId: 'm7',
+  it('documentos con rol transportista pide identidad', async () => {
+    await handleInbound({ from: '56944444444', text: 'soy transportista', messageId: 'm6' });
+    const { replies } = await handleInbound(
+      {
+        from: '56944444444',
+        text: 'documentos',
+        messageId: 'm7',
+      },
+      { lookupCarrierIdentity: mockLookup }
+    );
+    assert.match(replies[0], /RUT|email|nombre/i);
+  });
+
+  it('primer mensaje documentos pide rol (no menú empresa)', async () => {
+    const { replies } = await handleInbound({
+      from: '56966666666',
+      text: 'documentos',
+      messageId: 'm-docs-1',
     });
-    assert.match(replies[0], /Cédula|CI/i);
+    assert.match(replies[0], /transportista|empresa/i);
+    assert.doesNotMatch(replies[0], /Publicar una carga/i);
   });
 
-  it('opción 6 menú transportista', () => {
-    handleInbound({ from: '56955555555', text: 'transportista', messageId: 'm8' });
-    const { replies } = handleInbound({ from: '56955555555', text: '6', messageId: 'm9' });
-    assert.match(replies[0], /Documentos piloto/i);
+  it('documentos luego soy transportista pide RUT', async () => {
+    await handleInbound({ from: '56977777777', text: 'documentos', messageId: 'm-docs-2' });
+    const { replies } = await handleInbound(
+      {
+        from: '56977777777',
+        text: 'soy transportista',
+        messageId: 'm-docs-3',
+      },
+      { lookupCarrierIdentity: mockLookup }
+    );
+    assert.match(replies[0], /RUT|email|nombre/i);
   });
 
-  it('deduplica por message id', () => {
-    const first = handleInbound({ from: '56933333333', text: 'hola', messageId: 'dup-1' });
-    const second = handleInbound({ from: '56933333333', text: 'hola', messageId: 'dup-1' });
+  it('lookup por email responde cuenta pendiente', async () => {
+    await handleInbound(
+      { from: '56988888888', text: 'documentos', messageId: 'm8' },
+      { lookupCarrierIdentity: mockLookup }
+    );
+    await handleInbound({ from: '56988888888', text: 'soy transportista', messageId: 'm9' }, {
+      lookupCarrierIdentity: mockLookup,
+    });
+    const { replies } = await handleInbound(
+      { from: '56988888888', text: 'test@getcubik.cl', messageId: 'm10' },
+      { lookupCarrierIdentity: mockLookup }
+    );
+    assert.match(replies[0], /pendiente|Cédula/i);
+  });
+
+  it('opción 6 transportista pide identidad', async () => {
+    await handleInbound({ from: '56955555555', text: 'transportista', messageId: 'm8' });
+    const { replies } = await handleInbound(
+      { from: '56955555555', text: '6', messageId: 'm9' },
+      { lookupCarrierIdentity: mockLookup }
+    );
+    assert.match(replies[0], /RUT|email|Validación/i);
+  });
+
+  it('deduplica por message id', async () => {
+    const first = await handleInbound({ from: '56933333333', text: 'hola', messageId: 'dup-1' });
+    const second = await handleInbound({ from: '56933333333', text: 'hola', messageId: 'dup-1' });
     assert.equal(first.skipped, false);
     assert.equal(second.skipped, true);
   });

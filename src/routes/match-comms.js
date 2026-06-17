@@ -236,6 +236,26 @@ router.get('/notifications/list', optionalAuth, async (req, res) => {
       visible.push({ ...row, match_status: match.status });
     }
     visible.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+
+    if (req.user?.sub) {
+      const { listUserNotifications } = require('../lib/carrier-documents');
+      const accountRows = await listUserNotifications(req.user.sub, 15);
+      for (const an of accountRows) {
+        visible.push({
+          id: an.id,
+          type: an.type,
+          title: an.title,
+          body: an.body,
+          read_at: an.read_at,
+          created_at: an.created_at,
+          priority: an.priority || 'normal',
+          scope: 'account',
+          match_id: null,
+        });
+      }
+      visible.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+    }
+
     const unread = visible.filter((n) => !n.read_at).length;
     res.json({ ok: true, data: visible, unread });
   } catch (e) {
@@ -266,7 +286,10 @@ router.patch('/notifications/:id/read', optionalAuth, async (req, res) => {
     if (!req.user?.role) {
       return res.status(401).json({ ok: false, error: 'Inicia sesión' });
     }
-    const data = await comms.markNotificationRead(req.params.id);
+    let data = await comms.markNotificationRead(req.params.id);
+    if (!data && req.user.sub) {
+      data = await comms.markUserNotificationRead(req.params.id, req.user.sub);
+    }
     if (!data) return res.status(404).json({ ok: false, error: 'No encontrada' });
     res.json({ ok: true, data });
   } catch (e) {

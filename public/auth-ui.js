@@ -249,9 +249,15 @@ async function finishAuthLogin(json, register) {
   showAuthOtpStep(false);
   document.getElementById('auth-panel').hidden = true;
   if (register && Auth.user?.kyc_status === 'pending' && Auth.user?.role !== 'admin') {
-    alert(
-      'Cuenta creada. Quedó en revisión: un administrador debe aprobarla antes de publicar o emparejar.'
-    );
+    if (Auth.user?.role === 'carrier') {
+      alert(
+        'Cuenta creada. Siguiente paso: envía CI, licencia, SOAP y seguro por WhatsApp Cubik (mismo email de la app). Revisa el tour en tu cuenta.'
+      );
+    } else {
+      alert(
+        'Cuenta creada. Quedó en revisión: un administrador debe aprobarla antes de publicar o emparejar.'
+      );
+    }
   }
   if (typeof Penalties !== 'undefined') Penalties.refresh();
 }

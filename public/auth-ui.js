@@ -17,6 +17,12 @@ const Auth = {
       company_name: user.company_name,
       phone: user.phone,
       kyc_status: user.kyc_status || 'pending',
+      kyc_phase: user.kyc_phase || null,
+      docs_compliance_status: user.docs_compliance_status || null,
+      onboarding_progress: user.onboarding_progress || null,
+      document_profile: user.document_profile || null,
+      document_compliance: user.document_compliance || null,
+      national_rut: user.national_rut || null,
       is_available: Boolean(user.is_available),
       last_lat: user.last_lat ?? null,
       last_lng: user.last_lng ?? null,
@@ -1367,5 +1373,22 @@ if (document.body.classList.contains('cubik-app') && !Auth.user) {
   }
   if (changePw) PasswordStrengthUI.attach(changePw);
 })();
+
+async function refreshAuthProfile() {
+  if (typeof Auth === 'undefined' || !Auth.token || typeof apiFetch !== 'function') return null;
+  try {
+    const res = await apiFetch('/api/auth/me');
+    const json = await res.json();
+    if (res.ok && json.user) {
+      Auth.save(Auth.token, json.user);
+      return json.user;
+    }
+  } catch (_e) {
+    /* ignore */
+  }
+  return null;
+}
+
+window.refreshAuthProfile = refreshAuthProfile;
 
 Auth.render();

@@ -180,6 +180,97 @@ async function attachOnboardingToUser(userRow) {
   return { ...userRow, ...(data || {}) };
 }
 
+/**
+ * Resumen solo lectura para app Cuenta (espejo checklist C3a admin).
+ * @param {object|null|undefined} user
+ * @param {object|null|undefined} [compliance]
+ */
+function buildCarrierDocumentProfile(user, compliance) {
+  if (!user || user.role !== 'carrier') return null;
+
+  const legalDocs = LEGAL_DOC_PAIRS.map((pair) => {
+    const verified = !!user[pair.check];
+    const expiresAt = user[pair.expiry] ? String(user[pair.expiry]).slice(0, 10) : null;
+    let status = 'missing';
+    if (verified && expiresAt) {
+      status = 'ok';
+      const tracked = compliance?.tracked?.find((t) => t.key === pair.expiry);
+      if (tracked && tracked.daysLeft < 0) status = 'expired';
+      else if (tracked && tracked.daysLeft <= (compliance?.warnDays ?? 30)) status = 'expiring';
+    } else if (verified || expiresAt) {
+      status = 'incomplete';
+    }
+    return {
+      key: pair.check,
+      label: pair.label,
+      verified,
+      expires_at: expiresAt,
+      status,
+    };
+  });
+
+  const meta = [
+    {
+      key: 'carrier_rubro',
+      label: 'Rubro',
+      value: rubroLabel(user.carrier_rubro),
+      ok: !!String(user.carrier_rubro || '').trim(),
+    },
+    {
+      key: 'insurance_level',
+      label: 'Nivel seguro',
+      value: insuranceLabel(user.insurance_level),
+      ok: !!String(user.insurance_level || '').trim(),
+    },
+    {
+      key: 'onboarding_vehicle_plates',
+      label: 'Patente(s)',
+      value: String(user.onboarding_vehicle_plates || '').trim() || '—',
+      ok: !!String(user.onboarding_vehicle_plates || '').trim(),
+    },
+    {
+      key: 'carrier_fleet_type',
+      label: 'Tipo flota',
+      value: String(user.carrier_fleet_type || '').trim() || '—',
+      ok: !!String(user.carrier_fleet_type || '').trim(),
+    },
+  ];
+
+  const progress = checklistProgress(user);
+  const missingLabels = [];
+  for (const doc of legalDocs) {
+    if (doc.status === 'missing' || doc.status === 'incomplete') missingLabels.push(doc.label);
+  }
+  for (const item of meta) {
+    if (!item.ok) missingLabels.push(item.label);
+  }
+
+  let warningMessage = null;
+  let warningLevel = 'info';
+  if (compliance?.status === 'expired' && compliance.expired?.length) {
+    warningLevel = 'danger';
+    warningMessage = `Documentación vencida: ${compliance.expired.map((d) => d.label).join(', ')}. Actualiza por WhatsApp Cubik (escribe documentos).`;
+  } else if (missingLabels.length) {
+    warningLevel = 'warn';
+    warningMessage = `Falta validar: ${missingLabels.join(', ')}. Envía fotos por WhatsApp Cubik (escribe documentos e indica tu RUT).`;
+  } else if (compliance?.status === 'expiring' && compliance.expiring?.length) {
+    warningLevel = 'warn';
+    warningMessage = `Documentos por vencer: ${compliance.expiring.map((d) => `${d.label} (${d.dateLabel})`).join(' · ')}.`;
+  }
+
+  return {
+    rut: user.national_rut || null,
+    legal_docs: legalDocs,
+    meta,
+    progress,
+    missing_labels: missingLabels,
+    warning_message: warningMessage,
+    warning_level: warningMessage ? warningLevel : null,
+    docs_compliance_status: compliance?.status || user.docs_compliance_status || 'unknown',
+    complete: Boolean(progress?.complete && !missingLabels.length),
+  };
+}
+
 module.exports = {
   RUBROS,
   INSURANCE_LEVELS,
@@ -193,4 +284,5 @@ module.exports = {
   LEGAL_DOC_PAIRS,
   deriveCarrierKycPhase,
   attachOnboardingToUser,
+  buildCarrierDocumentProfile,
 };

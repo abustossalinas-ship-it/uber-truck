@@ -8,6 +8,7 @@ const {
   validateLegalDocumentation,
   rubroLabel,
   deriveCarrierKycPhase,
+  buildCarrierDocumentProfile,
 } = require('../src/lib/carrier-onboarding');
 
 describe('carrier-onboarding', () => {
@@ -100,5 +101,22 @@ describe('carrier-onboarding', () => {
     });
     assert.equal(deriveCarrierKycPhase('pending', complete), 'admin_review');
     assert.equal(deriveCarrierKycPhase('approved', complete), 'approved');
+  });
+
+  it('buildCarrierDocumentProfile lista faltantes y advertencia', () => {
+    const profile = buildCarrierDocumentProfile(
+      {
+        role: 'carrier',
+        national_rut: '15363398-3',
+        onboarding_doc_ci: true,
+        doc_ci_expires_at: '2032-02-03',
+        kyc_status: 'approved',
+      },
+      { status: 'valid', tracked: [], warnDays: 30 }
+    );
+    assert.ok(profile.warning_message);
+    assert.ok(profile.missing_labels.includes('Licencia'));
+    assert.equal(profile.rut, '15363398-3');
+    assert.equal(profile.progress.done, 1);
   });
 });

@@ -57,7 +57,8 @@ body.cubik-app.app-authed[data-app-tab="account"] #app-account-admin-slot #admin
 body.cubik-app.app-authed[data-app-tab="account"] #app-account-admin-slot #admin-kyc-panel:not([hidden]),
 body.cubik-app.app-authed[data-app-tab="account"] #app-account-admin-slot #admin-ops-panel:not([hidden]),
 body.cubik-app.app-authed[data-app-tab="account"] #app-account-penalties-slot #account-penalties-panel:not([hidden]),
-body.cubik-app.app-authed[data-app-tab="account"] #app-account-kyc-slot #kyc-banner:not([hidden]) {
+body.cubik-app.app-authed[data-app-tab="account"] #app-account-kyc-slot #kyc-banner:not([hidden]),
+body.cubik-app.app-authed[data-app-tab="account"] #app-account-kyc-slot #carrier-docs-panel:not([hidden]) {
   display: block !important;
 }
 
@@ -911,6 +912,144 @@ body.cubik-app[data-app-role='admin']:not([data-app-super-admin]) #app-opt-carri
   font-size: 0.75rem;
   color: var(--text-muted);
   text-transform: capitalize;
+}
+
+.carrier-docs-panel {
+  margin-top: 0.75rem;
+}
+
+.carrier-docs-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.carrier-docs-head h3 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.carrier-docs-lead,
+.carrier-docs-foot {
+  font-size: 0.8125rem;
+  margin: 0.5rem 0;
+}
+
+.carrier-docs-alert {
+  border-radius: 10px;
+  padding: 0.65rem 0.75rem;
+  margin: 0.75rem 0;
+  font-size: 0.875rem;
+}
+
+.carrier-docs-alert--warn {
+  background: #fff7ed;
+  border: 1px solid #fdba74;
+  color: #9a3412;
+}
+
+.carrier-docs-alert--danger {
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #991b1b;
+}
+
+.carrier-docs-alert--ok {
+  background: #ecfdf5;
+  border: 1px solid #6ee7b7;
+  color: #065f46;
+}
+
+.carrier-docs-rut {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.35rem 0.75rem;
+  margin: 0.75rem 0;
+  font-size: 0.875rem;
+}
+
+.carrier-docs-rut dt {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.carrier-docs-rut dd {
+  margin: 0;
+  font-weight: 600;
+}
+
+.carrier-doc-list,
+.carrier-doc-meta {
+  list-style: none;
+  margin: 0.5rem 0 0;
+  padding: 0;
+}
+
+.carrier-doc-row {
+  display: flex;
+  gap: 0.65rem;
+  align-items: flex-start;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.carrier-doc-row:last-child {
+  border-bottom: none;
+}
+
+.carrier-doc-status {
+  width: 1.25rem;
+  text-align: center;
+  font-weight: 700;
+}
+
+.carrier-doc-row--ok .carrier-doc-status {
+  color: #059669;
+}
+
+.carrier-doc-row--warn .carrier-doc-status {
+  color: #d97706;
+}
+
+.carrier-doc-row--bad .carrier-doc-status {
+  color: #dc2626;
+}
+
+.carrier-doc-row--pending .carrier-doc-status {
+  color: var(--text-muted);
+}
+
+.carrier-doc-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  font-size: 0.875rem;
+}
+
+.carrier-doc-meta {
+  margin-top: 0.75rem;
+  border-top: 1px dashed var(--border);
+  padding-top: 0.5rem;
+}
+
+.carrier-doc-meta-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.35rem 0;
+  font-size: 0.8125rem;
+}
+
+.carrier-doc-meta-row--pending strong {
+  color: #b45309;
+}
+
+.carrier-docs-wa {
+  display: inline-block;
+  margin-top: 0.75rem;
+  text-decoration: none;
 }
 
 /* Cuenta */

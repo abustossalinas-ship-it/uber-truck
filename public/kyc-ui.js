@@ -126,6 +126,123 @@ function renderCarrierTourHtml(user, waUrl) {
     </div>`;
 }
 
+function accountKycRowMeta(user) {
+  if (!user || user.role !== 'carrier') {
+    return typeof kycStatusLabel === 'function' ? kycStatusLabel(user?.kyc_status) : user?.kyc_status || '—';
+  }
+  const profile = user.document_profile;
+  const progress = profile?.progress || user.onboarding_progress;
+  if (profile?.warning_level === 'danger') return 'Docs vencidos';
+  if (profile?.missing_labels?.length) {
+    return `${progress?.done ?? 0}/${progress?.total ?? 7} · pendiente`;
+  }
+  if (user.kyc_status === 'approved') return 'Aprobada';
+  if (typeof carrierPhaseLabel === 'function') return carrierPhaseLabel(user.kyc_phase);
+  return user.kyc_status || '—';
+}
+
+function formatDocExpiry(iso) {
+  if (!iso) return '—';
+  const s = String(iso).slice(0, 10);
+  const m = s.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!m) return s;
+  return `${m[3]}-${m[2]}-${m[1]}`;
+}
+
+function docStatusIcon(status) {
+  if (status === 'ok') return '✓';
+  if (status === 'expiring') return '⚠';
+  if (status === 'expired') return '✕';
+  if (status === 'incomplete') return '…';
+  return '○';
+}
+
+async function renderCarrierDocumentsPanel() {
+  const slot = document.getElementById('app-account-kyc-slot');
+  if (!slot) return;
+  let panel = document.getElementById('carrier-docs-panel');
+  if (!panel) {
+    panel = document.createElement('section');
+    panel.id = 'carrier-docs-panel';
+    panel.className = 'carrier-docs-panel card';
+    panel.hidden = true;
+    slot.appendChild(panel);
+  }
+
+  const user = typeof Auth !== 'undefined' ? Auth.user : null;
+  if (!user || user.role !== 'carrier') {
+    panel.hidden = true;
+    return;
+  }
+
+  const profile = user.document_profile;
+  if (!profile) {
+    panel.hidden = true;
+    return;
+  }
+
+  panel.hidden = false;
+  const wa = await loadCarrierWhatsAppUrl();
+  const progress = profile.progress;
+  const legalRows = (profile.legal_docs || [])
+    .map((doc) => {
+      const tone =
+        doc.status === 'ok'
+          ? 'ok'
+          : doc.status === 'expired'
+            ? 'bad'
+            : doc.status === 'expiring'
+              ? 'warn'
+              : 'pending';
+      return `<li class="carrier-doc-row carrier-doc-row--${tone}">
+        <span class="carrier-doc-status" aria-hidden="true">${docStatusIcon(doc.status)}</span>
+        <div class="carrier-doc-body">
+          <strong>${doc.label}</strong>
+          <span class="muted">Vence: ${formatDocExpiry(doc.expires_at)}</span>
+        </div>
+      </li>`;
+    })
+    .join('');
+
+  const metaRows = (profile.meta || [])
+    .map(
+      (item) =>
+        `<li class="carrier-doc-meta-row ${item.ok ? 'carrier-doc-meta-row--ok' : 'carrier-doc-meta-row--pending'}">
+          <span>${item.label}</span>
+          <strong>${item.value}</strong>
+        </li>`
+    )
+    .join('');
+
+  const warn = profile.warning_message
+    ? `<div class="carrier-docs-alert carrier-docs-alert--${profile.warning_level || 'warn'}" role="status">
+        <p>${profile.warning_message}</p>
+      </div>`
+    : `<div class="carrier-docs-alert carrier-docs-alert--ok" role="status">
+        <p>Documentación completa según registros Cubik.</p>
+      </div>`;
+
+  const waBtn = wa
+    ? `<a class="carrier-docs-wa btn-secondary" href="${wa}" target="_blank" rel="noopener">Enviar docs por WhatsApp</a>`
+    : '';
+
+  panel.innerHTML = `
+    <header class="carrier-docs-head">
+      <h3>Documentación legal</h3>
+      <span class="pill ${profile.complete ? 'pill-done' : 'pill-warn'}">Checklist ${progress?.done ?? 0}/${progress?.total ?? 7}</span>
+    </header>
+    <p class="muted carrier-docs-lead">Solo lectura — Cubik valida con las fotos que envías por WhatsApp. Los cambios los confirma el equipo en revisión.</p>
+    ${warn}
+    <dl class="carrier-docs-rut">
+      <dt>RUT titular</dt>
+      <dd>${profile.rut || '—'}</dd>
+    </dl>
+    <ul class="carrier-doc-list" aria-label="Documentos legales">${legalRows}</ul>
+    <ul class="carrier-doc-meta" aria-label="Datos operativos">${metaRows}</ul>
+    <p class="muted carrier-docs-foot">Estado KYC: ${kycStatusLabel(user.kyc_status)} · Vencimientos: ${profile.docs_compliance_status || '—'}</p>
+    ${waBtn}`;
+}
+
 async function renderKycBanner() {
   const el = document.getElementById('kyc-banner');
   if (!el) return;
@@ -138,9 +255,18 @@ async function renderKycBanner() {
   if (user.kyc_status === 'approved') {
     const docsExpired =
       user.docs_compliance_status === 'expired' || user.kyc_phase === 'docs_expired';
-    if (!docsExpired) {
+    const profile = user.document_profile;
+    const missingDocs = profile?.missing_labels?.length;
+    if (!docsExpired && !missingDocs) {
       el.hidden = true;
       document.body.classList.remove('kyc-pending');
+      await renderCarrierDocumentsPanel();
+      return;
+    }
+    if (!docsExpired && missingDocs) {
+      el.hidden = true;
+      document.body.classList.remove('kyc-pending');
+      await renderCarrierDocumentsPanel();
       return;
     }
   }
@@ -157,12 +283,14 @@ async function renderKycBanner() {
       ? 'Tu documentación venció y no puedes operar. Solo puedes actualizar documentos por WhatsApp Cubik (escribe <strong>documentos</strong> e indica tu RUT).'
       : 'Completa la validación para operar. Sigue el tour: cada paso indica qué herramienta usar (app o WhatsApp).';
     el.innerHTML = `<div class="kyc-banner-inner kyc-banner-inner--blocked"><p>${msg}</p>${tour}<p class="muted">Estado KYC: ${kycStatusLabel(user.kyc_status)} · Docs: ${user.docs_compliance_status || '—'}</p></div>`;
+    await renderCarrierDocumentsPanel();
     return;
   }
 
   if (user.kyc_status === 'approved') {
     el.hidden = true;
     document.body.classList.remove('kyc-pending');
+    await renderCarrierDocumentsPanel();
     return;
   }
 
@@ -174,6 +302,7 @@ async function renderKycBanner() {
       ? 'Tu cuenta no está habilitada para operar en el piloto. Escríbenos si crees que es un error.'
       : 'Tu cuenta está <strong>en revisión</strong>. Puedes explorar la app, pero aún no puedes publicar cargas ni emparejar hasta que un administrador te apruebe.';
   el.innerHTML = `<div class="kyc-banner-inner"><p>${msg}</p><p class="muted">Estado: ${kycStatusLabel(user.kyc_status)}</p></div>`;
+  await renderCarrierDocumentsPanel();
 }
 
 function assertCanOperate() {
@@ -254,5 +383,7 @@ function handleApiKycError(res, json) {
 
 window.isOperatorApproved = isOperatorApproved;
 window.renderKycBanner = renderKycBanner;
+window.renderCarrierDocumentsPanel = renderCarrierDocumentsPanel;
+window.accountKycRowMeta = accountKycRowMeta;
 window.assertCanOperate = assertCanOperate;
 window.handleApiKycError = handleApiKycError;

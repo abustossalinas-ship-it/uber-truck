@@ -455,10 +455,14 @@ const AppShell = {
     }
     if (tab === 'home') this.renderHome();
     if (tab === 'account') {
-      this.renderAccount();
-      if (typeof refreshAdminHubNav === 'function') refreshAdminHubNav();
-      if (typeof refreshAdminKycPanel === 'function') refreshAdminKycPanel();
-      if (typeof refreshAdminOpsPanel === 'function') refreshAdminOpsPanel();
+      (async () => {
+        if (typeof refreshAuthProfile === 'function') await refreshAuthProfile();
+        this.renderAccount();
+        if (typeof refreshAdminHubNav === 'function') refreshAdminHubNav();
+        if (typeof refreshAdminKycPanel === 'function') refreshAdminKycPanel();
+        if (typeof refreshAdminOpsPanel === 'function') refreshAdminOpsPanel();
+        if (typeof renderKycBanner === 'function') await renderKycBanner();
+      })();
     }
   },
 
@@ -611,7 +615,10 @@ const AppShell = {
       });
     }
     if (sections) {
-      const kyc = user.kyc_status || 'pending';
+      const kycMeta =
+        typeof accountKycRowMeta === 'function'
+          ? accountKycRowMeta(user)
+          : user.kyc_status || 'pending';
       const chevron =
         '<svg class="app-profile-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>';
       sections.innerHTML = `
@@ -620,7 +627,7 @@ const AppShell = {
           <nav class="app-profile-menu">
             <button type="button" class="app-profile-row" data-profile-action="kyc">
               <span>Verificación KYC</span>
-              <span class="app-profile-row-end"><span class="app-profile-row-meta">${kyc}</span>${chevron}</span>
+              <span class="app-profile-row-end"><span class="app-profile-row-meta">${kycMeta}</span>${chevron}</span>
             </button>
           </nav>
         </section>
@@ -665,7 +672,9 @@ const AppShell = {
         else document.getElementById('btn-change-password')?.click();
       });
       sections.querySelector('[data-profile-action="kyc"]')?.addEventListener('click', () => {
-        document.getElementById('kyc-banner')?.scrollIntoView({ behavior: 'smooth' });
+        const target =
+          document.getElementById('carrier-docs-panel') || document.getElementById('kyc-banner');
+        target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
       });
       sections.querySelector('[data-profile-action="penalties"]')?.addEventListener('click', () => {
         document.getElementById('account-penalties-panel')?.scrollIntoView({ behavior: 'smooth' });

@@ -23,6 +23,7 @@ const {
   checklistProgress,
   deriveCarrierKycPhase,
   attachOnboardingToUser,
+  buildCarrierDocumentProfile,
 } = require('../lib/carrier-onboarding');
 const { syncUserDocumentCompliance } = require('../lib/kyc-gate');
 const {
@@ -311,6 +312,16 @@ router.get('/me', authMiddleware, async (req, res) => {
             user.onboarding_progress,
             user.docs_compliance_status
           );
+          user.document_profile = buildCarrierDocumentProfile(row, compliance);
+          user.national_rut = row.national_rut || null;
+          user.doc_ci_expires_at = row.doc_ci_expires_at || null;
+          user.doc_license_expires_at = row.doc_license_expires_at || null;
+          user.doc_insurance_expires_at = row.doc_insurance_expires_at || null;
+          user.doc_soap_expires_at = row.doc_soap_expires_at || null;
+          user.carrier_rubro = row.carrier_rubro || null;
+          user.insurance_level = row.insurance_level || null;
+          user.onboarding_vehicle_plates = row.onboarding_vehicle_plates || null;
+          user.carrier_fleet_type = row.carrier_fleet_type || null;
         }
       } else {
         user.kyc_status = await fetchKycStatus(req.user.sub);

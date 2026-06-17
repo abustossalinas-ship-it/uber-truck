@@ -247,7 +247,7 @@ function docRenewInstruction(kind) {
   const map = {
     ci: 'Envía foto legible de tu *cédula* (anverso y reverso) con fecha de vencimiento visible.',
     license:
-      'Envía foto de tu *licencia de conducir* vigente (clase y *fecha de control* legibles). En Chile la *fecha de control* es la de vencimiento.',
+      'Envía *solo el anverso* de tu licencia (foto grande, buena luz). Debe verse *N° de licencia*, nombre y *fecha de control*.',
     insurance: 'Envía foto o PDF de tu *póliza RC/carga* con vigencia visible.',
     soap: 'Envía foto de tu *SOAP* al día con patente y vigencia visibles.',
   };
@@ -341,12 +341,16 @@ Reenvía con buena luz, sin reflejos y ${dateHint}. Escribe *CI* o *licencia* an
     const label = docType === 'license' ? 'licencia' : 'cédula';
     const missing =
       reason === 'missing_rut'
-        ? 'el RUT'
+        ? 'el RUT (N° de licencia)'
         : docType === 'license'
           ? 'la *fecha de control* (vencimiento)'
           : 'la fecha de vencimiento';
+    const tip =
+      docType === 'license'
+        ? '\nEnvía *solo el anverso*, foto grande con buena luz (no anverso+reverso juntos).'
+        : '';
     return `Leímos tu ${label}, pero falta ${missing} legible.
-Reenvía foto más nítida con todos los datos visibles.`;
+Reenvía foto más nítida con todos los datos visibles.${tip}`;
   }
   if (reason === 'vision_error' || reason === 'download_failed' || reason === 'db_error' || reason === 'tesseract_error') {
     return `Recibimos tu archivo, pero hubo un error técnico al leerlo. Intenta de nuevo en 1 minuto o escribe *humano*.`;

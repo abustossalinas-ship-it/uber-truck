@@ -48,6 +48,16 @@ FECHA DE CONTROL 03/02/2026
 MUNICIPALIDAD CALERA DE TANGO
 `;
 
+const SAMPLE_LICENSE_COMMA = `
+LICENCIA DE CONDUCTOR
+REPUBLICA DE CHILE
+N° DE LICENCIA 15,363,398-3
+NOMBRES ARIEL GUILLERMO
+APELLIDOS BUSTOS SALINAS
+FECHA DE CONTROL 03/02/2030
+15363398-3
+`;
+
 describe('chile-document-parser', () => {
   it('parseChileanDocDate entiende DD MMM YYYY', () => {
     assert.equal(parseChileanDocDate('03 FEB 2032'), '2032-02-03');
@@ -96,6 +106,25 @@ describe('chile-document-parser', () => {
     assert.equal(namesMatch('Juan Bastidas', 'JUAN BASTIDAS'), true);
     assert.equal(namesMatch('ARIEL GUILLERMO BUSTOS SALINAS', 'Ariel Guillermo Bustos Salinas'), true);
     assert.equal(namesMatch('Pedro Perez', 'Juan Bastidas'), false);
+  });
+
+  it('extrae RUT con comas desde N DE LICENCIA', () => {
+    const ruts = extractRutCandidates(SAMPLE_LICENSE_COMMA);
+    assert.ok(ruts.includes('15363398-3'));
+    const parsed = parseChileanDocument(SAMPLE_LICENSE_COMMA, { hint: 'license' });
+    assert.equal(parsed.ok, true);
+    assert.equal(parsed.rut, '15363398-3');
+    assert.equal(parsed.expiresAt, '2030-02-03');
+  });
+
+  it('licencia sin RUT OCR usa fecha y nombre si cuenta ya tiene RUT', () => {
+    const parsed = parseChileanDocument(
+      'LICENCIA DE CONDUCTOR NOMBRES JUAN APELLIDOS BASTIDAS FECHA DE CONTROL 03/03/2020',
+      { hint: 'license' }
+    );
+    assert.equal(parsed.ok, true);
+    assert.equal(parsed.rut, null);
+    assert.equal(parsed.expiresAt, '2020-03-03');
   });
 
   it('respeta hint licencia si OCR ambiguo', () => {

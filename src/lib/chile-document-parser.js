@@ -30,7 +30,39 @@ const MONTHS = {
   DICIEMBRE: 11,
 };
 
-const RUT_RE = /\b(\d{1,2}\.?\d{3}\.?\d{3}[\s-]*[\dkK])\b/g;
+const RUT_RE = /\b(\d{1,2}[.,]?\d{3}[.,]?\d{3}[\s-]*[\dkK])\b/gi;
+
+function scrubRutOcrText(text) {
+  return String(text || '')
+    .toUpperCase()
+    .replace(/[OØ]/g, '0')
+    .replace(/(\d)[,.](\d{3})[,.](\d{3})/g, '$1.$2.$3')
+    .replace(/(\d)\s+(\d{3})\s+(\d{3})/g, '$1.$2.$3');
+}
+
+function extractRutCandidates(text) {
+  const scrubbed = scrubRutOcrText(text);
+  const found = [];
+  for (const match of scrubbed.matchAll(RUT_RE)) {
+    const rut = validateRut(match[1]);
+    if (rut.ok) found.push(rut.rut);
+  }
+  for (const match of scrubbed.matchAll(/\bRUN[\s:]*([\d.]{8,12}[\s-]*[\dK])\b/gi)) {
+    const rut = validateRut(match[1]);
+    if (rut.ok) found.push(rut.rut);
+  }
+  for (const match of scrubbed.matchAll(
+    /N[°ºO*]?\s*(?:DE\s+)?LICENCIA[\s:]*([\d.,\s-]{8,18}[\dK])/gi
+  )) {
+    const rut = validateRut(match[1]);
+    if (rut.ok) found.push(rut.rut);
+  }
+  for (const match of scrubbed.matchAll(/\b(\d{7,8}[\s-][\dK])\b/g)) {
+    const rut = validateRut(match[1]);
+    if (rut.ok) found.push(rut.rut);
+  }
+  return [...new Set(found)];
+}
 
 function normalizeOcrText(text) {
   return String(text || '')
@@ -82,20 +114,6 @@ function parseChileanDocDate(raw) {
   }
 
   return null;
-}
-
-function extractRutCandidates(text) {
-  const upper = String(text || '').toUpperCase();
-  const found = [];
-  for (const match of upper.matchAll(RUT_RE)) {
-    const rut = validateRut(match[1]);
-    if (rut.ok) found.push(rut.rut);
-  }
-  for (const match of upper.matchAll(/\bRUN[\s:]*([\d.]{8,12}[\s-]*[\dK])\b/gi)) {
-    const rut = validateRut(match[1]);
-    if (rut.ok) found.push(rut.rut);
-  }
-  return [...new Set(found)];
 }
 
 function scoreCi(text) {
@@ -286,7 +304,7 @@ function parseChileanDocument(text, opts = {}) {
     };
   }
 
-  if (!ruts.length && (docType === 'ci' || docType === 'license')) {
+  if (!ruts.length && docType === 'ci') {
     return {
       ok: false,
       reason: 'missing_rut',

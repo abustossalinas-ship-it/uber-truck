@@ -314,7 +314,8 @@ async function applyWhatsappDocumentExtract(userId, parsed) {
     patch.onboarding_doc_ci = true;
   } else if (parsed.docType === 'license') {
     if (!parsed.expiresAt) return { ok: false, reason: 'missing_expiry', docType: 'license' };
-    if (!parsed.rut && !user.national_rut) return { ok: false, reason: 'missing_rut', docType: 'license' };
+    const effectiveRut = parsed.rut || user.national_rut;
+    if (!effectiveRut) return { ok: false, reason: 'missing_rut', docType: 'license' };
     if (parsed.fullName && user.full_name && !namesMatch(parsed.fullName, user.full_name)) {
       return {
         ok: false,
@@ -326,6 +327,9 @@ async function applyWhatsappDocumentExtract(userId, parsed) {
     }
     patch.doc_license_expires_at = parsed.expiresAt;
     patch.onboarding_doc_license = true;
+    if (!parsed.rut && user.national_rut) {
+      patch.national_rut = user.national_rut;
+    }
   } else {
     return { ok: false, reason: 'unsupported_doc_type', docType: parsed.docType };
   }

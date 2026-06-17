@@ -50,8 +50,19 @@ async function getTesseractWorker() {
  * @param {Buffer} buffer
  * @param {number} [rotateDeg]
  */
-async function prepareImageBuffer(buffer, rotateDeg = 0) {
+async function prepareImageBuffer(buffer, rotateDeg = 0, cropTopFraction = null) {
   let img = sharp(buffer).rotate().normalize().sharpen();
+  if (cropTopFraction != null && cropTopFraction > 0 && cropTopFraction < 1) {
+    const meta = await sharp(buffer).metadata();
+    const w = meta.width || 0;
+    const h = meta.height || 0;
+    if (w > 0 && h > 120) {
+      img = sharp(buffer)
+        .extract({ left: 0, top: 0, width: w, height: Math.max(120, Math.round(h * cropTopFraction)) })
+        .normalize()
+        .sharpen();
+    }
+  }
   if (rotateDeg) img = img.rotate(rotateDeg);
   return img.jpeg({ quality: 92 }).toBuffer();
 }
@@ -152,38 +163,42 @@ async function extractTextFromImage(buffer) {
  */
 async function readChileanDocumentFromImage(buffer, opts = {}) {
   const rotations = [0, 90, 270];
+  const cropFractions =
+    opts.hint === 'license' ? [null, 0.55] : [null];
   /** @type {{ score: number, parsed: object, text: string, engine: string } | null} */
   let best = null;
   /** @type {{ reason?: string, message?: string } | null} */
   let lastFail = null;
 
-  for (const deg of rotations) {
-    const prepared = await prepareImageBuffer(buffer, deg);
+  for (const crop of cropFractions) {
+    for (const deg of rotations) {
+      const prepared = await prepareImageBuffer(buffer, deg, crop);
 
-    /** @type {Array<{ ok: boolean, text?: string, reason?: string, engine?: string, message?: string }>} */
-    const attempts = [];
-    if (hasVisionApiKey()) {
-      attempts.push(await extractTextWithVision(prepared));
-    }
-    attempts.push(await extractTextWithTesseract(prepared));
+      /** @type {Array<{ ok: boolean, text?: string, reason?: string, engine?: string, message?: string }>} */
+      const attempts = [];
+      if (hasVisionApiKey()) {
+        attempts.push(await extractTextWithVision(prepared));
+      }
+      attempts.push(await extractTextWithTesseract(prepared));
 
-    for (const ocr of attempts) {
-      if (!ocr.ok) {
-        lastFail = { reason: ocr.reason, message: ocr.message };
-        continue;
-      }
-      const parsed = parseChileanDocument(ocr.text, opts);
-      const score = scoreOcrParse(parsed, ocr.text);
-      if (!best || score > best.score) {
-        best = {
-          score,
-          parsed: { ...parsed, ocrText: ocr.text },
-          text: ocr.text,
-          engine: ocr.engine || 'tesseract',
-        };
-      }
-      if (parsed.ok) {
-        return { ...parsed, ocrText: ocr.text, engine: ocr.engine || 'tesseract' };
+      for (const ocr of attempts) {
+        if (!ocr.ok) {
+          lastFail = { reason: ocr.reason, message: ocr.message };
+          continue;
+        }
+        const parsed = parseChileanDocument(ocr.text, opts);
+        const score = scoreOcrParse(parsed, ocr.text) + (crop ? 5 : 0);
+        if (!best || score > best.score) {
+          best = {
+            score,
+            parsed: { ...parsed, ocrText: ocr.text },
+            text: ocr.text,
+            engine: ocr.engine || 'tesseract',
+          };
+        }
+        if (parsed.ok) {
+          return { ...parsed, ocrText: ocr.text, engine: ocr.engine || 'tesseract' };
+        }
       }
     }
   }

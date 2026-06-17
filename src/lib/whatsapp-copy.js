@@ -241,14 +241,13 @@ function docRenewInstruction(kind) {
   return `${map[kind] || map.ci}
 
 📎 Envía la foto ahora por este chat.
-⚠️ *Hoy:* un agente revisa manualmente (sin OCR ni rostro automático aún).
-Cuando la validemos, actualizamos tu checklist en la app.`;
+🔍 Cubik *lee automáticamente* cédula y licencia (RUT + vencimiento) si la foto es legible.
+SOAP y seguro siguen con revisión manual por ahora.`;
 }
 
-const MEDIA_ACK_MANUAL = `⚠️ *Validación automática (CI + rostro + licencia)* está en roadmap O1–O2.
-Hoy Cubik solo *recibe* tus fotos; un agente las revisa y marca el checklist en el panel admin.`;
+const MEDIA_ACK_MANUAL = `⚠️ Si la foto no es legible, un agente revisará manualmente el checklist en el panel admin.`;
 
-function mediaReceivedAck({ label, count, uploadTarget }) {
+function mediaReceivedAck({ label, count, uploadTarget, ocrPending }) {
   const docLabel = label || 'documento';
   const extra =
     uploadTarget === 'ci'
@@ -256,11 +255,65 @@ function mediaReceivedAck({ label, count, uploadTarget }) {
       : uploadTarget === 'license'
         ? '\nAsegúrate que se vea *clase* y *fecha de vencimiento*.'
         : '';
+
+  if (ocrPending) {
+    return `✅ Recibimos tu ${docLabel} (archivo ${count}).
+
+🔍 *Leyendo documento…* En unos segundos te confirmamos si es *cédula* o *licencia*, con RUT y vencimiento.${extra}`;
+  }
+
   return `✅ Recibimos tu ${docLabel} (archivo ${count}).
 
 ${MEDIA_ACK_MANUAL}${extra}
 
 Puedes seguir enviando SOAP, seguro, etc. Escribe *humano* si necesitas ayuda.`;
+}
+
+function ocrDocumentApplied({ docType, rut, expiresAt, fullName, licenseClass }) {
+  const docLabel = docType === 'license' ? 'Licencia de conducir' : 'Cédula de identidad';
+  const lines = [`*${docLabel} validada automáticamente*`];
+  if (fullName && docType === 'ci') lines.push(`Nombre: ${fullName}`);
+  if (rut) lines.push(`RUT: ${rut}`);
+  if (expiresAt && expiresAt !== '—') lines.push(`Vence: ${expiresAt}`);
+  if (licenseClass && docType === 'license') lines.push(`Clase: ${licenseClass}`);
+  lines.push(
+    '',
+    '✅ Datos registrados en Cubik. Falta SOAP/seguro/rubro/patentes si aún no los enviaste.',
+    'Un agente puede contrastar el original antes de aprobar tu cuenta.'
+  );
+  return lines.join('\n');
+}
+
+function ocrDocumentFailed({ reason, docType, expectedRut, foundRut, hint }) {
+  if (reason === 'rut_mismatch') {
+    return `⚠️ El RUT leído (${foundRut || '—'}) no coincide con tu cuenta (${expectedRut || '—'}).
+Reenvía foto legible de *tu* cédula o escribe *humano*.`;
+  }
+  if (reason === 'unknown_document' || reason === 'no_text_detected' || reason === 'text_too_short') {
+    const suggest =
+      hint === 'license'
+        ? 'licencia de conducir'
+        : hint === 'ci'
+          ? 'cédula de identidad'
+          : 'cédula o licencia';
+    return `No pudimos leer tu ${suggest} en la foto (poca luz, borrosa o recortada).
+Reenvía con buena luz, sin reflejos y con *fecha de vencimiento* visible. Escribe *CI* o *licencia* antes de la foto.`;
+  }
+  if (reason === 'missing_expiry' || reason === 'missing_rut') {
+    const label = docType === 'license' ? 'licencia' : 'cédula';
+    return `Leímos tu ${label}, pero falta ${reason === 'missing_rut' ? 'el RUT' : 'la fecha de vencimiento'} legible.
+Reenvía foto más nítida con todos los datos visibles.`;
+  }
+  if (reason === 'vision_error' || reason === 'download_failed' || reason === 'db_error') {
+    return `Recibimos tu archivo, pero hubo un error técnico al leerlo. Intenta de nuevo en 1 minuto o escribe *humano*.`;
+  }
+  return `No pudimos validar el documento automáticamente. Reenvía foto legible o escribe *humano* para revisión manual.`;
+}
+
+function ocrNeedIdentity() {
+  return `Para registrar tu documento automáticamente, primero identifica tu cuenta:
+*documentos* → *soy transportista* → tu *RUT* o *email* de la app.
+Luego reenvía la foto de CI o licencia.`;
 }
 
 function mediaReceivedNeedIdentity() {
@@ -290,4 +343,7 @@ module.exports = {
   mediaReceivedAck,
   mediaReceivedNeedIdentity,
   MEDIA_ACK_MANUAL,
+  ocrDocumentApplied,
+  ocrDocumentFailed,
+  ocrNeedIdentity,
 };

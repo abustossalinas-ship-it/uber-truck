@@ -143,6 +143,43 @@ async function sendText(to, text) {
   return json;
 }
 
+/**
+ * Descarga binario de media recibida por webhook (imagen o PDF).
+ * @param {string} mediaId
+ * @returns {Promise<{ buffer: Buffer, mimeType: string|null }>}
+ */
+async function downloadMedia(mediaId) {
+  const c = config();
+  if (!c.configured) {
+    throw new Error('WhatsApp Cloud API no configurada');
+  }
+  const metaUrl = `https://graph.facebook.com/${c.graphVersion}/${encodeURIComponent(String(mediaId))}`;
+  const metaRes = await fetch(metaUrl, {
+    headers: { Authorization: `Bearer ${c.accessToken}` },
+  });
+  const meta = await metaRes.json().catch(() => ({}));
+  if (!metaRes.ok || !meta?.url) {
+    const err = new Error(meta?.error?.message || `WhatsApp media meta ${metaRes.status}`);
+    err.statusCode = metaRes.status;
+    err.details = meta;
+    throw err;
+  }
+
+  const fileRes = await fetch(String(meta.url), {
+    headers: { Authorization: `Bearer ${c.accessToken}` },
+  });
+  if (!fileRes.ok) {
+    const err = new Error(`WhatsApp media download ${fileRes.status}`);
+    err.statusCode = fileRes.status;
+    throw err;
+  }
+  const arrayBuffer = await fileRes.arrayBuffer();
+  return {
+    buffer: Buffer.from(arrayBuffer),
+    mimeType: meta.mime_type ? String(meta.mime_type) : null,
+  };
+}
+
 module.exports = {
   config,
   isConfigured,
@@ -150,4 +187,5 @@ module.exports = {
   verifyWebhookSignature,
   parseWebhookMessages,
   sendText,
+  downloadMedia,
 };

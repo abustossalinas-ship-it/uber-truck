@@ -20,6 +20,7 @@ const {
   mediaReceivedNeedIdentity,
 } = require('./whatsapp-copy');
 const { evaluateDocumentCompliance } = require('./carrier-documents');
+const { isDocumentOcrEnabled } = require('./document-ocr');
 
 const HUMAN_RE =
   /\b(humano|persona|ejecutivo|agente|soporte|hablar con|quiero hablar|atenci[oó]n)\b/i;
@@ -241,6 +242,7 @@ function buildMediaReplies(inbound, session) {
       label: uploadLabel(kind),
       count: session.receivedMediaCount,
       uploadTarget: kind,
+      ocrPending: Boolean(session.linkedUser && isDocumentOcrEnabled()),
     }),
   ];
 }

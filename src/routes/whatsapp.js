@@ -4,6 +4,8 @@ const express = require('express');
 const whatsappCloud = require('../services/whatsapp-cloud');
 const whatsappBot = require('../lib/whatsapp-bot');
 const { lookupCarrierIdentity } = require('../lib/carrier-documents');
+const { processWhatsappDocumentMedia } = require('../lib/whatsapp-document-media');
+const { isDocumentOcrEnabled } = require('../lib/document-ocr');
 
 const router = express.Router();
 
@@ -48,12 +50,17 @@ router.post('/webhook', async (req, res) => {
       continue;
     }
     try {
-      const { replies, skipped } = await whatsappBot.handleInbound(msg, {
+      const { replies, session, skipped } = await whatsappBot.handleInbound(msg, {
         lookupCarrierIdentity,
       });
       if (skipped || !replies.length) continue;
       for (const text of replies) {
         await whatsappCloud.sendText(msg.from, text);
+      }
+      if (msg.mediaId && !skipped && isDocumentOcrEnabled()) {
+        processWhatsappDocumentMedia(msg, session).catch((e) => {
+          console.error('[whatsapp-ocr] async', msg.from, e.message || e);
+        });
       }
     } catch (e) {
       console.error('[whatsapp] Error procesando mensaje', msg.from, e.message || e, e.details || '');
@@ -62,7 +69,11 @@ router.post('/webhook', async (req, res) => {
 });
 
 router.get('/status', (_req, res) => {
-  res.json({ ok: true, whatsapp: whatsappCloud.statusPayload() });
+  res.json({
+    ok: true,
+    whatsapp: whatsappCloud.statusPayload(),
+    document_ocr: { enabled: isDocumentOcrEnabled() },
+  });
 });
 
 module.exports = router;

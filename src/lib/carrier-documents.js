@@ -252,6 +252,69 @@ async function listUserNotifications(userId, limit = 20) {
   return data || [];
 }
 
+/**
+ * Persiste datos leídos de CI/licencia vía WhatsApp OCR.
+ * @param {string} userId
+ * @param {object} parsed resultado de parseChileanDocument / readChileanDocumentFromImage
+ */
+async function applyWhatsappDocumentExtract(userId, parsed) {
+  if (!userId || !parsed?.ok || !supabase.isConfigured()) {
+    return { ok: false, reason: parsed?.reason || 'invalid_input' };
+  }
+
+  const sb = supabase.getClient();
+  const select =
+    'id, role, email, full_name, national_rut, doc_ci_expires_at, doc_license_expires_at, doc_insurance_expires_at, doc_soap_expires_at, onboarding_doc_ci, onboarding_doc_license, onboarding_doc_soap, onboarding_doc_insurance, docs_compliance_status';
+
+  const { data: user, error } = await sb.from('users').select(select).eq('id', userId).maybeSingle();
+  if (error) throw error;
+  if (!user || user.role !== 'carrier') return { ok: false, reason: 'not_carrier' };
+
+  const patch = { onboarding_updated_at: new Date().toISOString() };
+
+  if (parsed.rut) {
+    const rutCheck = validateRut(parsed.rut);
+    if (!rutCheck.ok) return { ok: false, reason: 'invalid_rut' };
+    if (user.national_rut && user.national_rut !== rutCheck.rut) {
+      return {
+        ok: false,
+        reason: 'rut_mismatch',
+        expectedRut: user.national_rut,
+        foundRut: rutCheck.rut,
+      };
+    }
+    patch.national_rut = rutCheck.rut;
+  }
+
+  if (parsed.docType === 'ci') {
+    if (!parsed.expiresAt) return { ok: false, reason: 'missing_expiry', docType: 'ci' };
+    if (!parsed.rut && !user.national_rut) return { ok: false, reason: 'missing_rut', docType: 'ci' };
+    patch.doc_ci_expires_at = parsed.expiresAt;
+    patch.onboarding_doc_ci = true;
+  } else if (parsed.docType === 'license') {
+    if (!parsed.expiresAt) return { ok: false, reason: 'missing_expiry', docType: 'license' };
+    patch.doc_license_expires_at = parsed.expiresAt;
+    patch.onboarding_doc_license = true;
+  } else {
+    return { ok: false, reason: 'unsupported_doc_type', docType: parsed.docType };
+  }
+
+  const { error: updErr } = await sb.from('users').update(patch).eq('id', userId);
+  if (updErr) throw updErr;
+
+  const merged = { ...user, ...patch, role: 'carrier' };
+  const compliance = await syncUserDocumentCompliance(userId, merged);
+
+  return {
+    ok: true,
+    docType: parsed.docType,
+    patch,
+    parsed,
+    compliance,
+    user: merged,
+  };
+}
+
 module.exports = {
   DOC_EXPIRY_WARN_DAYS,
   DOC_SELECT,
@@ -263,5 +326,6 @@ module.exports = {
   lookupCarrierIdentity,
   syncUserDocumentCompliance,
   listUserNotifications,
+  applyWhatsappDocumentExtract,
   formatClDate,
 };

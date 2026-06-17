@@ -165,13 +165,39 @@ describe('whatsapp-bot', () => {
     assert.match(replies[0], /transportista|empresa/i);
   });
 
-  it('documentos desde menu reinicia validacion', async () => {
-    await handleInbound({ from: '56999999994', text: 'hola', messageId: 'trap-7' });
-    const { replies } = await handleInbound(
-      { from: '56999999994', text: 'documentos', messageId: 'trap-8' },
+  it('imagen sin identidad pide RUT primero', async () => {
+    const { replies } = await handleInbound({
+      from: '56988888880',
+      text: '',
+      mediaType: 'image',
+      mediaId: 'img-1',
+      messageId: 'media-1',
+    });
+    assert.match(replies[0], /documentos|RUT|email/i);
+  });
+
+  it('imagen tras identidad confirma recepcion manual', async () => {
+    await handleInbound(
+      { from: '56988888881', text: 'documentos', messageId: 'media-2' },
       { lookupCarrierIdentity: mockLookup }
     );
-    assert.match(replies[0], /transportista|empresa|RUT/i);
+    await handleInbound({ from: '56988888881', text: 'soy transportista', messageId: 'media-3' }, {
+      lookupCarrierIdentity: mockLookup,
+    });
+    await handleInbound(
+      { from: '56988888881', text: 'test@getcubik.cl', messageId: 'media-4' },
+      { lookupCarrierIdentity: mockLookup }
+    );
+    await handleInbound({ from: '56988888881', text: 'licencia', messageId: 'media-5' });
+    const { replies } = await handleInbound({
+      from: '56988888881',
+      text: '',
+      mediaType: 'image',
+      mediaId: 'img-2',
+      messageId: 'media-6',
+    });
+    assert.match(replies[0], /Recibimos/i);
+    assert.match(replies[0], /manual|roadmap|agente/i);
   });
 });
 
@@ -204,5 +230,35 @@ describe('whatsapp-cloud parse', () => {
     assert.equal(msgs[0].from, '56987654321');
     assert.equal(msgs[0].text, 'Hola Cubik');
     assert.equal(msgs[0].phoneNumberId, '123');
+  });
+
+  it('parsea mensaje de imagen del webhook', () => {
+    const payload = {
+      object: 'whatsapp_business_account',
+      entry: [
+        {
+          changes: [
+            {
+              value: {
+                metadata: { phone_number_id: '123' },
+                messages: [
+                  {
+                    from: '56987654321',
+                    id: 'wamid.img',
+                    type: 'image',
+                    image: { id: 'media-id-1', caption: 'mi licencia' },
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      ],
+    };
+    const msgs = parseWebhookMessages(payload);
+    assert.equal(msgs.length, 1);
+    assert.equal(msgs[0].mediaType, 'image');
+    assert.equal(msgs[0].mediaId, 'media-id-1');
+    assert.match(msgs[0].caption, /licencia/i);
   });
 });

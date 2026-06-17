@@ -27,7 +27,7 @@ flowchart LR
    - **Pendiente:** enviar checklist (fotos legibles).
    - **Aprobada:** consultar vencimientos registrados o actualizar CI / licencia / seguro / SOAP.
    - **Vencida:** cuenta bloqueada en app — solo actualizar docs por WhatsApp.
-6. Enviar fotos **legibles**:
+6. Enviar fotos **legibles** (el bot confirma recepción; **no** valida OCR ni rostro automático — revisión admin):
    - Cédula anverso/reverso
    - Licencia vigente
    - SOAP

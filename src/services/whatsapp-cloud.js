@@ -71,13 +71,41 @@ function parseWebhookMessages(body) {
       if (!value) continue;
       const phoneNumberId = value.metadata?.phone_number_id || null;
       for (const msg of value.messages || []) {
-        if (msg.type !== 'text' || !msg.text?.body) continue;
-        out.push({
-          from: String(msg.from || ''),
-          text: String(msg.text.body || ''),
-          messageId: String(msg.id || ''),
-          phoneNumberId: phoneNumberId ? String(phoneNumberId) : null,
-        });
+        if (msg.type === 'text' && msg.text?.body) {
+          out.push({
+            from: String(msg.from || ''),
+            text: String(msg.text.body || ''),
+            messageId: String(msg.id || ''),
+            phoneNumberId: phoneNumberId ? String(phoneNumberId) : null,
+            mediaType: null,
+            mediaId: null,
+            caption: '',
+          });
+          continue;
+        }
+        if (msg.type === 'image' && msg.image?.id) {
+          out.push({
+            from: String(msg.from || ''),
+            text: String(msg.image.caption || '').trim(),
+            messageId: String(msg.id || ''),
+            phoneNumberId: phoneNumberId ? String(phoneNumberId) : null,
+            mediaType: 'image',
+            mediaId: String(msg.image.id),
+            caption: String(msg.image.caption || '').trim(),
+          });
+          continue;
+        }
+        if (msg.type === 'document' && msg.document?.id) {
+          out.push({
+            from: String(msg.from || ''),
+            text: String(msg.document.caption || msg.document.filename || '').trim(),
+            messageId: String(msg.id || ''),
+            phoneNumberId: phoneNumberId ? String(phoneNumberId) : null,
+            mediaType: 'document',
+            mediaId: String(msg.document.id),
+            caption: String(msg.document.caption || msg.document.filename || '').trim(),
+          });
+        }
       }
     }
   }

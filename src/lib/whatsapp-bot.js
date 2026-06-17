@@ -16,6 +16,8 @@ const {
   carrierApprovedDocsMessage,
   carrierExpiredDocsMessage,
   docRenewInstruction,
+  mediaReceivedAck,
+  mediaReceivedNeedIdentity,
 } = require('./whatsapp-copy');
 const { evaluateDocumentCompliance } = require('./carrier-documents');
 
@@ -38,7 +40,7 @@ const RENEW_SOAP_RE = /\bsoap\b/i;
 
 const DOCS_INTENT_HINT = `Para *documentos* responde *soy transportista*, envía tu *RUT* / *email*, o escribe *volver* para reiniciar.`;
 
-/** @typedef {{ role: 'shipper'|'carrier'|null, welcomed: boolean, awaitingHuman: boolean, docsIntent: boolean, awaitingIdentity: boolean, linkedUser: object|null, updatedAt: number }} Session */
+/** @typedef {{ role: 'shipper'|'carrier'|null, welcomed: boolean, awaitingHuman: boolean, docsIntent: boolean, awaitingIdentity: boolean, linkedUser: object|null, uploadTarget: string|null, receivedMediaCount: number, updatedAt: number }} Session */
 
 /** @type {Map<string, Session>} */
 const sessions = new Map();
@@ -85,12 +87,16 @@ function resetSession(session) {
   session.docsIntent = false;
   session.awaitingIdentity = false;
   session.linkedUser = null;
+  session.uploadTarget = null;
+  session.receivedMediaCount = 0;
 }
 
 function restartDocumentFlow(session) {
   session.awaitingHuman = false;
   session.awaitingIdentity = false;
   session.linkedUser = null;
+  session.uploadTarget = null;
+  session.receivedMediaCount = 0;
   session.docsIntent = true;
   session.welcomed = false;
   session.role = null;
@@ -110,6 +116,8 @@ function getSession(phone) {
       docsIntent: false,
       awaitingIdentity: false,
       linkedUser: null,
+      uploadTarget: null,
+      receivedMediaCount: 0,
       updatedAt: Date.now(),
     });
   }
@@ -199,6 +207,44 @@ function parseRenewalKind(lower) {
   return null;
 }
 
+function uploadLabel(kind) {
+  if (kind === 'ci') return 'cédula (CI)';
+  if (kind === 'license') return 'licencia de conducir';
+  if (kind === 'insurance') return 'póliza de seguro';
+  if (kind === 'soap') return 'SOAP';
+  return 'documento';
+}
+
+function inDocumentUploadContext(session) {
+  return Boolean(
+    session.linkedUser ||
+      session.awaitingIdentity ||
+      session.docsIntent ||
+      session.uploadTarget ||
+      session.role === 'carrier'
+  );
+}
+
+function buildMediaReplies(inbound, session) {
+  const caption = String(inbound.caption || inbound.text || '').toLowerCase();
+  const kindFromCaption = parseRenewalKind(caption);
+  if (kindFromCaption) session.uploadTarget = kindFromCaption;
+
+  if (!inDocumentUploadContext(session)) {
+    return [mediaReceivedNeedIdentity()];
+  }
+
+  session.receivedMediaCount = (session.receivedMediaCount || 0) + 1;
+  const kind = session.uploadTarget || kindFromCaption;
+  return [
+    mediaReceivedAck({
+      label: uploadLabel(kind),
+      count: session.receivedMediaCount,
+      uploadTarget: kind,
+    }),
+  ];
+}
+
 /**
  * @param {string} text
  * @param {Session} session
@@ -265,9 +311,17 @@ async function buildReplies(text, session, deps = {}) {
   if (session.linkedUser?.kyc_status === 'approved') {
     const renew = parseRenewalKind(lower);
     if (renew) {
+      session.uploadTarget = renew;
       replies.push(docRenewInstruction(renew));
       return replies;
     }
+  }
+
+  if (!session.linkedUser && parseRenewalKind(lower)) {
+    session.uploadTarget = parseRenewalKind(lower);
+    session.role = session.role || 'carrier';
+    replies.push(docRenewInstruction(session.uploadTarget));
+    return replies;
   }
 
   if (!session.welcomed) {
@@ -385,7 +439,9 @@ async function handleInbound(inbound, deps = {}) {
     return { replies: [], session: getSession(inbound.from), skipped: true };
   }
   const session = getSession(inbound.from);
-  const replies = await buildReplies(inbound.text, session, deps);
+  const replies = inbound.mediaType
+    ? buildMediaReplies(inbound, session)
+    : await buildReplies(inbound.text, session, deps);
   return { replies, session, skipped: false };
 }
 
@@ -401,6 +457,7 @@ module.exports = {
   resetSessionsForTests,
   normalizePhone,
   buildReplies,
+  buildMediaReplies,
   resetSession,
   restartDocumentFlow,
 };

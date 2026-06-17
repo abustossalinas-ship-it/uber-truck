@@ -238,7 +238,36 @@ function docRenewInstruction(kind) {
     insurance: 'Envía foto o PDF de tu *póliza RC/carga* con vigencia visible.',
     soap: 'Envía foto de tu *SOAP* al día con patente y vigencia visibles.',
   };
-  return `${map[kind] || map.ci}\nUn agente actualizará tu registro y te avisará en la app.`;
+  return `${map[kind] || map.ci}
+
+📎 Envía la foto ahora por este chat.
+⚠️ *Hoy:* un agente revisa manualmente (sin OCR ni rostro automático aún).
+Cuando la validemos, actualizamos tu checklist en la app.`;
+}
+
+const MEDIA_ACK_MANUAL = `⚠️ *Validación automática (CI + rostro + licencia)* está en roadmap O1–O2.
+Hoy Cubik solo *recibe* tus fotos; un agente las revisa y marca el checklist en el panel admin.`;
+
+function mediaReceivedAck({ label, count, uploadTarget }) {
+  const docLabel = label || 'documento';
+  const extra =
+    uploadTarget === 'ci'
+      ? '\nSi falta el *reverso* de la cédula, envía otra foto.'
+      : uploadTarget === 'license'
+        ? '\nAsegúrate que se vea *clase* y *fecha de vencimiento*.'
+        : '';
+  return `✅ Recibimos tu ${docLabel} (archivo ${count}).
+
+${MEDIA_ACK_MANUAL}${extra}
+
+Puedes seguir enviando SOAP, seguro, etc. Escribe *humano* si necesitas ayuda.`;
+}
+
+function mediaReceivedNeedIdentity() {
+  return `Recibimos tu archivo, pero aún no identificamos tu cuenta.
+
+Escribe *documentos* → *soy transportista* → indica tu *RUT* o *email* de la app.
+Luego reenvía las fotos.`;
 }
 
 module.exports = {
@@ -258,4 +287,7 @@ module.exports = {
   carrierApprovedDocsMessage,
   carrierExpiredDocsMessage,
   docRenewInstruction,
+  mediaReceivedAck,
+  mediaReceivedNeedIdentity,
+  MEDIA_ACK_MANUAL,
 };

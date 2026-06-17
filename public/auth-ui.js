@@ -45,6 +45,8 @@ const Auth = {
         body: JSON.stringify(getAuthDevicePayload()),
       }).catch(() => {});
     }
+    if (typeof AppShell !== 'undefined') AppShell._docsSessionCheckDone = false;
+    this._docsSessionCheckDone = false;
     if (typeof clearRatedMatchIds === 'function') clearRatedMatchIds();
     this.token = null;
     this.user = null;
@@ -86,13 +88,6 @@ const Auth = {
       return;
     }
     if (typeof renderKycBanner === 'function') renderKycBanner();
-    if (
-      document.body.classList.contains('cubik-app') &&
-      this.user?.role === 'carrier' &&
-      typeof refreshAuthProfile === 'function'
-    ) {
-      refreshAuthProfile().catch(() => {});
-    }
     if (typeof refreshAdminKycPanel === 'function') refreshAdminKycPanel();
     if (typeof refreshAdminHubNav === 'function') refreshAdminHubNav();
     if (typeof refreshAdminOpsPanel === 'function') refreshAdminOpsPanel();
@@ -1381,11 +1376,37 @@ if (document.body.classList.contains('cubik-app') && !Auth.user) {
   if (changePw) PasswordStrengthUI.attach(changePw);
 })();
 
+let docsBlockedAlertShown = false;
+
+function forceLogoutDocsBlocked(message) {
+  if (typeof Auth === 'undefined') return;
+  const msg =
+    message ||
+    'Documentación vencida. Tu sesión fue cerrada. Actualiza por WhatsApp Cubik (escribe documentos).';
+  Auth.logout();
+  if (typeof AppShell !== 'undefined' && typeof AppShell.syncAuthState === 'function') {
+    AppShell.syncAuthState();
+  }
+  if (!docsBlockedAlertShown) {
+    docsBlockedAlertShown = true;
+    alert(msg);
+    window.setTimeout(() => {
+      docsBlockedAlertShown = false;
+    }, 800);
+  }
+}
+
+window.forceLogoutDocsBlocked = forceLogoutDocsBlocked;
+
 async function refreshAuthProfile() {
   if (typeof Auth === 'undefined' || !Auth.token || typeof apiFetch !== 'function') return null;
   try {
-    const res = await apiFetch('/api/auth/me');
-    const json = await res.json();
+    const res = await apiFetch('/api/auth/me', { headers: Auth.headers() });
+    const json = await res.json().catch(() => ({}));
+    if (res.status === 403 && json.docs_blocked) {
+      forceLogoutDocsBlocked(json.error);
+      return null;
+    }
     if (res.ok && json.user) {
       Auth.save(Auth.token, json.user);
       return json.user;

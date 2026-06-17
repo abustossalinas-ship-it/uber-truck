@@ -52,6 +52,22 @@ function kycBlockMessage(status, compliance) {
   return 'Tu cuenta está en revisión. Un administrador debe aprobarla antes de publicar o emparejar.';
 }
 
+/** Bloquea requests autenticados si transportista tiene docs vencidos (excepto logout). */
+async function enforceCarrierSessionGate(req, res) {
+  if (!req.user?.sub || req.user.role !== 'carrier' || !supabase.isConfigured()) return false;
+  if (req.method === 'POST' && req.path === '/logout') return false;
+  const gate = await fetchOperatorGate(req.user.sub);
+  if (gate.compliance?.status !== 'expired') return false;
+  res.status(403).json({
+    ok: false,
+    error: docsBlockMessage(gate.compliance),
+    docs_blocked: true,
+    docs_compliance_status: 'expired',
+    session_invalid: true,
+  });
+  return true;
+}
+
 /** Impide login app si transportista tiene documentación legal vencida. */
 async function assertCarrierLoginAllowed(user) {
   if (!user?.id || user.role !== 'carrier' || !supabase.isConfigured()) return;
@@ -106,6 +122,7 @@ module.exports = {
   fetchOperatorGate,
   kycBlockMessage,
   assertCarrierLoginAllowed,
+  enforceCarrierSessionGate,
   requireApprovedOperator,
   syncUserDocumentCompliance,
 };

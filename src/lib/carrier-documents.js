@@ -171,6 +171,14 @@ async function syncUserDocumentCompliance(userId, userRow) {
   if (updErr) throw updErr;
 
   await ensureDocumentNotifications(userId, compliance);
+  if (compliance.status === 'expired') {
+    try {
+      const { revokeAllUserSessions } = require('./device-session');
+      await revokeAllUserSessions(userId);
+    } catch (e) {
+      console.error('[carrier-docs] revoke sessions on expired docs', userId, e.message || e);
+    }
+  }
   return compliance;
 }
 

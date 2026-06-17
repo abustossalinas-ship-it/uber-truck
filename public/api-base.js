@@ -22,8 +22,20 @@
   window.apiUrl = resolveUrl;
   window.apiOrigin = apiOrigin;
 
-  window.apiFetch = function apiFetch(path, options) {
-    return fetch(resolveUrl(path), options);
+  window.apiFetch = async function apiFetch(path, options) {
+    const res = await nativeFetch(resolveUrl(path), options);
+    const pathStr = String(path || '');
+    if (res.status === 403 && !pathStr.includes('/auth/logout')) {
+      try {
+        const json = await res.clone().json();
+        if (json.docs_blocked && typeof window.forceLogoutDocsBlocked === 'function') {
+          window.forceLogoutDocsBlocked(json.error);
+        }
+      } catch (_) {
+        /* ignore */
+      }
+    }
+    return res;
   };
 
   const nativeFetch = window.fetch.bind(window);

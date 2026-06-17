@@ -120,6 +120,17 @@ async function revokeSession(userId, deviceHash) {
     .eq('device_hash', deviceHash);
 }
 
+async function revokeAllUserSessions(userId) {
+  if (!userId || !supabase.isConfigured()) return;
+  const sb = supabase.getClient();
+  const { error } = await sb
+    .from('user_sessions')
+    .update({ revoked_at: new Date().toISOString() })
+    .eq('user_id', userId)
+    .is('revoked_at', null);
+  if (error && error.code !== '42P01') throw error;
+}
+
 function issueAuthPayload(user) {
   const formatted = {
     id: user.id,
@@ -161,6 +172,7 @@ module.exports = {
   touchSession,
   upsertSession,
   revokeSession,
+  revokeAllUserSessions,
   issueAuthPayload,
   completeTrustedLogin,
 };

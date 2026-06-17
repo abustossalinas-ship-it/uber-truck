@@ -361,13 +361,12 @@ function handleApiKycError(res, json) {
     return true;
   }
   if (res?.status === 403 && json?.docs_blocked) {
-    if (typeof Auth !== 'undefined' && Auth.user) {
-      Auth.user.docs_compliance_status = 'expired';
-      Auth.user.kyc_phase = 'docs_expired';
-      Auth.render?.();
+    if (typeof forceLogoutDocsBlocked === 'function') {
+      forceLogoutDocsBlocked(json.error);
+    } else if (typeof Auth !== 'undefined') {
+      Auth.logout();
+      alert(json.error || 'Documentación vencida');
     }
-    alert(json.error || 'Documentación vencida');
-    document.getElementById('kyc-banner')?.scrollIntoView({ behavior: 'smooth' });
     return true;
   }
   if (res?.status === 403 && json?.kyc_status) {

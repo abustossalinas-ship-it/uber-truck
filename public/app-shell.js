@@ -341,6 +341,10 @@ const AppShell = {
     const chrome = document.getElementById('app-chrome');
     if (gate) gate.hidden = Boolean(user);
     if (chrome) chrome.hidden = !user;
+    if (user && !this._docsSessionCheckDone && typeof refreshAuthProfile === 'function') {
+      this._docsSessionCheckDone = true;
+      refreshAuthProfile().catch(() => {});
+    }
     if (user) {
       this.renderHome();
       this.renderAccount();
@@ -353,6 +357,7 @@ const AppShell = {
       if (user.role === 'carrier') this.setupCarrierGps();
       if (!this.deep) this.setTab(this.tab || 'home');
     } else {
+      this._docsSessionCheckDone = false;
       this.deep = null;
       document.body.classList.remove('app-deep', 'app-main-visible');
       const authPanel = document.getElementById('auth-panel');

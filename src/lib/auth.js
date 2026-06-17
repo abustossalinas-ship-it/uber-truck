@@ -3,6 +3,7 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const supabase = require('../services/supabase');
+const { enforceCarrierSessionGate } = require('./kyc-gate');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'uber-truck-dev-change-me';
 const JWT_EXPIRES = process.env.JWT_EXPIRES || '30d';
@@ -30,13 +31,20 @@ function verifyToken(token) {
   }
 }
 
-function authMiddleware(req, res, next) {
+async function authMiddleware(req, res, next) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
   if (!token) return res.status(401).json({ ok: false, error: 'No autenticado' });
   const payload = verifyToken(token);
   if (!payload) return res.status(401).json({ ok: false, error: 'Sesión inválida' });
   req.user = payload;
+  try {
+    const blocked = await enforceCarrierSessionGate(req, res);
+    if (blocked) return;
+  } catch (e) {
+    console.error('[auth] session docs gate', e);
+    return res.status(500).json({ ok: false, error: 'No se pudo verificar el estado de la cuenta' });
+  }
   next();
 }
 

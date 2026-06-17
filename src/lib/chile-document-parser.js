@@ -117,7 +117,70 @@ function scoreLicense(text) {
   if (/REGISTRO\s+NACIONAL\s+DE\s+CONDUCTORES|\bR\.?N\.?C\.?\b/.test(t)) score += 4;
   if (/\bCLASE\s+[A-F]\b/.test(t)) score += 2;
   if (/FECHA\s+DE\s+VENCIMIENTO|FECHA\s+VENCIMIENTO/.test(t)) score += 1;
+  if (/FECHA\s+(?:DE\s+)?CONTROL/.test(t)) score += 2;
   return score;
+}
+
+function normalizePersonName(name) {
+  return String(name || '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toUpperCase()
+    .replace(/[^A-Z\s]/g, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function namesMatch(a, b) {
+  const na = normalizePersonName(a);
+  const nb = normalizePersonName(b);
+  if (!na || !nb) return false;
+  if (na === nb) return true;
+  const ta = na.split(' ').filter(Boolean);
+  const tb = nb.split(' ').filter(Boolean);
+  const [short, long] = ta.length <= tb.length ? [ta, tb] : [tb, ta];
+  return short.length >= 2 && short.every((token) => long.includes(token));
+}
+
+/** En licencias chilenas la *fecha de control* es la de vencimiento (no confundir con último control). */
+function extractLicenseExpiryDate(text) {
+  const upper = String(text || '').toUpperCase();
+
+  const explicit = upper.match(
+    /FECHA\s+DE\s+CONTROL[\s:]*(\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{4})/
+  );
+  if (explicit) {
+    const iso = parseChileanDocDate(explicit[1]);
+    if (iso) return iso;
+  }
+
+  for (const match of upper.matchAll(
+    /FECHA\s+CONTROL[\s:]*(\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{4})/g
+  )) {
+    const idx = match.index ?? 0;
+    const before = upper.slice(Math.max(0, idx - 18), idx);
+    if (/ULTIMO\s*$/.test(before)) continue;
+    const iso = parseChileanDocDate(match[1]);
+    if (iso) return iso;
+  }
+
+  const vencPatterns = [
+    /FECHA\s+DE\s+VENCIMIENTO[\s:]*([0-9A-ZÁÉÍÓÚÑ.\s/-]{6,20})/i,
+    /FECHA\s+VENCIMIENTO[\s:]*([0-9A-ZÁÉÍÓÚÑ.\s/-]{6,20})/i,
+  ];
+  for (const re of vencPatterns) {
+    const m = upper.match(re);
+    if (!m) continue;
+    const iso = parseChileanDocDate(m[1]);
+    if (iso) return iso;
+  }
+
+  const dated = [...upper.matchAll(/\b(\d{1,2}[\/\-.]\d{1,2}[\/\-.]\d{4})\b/g)]
+    .map((m) => parseChileanDocDate(m[1]))
+    .filter(Boolean);
+  if (dated.length === 1) return dated[0];
+  if (dated.length > 1) return dated.sort().pop();
+  return null;
 }
 
 function classifyDocumentType(text, hint) {
@@ -144,6 +207,8 @@ function classifyDocumentType(text, hint) {
 }
 
 function extractExpiryDate(text, docType) {
+  if (docType === 'license') return extractLicenseExpiryDate(text);
+
   const upper = String(text || '').toUpperCase();
   const patterns = [
     /FECHA\s+DE\s+VENCIMIENTO[\s:]*([0-9A-ZÁÉÍÓÚÑ.\s/-]{6,20})/i,
@@ -206,7 +271,7 @@ function parseChileanDocument(text, opts = {}) {
 
   const ruts = extractRutCandidates(normalized);
   const expiresAt = extractExpiryDate(normalized, docType);
-  const fullName = docType === 'ci' ? extractName(normalized) : null;
+  const fullName = extractName(normalized);
   const licenseClass = docType === 'license' ? extractLicenseClass(normalized) : null;
 
   if (!expiresAt && docType !== 'insurance' && docType !== 'soap') {
@@ -221,7 +286,7 @@ function parseChileanDocument(text, opts = {}) {
     };
   }
 
-  if (!ruts.length && docType === 'ci') {
+  if (!ruts.length && (docType === 'ci' || docType === 'license')) {
     return {
       ok: false,
       reason: 'missing_rut',
@@ -249,6 +314,9 @@ module.exports = {
   parseChileanDocument,
   classifyDocumentType,
   extractRutCandidates,
+  extractLicenseExpiryDate,
+  normalizePersonName,
+  namesMatch,
   scoreCi,
   scoreLicense,
 };

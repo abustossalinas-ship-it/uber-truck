@@ -7,6 +7,8 @@ const {
   parseChileanDocDate,
   classifyDocumentType,
   extractRutCandidates,
+  extractLicenseExpiryDate,
+  namesMatch,
 } = require('../src/lib/chile-document-parser');
 
 const SAMPLE_CI = `
@@ -32,6 +34,18 @@ NOMBRES ARIEL GUILLERMO
 RUN 15.363.398-3
 CLASE B
 FECHA DE VENCIMIENTO 15 DIC 2028
+`;
+
+const SAMPLE_LICENSE_CONTROL = `
+REPUBLICA DE CHILE
+LICENCIA DE CONDUCTOR
+APELLIDOS BUSTOS SALINAS
+NOMBRES ARIEL GUILLERMO
+N° LICENCIA 15.363.398-3
+CLASE B
+FECHA ULTIMO CONTROL 03/02/2020
+FECHA DE CONTROL 03/02/2026
+MUNICIPALIDAD CALERA DE TANGO
 `;
 
 describe('chile-document-parser', () => {
@@ -67,6 +81,21 @@ describe('chile-document-parser', () => {
     assert.equal(parsed.expiresAt, '2028-12-15');
     assert.equal(parsed.licenseClass, 'B');
     assert.equal(parsed.rut, '15363398-3');
+    assert.match(parsed.fullName || '', /ARIEL GUILLERMO/i);
+  });
+
+  it('parsea licencia con fecha de control chilena', () => {
+    const parsed = parseChileanDocument(SAMPLE_LICENSE_CONTROL);
+    assert.equal(parsed.ok, true);
+    assert.equal(parsed.docType, 'license');
+    assert.equal(parsed.expiresAt, '2026-02-03');
+    assert.equal(extractLicenseExpiryDate(SAMPLE_LICENSE_CONTROL), '2026-02-03');
+  });
+
+  it('namesMatch tolera orden y acentos', () => {
+    assert.equal(namesMatch('Juan Bastidas', 'JUAN BASTIDAS'), true);
+    assert.equal(namesMatch('ARIEL GUILLERMO BUSTOS SALINAS', 'Ariel Guillermo Bustos Salinas'), true);
+    assert.equal(namesMatch('Pedro Perez', 'Juan Bastidas'), false);
   });
 
   it('respeta hint licencia si OCR ambiguo', () => {

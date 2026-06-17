@@ -17,7 +17,7 @@ const {
   SESSION_TTL_DAYS,
 } = require('../lib/device-session');
 const { TRUCK_TYPES } = require('../lib/truck-capacity');
-const { fetchKycStatus } = require('../lib/kyc-gate');
+const { fetchKycStatus, assertCarrierLoginAllowed } = require('../lib/kyc-gate');
 const { getUserPresence } = require('../lib/carrier-presence');
 const {
   checklistProgress,
@@ -93,6 +93,7 @@ router.post('/login', async (req, res) => {
   try {
     const user = await validateLoginCredentials(email, password);
     assertLoginIntentRole(user, req.body || {});
+    await assertCarrierLoginAllowed(user);
     const result = await resolveLoginAfterPassword(user, req, req.body || {});
     res.json({ ok: true, ...result });
   } catch (e) {
@@ -103,6 +104,7 @@ router.post('/login', async (req, res) => {
       code: e.code || undefined,
       actual_role: e.actual_role,
       wait_seconds: e.wait_seconds,
+      docs_blocked: e.docs_blocked,
     });
   }
 });
@@ -115,6 +117,7 @@ router.post('/otp/verify', async (req, res) => {
   try {
     const user = await validateLoginCredentials(email, password);
     assertLoginIntentRole(user, req.body || {});
+    await assertCarrierLoginAllowed(user);
     const meta = requestMeta(req, req.body || {});
     const result = await verifyNewDeviceOtp({ otp_id, code, user, meta });
     res.json({ ok: true, ...result });
@@ -125,6 +128,7 @@ router.post('/otp/verify', async (req, res) => {
       error: e.message || 'Error al verificar código',
       code: e.code,
       actual_role: e.actual_role,
+      docs_blocked: e.docs_blocked,
     });
   }
 });

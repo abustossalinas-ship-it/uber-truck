@@ -52,6 +52,20 @@ function kycBlockMessage(status, compliance) {
   return 'Tu cuenta está en revisión. Un administrador debe aprobarla antes de publicar o emparejar.';
 }
 
+/** Impide login app si transportista tiene documentación legal vencida. */
+async function assertCarrierLoginAllowed(user) {
+  if (!user?.id || user.role !== 'carrier' || !supabase.isConfigured()) return;
+  const gate = await fetchOperatorGate(user.id);
+  if (gate.compliance?.status === 'expired') {
+    const err = new Error(docsBlockMessage(gate.compliance));
+    err.status = 403;
+    err.code = 'docs_expired';
+    err.docs_blocked = true;
+    err.docs_compliance_status = 'expired';
+    throw err;
+  }
+}
+
 /** Bloquea operaciones de marketplace si KYC no está aprobado o docs vencidos. */
 async function requireApprovedOperator(req, res, next) {
   if (!kycEnforced()) return next();
@@ -91,6 +105,7 @@ module.exports = {
   fetchKycStatus,
   fetchOperatorGate,
   kycBlockMessage,
+  assertCarrierLoginAllowed,
   requireApprovedOperator,
   syncUserDocumentCompliance,
 };

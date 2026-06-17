@@ -2,6 +2,7 @@
 
 const supabase = require('../services/supabase');
 const { validateRut } = require('./rut-chile');
+const { namesMatch } = require('./chile-document-parser');
 
 const DOC_EXPIRY_WARN_DAYS = Number(process.env.DOC_EXPIRY_WARN_DAYS || 30);
 
@@ -292,10 +293,29 @@ async function applyWhatsappDocumentExtract(userId, parsed) {
   if (parsed.docType === 'ci') {
     if (!parsed.expiresAt) return { ok: false, reason: 'missing_expiry', docType: 'ci' };
     if (!parsed.rut && !user.national_rut) return { ok: false, reason: 'missing_rut', docType: 'ci' };
+    if (parsed.fullName && user.full_name && !namesMatch(parsed.fullName, user.full_name)) {
+      return {
+        ok: false,
+        reason: 'name_mismatch',
+        docType: 'ci',
+        foundName: parsed.fullName,
+        expectedName: user.full_name,
+      };
+    }
     patch.doc_ci_expires_at = parsed.expiresAt;
     patch.onboarding_doc_ci = true;
   } else if (parsed.docType === 'license') {
     if (!parsed.expiresAt) return { ok: false, reason: 'missing_expiry', docType: 'license' };
+    if (!parsed.rut && !user.national_rut) return { ok: false, reason: 'missing_rut', docType: 'license' };
+    if (parsed.fullName && user.full_name && !namesMatch(parsed.fullName, user.full_name)) {
+      return {
+        ok: false,
+        reason: 'name_mismatch',
+        docType: 'license',
+        foundName: parsed.fullName,
+        expectedName: user.full_name,
+      };
+    }
     patch.doc_license_expires_at = parsed.expiresAt;
     patch.onboarding_doc_license = true;
   } else {

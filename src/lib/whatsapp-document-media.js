@@ -84,6 +84,8 @@ async function processWhatsappDocumentMedia(msg, session = {}) {
         reason: applied.reason,
         expectedRut: applied.expectedRut,
         foundRut: applied.foundRut,
+        foundName: applied.foundName,
+        expectedName: applied.expectedName,
         docType: readResult.docType,
       })
     );
@@ -101,6 +103,7 @@ async function processWhatsappDocumentMedia(msg, session = {}) {
       expiresAt: expiryLabel,
       fullName: readResult.fullName,
       licenseClass: readResult.licenseClass,
+      compliance: applied.compliance,
     })
   );
 

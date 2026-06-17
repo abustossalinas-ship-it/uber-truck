@@ -211,9 +211,16 @@ Indica el *mismo email* de la app. Un agente completa el checklist en 24 h hábi
 function carrierApprovedDocsMessage(user, compliance) {
   const lines = carrierDocStatusLines(user);
   let lead = `*Cuenta aprobada* — ${user.full_name || 'Transportista'}`;
+  const pending = [];
+  if (!user.doc_license_expires_at) pending.push('licencia');
+  if (!user.doc_soap_expires_at) pending.push('SOAP');
+  if (!user.doc_insurance_expires_at) pending.push('seguro');
+
   if (compliance?.status === 'expiring' && compliance.expiring?.length) {
     const warn = compliance.expiring.map((d) => d.label).join(', ');
     lead += `\n⚠️ Por vencer: ${warn}`;
+  } else if (pending.length) {
+    lead += `\n📋 Pendiente registrar: ${pending.join(', ')}.`;
   } else {
     lead += '\n✅ Documentación al día según registros Cubik.';
   }
@@ -240,7 +247,7 @@ function docRenewInstruction(kind) {
   const map = {
     ci: 'Envía foto legible de tu *cédula* (anverso y reverso) con fecha de vencimiento visible.',
     license:
-      'Envía foto de tu *licencia de conducir* vigente (clase y fecha de vencimiento legibles).',
+      'Envía foto de tu *licencia de conducir* vigente (clase y *fecha de control* legibles). En Chile la *fecha de control* es la de vencimiento.',
     insurance: 'Envía foto o PDF de tu *póliza RC/carga* con vigencia visible.',
     soap: 'Envía foto de tu *SOAP* al día con patente y vigencia visibles.',
   };
@@ -275,25 +282,46 @@ ${MEDIA_ACK_MANUAL}${extra}
 Puedes seguir enviando SOAP, seguro, etc. Escribe *humano* si necesitas ayuda.`;
 }
 
-function ocrDocumentApplied({ docType, rut, expiresAt, fullName, licenseClass }) {
+function ocrDocumentApplied({ docType, rut, expiresAt, fullName, licenseClass, compliance }) {
   const docLabel = docType === 'license' ? 'Licencia de conducir' : 'Cédula de identidad';
   const lines = [`*${docLabel} validada automáticamente*`];
-  if (fullName && docType === 'ci') lines.push(`Nombre: ${fullName}`);
+  if (fullName) lines.push(`Nombre: ${fullName}`);
   if (rut) lines.push(`RUT: ${rut}`);
-  if (expiresAt && expiresAt !== '—') lines.push(`Vence: ${expiresAt}`);
+  if (expiresAt && expiresAt !== '—') {
+    lines.push(docType === 'license' ? `Fecha de control (vence): ${expiresAt}` : `Vence: ${expiresAt}`);
+  }
   if (licenseClass && docType === 'license') lines.push(`Clase: ${licenseClass}`);
-  lines.push(
-    '',
-    '✅ Datos registrados en Cubik. Falta SOAP/seguro/rubro/patentes si aún no los enviaste.',
-    'Un agente puede contrastar el original antes de aprobar tu cuenta.'
-  );
+
+  const docExpired =
+    compliance?.status === 'expired' &&
+    compliance.expired?.some((d) => d.renewKey === docType);
+
+  if (docExpired) {
+    lines.push(
+      '',
+      `⚠️ *${docLabel} vencida* — debes renovarla en la municipalidad.`,
+      '🚫 *Acceso a la app suspendido* hasta enviar la licencia vigente por este WhatsApp.',
+      'Cuando renueves, escribe *licencia* y envía la foto actualizada.'
+    );
+  } else {
+    lines.push(
+      '',
+      '✅ Datos registrados en Cubik. Falta SOAP/seguro/rubro/patentes si aún no los enviaste.',
+      'Un agente puede contrastar el original antes de aprobar tu cuenta.'
+    );
+  }
   return lines.join('\n');
 }
 
-function ocrDocumentFailed({ reason, docType, expectedRut, foundRut, hint }) {
+function ocrDocumentFailed({ reason, docType, expectedRut, foundRut, foundName, expectedName, hint }) {
   if (reason === 'rut_mismatch') {
     return `⚠️ El RUT leído (${foundRut || '—'}) no coincide con tu cuenta (${expectedRut || '—'}).
-Reenvía foto legible de *tu* cédula o escribe *humano*.`;
+Reenvía foto legible de *tu* cédula o licencia, o escribe *humano*.`;
+  }
+  if (reason === 'name_mismatch') {
+    const label = docType === 'license' ? 'licencia' : 'cédula';
+    return `⚠️ El nombre en la ${label} (${foundName || '—'}) no coincide con tu cuenta (${expectedName || '—'}).
+Debe ser el mismo titular que tu CI. Reenvía *tu* documento o escribe *humano*.`;
   }
   if (reason === 'unknown_document' || reason === 'no_text_detected' || reason === 'text_too_short') {
     const suggest =
@@ -302,12 +330,22 @@ Reenvía foto legible de *tu* cédula o escribe *humano*.`;
         : hint === 'ci'
           ? 'cédula de identidad'
           : 'cédula o licencia';
+    const dateHint =
+      hint === 'license'
+        ? 'con *fecha de control* (vencimiento) visible'
+        : 'con *fecha de vencimiento* visible';
     return `No pudimos leer tu ${suggest} en la foto (poca luz, borrosa o recortada).
-Reenvía con buena luz, sin reflejos y con *fecha de vencimiento* visible. Escribe *CI* o *licencia* antes de la foto.`;
+Reenvía con buena luz, sin reflejos y ${dateHint}. Escribe *CI* o *licencia* antes de la foto.`;
   }
   if (reason === 'missing_expiry' || reason === 'missing_rut') {
     const label = docType === 'license' ? 'licencia' : 'cédula';
-    return `Leímos tu ${label}, pero falta ${reason === 'missing_rut' ? 'el RUT' : 'la fecha de vencimiento'} legible.
+    const missing =
+      reason === 'missing_rut'
+        ? 'el RUT'
+        : docType === 'license'
+          ? 'la *fecha de control* (vencimiento)'
+          : 'la fecha de vencimiento';
+    return `Leímos tu ${label}, pero falta ${missing} legible.
 Reenvía foto más nítida con todos los datos visibles.`;
   }
   if (reason === 'vision_error' || reason === 'download_failed' || reason === 'db_error' || reason === 'tesseract_error') {

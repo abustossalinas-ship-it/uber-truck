@@ -50,4 +50,11 @@ describe('carrier-documents', () => {
     assert.match(msg, /Licencia/i);
     assert.match(msg, /WhatsApp/i);
   });
+
+  it('docsBlockMessage indica bloqueo de cuenta', () => {
+    const msg = docsBlockMessage({
+      expired: [{ label: 'Licencia de conducir' }],
+    });
+    assert.match(msg, /bloqueada/i);
+  });
 });

@@ -30,36 +30,36 @@ const MONTHS = {
   DICIEMBRE: 11,
 };
 
-const RUT_RE = /\b(\d{1,2}[.,]?\d{3}[.,]?\d{3}[\s-]*[\dkK])\b/gi;
+const RUT_RE =
+  /\b(\d{1,2}[.,\s]?\d{3}[.,\s]?\d{3}[\s.\-]*[\dkK]|\d{7,8}[\s.\-]*[\dkK])\b/gi;
 
 function scrubRutOcrText(text) {
   return String(text || '')
     .toUpperCase()
     .replace(/[OØ]/g, '0')
+    .replace(/\u2013|\u2014/g, '-')
     .replace(/(\d)[,.](\d{3})[,.](\d{3})/g, '$1.$2.$3')
-    .replace(/(\d)\s+(\d{3})\s+(\d{3})/g, '$1.$2.$3');
+    .replace(/(\d)\s+(\d{3})\s+(\d{3})/g, '$1.$2.$3')
+    .replace(/(\d{7,8})\s+([\dkK])\b/g, '$1-$2');
 }
 
 function extractRutCandidates(text) {
   const scrubbed = scrubRutOcrText(text);
   const found = [];
+  const tryPush = (fragment) => {
+    const rut = validateRut(fragment);
+    if (rut.ok) found.push(rut.rut);
+  };
   for (const match of scrubbed.matchAll(RUT_RE)) {
-    const rut = validateRut(match[1]);
-    if (rut.ok) found.push(rut.rut);
+    tryPush(match[1]);
   }
-  for (const match of scrubbed.matchAll(/\bRUN[\s:]*([\d.]{8,12}[\s-]*[\dK])\b/gi)) {
-    const rut = validateRut(match[1]);
-    if (rut.ok) found.push(rut.rut);
+  for (const match of scrubbed.matchAll(/\bRUN[\s:]*([\d.,\s\-]{8,18}[\dK])/gi)) {
+    tryPush(match[1]);
   }
   for (const match of scrubbed.matchAll(
-    /N[°ºO*]?\s*(?:DE\s+)?LICENCIA[\s:]*([\d.,\s-]{8,18}[\dK])/gi
+    /N[°ºO*]?\s*(?:DE\s+)?LICENCIA[\s:]*([\d.,\s\-]{8,20}[\dK])/gi
   )) {
-    const rut = validateRut(match[1]);
-    if (rut.ok) found.push(rut.rut);
-  }
-  for (const match of scrubbed.matchAll(/\b(\d{7,8}[\s-][\dK])\b/g)) {
-    const rut = validateRut(match[1]);
-    if (rut.ok) found.push(rut.rut);
+    tryPush(match[1]);
   }
   return [...new Set(found)];
 }

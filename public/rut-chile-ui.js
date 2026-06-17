@@ -4,9 +4,8 @@ const RutChileUI = {
     const raw = String(input || '')
       .trim()
       .toUpperCase()
-      .replace(/\./g, '')
-      .replace(/-/g, '')
-      .replace(/\s/g, '');
+      .replace(/[.\s,]/g, '')
+      .replace(/-/g, '');
     if (raw.length < 2) return null;
     const dv = raw.slice(-1);
     const body = raw.slice(0, -1).replace(/^0+/, '') || '0';

@@ -117,6 +117,24 @@ describe('chile-document-parser', () => {
     assert.equal(parsed.expiresAt, '2030-02-03');
   });
 
+  it('acepta RUT impreso con puntos, comas, espacios o sin separador', () => {
+    const formats = [
+      '15.363.398-3',
+      '15,363,398-3',
+      '15363398-3',
+      '15 363 398-3',
+      '15.363.398 3',
+      '15,363,398 3',
+      'RUN 15.363.398-3',
+      'N° DE LICENCIA 15,363,398-3',
+      'N DE LICENCIA 15363398-3',
+    ];
+    for (const fmt of formats) {
+      const ruts = extractRutCandidates(fmt);
+      assert.ok(ruts.includes('15363398-3'), `falló con: ${fmt}`);
+    }
+  });
+
   it('licencia sin RUT OCR usa fecha y nombre si cuenta ya tiene RUT', () => {
     const parsed = parseChileanDocument(
       'LICENCIA DE CONDUCTOR NOMBRES JUAN APELLIDOS BASTIDAS FECHA DE CONTROL 03/03/2020',

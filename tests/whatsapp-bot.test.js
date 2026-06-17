@@ -6,6 +6,7 @@ const {
   handleInbound,
   detectRoleFromText,
   resetSessionsForTests,
+  getSession,
 } = require('../src/lib/whatsapp-bot');
 const { parseWebhookMessages } = require('../src/services/whatsapp-cloud');
 
@@ -197,7 +198,53 @@ describe('whatsapp-bot', () => {
       messageId: 'media-6',
     });
     assert.match(replies[0], /Recibimos/i);
-    assert.match(replies[0], /manual|roadmap|agente/i);
+    assert.match(replies[0], /manual|roadmap|agente|Leyendo documento/i);
+  });
+
+  it('licencia con cuenta vinculada pide foto sin reiniciar identidad', async () => {
+    const phone = '56988888882';
+    const approvedUser = {
+      id: 'u1',
+      email: 'juan@test.com',
+      full_name: 'Juan Bastidas',
+      kyc_status: 'approved',
+      role: 'carrier',
+    };
+    const lookup = async () => ({ found: true, user: approvedUser });
+    const session = getSession(phone);
+    session.linkedUser = approvedUser;
+    session.role = 'carrier';
+    session.welcomed = true;
+    const { replies } = await handleInbound(
+      { from: phone, text: 'licencia', messageId: 'loop-2' },
+      { lookupCarrierIdentity: lookup }
+    );
+    assert.match(replies[0], /licencia de conducir/i);
+    assert.doesNotMatch(replies[0], /Indica tu RUT/i);
+    assert.equal(session.uploadTarget, 'license');
+    assert.ok(session.linkedUser);
+  });
+
+  it('actualizar licencia con typo no reinicia flujo', async () => {
+    const phone = '56988888883';
+    const approvedUser = {
+      id: 'u2',
+      email: 'ab@test.com',
+      full_name: 'Juan Bastidas',
+      kyc_status: 'approved',
+      role: 'carrier',
+    };
+    const lookup = async () => ({ found: true, user: approvedUser });
+    const session = getSession(phone);
+    session.linkedUser = approvedUser;
+    session.role = 'carrier';
+    session.welcomed = true;
+    const { replies } = await handleInbound(
+      { from: phone, text: 'Actuali,ar licencia', messageId: 'loop-4' },
+      { lookupCarrierIdentity: lookup }
+    );
+    assert.match(replies[0], /licencia/i);
+    assert.doesNotMatch(replies[0], /Indica tu RUT/i);
   });
 });
 

@@ -30,8 +30,9 @@ const PRICE_RE = /\b(precio|cu[aá]nto sale|costo|tarifa|comisi[oó]n)\b/i;
 const REGISTER_RE = /\b(registro|registr|cuenta|crear cuenta|inscrib)\b/i;
 const DEMO_RE = /\b(demo|agendar|reuni[oó]n|presentaci[oó]n)\b/i;
 const TECH_RE = /\b(error|bug|no carga|pantalla|olvid[eé]|contraseña|password)\b/i;
-const DOCS_RE =
-  /\b(document|documentos|papeles|cedula|c[eé]dula|licencia|seguro|soap|rubro|patente|validar cuenta|enviar foto|actualizar)\b/i;
+const DOCS_MENU_RE =
+  /\b(documentos|documentaci[oó]n|papeles|validar cuenta|enviar foto)\b/i;
+const DOCS_RE = DOCS_MENU_RE;
 const RESET_RE =
   /\b(volver|inicio|reiniciar|cerrar|cancelar|empezar de nuevo|salir|menu documentos)\b/i;
 const RENEW_CI_RE = /\b(ci|c[eé]dula|carnet)\b/i;
@@ -201,11 +202,29 @@ function repliesForLinkedCarrier(user) {
 }
 
 function parseRenewalKind(lower) {
-  if (RENEW_CI_RE.test(lower)) return 'ci';
-  if (RENEW_LICENSE_RE.test(lower)) return 'license';
-  if (RENEW_INSURANCE_RE.test(lower)) return 'insurance';
-  if (RENEW_SOAP_RE.test(lower)) return 'soap';
+  const t = normalizeDocText(lower);
+  if (RENEW_CI_RE.test(t)) return 'ci';
+  if (RENEW_LICENSE_RE.test(t)) return 'license';
+  if (RENEW_INSURANCE_RE.test(t)) return 'insurance';
+  if (RENEW_SOAP_RE.test(t)) return 'soap';
   return null;
+}
+
+function normalizeDocText(text) {
+  return String(text || '')
+    .toLowerCase()
+    .replace(/actuali\s*,\s*ar/gi, 'actualizar')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function repliesForDocRenewal(session, kind) {
+  session.uploadTarget = kind;
+  session.role = 'carrier';
+  session.welcomed = true;
+  session.docsIntent = false;
+  session.awaitingIdentity = false;
+  return [docRenewInstruction(kind)];
 }
 
 function uploadLabel(kind) {
@@ -256,7 +275,7 @@ function buildMediaReplies(inbound, session) {
 async function buildReplies(text, session, deps = {}) {
   const lookup = deps.lookupCarrierIdentity || null;
   const body = String(text || '').trim();
-  const lower = body.toLowerCase();
+  const lower = normalizeDocText(body);
   const replies = [];
   const detectedRole = detectRoleFromText(body);
 
@@ -280,7 +299,24 @@ async function buildReplies(text, session, deps = {}) {
     return replies;
   }
 
-  if (DOCS_RE.test(lower)) {
+  if (session.linkedUser) {
+    const renew = parseRenewalKind(lower);
+    if (renew) {
+      return repliesForDocRenewal(session, renew);
+    }
+    if (/\bactualiz(ar|a)\b/i.test(lower)) {
+      return repliesForLinkedCarrier(session.linkedUser);
+    }
+  }
+
+  if (DOCS_MENU_RE.test(lower)) {
+    if (session.linkedUser) {
+      session.role = 'carrier';
+      session.docsIntent = false;
+      session.awaitingIdentity = false;
+      session.welcomed = true;
+      return repliesForLinkedCarrier(session.linkedUser);
+    }
     const preferCarrier = detectedRole === 'carrier' || session.role === 'carrier';
     restartDocumentFlow(session);
     if (preferCarrier && lookup) {
@@ -310,18 +346,17 @@ async function buildReplies(text, session, deps = {}) {
     }
   }
 
-  if (session.linkedUser?.kyc_status === 'approved') {
-    const renew = parseRenewalKind(lower);
-    if (renew) {
-      session.uploadTarget = renew;
-      replies.push(docRenewInstruction(renew));
-      return replies;
-    }
-  }
-
   if (!session.linkedUser && parseRenewalKind(lower)) {
     session.uploadTarget = parseRenewalKind(lower);
     session.role = session.role || 'carrier';
+    if (lookup) {
+      startCarrierIdentityFlow(session);
+      replies.push(
+        docRenewInstruction(session.uploadTarget),
+        'Antes de enviar la foto, confirma tu cuenta con *RUT* o *email* de la app.'
+      );
+      return replies;
+    }
     replies.push(docRenewInstruction(session.uploadTarget));
     return replies;
   }
@@ -462,4 +497,6 @@ module.exports = {
   buildMediaReplies,
   resetSession,
   restartDocumentFlow,
+  parseRenewalKind,
+  normalizeDocText,
 };

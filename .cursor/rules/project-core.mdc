@@ -30,7 +30,7 @@ Producto: **marketplace de transporte por camión** (publicar carga, ofertar via
 
 - Cambios **mínimos** y acotados al pedido.
 - Mensajes al usuario final en **español**.
-- Git: **siempre commit** al terminar cambios de código (mensaje claro) para que Ariel revise; **push a `main`** salvo que pida lo contrario. No commitear secretos ni `.env`.
+- Git: **siempre commit + push a `main`** al terminar (mensaje claro). Railway despliega desde `main` → https://www.getcubik.cl — sin push no hay cambios en producción. No commitear secretos ni `.env`.
 
 ## Comandos
 

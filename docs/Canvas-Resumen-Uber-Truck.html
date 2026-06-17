@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Resumen Canvas — Cubik (may 2026)</title>
+  <title>Resumen Canvas — Cubik (jun 2026)</title>
   <style>
     body { font-family: Calibri, Arial, sans-serif; font-size: 11pt; line-height: 1.35; max-width: 900px; margin: 2cm auto; color: #111; }
     h1 { font-size: 18pt; border-bottom: 1px solid #333; }
@@ -21,13 +21,13 @@
 <body>
 
 <p class="meta"><a href="/docs/">← Documentación</a> · <a href="/">Inicio app</a></p>
-<p class="meta"><strong>Versión doc:</strong> 1.6 · <strong>25 may 2026</strong> · Software <strong>0.0.129</strong> (frontend captación v0.0.170) · Memoria <strong>v4.5.3</strong> · Journey <strong>v3.2</strong> · Canvas: <code>estado-avance</code>, <code>comparacion-costos-transporte</code>, <code>cubik-plan-native-escala</code></p>
+<p class="meta"><strong>Versión doc:</strong> 1.6 · <strong>16 jun 2026</strong> · Software <strong>0.0.129</strong> (frontend captación v0.0.170) · Memoria <strong>v4.5.3</strong> · Journey <strong>v3.2</strong> · Canvas: <code>estado-avance</code>, <code>comparacion-costos-transporte</code>, <code>cubik-plan-native-escala</code></p>
 
 <h1>Resumen Canvas — Cubik</h1>
-<p>Equivalente a los canvas de Cursor y a la memoria técnica v4.5. Export Word: <code>npm run export:all-docs</code>.</p>
+<p>Equivalente a los canvas de Cursor y a la memoria técnica v4.5.3. Export Word: <code>npm run export:all-docs</code>.</p>
 <p class="meta"><strong>Producción:</strong> <a href="https://uber-truck-production.up.railway.app">uber-truck-production.up.railway.app</a> · <a href="https://uber-truck-production.up.railway.app/probar">/probar</a> · <a href="https://uber-truck-production.up.railway.app/qa-lab">/qa-lab</a></p>
 
-<h2>1. Avance global (25 may 2026)</h2>
+<h2>1. Avance global (16 jun 2026)</h2>
 <table>
   <tr><th>Área</th><th>%</th><th>Nota</th></tr>
   <tr class="done"><td>MVP digital núcleo (fase 2)</td><td>~95%</td><td>Paridad Uber + QA + notificaciones + app Cubik</td></tr>
@@ -35,7 +35,7 @@
   <tr class="done"><td>Cubik Saldo piloto 10/5 (2.11)</td><td>~78%</td><td>Pagar simulado, badges, notificación transportista</td></tr>
   <tr class="doing"><td>Cubik Saldo prod (wallet + escrow)</td><td>~8%</td><td>Retención al En ruta, ledger, recarga pasarela</td></tr>
   <tr class="done"><td>QA automatizado</td><td>~85%</td><td>Unit + Playwright + CI + Laboratorio /qa-lab</td></tr>
-  <tr class="done"><td>Push móvil (FCM)</td><td>~100%</td><td>Validado may 2026 — segundo plano, acciones</td></tr>
+  <tr class="done"><td>Push móvil (FCM)</td><td>~100%</td><td>Validado jun 2026 — segundo plano, acciones</td></tr>
   <tr><td>Proyecto hasta M5</td><td>~50%</td><td>Piloto comercial 25/50 + M2 (20 viajes)</td></tr>
 </table>
 
@@ -43,6 +43,7 @@
 <table>
   <tr><th>Versión</th><th>Foco</th></tr>
   <tr><td>0.0.168</td><td>Captación: landing v3 por rol + modal «Agendar demo» → tabla <code>prospectos</code> + aviso correo</td></tr>
+  <tr><td>Docs jun 2026</td><td>Memoria v4.5.3 + Journey v3.2 + onboarding rubros (C3a–O4) + WhatsApp token §10</td></tr>
   <tr><td>0.0.160+</td><td>Bot WhatsApp Meta Cloud API (webhook + FAQ); páginas legales <code>/privacidad</code>·<code>/terminos</code></td></tr>
   <tr><td>0.0.155+</td><td>Marca CUBIK oficial (hexágono azul) + bienvenida minimal Fase 1 con iconos de rol</td></tr>
   <tr><td>0.0.125</td><td>Fix login welcome APK + notificaciones archivadas al cerrar viaje</td></tr>
@@ -65,7 +66,7 @@
 <h2>4. Plan comercial piloto / escala</h2>
 <table>
   <tr><th>Fase</th><th>Alcance</th><th>Stack</th></tr>
-  <tr><td>Demo may 2026</td><td>Presentación inversores/clientes</td><td>Web prod + APK remoto</td></tr>
+  <tr><td>Demo jun 2026</td><td>Presentación inversores/clientes</td><td>Web prod + APK remoto</td></tr>
   <tr><td>Piloto</td><td>25 empresas + 50 transportistas</td><td>Capacitor híbrido + APK firmado (~USD 320/mes)</td></tr>
   <tr><td>Escala</td><td>50+ empresas + 200 camiones</td><td>Híbrido + nativo GPS si aplica (~USD 2.100/mes)</td></tr>
 </table>
@@ -88,15 +89,17 @@
   <tr class="done"><td>Notificaciones activas vs historial</td><td>Hecho v0.0.125</td></tr>
   <tr class="done"><td>Cubik app Android (Capacitor + APK)</td><td>Hecho</td></tr>
   <tr class="done"><td>Landing v3 + captación prospectos (Agendar demo)</td><td>Hecho v0.0.168</td></tr>
-  <tr class="done"><td>Bot WhatsApp Meta Cloud + legal (privacidad/términos)</td><td>Hecho v0.0.160+</td></tr>
+  <tr class="done"><td>Bot WhatsApp Meta Cloud + legal (privacidad/términos)</td><td>Hecho v0.0.160+ · token permanente jun 2026</td></tr>
+  <tr class="doing"><td>Onboarding rubros + seguro (piloto manual C3a–c)</td><td>En curso — <a href="ONBOARDING-PILOTO-RUBROS.md">ONBOARDING</a></td></tr>
+  <tr class="doing"><td>Login facial + docs + matching rubro (O1–O4)</td><td>Plan producto jun–ago 2026</td></tr>
   <tr class="doing"><td>Wallet real + retención al En ruta</td><td>Pendiente</td></tr>
-  <tr class="done"><td>Push FCM Android</td><td>Hecho may 2026</td></tr>
+  <tr class="done"><td>Push FCM Android</td><td>Hecho jun 2026</td></tr>
   <tr class="doing"><td>Twilio Proxy</td><td>Pendiente validación</td></tr>
 </table>
 
 <h2>7. Prioridades inmediatas</h2>
 <ul>
-  <li><strong>P0:</strong> Presentación comercial — demo + plan piloto 25/50</li>
+  <li><strong>P0:</strong> Onboarding piloto por rubros — 10 camiones/rubro + checklist docs (C3a–c)</li>
   <li><strong>P0:</strong> Piloto M2 — 20 viajes corredor RM ↔ Valparaíso</li>
   <li><strong>P0:</strong> Wallet real + escrow en ruta</li>
   <li><strong>P1:</strong> Twilio Proxy</li>

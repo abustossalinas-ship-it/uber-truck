@@ -5,8 +5,8 @@
 | Campo | Valor |
 |-------|-------|
 | Versión documento | **v4.5.3** |
-| Software | **0.0.129** API · frontend captación **v0.0.168** |
-| Última actualización | **25 may 2026** |
+| Software | **0.0.129** API · frontend captación **v0.0.170** |
+| Última actualización | **16 jun 2026** |
 | Backlog / Gantt | **Vivo** — revisar semanalmente |
 
 Incluye: visión, paridad MVP **cerrada**, hitos M1–M5, Gantt 16 sem (canvas comercial), backlog vivo, Cubik Saldo piloto, QA, plan piloto 25/50, auth/correo/dominio, **captación (landing v3 + prospectos + bot WhatsApp Meta)**, **onboarding piloto por rubros y confianza (C3a–O4)**.

@@ -1,6 +1,6 @@
 # Guión demo comercial — Cubik
 
-**Software:** 0.0.125 · **Jun 2026** · Duración sugerida: **15–20 min**
+**Software:** 0.0.129 · **16 jun 2026** · Duración sugerida: **15–20 min**
 
 ## Antes de empezar
 

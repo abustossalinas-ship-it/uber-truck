@@ -14,7 +14,7 @@ import {
   useHostTheme,
 } from "cursor/canvas";
 
-/** Coeficientes calibrados may 2026 — src/lib/match-price.js */
+/** Coeficientes calibrados jun 2026 — src/lib/match-price.js */
 const RATES = { base: 80_000, km: 450, kg: 22 };
 const RATES_OLD = { base: 120_000, km: 750, kg: 45 };
 
@@ -232,7 +232,7 @@ export default function ComparacionCostosTransporte() {
       </Card>
 
       <Callout tone="info">
-        Coeficientes calibrados may 2026: 80k + 450/km + 22/kg. Renca–Serena 463 km / 12 t ≈ $552k (cerca del
+        Coeficientes calibrados jun 2026: 80k + 450/km + 22/kg. Renca–Serena 463 km / 12 t ≈ $552k (cerca del
         $570k acordado). Sigue ~2× el $/kg del informe masivo (unidades distintas). Ajuste fino vía variables
         BUDGET_* en Railway.
       </Callout>

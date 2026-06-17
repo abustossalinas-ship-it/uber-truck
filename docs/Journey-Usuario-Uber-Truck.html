@@ -28,13 +28,13 @@
   <div class="doc-title-wrap">
     <h1>Journey de usuario — Uber Truck</h1>
     <p class="meta"><strong>Producto:</strong> App tipo Uber para carga por camión (backhaul).<br />
-    <strong>Versión:</strong> 3.2 · 25 may 2026 · Software app <strong>0.0.129</strong> (frontend captación v0.0.170) · Canal: <strong>app Cubik</strong> (web PWA + APK Android Capacitor) + landing comercial v3</p>
+    <strong>Versión:</strong> 3.2 · 16 jun 2026 · Software app <strong>0.0.129</strong> (frontend captación v0.0.170) · Canal: <strong>app Cubik</strong> (web PWA + APK Android Capacitor) + landing comercial v3</p>
   </div>
 </div>
 
 <p class="meta"><a href="/docs/">← Documentación</a> · <a href="Probar-Uber-Truck.html">Cómo probar la app</a> · <a href="https://uber-truck-production.up.railway.app/probar">Link testers /probar</a> · <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica</a> · <a href="/">Inicio app</a></p>
 
-<h2 id="acceso-testers">0. Cómo entrar a la app (may 2026)</h2>
+<h2 id="acceso-testers">0. Cómo entrar a la app (jun 2026)</h2>
 <table>
   <tr><th>Dispositivo</th><th>Cómo acceder</th><th>Link / archivo</th></tr>
   <tr><td><strong>Android</strong></td><td>APK remoto (siempre prod) o bundle firmado para piloto</td><td><code>npm run android:install:remote</code> · <code>cubik-android.apk</code> · <a href="/probar">/probar</a></td></tr>
@@ -186,7 +186,7 @@
 <p class="meta">Detalle técnico y API: <a href="PENALTY-AND-SUPPORT.md">PENALTY-AND-SUPPORT.md</a> · <a href="Multas-Cuenta-Uber-Truck.html">Multas y cuenta (HTML)</a> · SQL 030 · Memoria: <a href="Memoria-tecnica-Uber-Truck.html">§ bitácora 3 jun</a>.</p>
 <p><strong>Implementación:</strong> Cubik Saldo + cobro automático 10/5 en <strong>próxima semana</strong>; multas legacy siguen transferencia + comprobante hasta migración wallet.</p>
 
-<h2 id="checkout-tarifas">9b. Checkout y tarifas (diseño may 2026)</h2>
+<h2 id="checkout-tarifas">9b. Checkout y tarifas (diseño jun 2026)</h2>
 <p>Referencia visual: flujo Uber Eats «Terminar y pagar» — resumen explícito antes de confirmar.</p>
 <table>
   <tr><th>Momento</th><th>Embarcador ve</th><th>Transportista ve</th></tr>
@@ -196,17 +196,17 @@
 </table>
 <p><strong>Cubik Plus Empresa (futuro):</strong> mensualidad fija vs descuento en fee embarcador (tipo Uber One); banner de ahorro en checkout del embarcador.</p>
 
-<h2 id="auth-email">9c. Acceso y correo (pendiente)</h2>
+<h2 id="auth-email">9c. Acceso y correo</h2>
 <p>Hoy el ingreso es con <strong>email y contraseña</strong>. Para probar dos roles se usan dos correos o alias Gmail (<code>correo+embarcador@gmail.com</code>).</p>
-<p><strong>Pendiente producción (bloque E):</strong></p>
+<p><strong>Cerrado (jun 2026):</strong> recuperar contraseña por enlace Resend con dominio <code>getcubik.cl</code> verificado.</p>
+<p><strong>Pendiente post-M2:</strong></p>
 <ul>
   <li><strong>Continuar con Google</strong> — cuentas Gmail / Google Workspace.</li>
   <li><strong>Continuar con Apple</strong> — Sign in with Apple (relevante para app iOS futura).</li>
-  <li><strong>Recuperar contraseña</strong> por enlace enviado al correo (Resend + dominio propio).</li>
 </ul>
 <p class="meta">Detalle: <a href="AUTH-AND-EMAIL-ROADMAP.md">AUTH-AND-EMAIL-ROADMAP.md</a> · <a href="Probar-Uber-Truck.html">Probar la app</a>.</p>
 
-<h2 id="cubicacion">9d. Cubicación al publicar carga (may 2026)</h2>
+<h2 id="cubicacion">9d. Cubicación al publicar carga (jun 2026)</h2>
 <ol>
   <li>El embarcador indica <strong>pallets</strong> y/o <strong>volumen (m³)</strong>; la app sincroniza ambos (~1,2 m³ por pallet).</li>
   <li>Elige un <strong>preset de cubicación</strong> (ej. 1 pallet, 2 pallets…); si excede el preset, pasa a <strong>Personalizado</strong>.</li>
@@ -247,7 +247,7 @@
 </ul>
 
 <h2>15. Piloto comercial (25 empresas + 50 transportistas)</h2>
-<p>Fase posterior a la demo comercial may 2026. Mismo stack Capacitor híbrido; onboarding curado; corredor RM ↔ Valparaíso/San Antonio. Detalle: <a href="PLAN-COMERCIAL-PILOTO.md">PLAN-COMERCIAL-PILOTO.md</a> · <a href="ONBOARDING-PILOTO-RUBROS.md">ONBOARDING-PILOTO-RUBROS.md</a>.</p>
+<p>Fase posterior a la demo comercial jun 2026. Mismo stack Capacitor híbrido; onboarding curado; corredor RM ↔ Valparaíso/San Antonio. Detalle: <a href="PLAN-COMERCIAL-PILOTO.md">PLAN-COMERCIAL-PILOTO.md</a> · <a href="ONBOARDING-PILOTO-RUBROS.md">ONBOARDING-PILOTO-RUBROS.md</a>.</p>
 
 <h2 id="onboarding-rubros">15b. Onboarding piloto por rubros</h2>
 <p>Registro riguroso para confianza bilateral. Documento completo: <a href="ONBOARDING-PILOTO-RUBROS.md">ONBOARDING-PILOTO-RUBROS.md</a>.</p>
@@ -288,6 +288,6 @@
 
 <p class="meta">Modelo de negocio: <a href="Modelo-Negocio-Uber-Truck.html">Modelo-Negocio-Uber-Truck.html</a> · Gantt y backlog: <a href="Memoria-tecnica-Uber-Truck.html">Memoria técnica v4.5.3</a> · QA: <a href="QA-AUTOMATIZADO.md">QA-AUTOMATIZADO.md</a> · Probar: <a href="Probar-Uber-Truck.html">Probar-Uber-Truck.html</a></p>
 
-<p class="meta"><em>Fin del documento — v3.2 (25 may 2026): onboarding piloto por rubros (§15b), registro ampliado transportista/embarcador, captación landing v3 + WhatsApp Meta, páginas legales. Memoria v4.5.3 · Cubik Saldo piloto 10/5.</em></p>
+<p class="meta"><em>Fin del documento — v3.2 (16 jun 2026): onboarding piloto por rubros (§15b), registro ampliado transportista/embarcador, captación landing v3 + WhatsApp Meta, páginas legales. Memoria v4.5.3 · Cubik Saldo piloto 10/5.</em></p>
 </body>
 </html>

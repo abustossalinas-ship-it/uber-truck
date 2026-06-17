@@ -12,7 +12,7 @@
 |-----------|--------|
 | **Memoria técnica** | [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html) |
 
-Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX **MVP cerrada**, hitos, **Gantt 16 sem**, **backlog vivo**, Cubik Saldo piloto, QA automatizado, plan comercial piloto 25/50, auth/correo/dominio, **captación (landing v3 + prospectos + bot WhatsApp Meta)**, **onboarding piloto por rubros (C3a–O4)**. La tabla **Post-MVP** es backlog planificado (no bugs). **Última actualización:** 25 may 2026 · software **0.0.129** (frontend captación **v0.0.168**) · memoria **v4.5.3**.
+Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX **MVP cerrada**, hitos, **Gantt 16 sem**, **backlog vivo**, Cubik Saldo piloto, QA automatizado, plan comercial piloto 25/50, auth/correo/dominio, **captación (landing v3 + prospectos + bot WhatsApp Meta)**, **onboarding piloto por rubros (C3a–O4)**. La tabla **Post-MVP** es backlog planificado (no bugs). **Última actualización:** 16 jun 2026 · software **0.0.129** (frontend captación **v0.0.170**) · memoria **v4.5.3** · journey **v3.2**.
 
 No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitácora MVP digital (evita duplicados).
 
@@ -26,7 +26,7 @@ No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitáco
 | Auth, OAuth futuro, contraseña | [AUTH-AND-EMAIL-ROADMAP.md](./AUTH-AND-EMAIL-ROADMAP.md) |
 | Checklist Post-MVP | [POST-MVP-CHECKLIST.md](./POST-MVP-CHECKLIST.md) |
 
-## Comercial y piloto (may 2026)
+## Comercial y piloto (jun 2026)
 
 | Tema | Documento |
 |------|-----------|
@@ -56,8 +56,8 @@ No hay archivos separados de kickoff, gantt, roadmap, próximos hitos ni bitáco
 | Tema | HTML |
 |------|------|
 | Modelo de negocio | [Modelo-Negocio-Uber-Truck.html](./Modelo-Negocio-Uber-Truck.html) |
-| Journey usuario | [Journey-Usuario-Uber-Truck.html](./Journey-Usuario-Uber-Truck.html) (v3.2 · 25 may 2026) |
-| Resumen canvas | [Canvas-Resumen-Uber-Truck.html](./Canvas-Resumen-Uber-Truck.html) (v1.6 · 25 may 2026) |
+| Journey usuario | [Journey-Usuario-Uber-Truck.html](./Journey-Usuario-Uber-Truck.html) (v3.2 · 16 jun 2026) |
+| Resumen canvas | [Canvas-Resumen-Uber-Truck.html](./Canvas-Resumen-Uber-Truck.html) (v1.6 · 16 jun 2026) |
 | Cancelación / multas | [Politica-Cancelacion-Uber-Truck.html](./Politica-Cancelacion-Uber-Truck.html) · [Multas-Cuenta-Uber-Truck.html](./Multas-Cuenta-Uber-Truck.html) |
 | SQL Supabase | [Sql-Supabase-Uber-Truck.html](./Sql-Supabase-Uber-Truck.html) · [SQL-SUPABASE.md](./SQL-SUPABASE.md) |
 | Confianza y carga | [CARGO-TRUST.md](./CARGO-TRUST.md) · [Terminos-Confianza-Carga-Uber-Truck.html](./Terminos-Confianza-Carga-Uber-Truck.html) |

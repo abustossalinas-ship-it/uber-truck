@@ -1,5 +1,7 @@
 # Cubik — WhatsApp Meta Cloud API
 
+**Actualizado:** 16 jun 2026 · **Software:** 0.0.129
+
 Integración **solo Meta** (sin Twilio). El bot responde automáticamente cuando un usuario escribe al número de Cubik.
 
 ## Arquitectura

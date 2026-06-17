@@ -1,6 +1,6 @@
 # QA automatizado — Cubik
 
-**Software:** 0.0.129 · **May 2026**
+**Software:** 0.0.129 · **16 jun 2026**
 
 ## Preparación (una sola vez)
 

@@ -8,7 +8,7 @@ Canvas interactivo (Gantt, costos, checklist nativo): `canvases/cubik-plan-nativ
 
 | Fase | Alcance | Stack | Infra aprox. |
 |------|---------|-------|--------------|
-| **Demo comercial** | Presentación may 2026 | Web prod + APK remoto | Railway actual |
+| **Demo comercial** | Presentación jun 2026 | Web prod + APK remoto | Railway actual |
 | **Piloto** | 25 empresas + 50 transportistas | Capacitor híbrido + APK bundle firmado | ~USD 320/mes |
 | **Escala** | 50+ empresas + 200 camiones | Híbrido + módulo nativo GPS si aplica | ~USD 2.100/mes |
 

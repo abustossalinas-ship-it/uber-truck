@@ -21,7 +21,7 @@ import {
   useHostTheme,
 } from "cursor/canvas";
 
-/** Plan piloto → escala · Cubik · 25 may 2026 · presentación comercial */
+/** Plan piloto → escala · Cubik · 16 jun 2026 · presentación comercial */
 
 type CheckRow = {
   criterio: string;
@@ -104,9 +104,9 @@ const CHECKLIST: CheckRow[] = [
   },
 ];
 
-/** Gantt simplificado — semanas desde 25 may 2026 */
+/** Gantt simplificado — semanas desde 16 jun 2026 */
 const GANTT_WEEKS = [
-  "S1\n9–13 jun",
+  "S1\n16–20 jun",
   "S2",
   "S3",
   "S4",
@@ -292,7 +292,7 @@ export default function CubikPlanNativeEscala() {
       </Card>
 
       <Card>
-        <CardHeader title="Gantt — 16 semanas desde 25 may 2026" />
+        <CardHeader title="Gantt — 16 semanas desde 16 jun 2026" />
         <CardBody>
           <Text size="small" tone="tertiary" style={{ marginBottom: 12 }}>
             Eje X: semanas · Barras apiladas = fases en paralelo · Fuente: plan interno Cubik
@@ -379,7 +379,7 @@ export default function CubikPlanNativeEscala() {
       </Callout>
 
       <Text size="small" tone="tertiary" style={{ textAlign: "center" }}>
-        Cubik · plan comercial 25 may 2026 · infra en USD · desarrollo interno asumido en piloto
+        Cubik · plan comercial 16 jun 2026 · infra en USD · desarrollo interno asumido en piloto
       </Text>
     </Stack>
   );

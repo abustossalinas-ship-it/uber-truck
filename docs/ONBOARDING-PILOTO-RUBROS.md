@@ -1,7 +1,7 @@
 # Onboarding piloto — rubros, confianza y discurso comercial
 
 **Producto:** Cubik · **Alcance:** registro transportistas y empresas · **Piloto:** corredor RM–V  
-**Actualizado:** 25 may 2026 · **Estado:** estrategia + blueprint (implementación facial/rubros en roadmap)
+**Actualizado:** 16 jun 2026 · **Estado:** estrategia + blueprint (implementación facial/rubros en roadmap)
 
 ---
 
@@ -33,7 +33,7 @@ La confianza se construye con **registro riguroso** (identidad + documentos + ru
 | 7. **Banco** | Cuenta para cobros (ya en app) | Operar tras KYC |
 | 8. **Revisión** | Admin aprueba `kyc_status = approved` | Semi-curado piloto |
 
-> **Hoy en prod (25 may 2026):** email + contraseña, empresa, banco, KYC manual admin. Pasos 2–5 son **roadmap C3+**; en piloto se pueden completar por WhatsApp/formulario y cargar en panel admin.
+> **Hoy en prod (16 jun 2026):** email + contraseña, empresa, banco, KYC manual admin. Pasos 2–5 son **roadmap C3+**; en piloto se pueden completar por WhatsApp/formulario y cargar en panel admin.
 
 ### 1.2 Seguro — validación acotada (sin prometer API completa)
 

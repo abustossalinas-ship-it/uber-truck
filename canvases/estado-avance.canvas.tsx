@@ -18,7 +18,7 @@ import {
 
 const VERSION = "0.0.168";
 const MEMORIA = "v4.5.3";
-const FECHA = "25 may 2026";
+const FECHA = "16 jun 2026";
 const PROD = "https://uber-truck-production.up.railway.app";
 const REPO = "https://github.com/abustossalinas-ship-it/uber-truck";
 
@@ -120,7 +120,7 @@ export default function EstadoAvanceUberTruck() {
       </Card>
 
       <Card>
-        <CardHeader title="Releases recientes (may 2026)" />
+        <CardHeader title="Releases recientes (jun 2026)" />
         <CardBody>
           <Table
             columns={[

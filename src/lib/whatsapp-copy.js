@@ -17,7 +17,10 @@ const DOCS_ROLE_PICK = `*Documentos de validación — Cubik*
 • Escribe *soy transportista* → checklist CI, licencia, SOAP y seguro
 • Escribe *soy empresa* → registro embarcador en getcubik.cl/app
 
-Si ya te registraste como transportista, responde *soy transportista* y te guiamos paso a paso.`;
+Si ya te registraste, responde *soy transportista* o envía tu *RUT* / *email* de la app.
+
+📄 Escribe *documentos* en cualquier momento para volver a validación.
+↩️ Escribe *volver* para reiniciar desde cero.`;
 
 const WELCOME = {
   shipper: `👋 Bienvenido a Cubik.
@@ -49,6 +52,8 @@ const MENU = {
 3️⃣ Costos, pagos y comisiones
 4️⃣ Seguimiento de envíos
 5️⃣ Registro y demo
+📄 *documentos* — validación de cuenta
+↩️ *volver* — reiniciar conversación
 👤 Escribe *humano* para hablar con un ejecutivo`,
   carrier: `¿En qué te ayudo?
 1️⃣ Cómo encuentro cargas
@@ -57,6 +62,8 @@ const MENU = {
 4️⃣ Estado de mis viajes
 5️⃣ Registro en Cubik
 6️⃣ Enviar documentos (piloto)
+📄 *documentos* — validación de cuenta
+↩️ *volver* — reiniciar conversación
 👤 Escribe *humano* para hablar con soporte`,
 };
 
@@ -145,7 +152,9 @@ function identityPrompt() {
   return `*Validación de cuenta — Cubik*
 Indica tu *RUT* (ej. 12.345.678-9), el *email* con el que te registraste en la app o tu *nombre completo*.
 
-Con eso verificamos si tu cuenta existe, está pendiente o aprobada, y qué documentos debes enviar.`;
+Con eso verificamos si tu cuenta existe, está pendiente o aprobada, y qué documentos debes enviar.
+
+↩️ Escribe *volver* para reiniciar · 📄 *documentos* para empezar de nuevo.`;
 }
 
 function identityNotFound() {

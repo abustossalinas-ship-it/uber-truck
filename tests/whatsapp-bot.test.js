@@ -135,6 +135,44 @@ describe('whatsapp-bot', () => {
     assert.equal(first.skipped, false);
     assert.equal(second.skipped, true);
   });
+
+  it('documentos luego nombre no cae en menu empresa', async () => {
+    await handleInbound({ from: '56999999991', text: 'documentos', messageId: 'trap-1' });
+    const { replies } = await handleInbound(
+      { from: '56999999991', text: 'juan bastidas', messageId: 'trap-2' },
+      { lookupCarrierIdentity: mockLookup }
+    );
+    assert.doesNotMatch(replies.join(' '), /Publicar una carga/i);
+    assert.match(replies.join(' '), /transportista|RUT|volver/i);
+  });
+
+  it('atrapado en menu empresa vuelve con soy transportista', async () => {
+    await handleInbound({ from: '56999999992', text: 'hola', messageId: 'trap-3' });
+    const { replies } = await handleInbound(
+      { from: '56999999992', text: 'soy trasnportista', messageId: 'trap-4' },
+      { lookupCarrierIdentity: mockLookup }
+    );
+    assert.match(replies[0], /RUT|email|Validación/i);
+  });
+
+  it('volver reinicia flujo documentos', async () => {
+    await handleInbound({ from: '56999999993', text: 'hola', messageId: 'trap-5' });
+    const { replies } = await handleInbound({
+      from: '56999999993',
+      text: 'volver',
+      messageId: 'trap-6',
+    });
+    assert.match(replies[0], /transportista|empresa/i);
+  });
+
+  it('documentos desde menu reinicia validacion', async () => {
+    await handleInbound({ from: '56999999994', text: 'hola', messageId: 'trap-7' });
+    const { replies } = await handleInbound(
+      { from: '56999999994', text: 'documentos', messageId: 'trap-8' },
+      { lookupCarrierIdentity: mockLookup }
+    );
+    assert.match(replies[0], /transportista|empresa|RUT/i);
+  });
 });
 
 describe('whatsapp-cloud parse', () => {

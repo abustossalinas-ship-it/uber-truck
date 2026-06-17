@@ -29,10 +29,14 @@ const DEMO_RE = /\b(demo|agendar|reuni[oó]n|presentaci[oó]n)\b/i;
 const TECH_RE = /\b(error|bug|no carga|pantalla|olvid[eé]|contraseña|password)\b/i;
 const DOCS_RE =
   /\b(document|documentos|papeles|cedula|c[eé]dula|licencia|seguro|soap|rubro|patente|validar cuenta|enviar foto|actualizar)\b/i;
+const RESET_RE =
+  /\b(volver|inicio|reiniciar|cerrar|cancelar|empezar de nuevo|salir|menu documentos)\b/i;
 const RENEW_CI_RE = /\b(ci|c[eé]dula|carnet)\b/i;
 const RENEW_LICENSE_RE = /\blicencia\b/i;
 const RENEW_INSURANCE_RE = /\b(seguro|p[oó]liza|rc)\b/i;
 const RENEW_SOAP_RE = /\bsoap\b/i;
+
+const DOCS_INTENT_HINT = `Para *documentos* responde *soy transportista*, envía tu *RUT* / *email*, o escribe *volver* para reiniciar.`;
 
 /** @typedef {{ role: 'shipper'|'carrier'|null, welcomed: boolean, awaitingHuman: boolean, docsIntent: boolean, awaitingIdentity: boolean, linkedUser: object|null, updatedAt: number }} Session */
 
@@ -56,7 +60,8 @@ function detectRoleFromText(text) {
   if (/\bsoy\s+empresa\b|encontrar transportistas|publicar cargas|mover tu carga/.test(t)) {
     return 'shipper';
   }
-  if (/\bsoy\s+transportista\b/.test(t)) return 'carrier';
+  if (/\bsoy\s+tr[a-z]*ns?portista\b/.test(t)) return 'carrier';
+  if (/\btransportista\b/.test(t) && !/\bempresa\b/.test(t)) return 'carrier';
   if (
     /\btransportistas?\b|\bcamion\b|\bcamión\b|\bflota\b|\bruta\b|ofertar|viajes vac|rentabilidad/.test(
       t
@@ -71,6 +76,24 @@ function detectRoleFromText(text) {
 
 function roleOf(session) {
   return session.role === 'carrier' ? 'carrier' : 'shipper';
+}
+
+function resetSession(session) {
+  session.role = null;
+  session.welcomed = false;
+  session.awaitingHuman = false;
+  session.docsIntent = false;
+  session.awaitingIdentity = false;
+  session.linkedUser = null;
+}
+
+function restartDocumentFlow(session) {
+  session.awaitingHuman = false;
+  session.awaitingIdentity = false;
+  session.linkedUser = null;
+  session.docsIntent = true;
+  session.welcomed = false;
+  session.role = null;
 }
 
 function getSession(phone) {
@@ -133,6 +156,25 @@ function startCarrierIdentityFlow(session) {
   session.welcomed = true;
 }
 
+async function runIdentityLookup(body, session, lookup) {
+  const result = await lookup(body);
+  session.awaitingIdentity = false;
+  if (!result.found) {
+    if (result.reason === 'ambiguous') {
+      session.awaitingIdentity = true;
+      return [identityAmbiguous(result.count)];
+    }
+    session.awaitingIdentity = true;
+    return [identityNotFound()];
+  }
+  if (result.wrongRole) {
+    return [identityWrongRole()];
+  }
+  session.linkedUser = result.user;
+  session.role = 'carrier';
+  return repliesForLinkedCarrier(result.user);
+}
+
 function repliesForLinkedCarrier(user) {
   const compliance = evaluateDocumentCompliance(user);
   if (compliance.status === 'expired') {
@@ -168,10 +210,12 @@ async function buildReplies(text, session, deps = {}) {
   const body = String(text || '').trim();
   const lower = body.toLowerCase();
   const replies = [];
+  const detectedRole = detectRoleFromText(body);
 
-  if (!session.role) {
-    const detected = detectRoleFromText(body);
-    if (detected) session.role = detected;
+  if (RESET_RE.test(lower)) {
+    restartDocumentFlow(session);
+    replies.push(DOCS_ROLE_PICK);
+    return replies;
   }
 
   if (ESCALATE_RE.test(lower) || HUMAN_RE.test(lower)) {
@@ -188,28 +232,30 @@ async function buildReplies(text, session, deps = {}) {
     return replies;
   }
 
+  if (DOCS_RE.test(lower)) {
+    const preferCarrier = detectedRole === 'carrier' || session.role === 'carrier';
+    restartDocumentFlow(session);
+    if (preferCarrier && lookup) {
+      startCarrierIdentityFlow(session);
+      replies.push(identityPrompt());
+      return replies;
+    }
+    replies.push(DOCS_ROLE_PICK);
+    return replies;
+  }
+
+  if (detectedRole === 'carrier' && (session.docsIntent || !session.welcomed || session.role === 'shipper')) {
+    session.role = 'carrier';
+    if (lookup) {
+      startCarrierIdentityFlow(session);
+      replies.push(identityPrompt());
+      return replies;
+    }
+  }
+
   if (session.awaitingIdentity && lookup) {
     try {
-      const result = await lookup(body);
-      session.awaitingIdentity = false;
-      if (!result.found) {
-        if (result.reason === 'ambiguous') {
-          replies.push(identityAmbiguous(result.count));
-          session.awaitingIdentity = true;
-          return replies;
-        }
-        replies.push(identityNotFound());
-        session.awaitingIdentity = true;
-        return replies;
-      }
-      if (result.wrongRole) {
-        replies.push(identityWrongRole());
-        return replies;
-      }
-      session.linkedUser = result.user;
-      session.role = 'carrier';
-      replies.push(...repliesForLinkedCarrier(result.user));
-      return replies;
+      return await runIdentityLookup(body, session, lookup);
     } catch (_e) {
       replies.push('No pudimos validar tu cuenta ahora. Intenta de nuevo o escribe *humano*.');
       return replies;
@@ -224,40 +270,53 @@ async function buildReplies(text, session, deps = {}) {
     }
   }
 
-  if (DOCS_RE.test(lower)) {
-    if (!session.role) {
-      session.docsIntent = true;
-      replies.push(DOCS_ROLE_PICK);
-      return replies;
-    }
-    if (session.role === 'carrier' && lookup) {
-      startCarrierIdentityFlow(session);
-      replies.push(identityPrompt());
-      return replies;
-    }
-    session.welcomed = true;
-    session.docsIntent = false;
-    if (session.role === 'carrier') {
-      replies.push(ONBOARDING_DOCS.carrier, MENU.carrier);
-    } else {
-      replies.push(ONBOARDING_DOCS.shipper);
-    }
-    return replies;
-  }
-
   if (!session.welcomed) {
-    const detected = detectRoleFromText(body);
-    if (detected) session.role = detected;
-    if (session.docsIntent && session.role === 'carrier' && lookup) {
-      startCarrierIdentityFlow(session);
-      replies.push(identityPrompt());
+    if (session.docsIntent) {
+      if (detectedRole === 'shipper') {
+        session.role = 'shipper';
+        session.welcomed = true;
+        session.docsIntent = false;
+        replies.push(ONBOARDING_DOCS.shipper);
+        return replies;
+      }
+      if (detectedRole === 'carrier') {
+        session.role = 'carrier';
+        if (lookup) {
+          startCarrierIdentityFlow(session);
+          replies.push(identityPrompt());
+          return replies;
+        }
+      }
+      if (lookup && body.length >= 3) {
+        session.role = 'carrier';
+        session.awaitingIdentity = true;
+        session.welcomed = true;
+        try {
+          return await runIdentityLookup(body, session, lookup);
+        } catch (_e) {
+          replies.push('No pudimos validar tu cuenta ahora. Intenta de nuevo o escribe *volver*.');
+          return replies;
+        }
+      }
+      replies.push(DOCS_INTENT_HINT, DOCS_ROLE_PICK);
       return replies;
     }
-    const role = session.role || detected || 'shipper';
+
+    if (detectedRole) session.role = detectedRole;
+    const role = session.role || detectedRole || 'shipper';
     session.role = role;
     session.welcomed = true;
     replies.push(WELCOME[role], MENU[role]);
     return replies;
+  }
+
+  if (detectedRole === 'carrier' && session.role !== 'carrier') {
+    session.role = 'carrier';
+    if (lookup) {
+      startCarrierIdentityFlow(session);
+      replies.push(identityPrompt());
+      return replies;
+    }
   }
 
   const menuChoice = parseMenuChoice(body);
@@ -311,7 +370,7 @@ async function buildReplies(text, session, deps = {}) {
   }
 
   replies.push(
-    'No estoy seguro de entender. Elige una opción del menú (1–6) o escribe *humano* para un ejecutivo.',
+    'No estoy seguro de entender. Elige una opción del menú (1–6), escribe *documentos* / *volver*, o *humano* para un ejecutivo.',
     MENU[roleOf(session)]
   );
   return replies;
@@ -342,4 +401,6 @@ module.exports = {
   resetSessionsForTests,
   normalizePhone,
   buildReplies,
+  resetSession,
+  restartDocumentFlow,
 };

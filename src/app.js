@@ -139,6 +139,10 @@ app.get('/qa-lab', (_req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   res.sendFile(path.join(publicDir, 'qa-lab.html'));
 });
+app.get('/piloto-one-pager', (_req, res) => {
+  res.setHeader('Cache-Control', 'no-store');
+  res.sendFile(path.join(publicDir, 'piloto-one-pager.html'));
+});
 if (process.env.NODE_ENV !== 'production') {
   app.use('/qa-report', express.static(path.join(__dirname, '..', 'playwright-report')));
 }

@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="es-CL">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cubik — Piloto comercial (one-pager)</title>
+  <style>
+    :root {
+      --ink: #152238;
+      --muted: #5f6f8f;
+      --accent: #e86f1a;
+      --line: #dce3f0;
+      --ok: #0d8a5b;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", system-ui, sans-serif;
+      color: var(--ink);
+      background: #f4f6fb;
+      line-height: 1.4;
+    }
+    .page {
+      max-width: 820px;
+      margin: 0 auto;
+      background: #fff;
+      padding: 32px 36px 28px;
+    }
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 16px;
+      border-bottom: 3px solid var(--accent);
+      padding-bottom: 14px;
+      margin-bottom: 18px;
+    }
+    h1 { margin: 0; font-size: 1.65rem; letter-spacing: -0.02em; }
+    .tagline { margin: 4px 0 0; color: var(--muted); font-size: 0.95rem; }
+    .meta { text-align: right; font-size: 0.82rem; color: var(--muted); }
+    .meta strong { color: var(--ink); display: block; font-size: 0.95rem; }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px 20px;
+      margin-bottom: 16px;
+    }
+    .box {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .box h2 {
+      margin: 0 0 8px;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: var(--accent);
+    }
+    .box ul { margin: 0; padding-left: 18px; font-size: 0.88rem; }
+    .box li { margin: 3px 0; }
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+    .stat {
+      text-align: center;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 6px;
+    }
+    .stat strong { display: block; font-size: 1.35rem; color: var(--accent); }
+    .stat span { font-size: 0.72rem; color: var(--muted); }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.84rem;
+      margin-bottom: 14px;
+    }
+    th, td {
+      border: 1px solid var(--line);
+      padding: 7px 10px;
+      text-align: left;
+    }
+    th { background: #f8fafc; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.04em; }
+    .timeline { font-size: 0.84rem; }
+    .timeline div { display: flex; gap: 10px; margin: 4px 0; }
+    .timeline .w { min-width: 72px; font-weight: 600; color: var(--accent); }
+    .foot {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 0.78rem;
+      color: var(--muted);
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+      margin-top: 8px;
+    }
+    .foot a { color: var(--accent); }
+    .no-print {
+      text-align: center;
+      padding: 12px;
+      background: #fff4ec;
+      border-bottom: 1px solid #ffd8bc;
+    }
+    .no-print button {
+      background: var(--accent);
+      color: #fff;
+      border: 0;
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 0.95rem;
+      cursor: pointer;
+    }
+    @media print {
+      body { background: #fff; }
+      .page { padding: 0; max-width: none; }
+      .no-print { display: none; }
+    }
+    @media (max-width: 640px) {
+      .grid, .stats { grid-template-columns: 1fr; }
+      header { flex-direction: column; }
+      .meta { text-align: left; }
+    }
+  </style>
+</head>
+<body>
+  <div class="no-print">
+    <button type="button" onclick="window.print()">Imprimir / guardar PDF</button>
+  </div>
+  <article class="page">
+    <header>
+      <div>
+        <h1>Cubik — Piloto comercial</h1>
+        <p class="tagline">Marketplace B2B de flete · corredor RM ↔ Valparaíso / San Antonio</p>
+      </div>
+      <div class="meta">
+        <strong>Software v0.0.129</strong>
+        Jun 2026 · getcubik.cl
+      </div>
+    </header>
+
+    <div class="stats">
+      <div class="stat"><strong>25</strong><span>Empresas embarcadoras</span></div>
+      <div class="stat"><strong>50</strong><span>Transportistas verificados</span></div>
+      <div class="stat"><strong>20</strong><span>Viajes M2 (KPI piloto)</span></div>
+      <div class="stat"><strong>16 sem</strong><span>Horizonte plan</span></div>
+    </div>
+
+    <div class="grid">
+      <section class="box">
+        <h2>Qué es hoy</h2>
+        <ul>
+          <li>Producto <strong>real en producción</strong> (Railway + Supabase)</li>
+          <li>App Android (Capacitor) + web móvil</li>
+          <li>Publicar carga, ofertar, emparejar, mapa/GPS, chat, Cubik Saldo piloto</li>
+          <li>KYC semi-curado + validación documentos WhatsApp (CI/licencia OCR)</li>
+          <li><strong>122 tests</strong> automatizados (QA lab)</li>
+        </ul>
+      </section>
+      <section class="box">
+        <h2>Propuesta piloto</h2>
+        <ul>
+          <li>Onboarding curado por rubro (construcción + retail/alimentos)</li>
+          <li>10 camiones activos por rubro en corredor RM–V</li>
+          <li>Take rate dual: <strong>10%</strong> embarcador · <strong>5%</strong> transportista</li>
+          <li>Soporte WhatsApp Cubik + panel admin</li>
+          <li>Plan B Cornershop: 1–2 empresas ancla por rubro si baja liquidez</li>
+        </ul>
+      </section>
+    </div>
+
+    <table>
+      <thead>
+        <tr><th>Fase</th><th>Alcance</th><th>Stack</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Demo comercial</td><td>Presentación en vivo web + APK</td><td>Híbrido Capacitor (sin rewrite nativo)</td></tr>
+        <tr><td>Piloto 25/50</td><td>Onboarding docs + banco + KYC admin</td><td>APK bundle firmado · ~USD 320/mes infra</td></tr>
+        <tr><td>Operación M2</td><td>20 viajes <code>completed</code> corredor</td><td>Mismo stack · KPIs semanales</td></tr>
+        <tr><td>Escala 50+/200</td><td>Maps + densidad · nativo GPS si aplica</td><td>~USD 2.100/mes · módulo nativo selectivo</td></tr>
+      </tbody>
+    </table>
+
+    <section class="box timeline">
+      <h2>Timeline 16 semanas (Gantt)</h2>
+      <div><span class="w">S1</span> Demo comercial · prod + APK + guión</div>
+      <div><span class="w">S2–S5</span> Captación 25/50 · C3a docs WhatsApp + admin</div>
+      <div><span class="w">S4–S9</span> Spike GPS background (paralelo, no bloqueante)</div>
+      <div><span class="w">S6–S13</span> Operación piloto · meta 20 viajes M2</div>
+      <div><span class="w">S10+</span> Prep escala · costos Maps · go/no-go nativo</div>
+    </section>
+
+    <div class="grid" style="margin-top:14px">
+      <section class="box">
+        <h2>No prometemos en esta etapa</h2>
+        <ul>
+          <li>App 100 % nativa reescrita</li>
+          <li>Wallet real / escrow (roadmap post-piloto)</li>
+          <li>Cobertura nacional día uno</li>
+          <li>Play Store producción abierta sin M2</li>
+        </ul>
+      </section>
+      <section class="box">
+        <h2>Próximos pasos</h2>
+        <ul>
+          <li>Cerrar onboarding C3a transportistas piloto</li>
+          <li>Wallet producción + escrow en ruta</li>
+          <li>Twilio Proxy (llamadas enmascaradas) — opcional</li>
+          <li>Expansión corredor con datos de liquidez</li>
+        </ul>
+      </section>
+    </div>
+
+    <footer class="foot">
+      <span>Demo: <a href="https://getcubik.cl/app">getcubik.cl/app</a> · Testers: <a href="https://getcubik.cl/probar">/probar</a></span>
+      <span>QA: <a href="https://uber-truck-production.up.railway.app/qa-lab">Laboratorio QA</a></span>
+    </footer>
+  </article>
+</body>
+</html>

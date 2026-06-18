@@ -10,9 +10,15 @@ const AREA_RULES = [
   { id: 'welcome', label: 'Welcome / login', match: (s) => /welcome|login|auth-ui|prod-smoke/i.test(s) },
   { id: 'nav', label: 'Navegación app', match: (s) => /authed|inicio|emparejar|cuenta|actividad/i.test(s) },
   { id: 'board', label: 'Tablero / datos', match: (s) => /board|proximity|notification|demo|seed/i.test(s) },
+  {
+    id: 'compliance',
+    label: 'Docs / WhatsApp / OCR',
+    match: (s) =>
+      /carrier-documents|carrier-onboarding|chile-document|whatsapp-bot|whatsapp-cloud/i.test(s),
+  },
   { id: 'android', label: 'Android / APK', match: (s) => /android|bundle|apk/i.test(s) },
-  { id: 'prod', label: 'Smoke producción', match: (s) => /prod/i.test(s) },
-  { id: 'landing', label: 'Landing / marca', match: (s) => /landing|design-system|logo-brand|prospect|whatsapp/i.test(s) },
+  { id: 'prod', label: 'Smoke producción', match: (s) => /prod-smoke|prod\b/i.test(s) },
+  { id: 'landing', label: 'Landing / marca', match: (s) => /landing|design-system|logo-brand|prospectos/i.test(s) },
 ];
 
 function readFile(rel) {
@@ -210,7 +216,7 @@ const catalog = {
     },
     unit: {
       name: 'Node test runner',
-      role: 'Lógica pura, sintaxis auth-ui, notificaciones, proximidad GPS',
+      role: 'Lógica pura, OCR documentos, compliance C3a, bot WhatsApp, auth, notificaciones, GPS',
       when: 'Regresiones rápidas sin abrir navegador',
       cmd: 'npm run test:unit',
     },

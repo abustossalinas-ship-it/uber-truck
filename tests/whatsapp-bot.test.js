@@ -220,7 +220,7 @@ describe('whatsapp-bot', () => {
       { from: phone, text: 'licencia', messageId: 'loop-2' },
       { lookupCarrierIdentity: lookup }
     );
-    assert.match(replies[0], /licencia de conducir/i);
+    assert.match(replies[0], /anverso.*licencia|fecha de control/i);
     assert.doesNotMatch(replies[0], /Indica tu RUT/i);
     assert.equal(session.uploadTarget, 'license');
     assert.ok(session.linkedUser);

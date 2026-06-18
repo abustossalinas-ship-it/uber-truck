@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-06-12T04:51:56.203Z",
+  "generated_at": "2026-06-18T21:51:12.508Z",
   "version": "0.0.129",
   "counts": {
-    "unit": 41,
+    "unit": 80,
     "e2e": 42,
     "e2e_optional": 3,
-    "required": 80,
+    "required": 119,
     "optional": 3,
-    "total": 83
+    "total": 122
   },
   "charts": {
     "by_kind": [
       {
         "label": "Unitarios (Node)",
-        "value": 41
+        "value": 80
       },
       {
         "label": "E2E (Playwright)",
@@ -23,7 +23,7 @@
     "by_coverage": [
       {
         "label": "Obligatorios (CI)",
-        "value": 80
+        "value": 119
       },
       {
         "label": "Opcionales (.env / Supabase)",
@@ -32,28 +32,32 @@
     ],
     "by_area": [
       {
+        "label": "Docs / WhatsApp / OCR",
+        "value": 32
+      },
+      {
+        "label": "Tablero / datos",
+        "value": 24
+      },
+      {
         "label": "Landing / marca",
-        "value": 30
+        "value": 23
       },
       {
         "label": "Welcome / login",
         "value": 20
       },
       {
-        "label": "Tablero / datos",
-        "value": 14
-      },
-      {
         "label": "Otros",
-        "value": 11
+        "value": 12
       },
       {
         "label": "Navegación app",
-        "value": 6
+        "value": 10
       },
       {
         "label": "Smoke producción",
-        "value": 2
+        "value": 1
       }
     ],
     "by_suite": [
@@ -75,6 +79,21 @@
       {
         "label": "auth-ui-syntax",
         "value": 1,
+        "kind": "unit"
+      },
+      {
+        "label": "carrier-documents",
+        "value": 5,
+        "kind": "unit"
+      },
+      {
+        "label": "carrier-onboarding",
+        "value": 10,
+        "kind": "unit"
+      },
+      {
+        "label": "chile-document-parser",
+        "value": 11,
         "kind": "unit"
       },
       {
@@ -104,7 +123,7 @@
       },
       {
         "label": "whatsapp-bot",
-        "value": 7,
+        "value": 20,
         "kind": "unit"
       },
       {
@@ -151,7 +170,7 @@
     "last_run": [
       {
         "label": "Pasaron",
-        "value": 31
+        "value": 32
       },
       {
         "label": "Omitidos",
@@ -168,7 +187,7 @@
     },
     "unit": {
       "name": "Node test runner",
-      "role": "Lógica pura, sintaxis auth-ui, notificaciones, proximidad GPS",
+      "role": "Lógica pura, OCR documentos, compliance C3a, bot WhatsApp, auth, notificaciones, GPS",
       "when": "Regresiones rápidas sin abrir navegador",
       "cmd": "npm run test:unit"
     },
@@ -303,8 +322,8 @@
         {
           "name": "generateOtpCode produce 4 dígitos",
           "optional": false,
-          "area": "prod",
-          "area_label": "Smoke producción"
+          "area": "other",
+          "area_label": "Otros"
         },
         {
           "name": "hashOtp es determinístico",
@@ -324,6 +343,183 @@
           "optional": false,
           "area": "welcome",
           "area_label": "Welcome / login"
+        }
+      ]
+    },
+    {
+      "file": "tests/carrier-documents.test.js",
+      "suite": "carrier-documents",
+      "kind": "unit",
+      "cases": [
+        {
+          "name": "evaluateDocumentCompliance marca expired",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "evaluateDocumentCompliance marca expiring",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "parseIsoDate rechaza basura",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "docsBlockMessage lista documentos vencidos",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "docsBlockMessage indica bloqueo de cuenta",
+          "optional": false,
+          "area": "nav",
+          "area_label": "Navegación app"
+        }
+      ]
+    },
+    {
+      "file": "tests/carrier-onboarding.test.js",
+      "suite": "carrier-onboarding",
+      "kind": "unit",
+      "cases": [
+        {
+          "name": "checklistProgress completo cuando todos los ítems ok",
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
+        },
+        {
+          "name": "checklistProgress null para embarcador",
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
+        },
+        {
+          "name": "validateOnboardingPatch rechaza rubro inválido",
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
+        },
+        {
+          "name": "validateOnboardingPatch acepta patch válido",
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
+        },
+        {
+          "name": "rubroLabel devuelve etiqueta legible",
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
+        },
+        {
+          "name": "validateLegalDocumentation exige fecha si documento marcado",
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
+        },
+        {
+          "name": "validateLegalDocumentation exige RUT si hay docs",
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
+        },
+        {
+          "name": "validateLegalDocumentation ok cuando pares completos",
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
+        },
+        {
+          "name": "deriveCarrierKycPhase distingue docs y revisión",
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
+        },
+        {
+          "name": "buildCarrierDocumentProfile lista faltantes y advertencia",
+          "optional": false,
+          "area": "board",
+          "area_label": "Tablero / datos"
+        }
+      ]
+    },
+    {
+      "file": "tests/chile-document-parser.test.js",
+      "suite": "chile-document-parser",
+      "kind": "unit",
+      "cases": [
+        {
+          "name": "parseChileanDocDate entiende DD MMM YYYY",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "extrae RUT desde texto OCR",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "clasifica cédula de identidad",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "parsea cédula con RUT, nombre y vencimiento",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "parsea licencia con clase y vencimiento",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "parsea licencia con fecha de control chilena",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "namesMatch tolera orden y acentos",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "extrae RUT con comas desde N DE LICENCIA",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "acepta RUT impreso con puntos, comas, espacios o sin separador",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "licencia sin RUT OCR usa fecha y nombre si cuenta ya tiene RUT",
+          "optional": false,
+          "area": "nav",
+          "area_label": "Navegación app"
+        },
+        {
+          "name": "respeta hint licencia si OCR ambiguo",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
         }
       ]
     },
@@ -407,7 +603,7 @@
       "kind": "unit",
       "cases": [
         {
-          "name": "buildPostMvpStatus devuelve 8 ítems en orden",
+          "name": "buildPostMvpStatus devuelve 9 ítems en orden",
           "optional": false,
           "area": "other",
           "area_label": "Otros"
@@ -502,44 +698,122 @@
         {
           "name": "detecta rol transportista desde texto wa.me",
           "optional": false,
-          "area": "landing",
-          "area_label": "Landing / marca"
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
         },
         {
           "name": "detecta rol empresa desde texto wa.me",
           "optional": false,
-          "area": "landing",
-          "area_label": "Landing / marca"
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
         },
         {
-          "name": "primer mensaje envía bienvenida y menú",
+          "name": "primer mensaje envía bienvenida y menú en un solo texto",
           "optional": false,
-          "area": "landing",
-          "area_label": "Landing / marca"
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
         },
         {
           "name": "opción 1 responde FAQ",
           "optional": false,
-          "area": "landing",
-          "area_label": "Landing / marca"
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
         },
         {
           "name": "humano escala a agente",
           "optional": false,
-          "area": "landing",
-          "area_label": "Landing / marca"
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "documentos con rol transportista pide identidad",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "primer mensaje documentos pide rol (no menú empresa)",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "documentos luego soy transportista pide RUT",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "lookup por email responde cuenta pendiente",
+          "optional": false,
+          "area": "nav",
+          "area_label": "Navegación app"
+        },
+        {
+          "name": "opción 6 transportista pide identidad",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
         },
         {
           "name": "deduplica por message id",
           "optional": false,
-          "area": "landing",
-          "area_label": "Landing / marca"
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "documentos luego nombre no cae en menu empresa",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "atrapado en menu empresa vuelve con soy transportista",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "volver reinicia flujo documentos",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "imagen sin identidad pide RUT primero",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "imagen tras identidad confirma recepcion manual",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "licencia con cuenta vinculada pide foto sin reiniciar identidad",
+          "optional": false,
+          "area": "nav",
+          "area_label": "Navegación app"
+        },
+        {
+          "name": "actualizar licencia con typo no reinicia flujo",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
         },
         {
           "name": "parsea mensaje de texto del webhook",
           "optional": false,
-          "area": "landing",
-          "area_label": "Landing / marca"
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "parsea mensaje de imagen del webhook",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
         }
       ]
     }
@@ -897,5 +1171,5 @@
     }
   ],
   "report_available": true,
-  "last_run_at": "2026-06-12T02:25:10.699Z"
+  "last_run_at": "2026-06-18T21:50:31.610Z"
 }

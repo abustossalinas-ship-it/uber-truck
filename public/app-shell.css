@@ -62,6 +62,12 @@ body.cubik-app.app-authed[data-app-tab="account"] #app-account-kyc-slot #carrier
   display: block !important;
 }
 
+body.cubik-app .notif-panel:not([hidden]) {
+  display: block !important;
+  top: calc(var(--app-safe-top) + var(--app-top-h) + 0.5rem);
+  z-index: 500;
+}
+
 body.cubik-app.app-authed.app-main-visible main {
   display: block !important;
   position: fixed;

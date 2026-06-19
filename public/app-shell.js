@@ -276,8 +276,58 @@ const AppShell = {
   bindTopBar() {
     document.getElementById('app-top-back')?.addEventListener('click', () => this.exitDeep());
     document.getElementById('app-top-notif')?.addEventListener('click', () => {
-      document.getElementById('btn-notifications')?.click();
+      this.openNotifications();
     });
+  },
+
+  scrollAppToElement(el, offset = 8) {
+    if (!el) return;
+    const scroll = document.getElementById('app-scroll');
+    if (!scroll) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+    const top =
+      scroll.scrollTop +
+      el.getBoundingClientRect().top -
+      scroll.getBoundingClientRect().top -
+      offset;
+    scroll.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  },
+
+  openNotifications() {
+    if (typeof Comms !== 'undefined' && typeof Comms.openNotifPanel === 'function') {
+      Comms.openNotifPanel();
+      return;
+    }
+    document.getElementById('btn-notifications')?.click();
+  },
+
+  async openAccountPenalties() {
+    if (this.tab !== 'account') this.setTab('account');
+    this.renderAccount();
+    if (typeof Penalties !== 'undefined') await Penalties.refresh();
+    const panel = document.getElementById('account-penalties-panel');
+    if (panel) {
+      panel.hidden = false;
+      panel.removeAttribute('hidden');
+      requestAnimationFrame(() => this.scrollAppToElement(panel, 12));
+    }
+  },
+
+  async openAccountKyc() {
+    if (this.tab !== 'account') this.setTab('account');
+    this.renderAccount();
+    if (typeof renderKycBanner === 'function') await renderKycBanner();
+    const target =
+      document.getElementById('carrier-docs-panel') ||
+      document.getElementById('kyc-banner') ||
+      document.getElementById('app-account-kyc-slot');
+    if (target) {
+      target.hidden = false;
+      target.removeAttribute('hidden');
+      requestAnimationFrame(() => this.scrollAppToElement(target, 12));
+    }
   },
 
   bindOptionsGrid() {
@@ -467,6 +517,7 @@ const AppShell = {
         if (typeof refreshAdminKycPanel === 'function') refreshAdminKycPanel();
         if (typeof refreshAdminOpsPanel === 'function') refreshAdminOpsPanel();
         if (typeof renderKycBanner === 'function') await renderKycBanner();
+        if (typeof Penalties !== 'undefined') await Penalties.refresh();
       })();
     }
   },
@@ -677,16 +728,13 @@ const AppShell = {
         else document.getElementById('btn-change-password')?.click();
       });
       sections.querySelector('[data-profile-action="kyc"]')?.addEventListener('click', () => {
-        const target =
-          document.getElementById('carrier-docs-panel') || document.getElementById('kyc-banner');
-        target?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        this.openAccountKyc();
       });
       sections.querySelector('[data-profile-action="penalties"]')?.addEventListener('click', () => {
-        document.getElementById('account-penalties-panel')?.scrollIntoView({ behavior: 'smooth' });
-        if (typeof Penalties !== 'undefined') Penalties.refresh();
+        this.openAccountPenalties();
       });
       sections.querySelector('[data-profile-action="notifications"]')?.addEventListener('click', () => {
-        document.getElementById('btn-notifications')?.click();
+        this.openNotifications();
       });
       sections.querySelector('[data-profile-action="help"]')?.addEventListener('click', () => {
         this.openAction('help');

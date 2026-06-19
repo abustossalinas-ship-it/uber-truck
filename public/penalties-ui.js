@@ -160,7 +160,9 @@ const Penalties = {
             <button type="button" class="tab tab-sm" id="btn-wallet-topup">Recargar saldo</button>
           </div>
           <p class="muted">Recarga de prueba — no debita cuenta bancaria ni tarjeta.</p>`
-        : '';
+        : role === 'carrier'
+          ? `<p class="muted cubik-topup-hint"><strong>Recargar</strong> solo lo hace el <strong>embarcador</strong> (paga el flete). Tú recibes neto aquí cuando el embarcador confirma un viaje completado.</p>`
+          : '';
     return `<section class="cubik-saldo-pilot cubik-saldo-prod">
       <div class="cubik-saldo-head">
         <h3>Cubik Saldo <span class="pill pill-pilot">Prueba</span></h3>

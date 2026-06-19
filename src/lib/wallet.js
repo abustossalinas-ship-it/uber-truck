@@ -252,7 +252,7 @@ async function buildWalletSummary(repo, user) {
     ledger_labels: true,
     note:
       role === 'shipper'
-        ? 'Saldo de prueba: recarga arriba sin cargo a tu banco. Al «En ruta» retenemos flete + 10%. Publicar exige 20% del presupuesto máximo en saldo.'
+        ? 'Saldo de prueba: usa el botón <strong>Recargar saldo</strong> abajo (sin cargo a tu banco). Al «En ruta» retenemos flete + 10%. Publicar exige 20% del presupuesto máximo en saldo.'
         : 'Al completar el viaje acreditamos tu neto (flete − 5%) en Cubik Saldo de prueba. Retiro a banco real: etapa posterior.',
     can_topup: paymentProviderMode() === 'sandbox' || paymentProviderMode() === 'mercadopago',
   };

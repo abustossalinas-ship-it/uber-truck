@@ -50,7 +50,19 @@ const { listTripEvents } = require('../lib/trip-events');
 const { buildMatchTracking } = require('../lib/match-tracking');
 const { enrichMatchesCounterparty, buildMatchContact } = require('../lib/match-contact');
 const { enrichMatchesPaymentPilot } = require('../lib/payment-simulation');
+const { walletEnabled } = require('../lib/wallet-config');
+const {
+  holdEscrowOnRoute,
+  releaseEscrowOnComplete,
+  refundEscrowOnCancel,
+  enrichMatchesWalletPayment,
+} = require('../lib/wallet-settlement');
 const { processPilotPay } = require('../lib/pilot-payment');
+
+function enrichMatchesPayment(matches, user) {
+  if (walletEnabled()) return enrichMatchesWalletPayment(matches, user);
+  return enrichMatchesPaymentPilot(matches, user);
+}
 const maps = require('../services/google-maps');
 const { computeDestinationEtaFromRoute } = require('../lib/load-time-estimate');
 
@@ -123,7 +135,7 @@ router.get('/', optionalAuth, async (req, res) => {
     let filtered = filterMatchesForUserWithMaps(rows, req.user, loadById, offerById);
     filtered = await enrichMatchesWithRatings(repo, filtered, req.user, ctx);
     filtered = await enrichMatchesCounterparty(repo, filtered, req.user, ctx);
-    filtered = enrichMatchesPaymentPilot(filtered, req.user);
+    filtered = enrichMatchesPayment(filtered, req.user);
     res.json({ ok: true, data: filtered });
   } catch (e) {
     console.error(e);
@@ -595,6 +607,14 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
       const penalty = computePenalty(reason, match.agreed_price_clp);
       const updated = await applyCancelPatch(match, action, role, req.body);
       await releaseLoadAndOffer(match);
+      let finalMatch = updated;
+      if (walletEnabled()) {
+        try {
+          finalMatch = await refundEscrowOnCancel(repo, updated);
+        } catch (walletErr) {
+          console.error('wallet refund cancel', walletErr);
+        }
+      }
       await comms.markAllReadForMatch('shipper', match.id);
       await comms.markAllReadForMatch('carrier', match.id);
       await logMatchTrip(req, updated, {
@@ -606,11 +626,11 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
       const repNote = reputationMessage(reason);
       let support_case = null;
       if (action === 'cancel' && penalty?.type === 'fee_suggested' && penalty?.amount_clp) {
-        support_case = await openCaseForCancelledMatch(updated, role, penalty);
+        support_case = await openCaseForCancelledMatch(finalMatch, role, penalty);
       }
       return res.json({
         ok: true,
-        data: updated,
+        data: finalMatch,
         message: cancelMessage(action),
         penalty,
         reputation_note: repNote,
@@ -651,7 +671,25 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
         patch.delivery_note = req.body.delivery_note.trim().slice(0, 500);
       }
       const completed = await repo.update('matches', match.id, patch);
-      await logMatchTrip(req, completed, {
+      let settled = completed;
+      if (walletEnabled()) {
+        try {
+          settled = await releaseEscrowOnComplete(repo, completed);
+          const { breakdownForMatch } = require('../lib/payment-simulation');
+          const carrierBd = breakdownForMatch(settled, 'carrier');
+          await comms.addNotification({
+            match_id: match.id,
+            for_role: 'carrier',
+            type: 'wallet_payment',
+            title: 'Pago acreditado en Cubik Saldo',
+            body: `Neto $${Number(carrierBd?.net_clp || 0).toLocaleString('es-CL')} CLP en tu saldo Cubik.`,
+            amount_clp: carrierBd?.net_clp || null,
+          });
+        } catch (walletErr) {
+          console.error('wallet release complete', walletErr);
+        }
+      }
+      await logMatchTrip(req, settled, {
         event_type: 'trip_completed',
         from_status: match.status,
         to_status: 'completed',
@@ -685,23 +723,14 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
       ]);
       return res.json({
         ok: true,
-        data: completed,
-        message: 'Viaje cerrado. Puedes calificar a la otra parte en Mis viajes.',
+        data: settled,
+        message: walletEnabled()
+          ? 'Viaje cerrado. Pago liberado al transportista en Cubik Saldo.'
+          : 'Viaje cerrado. Puedes calificar a la otra parte en Mis viajes.',
         prompt_rating: true,
       });
     }
 
-    const updated = await repo.update('matches', match.id, { status: next });
-    await logMatchTrip(req, updated, {
-      event_type: 'status_change',
-      from_status: match.status,
-      to_status: next,
-    });
-
-    if (next === 'accepted') {
-      await repo.update('load_requests', match.load_request_id, { status: 'matched' });
-      await repo.update('capacity_offers', match.capacity_offer_id, { status: 'reserved' });
-    }
     if (next === 'in_progress') {
       if (role !== 'carrier' && req.user?.role !== 'admin') {
         return res.status(403).json({
@@ -709,6 +738,23 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
           error: 'Solo el transportista marca que el camión salió / está en ruta',
         });
       }
+      if (walletEnabled()) {
+        try {
+          await holdEscrowOnRoute(repo, match);
+        } catch (e) {
+          return res.status(e.status || 402).json({
+            ok: false,
+            error: e.message || 'No se pudo retener pago en Cubik Saldo',
+            wallet_insufficient: e.code === 'wallet_insufficient_balance',
+          });
+        }
+      }
+      const updated = await repo.update('matches', match.id, { status: next });
+      await logMatchTrip(req, updated, {
+        event_type: 'status_change',
+        from_status: match.status,
+        to_status: next,
+      });
       const load = await repo.getById('load_requests', match.load_request_id);
       let loadPatch = { status: 'in_transit' };
       if (load?.origin_lat != null && load?.destination_lat != null && maps.isConfigured()) {
@@ -725,6 +771,39 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
         }
       }
       await repo.update('load_requests', match.load_request_id, loadPatch);
+      const parties = await getMatchParties(repo, match);
+      if (walletEnabled()) {
+        try {
+          await comms.addNotification({
+            match_id: match.id,
+            for_role: 'shipper',
+            type: 'wallet_escrow',
+            title: 'Pago retenido en Cubik Saldo',
+            body: `${parties?.carrier_name || 'Transportista'} marcó en ruta. Retuvimos flete + servicio 10%.`,
+          });
+        } catch (notifyErr) {
+          console.error('wallet escrow notify', notifyErr);
+        }
+      }
+      return res.json({
+        ok: true,
+        data: enrichMatchesPayment([updated], req.user)[0] || updated,
+        message: walletEnabled()
+          ? 'Camión en ruta. Pago retenido en Cubik Saldo del embarcador.'
+          : 'Camión en ruta.',
+      });
+    }
+
+    const updated = await repo.update('matches', match.id, { status: next });
+    await logMatchTrip(req, updated, {
+      event_type: 'status_change',
+      from_status: match.status,
+      to_status: next,
+    });
+
+    if (next === 'accepted') {
+      await repo.update('load_requests', match.load_request_id, { status: 'matched' });
+      await repo.update('capacity_offers', match.capacity_offer_id, { status: 'reserved' });
     }
 
     res.json({ ok: true, data: updated });
@@ -736,6 +815,12 @@ router.patch('/:id/status', optionalAuth, ...operatorGate, async (req, res) => {
 
 router.post('/:id/pilot-pay', requireAuthIfDb, async (req, res) => {
   try {
+    if (walletEnabled()) {
+      return res.status(400).json({
+        ok: false,
+        error: 'Con Cubik Saldo prod el pago se retiene al marcar «En ruta», no al completar.',
+      });
+    }
     const { breakdownForMatch: bdFn, enrichMatchPaymentPilot } = require('../lib/payment-simulation');
     const raw = await processPilotPay(repo, req.params.id, req.user);
     const updated = enrichMatchPaymentPilot(raw, req.user);

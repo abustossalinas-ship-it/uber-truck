@@ -28,6 +28,7 @@ const { rankProposalsForLoad, RANK_MODES } = require('../lib/proposal-ranking');
 const { requireApprovedOperator } = require('../lib/kyc-gate');
 const { requireBankAccount } = require('../lib/bank-gate');
 const { requirePenaltyClear } = require('../lib/penalty-gate');
+const { requireWalletForPublish } = require('../lib/wallet-gate');
 
 const router = express.Router();
 const operatorGate = [requireAuthIfDb, requireApprovedOperator, requireBankAccount, requirePenaltyClear];
@@ -194,7 +195,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
   }
 });
 
-router.post('/', optionalAuth, ...operatorGate, async (req, res) => {
+router.post('/', optionalAuth, ...operatorGate, requireWalletForPublish, async (req, res) => {
   const body = req.body || {};
   if (supabaseService.isConfigured()) {
     const pubErr = assertCanPublishLoad(req.user);

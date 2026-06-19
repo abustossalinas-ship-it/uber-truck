@@ -3,8 +3,10 @@
 const supabase = require('../services/supabase');
 const { fetchDefaultBankAccount, listBankAccounts } = require('./bank-accounts');
 const { hasVerifiedCard, listPaymentMethods } = require('./payment-methods');
+const { walletSandboxPilot } = require('./wallet-config');
 
 function bankEnforced() {
+  if (walletSandboxPilot()) return false;
   if (!supabase.isConfigured()) return false;
   if (process.env.BANK_ENFORCE === 'false') return false;
   if (process.env.BANK_ENFORCE === 'true') return true;
@@ -31,11 +33,23 @@ async function fetchPaymentSetup(userId) {
   } catch (e) {
     if (!e.message?.includes('user_payment_methods')) throw e;
   }
-  const can_operate = bank.complete || cardVerified;
-  return { bank, bank_accounts: bankAccounts, payment_methods: methods, card_verified: cardVerified, can_operate };
+  const wallet_pilot = walletSandboxPilot();
+  const can_operate = bank.complete || cardVerified || wallet_pilot;
+  return {
+    bank,
+    bank_accounts: bankAccounts,
+    payment_methods: methods,
+    card_verified: cardVerified,
+    wallet_pilot,
+    bank_deferred: wallet_pilot,
+    can_operate,
+  };
 }
 
 function bankBlockMessage() {
+  if (walletSandboxPilot()) {
+    return 'Recarga Cubik Saldo en Cuenta para publicar o completar viajes (etapa piloto sin banco real).';
+  }
   return 'Debes inscribir cuenta bancaria o verificar una tarjeta antes de publicar, ofertar o emparejar (como en Copec/Uber).';
 }
 

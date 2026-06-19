@@ -3,6 +3,7 @@
 const fcm = require('../services/fcm');
 const mail = require('../services/mail');
 const { paymentConfig } = require('./payment-config');
+const { walletEnabled } = require('./wallet-config');
 
 /**
  * Estado server-side de los 8 ítems Post-MVP (orden memoria v4.3).
@@ -19,8 +20,8 @@ function buildPostMvpStatus(ctx = {}) {
   const fcmOk = fcm.isConfigured();
   const tokenCount = ctx.fcm_tokens ?? 0;
 
-  const walletProdReady = payment.provider_mode === 'mercadopago';
-  const walletPilot = payment.provider_mode === 'sandbox' || payment.sandbox_in_production;
+  const walletProdReady = walletEnabled() && (payment.provider_mode === 'mercadopago' || payment.provider_mode === 'sandbox');
+  const walletPilot = !walletEnabled() && (payment.provider_mode === 'sandbox' || payment.sandbox_in_production);
 
   return {
     updated: '2026-06-12',
@@ -73,18 +74,19 @@ function buildPostMvpStatus(ctx = {}) {
         server_ready: walletProdReady,
         blocking_demo: false,
         summary: walletProdReady
-          ? 'Mercado Pago configurado'
+          ? 'Cubik Saldo prod activo (WALLET_ENABLED) — ledger + escrow en ruta'
           : walletPilot
-            ? 'Piloto simulado activo; wallet real pendiente'
+            ? 'Piloto simulado activo; activar WALLET_ENABLED tras migración 035'
             : 'Pasarela no configurada',
         env: {
+          WALLET_ENABLED: walletEnabled(),
           PAYMENT_PROVIDER: payment.provider_mode,
           MERCADOPAGO_ACCESS_TOKEN: Boolean(process.env.MERCADOPAGO_ACCESS_TOKEN?.trim()),
         },
         validate: [
-          'Definir MP prod o transferencia + ledger',
-          'Migración wallet + saldo usuario',
-          'Retención al «En ruta» (U7)',
+          'Ejecutar docs/RUN_035_wallet_ledger.sql en Supabase',
+          'Railway: WALLET_ENABLED=true',
+          'Recarga sandbox + viaje en ruta → retención → completar → acreditación carrier',
         ],
       },
       {
@@ -179,11 +181,13 @@ function buildPostMvpStatus(ctx = {}) {
         order: 8,
         title: 'Escrow checkout en ruta',
         phase: 'pilot_p0',
-        status: walletProdReady ? 'blocked_deps' : 'blocked_deps',
-        server_ready: false,
+        status: walletProdReady ? 'ready_to_validate' : 'blocked_deps',
+        server_ready: walletProdReady,
         blocking_demo: false,
-        summary: 'Diseño cerrado; depende de wallet prod (ítem 3)',
-        blocked_by: ['wallet_prod'],
+        summary: walletProdReady
+          ? 'Escrow en ruta listo para validar con WALLET_ENABLED'
+          : 'Diseño cerrado; activar WALLET_ENABLED + migración 035',
+        blocked_by: walletProdReady ? [] : ['wallet_prod'],
         validate: [
           'Completar wallet prod primero',
           'Retención al «Marcar en ruta» + ledger',

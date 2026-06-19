@@ -340,6 +340,7 @@ app.use('/api/capacity-offers', require('./routes/capacity-offers'));
 app.use('/api/matches', require('./routes/matches'));
 app.use('/api/comms', require('./routes/match-comms'));
 app.use('/api/account', require('./routes/account'));
+app.use('/api/wallet', require('./routes/wallet'));
 app.use('/api/devices', require('./routes/devices'));
 app.use('/api/post-mvp', require('./routes/post-mvp'));
 app.use('/api/admin', require('./routes/admin'));

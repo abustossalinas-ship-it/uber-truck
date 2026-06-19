@@ -19,6 +19,8 @@ const EMPTY = {
   support_cases: [],
   support_messages: [],
   prospectos: [],
+  wallet_accounts: [],
+  wallet_ledger: [],
 };
 
 const SEED = {
@@ -89,6 +91,8 @@ function readStore() {
       support_cases: data.support_cases || [],
       support_messages: data.support_messages || [],
       prospectos: data.prospectos || [],
+      wallet_accounts: data.wallet_accounts || [],
+      wallet_ledger: data.wallet_ledger || [],
     };
   } catch {
     return structuredClone(EMPTY);
@@ -165,7 +169,11 @@ function insert(collection, row) {
                     ? 'sm'
                     : collection === 'prospectos'
                       ? 'pro'
-                      : 'mt'
+                      : collection === 'wallet_accounts'
+                        ? 'wa'
+                        : collection === 'wallet_ledger'
+                          ? 'wl'
+                          : 'mt'
       ),
     created_at: row.created_at || new Date().toISOString(),
   };
@@ -189,4 +197,5 @@ module.exports = {
   insert,
   update,
   readStore,
+  newId,
 };

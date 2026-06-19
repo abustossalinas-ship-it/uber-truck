@@ -22,6 +22,7 @@ const Penalties = {
 
   renderWallet(summary) {
     let bankAccounts = summary?.bank_accounts || [];
+    const walletPilot = summary?.wallet_pilot || summary?.wallet?.sandbox_pilot;
     if (!bankAccounts.length && summary?.bank_account?.complete) {
       const f = summary.bank_account.fields || {};
       bankAccounts = [
@@ -78,11 +79,15 @@ const Penalties = {
     return `
       <section class="wallet-section">
         <h3>Billetera</h3>
-        <p class="muted wallet-empty">Gestiona cuentas bancarias y tarjetas para cobros y multas (como Uber).</p>
-        <h4>Cuentas bancarias</h4>
+        ${
+          walletPilot
+            ? `<p class="muted wallet-empty">Etapa piloto: operas con <strong>Cubik Saldo (prueba)</strong> arriba. Cuenta bancaria y retiros reales vienen en la siguiente fase.</p>`
+            : `<p class="muted wallet-empty">Gestiona cuentas bancarias y tarjetas para cobros y multas (como Uber).</p>`
+        }
+        <h4>Cuentas bancarias ${walletPilot ? '<span class="pill pill-pilot">Opcional ahora</span>' : ''}</h4>
         ${bankAccounts.length ? `<ul class="wallet-list">${bankRows}</ul>` : '<p class="muted wallet-empty">Sin cuentas registradas.</p>'}
         <button type="button" class="tab tab-sm tab-outline" id="btn-open-bank">+ Agregar cuenta bancaria</button>
-        <h4>Tarjetas verificadas</h4>
+        <h4>Tarjetas verificadas ${walletPilot ? '<span class="pill pill-pilot">Opcional ahora</span>' : ''}</h4>
         ${cards.length ? `<div class="wallet-list">${cardRows}</div>` : '<p class="muted wallet-empty">Sin tarjetas.</p>'}
         <button type="button" class="tab tab-sm" id="btn-open-card">+ Agregar tarjeta (Copec)</button>
       </section>`;
@@ -124,6 +129,88 @@ const Penalties = {
     if (v < 0) return `−$${abs} CLP`;
     if (v > 0) return `$${abs} CLP`;
     return '$0 CLP';
+  },
+
+  renderCubikSaldo(summary) {
+    const w = summary?.cubik_saldo;
+    if (!w?.enabled) return this.renderCubikSaldoPilot(summary);
+    const balance = w.balance_clp || 0;
+    const role = w.role;
+    const ledgerRows = (w.ledger || [])
+      .slice(0, 6)
+      .map(
+        (e) => `<li class="cubik-ledger-row">
+          <span>${this.ledgerLabel(e)}</span>
+          <strong class="${e.amount_clp >= 0 ? 'cubik-amount-positive' : 'cubik-amount-negative'}">${this.formatClpSigned(e.amount_clp)}</strong>
+        </li>`
+      )
+      .join('');
+    const escrowRows = (w.active_escrow || [])
+      .map(
+        (t) => `<li class="cubik-trip-row">
+          <strong>${t.status_label}</strong>
+          <span>${this.formatClp(t.amount_clp)}</span>
+        </li>`
+      )
+      .join('');
+    const topupBlock =
+      w.can_topup && role === 'shipper'
+        ? `<div class="cubik-topup-row">
+            <input type="number" id="wallet-topup-amount" min="1000" step="1000" placeholder="Monto CLP" class="input-sm" />
+            <button type="button" class="tab tab-sm" id="btn-wallet-topup">Recargar saldo</button>
+          </div>
+          <p class="muted">Recarga de prueba — no debita cuenta bancaria ni tarjeta.</p>`
+        : '';
+    return `<section class="cubik-saldo-pilot cubik-saldo-prod">
+      <div class="cubik-saldo-head">
+        <h3>Cubik Saldo <span class="pill pill-pilot">Prueba</span></h3>
+        <p class="muted">${w.note || ''}</p>
+        <p class="muted cubik-sandbox-disclaimer">Sin cargo a tu banco ni tarjeta real. Solo movimientos simulados en Cubik.</p>
+        ${w.tables_missing ? '<p class="warn">Migración wallet pendiente en Supabase (035).</p>' : ''}
+      </div>
+      <div class="cubik-balance-card cubik-balance-positive">
+        <p class="cubik-balance-label">${w.wallet_label}</p>
+        <p class="cubik-balance-amount">${this.formatClp(balance)}</p>
+        ${w.held_total_clp ? `<p class="muted">Retenido en viajes activos: ${this.formatClp(w.held_total_clp)}</p>` : ''}
+      </div>
+      ${topupBlock}
+      ${escrowRows ? `<h4>En curso</h4><ul class="cubik-trip-list">${escrowRows}</ul>` : ''}
+      ${ledgerRows ? `<h4>Últimos movimientos</h4><ul class="cubik-trip-list cubik-ledger-list">${ledgerRows}</ul>` : ''}
+    </section>`;
+  },
+
+  ledgerLabel(entry) {
+    const map = {
+      topup_sandbox: 'Recarga sandbox',
+      topup_mercadopago: 'Recarga Mercado Pago',
+      escrow_hold: 'Retención en ruta',
+      escrow_release: 'Pago flete',
+      escrow_refund: 'Devolución',
+    };
+    return map[entry?.entry_type] || entry?.label || 'Movimiento';
+  },
+
+  async walletTopUp() {
+    const input = document.getElementById('wallet-topup-amount');
+    const amount = Number(input?.value || 0);
+    if (!amount || amount < 1000) {
+      alert('Ingresa un monto mínimo de $1.000 CLP');
+      return;
+    }
+    try {
+      const res = await fetch('/api/wallet/topup', {
+        method: 'POST',
+        headers: this.headers(),
+        body: JSON.stringify({ amount_clp: amount }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json.ok) throw new Error(json.error || 'No se pudo recargar');
+      if (input) input.value = '';
+      await this.refresh();
+      alert(json.message || 'Recarga acreditada');
+    } catch (e) {
+      alert(e.message || 'Error al recargar');
+    }
   },
 
   renderCubikSaldoPilot(summary) {
@@ -803,14 +890,17 @@ const Penalties = {
         : !hasAnyPenalty
           ? '<p class="muted">Sin multas en tus emparejamientos cancelados.</p>'
           : '';
-    const bankOperate = s.payment_required_for_operate || s.bank_required_for_operate
-      ? `<p class="penalty-bank-warn"><strong>Medio de pago obligatorio</strong> para operar (tarjeta verificada o cuenta bancaria). <button type="button" class="link-btn" id="btn-open-card-inline">Agregar tarjeta</button> · <button type="button" class="link-btn" id="btn-open-bank-inline">Cuenta bancaria</button></p>`
-      : s.bank_required_for_charges
-        ? `<p class="penalty-bank-warn">Inscribe tarjeta o cuenta bancaria para multas y cobros.</p>`
-        : '';
+    const bankOperate =
+      s.wallet_pilot && s.cubik_saldo?.enabled
+        ? `<p class="muted">Pagos del viaje van por <strong>Cubik Saldo (prueba)</strong>. Banco y tarjeta quedan para la etapa de cobros reales.</p>`
+        : s.payment_required_for_operate || s.bank_required_for_operate
+          ? `<p class="penalty-bank-warn"><strong>Medio de pago obligatorio</strong> para operar (tarjeta verificada o cuenta bancaria). <button type="button" class="link-btn" id="btn-open-card-inline">Agregar tarjeta</button> · <button type="button" class="link-btn" id="btn-open-bank-inline">Cuenta bancaria</button></p>`
+          : s.bank_required_for_charges
+            ? `<p class="penalty-bank-warn">Inscribe tarjeta o cuenta bancaria para multas y cobros.</p>`
+            : '';
     const walletBlock = this.renderWallet(s);
 
-    const cubikSaldoBlock = this.renderCubikSaldoPilot(s);
+    const cubikSaldoBlock = this.renderCubikSaldo(s);
 
     const pendingBlock = p.pending_confirmations?.length
       ? `<section class="penalty-confirm-pending"><h3>Pagos por confirmar (${confirmH} h)</h3>
@@ -848,6 +938,7 @@ const Penalties = {
     `;
     document.getElementById('btn-open-bank')?.addEventListener('click', () => this.openBankModal());
     document.getElementById('btn-open-bank-inline')?.addEventListener('click', () => this.openBankModal());
+    document.getElementById('btn-wallet-topup')?.addEventListener('click', () => this.walletTopUp());
     document.getElementById('btn-open-card')?.addEventListener('click', () => this.openCardModal());
     document.getElementById('btn-open-card-inline')?.addEventListener('click', () => this.openCardModal());
     this.bindWalletActions(box);

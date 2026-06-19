@@ -58,6 +58,7 @@ const AppShell = {
     this.bindAuthHooks();
     this.bindBackButton();
     this.initPullToRefresh();
+    this.hideAllAccountPanels();
     this.initNativePlugins();
     this.showBuildVersion();
     this.syncAuthState();
@@ -81,10 +82,9 @@ const AppShell = {
   openChangePassword() {
     if (typeof Auth === 'undefined' || !Auth.user) return;
     if (document.body.classList.contains('cubik-app')) {
-      if (this.tab !== 'account') this.setTab('account');
-      else this.renderAccount();
       this._accountPanelOpen = 'password';
-      this.applyAccountPanel();
+      if (this.tab !== 'account') this.setTab('account');
+      else this.applyAccountPanel();
       return;
     }
     this.mountAuthInGate();
@@ -313,33 +313,54 @@ const AppShell = {
   openNotifications() {
     this._accountPanelOpen = 'notifications';
     if (this.tab !== 'account') this.setTab('account');
-    else {
-      this.renderAccount();
-      this.applyAccountPanel();
-    }
+    else this.applyAccountPanel();
   },
 
   async openAccountPenalties() {
     this._accountPanelOpen = 'penalties';
     if (this.tab !== 'account') this.setTab('account');
-    else {
-      this.renderAccount();
-      await this.applyAccountPanel();
-    }
+    else await this.applyAccountPanel();
   },
 
   async openAccountKyc() {
     this._accountPanelOpen = 'kyc';
     if (this.tab !== 'account') this.setTab('account');
-    else {
-      this.renderAccount();
-      await this.applyAccountPanel();
-    }
+    else await this.applyAccountPanel();
   },
 
   closeAccountPanel() {
     this._accountPanelOpen = null;
     this.applyAccountPanel();
+  },
+
+  accountPanelIds() {
+    return [
+      'account-penalties-panel',
+      'kyc-banner',
+      'carrier-docs-panel',
+      'change-password-panel',
+      'notif-panel',
+    ];
+  },
+
+  detachAccountPanels() {
+    const anchor = document.getElementById('app-panels-home-anchor');
+    if (!anchor) return;
+    let after = anchor;
+    this.accountPanelIds().forEach((id) => {
+      const el = document.getElementById(id);
+      if (!el || !el.closest('#app-profile-sections')) return;
+      after.insertAdjacentElement('afterend', el);
+      after = el;
+      el.setAttribute('hidden', '');
+    });
+  },
+
+  hideAllAccountPanels() {
+    this.accountPanelIds().forEach((id) => {
+      document.getElementById(id)?.setAttribute('hidden', '');
+    });
+    document.body.classList.remove('app-change-pw-open', 'app-account-panel-open');
   },
 
   async toggleAccountPanel(action) {
@@ -351,6 +372,7 @@ const AppShell = {
     const open = this._accountPanelOpen;
     const actions = ['kyc', 'password', 'penalties', 'notifications', 'help'];
 
+    try {
     actions.forEach((action) => {
       const slot = document.getElementById(`app-panel-slot-${action}`);
       const btn = document.querySelector(`[data-profile-action="${action}"]`);
@@ -377,7 +399,7 @@ const AppShell = {
     }
     if (open !== 'password') {
       const pw = document.getElementById('change-password-panel');
-      if (pw?.closest('.app-profile-panel-slot')) {
+      if (pw) {
         pw.setAttribute('hidden', '');
         document.getElementById('form-change-password')?.reset();
         document.getElementById('change-password-error')?.setAttribute('hidden', '');
@@ -440,6 +462,9 @@ const AppShell = {
       const slot = document.getElementById(`app-panel-slot-${open}`);
       if (slot) requestAnimationFrame(() => this.scrollAppToElement(slot, 12));
     }
+    } catch (err) {
+      console.error('applyAccountPanel', err);
+    }
   },
 
   bindOptionsGrid() {
@@ -467,6 +492,11 @@ const AppShell = {
   bindAccount() {
     document.getElementById('app-btn-logout')?.addEventListener('click', () => {
       document.getElementById('btn-auth')?.click();
+    });
+    document.getElementById('app-profile-sections')?.addEventListener('click', (e) => {
+      const btn = e.target.closest('[data-profile-action]');
+      if (!btn) return;
+      this.toggleAccountPanel(btn.dataset.profileAction);
     });
   },
 
@@ -594,6 +624,7 @@ const AppShell = {
     this.tab = tab;
     if (prev === 'account' && tab !== 'account') {
       this._accountPanelOpen = null;
+      this.hideAllAccountPanels();
       this.restorePanelsHome();
     }
     if (this.deep) this.exitDeep(false);
@@ -794,6 +825,7 @@ const AppShell = {
       });
     }
     if (sections) {
+      this.detachAccountPanels();
       const kycMeta =
         typeof accountKycRowMeta === 'function'
           ? accountKycRowMeta(user)
@@ -839,11 +871,6 @@ const AppShell = {
             ${accordionRow('help', 'Ayuda con un viaje')}
           </div>
         </section>`;
-      sections.querySelectorAll('[data-profile-action]').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          this.toggleAccountPanel(btn.dataset.profileAction);
-        });
-      });
     }
     const adminSlot = document.getElementById('app-account-admin-slot');
     if (adminSlot) {
@@ -861,6 +888,9 @@ const AppShell = {
     if (notifSrc && notifDst) {
       notifDst.textContent = notifSrc.textContent;
       notifDst.hidden = notifSrc.hidden;
+    }
+    if (this.tab === 'account' && this._accountPanelOpen) {
+      this.applyAccountPanel();
     }
   },
 

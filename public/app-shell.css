@@ -403,20 +403,11 @@ body.cubik-app.app-authed .app-gate {
   cursor: pointer;
 }
 
-body.cubik-app.app-change-pw-open #change-password-panel:not([hidden]) {
-  display: flex !important;
-  position: fixed;
-  inset: 0;
-  z-index: 500;
-  background: var(--bg);
-}
-
 body.cubik-app #change-password-panel form button[type="submit"] {
   width: 100%;
 }
 
-body.cubik-app #auth-panel,
-body.cubik-app #change-password-panel {
+body.cubik-app #auth-panel {
   position: fixed;
   inset: 0;
   z-index: 420;
@@ -436,6 +427,24 @@ body.cubik-app #change-password-panel {
     max(1rem, env(safe-area-inset-right, 0px));
   overflow-y: auto;
   background: var(--bg);
+  box-sizing: border-box;
+}
+
+body.cubik-app.app-change-pw-open #change-password-panel:not([hidden]) {
+  display: flex !important;
+  position: fixed;
+  inset: 0;
+  z-index: 500;
+  background: var(--bg);
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  padding:
+    calc(var(--app-safe-top) + 0.75rem)
+    max(1rem, env(safe-area-inset-left, 0px))
+    calc(var(--app-safe-bottom) + 0.75rem)
+    max(1rem, env(safe-area-inset-right, 0px));
   box-sizing: border-box;
 }
 

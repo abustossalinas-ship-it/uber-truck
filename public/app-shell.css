@@ -804,6 +804,10 @@ body.cubik-app[data-app-role='admin']:not([data-app-super-admin]) #app-opt-carri
   border-bottom: none;
 }
 
+.app-profile-panel-slot:not([hidden]) {
+  display: block;
+}
+
 .app-profile-panel-slot[hidden] {
   display: none !important;
   padding: 0;

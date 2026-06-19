@@ -68,6 +68,10 @@ test.describe('Cubik app — sesión mock (sin backend)', () => {
     await loginAsMockUser(page, 'carrier');
     await tapAppTab(page, 'account');
     await page.locator('[data-profile-action="password"]').click();
+    await expect(page.locator('[data-profile-action="password"]')).toHaveAttribute(
+      'aria-expanded',
+      'true'
+    );
     await expect(page.locator('#app-panel-slot-password #change-password-panel')).toBeVisible();
     await tapAppTab(page, 'home');
     await expect(page.locator('#app-view-home')).toBeVisible();
@@ -76,6 +80,18 @@ test.describe('Cubik app — sesión mock (sin backend)', () => {
     await expect(page.locator('#app-panel-slot-kyc')).toBeVisible();
     await tapAppTab(page, 'options');
     await expect(page.locator('#app-view-options')).toBeVisible();
+  });
+
+  test('Cuenta: acordeón permanece abierto tras Auth.render', async ({ page }) => {
+    await loginAsMockUser(page, 'shipper');
+    await tapAppTab(page, 'account');
+    await page.locator('[data-profile-action="help"]').click();
+    await expect(page.locator('#app-panel-slot-help')).toBeVisible();
+    await page.evaluate(() => {
+      if (typeof Auth !== 'undefined' && typeof Auth.render === 'function') Auth.render();
+    });
+    await expect(page.locator('#app-panel-slot-help')).toBeVisible();
+    await expect(page.locator('[data-profile-action="help"]')).toHaveAttribute('aria-expanded', 'true');
   });
 });
 

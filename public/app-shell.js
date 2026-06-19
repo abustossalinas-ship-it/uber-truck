@@ -5,6 +5,9 @@ const AppShell = {
   tab: 'home',
   deep: null,
   _accountPanelOpen: null,
+  _accountMenuSig: null,
+  _accountRefreshPromise: null,
+  _authTabSynced: false,
   _splashHidden: false,
   _pushPendingToken: null,
   _pushListenersBound: false,
@@ -414,6 +417,7 @@ const AppShell = {
     }
 
     if (open === 'password') {
+      this.mountAuthInGate();
       const panel = document.getElementById('change-password-panel');
       if (panel) {
         this.mountPanelInSlot('change-password-panel', 'app-panel-slot-password');
@@ -547,8 +551,14 @@ const AppShell = {
         refreshBoard().catch(() => {});
       }
       if (user.role === 'carrier') this.setupCarrierGps();
-      if (!this.deep) this.setTab(this.tab || 'home');
+      if (!this.deep && !this._authTabSynced) {
+        this._authTabSynced = true;
+        this.setTab(this.tab || 'home');
+      }
     } else {
+      this._authTabSynced = false;
+      this._accountMenuSig = null;
+      this._accountPanelOpen = null;
       this._docsSessionCheckDone = false;
       this.deep = null;
       document.body.classList.remove('app-deep', 'app-main-visible');
@@ -619,7 +629,108 @@ const AppShell = {
     if (el && slot && !slot.contains(el)) slot.appendChild(el);
   },
 
-  setTab(tab) {
+  accountMenuSignature(user) {
+    if (!user) return '';
+    const kycMeta =
+      typeof accountKycRowMeta === 'function'
+        ? accountKycRowMeta(user)
+        : user.kyc_status || 'pending';
+    return [user.id, user.role, user.kyc_status, kycMeta, user.company_name || ''].join('|');
+  },
+
+  renderAccountMenu(user) {
+    const sections = document.getElementById('app-profile-sections');
+    if (!sections || !user) return;
+    const sig = this.accountMenuSignature(user);
+    const kycMeta =
+      typeof accountKycRowMeta === 'function'
+        ? accountKycRowMeta(user)
+        : user.kyc_status || 'pending';
+    if (this._accountMenuSig === sig && sections.querySelector('[data-profile-action]')) {
+      const metaEl = sections.querySelector('[data-profile-action="kyc"] .app-profile-row-meta');
+      if (metaEl) metaEl.textContent = kycMeta;
+      return;
+    }
+    if (this._accountPanelOpen && sections.querySelector('[data-profile-action]')) {
+      const metaEl = sections.querySelector('[data-profile-action="kyc"] .app-profile-row-meta');
+      if (metaEl) metaEl.textContent = kycMeta;
+      this._accountMenuSig = sig;
+      return;
+    }
+    this.detachAccountPanels();
+    this._accountMenuSig = sig;
+    const chevron =
+      '<svg class="app-profile-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>';
+    const accordionRow = (action, label, metaHtml = '') => `
+      <div class="app-profile-accordion-item">
+        <button type="button" class="app-profile-row" data-profile-action="${action}" aria-expanded="false" aria-controls="app-panel-slot-${action}">
+          <span>${label}</span>
+          <span class="app-profile-row-end">${metaHtml}${chevron}</span>
+        </button>
+        <div id="app-panel-slot-${action}" class="app-profile-panel-slot" data-profile-panel="${action}" hidden></div>
+      </div>`;
+    sections.innerHTML = `
+      <section class="app-account-group">
+        <h3 class="app-account-group-title">Perfil</h3>
+        <div class="app-profile-accordion">
+          ${accordionRow('kyc', 'Verificación KYC', `<span class="app-profile-row-meta">${kycMeta}</span>`)}
+        </div>
+      </section>
+      <section class="app-account-group">
+        <h3 class="app-account-group-title">Seguridad</h3>
+        <div class="app-profile-accordion">
+          ${accordionRow('password', 'Cambiar contraseña')}
+        </div>
+      </section>
+      <section class="app-account-group">
+        <h3 class="app-account-group-title">Pagos</h3>
+        <div class="app-profile-accordion">
+          ${accordionRow('penalties', 'Multas y billetera')}
+        </div>
+      </section>
+      <section class="app-account-group">
+        <h3 class="app-account-group-title">Notificaciones</h3>
+        <div class="app-profile-accordion">
+          ${accordionRow('notifications', 'Centro de notificaciones')}
+        </div>
+      </section>
+      <section class="app-account-group">
+        <h3 class="app-account-group-title">Ayuda</h3>
+        <div class="app-profile-accordion">
+          ${accordionRow('help', 'Ayuda con un viaje')}
+        </div>
+      </section>`;
+    if (this._accountPanelOpen) {
+      const btn = sections.querySelector(
+        `[data-profile-action="${this._accountPanelOpen}"]`
+      );
+      if (btn) btn.setAttribute('aria-expanded', 'true');
+    }
+  },
+
+  async refreshAccountTab({ profile = true } = {}) {
+    if (this._accountRefreshPromise) {
+      await this._accountRefreshPromise;
+    }
+    const run = async () => {
+      if (profile && typeof refreshAuthProfile === 'function') {
+        await refreshAuthProfile();
+      }
+      this.renderAccount();
+      if (typeof refreshAdminHubNav === 'function') refreshAdminHubNav();
+      if (typeof refreshAdminKycPanel === 'function') refreshAdminKycPanel();
+      if (typeof refreshAdminOpsPanel === 'function') refreshAdminOpsPanel();
+      await this.applyAccountPanel();
+    };
+    this._accountRefreshPromise = run();
+    try {
+      await this._accountRefreshPromise;
+    } finally {
+      this._accountRefreshPromise = null;
+    }
+  },
+
+  setTab(tab, { forceAccountRefresh = false } = {}) {
     const prev = this.tab;
     this.tab = tab;
     if (prev === 'account' && tab !== 'account') {
@@ -665,17 +776,10 @@ const AppShell = {
       if (actView) actView.classList.remove('app-view-pass-through');
     }
     if (tab === 'home') this.renderHome();
-    if (tab === 'account') {
-      (async () => {
-        if (typeof refreshAuthProfile === 'function') await refreshAuthProfile();
-        this.renderAccount();
-        if (typeof refreshAdminHubNav === 'function') refreshAdminHubNav();
-        if (typeof refreshAdminKycPanel === 'function') refreshAdminKycPanel();
-        if (typeof refreshAdminOpsPanel === 'function') refreshAdminOpsPanel();
-        if (typeof renderKycBanner === 'function') await renderKycBanner();
-        if (typeof Penalties !== 'undefined') await Penalties.refresh();
-        await this.applyAccountPanel();
-      })();
+    if (tab === 'account' && (prev !== 'account' || forceAccountRefresh)) {
+      this.refreshAccountTab({ profile: prev !== 'account' }).catch((err) =>
+        console.error('refreshAccountTab', err)
+      );
     }
   },
 
@@ -825,52 +929,7 @@ const AppShell = {
       });
     }
     if (sections) {
-      this.detachAccountPanels();
-      const kycMeta =
-        typeof accountKycRowMeta === 'function'
-          ? accountKycRowMeta(user)
-          : user.kyc_status || 'pending';
-      const chevron =
-        '<svg class="app-profile-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>';
-      const accordionRow = (action, label, metaHtml = '') => `
-        <div class="app-profile-accordion-item">
-          <button type="button" class="app-profile-row" data-profile-action="${action}" aria-expanded="false" aria-controls="app-panel-slot-${action}">
-            <span>${label}</span>
-            <span class="app-profile-row-end">${metaHtml}${chevron}</span>
-          </button>
-          <div id="app-panel-slot-${action}" class="app-profile-panel-slot" data-profile-panel="${action}" hidden></div>
-        </div>`;
-      sections.innerHTML = `
-        <section class="app-account-group">
-          <h3 class="app-account-group-title">Perfil</h3>
-          <div class="app-profile-accordion">
-            ${accordionRow('kyc', 'Verificación KYC', `<span class="app-profile-row-meta">${kycMeta}</span>`)}
-          </div>
-        </section>
-        <section class="app-account-group">
-          <h3 class="app-account-group-title">Seguridad</h3>
-          <div class="app-profile-accordion">
-            ${accordionRow('password', 'Cambiar contraseña')}
-          </div>
-        </section>
-        <section class="app-account-group">
-          <h3 class="app-account-group-title">Pagos</h3>
-          <div class="app-profile-accordion">
-            ${accordionRow('penalties', 'Multas y billetera')}
-          </div>
-        </section>
-        <section class="app-account-group">
-          <h3 class="app-account-group-title">Notificaciones</h3>
-          <div class="app-profile-accordion">
-            ${accordionRow('notifications', 'Centro de notificaciones')}
-          </div>
-        </section>
-        <section class="app-account-group">
-          <h3 class="app-account-group-title">Ayuda</h3>
-          <div class="app-profile-accordion">
-            ${accordionRow('help', 'Ayuda con un viaje')}
-          </div>
-        </section>`;
+      this.renderAccountMenu(user);
     }
     const adminSlot = document.getElementById('app-account-admin-slot');
     if (adminSlot) {

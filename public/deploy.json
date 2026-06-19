@@ -1,5 +1,5 @@
 {
-  "version": "0.0.129",
+  "version": "0.0.130",
   "git_sha": "",
   "ui": "password-strength-change-pw",
   "note": "Contraseña segura + fix cambiar clave en Cuenta app"

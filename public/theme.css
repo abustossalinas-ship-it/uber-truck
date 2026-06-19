@@ -215,6 +215,20 @@ body {
   display: block;
 }
 
+.carrier-only {
+  display: none !important;
+}
+
+.auth-panel.is-register.is-carrier-register .carrier-only {
+  display: block !important;
+}
+
+.auth-carrier-hint {
+  font-size: 0.82rem;
+  margin: 0.25rem 0 0.75rem;
+  line-height: 1.35;
+}
+
 .auth-panel .admin-only {
   display: none;
 }

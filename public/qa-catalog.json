@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-06-19T00:06:25.930Z",
+  "generated_at": "2026-06-19T00:13:53.894Z",
   "version": "0.0.129",
   "counts": {
-    "unit": 81,
+    "unit": 84,
     "e2e": 42,
     "e2e_optional": 3,
-    "required": 120,
+    "required": 123,
     "optional": 3,
-    "total": 123
+    "total": 126
   },
   "charts": {
     "by_kind": [
       {
         "label": "Unitarios (Node)",
-        "value": 81
+        "value": 84
       },
       {
         "label": "E2E (Playwright)",
@@ -23,7 +23,7 @@
     "by_coverage": [
       {
         "label": "Obligatorios (CI)",
-        "value": 120
+        "value": 123
       },
       {
         "label": "Opcionales (.env / Supabase)",
@@ -49,7 +49,7 @@
       },
       {
         "label": "Otros",
-        "value": 12
+        "value": 15
       },
       {
         "label": "Navegación app",
@@ -69,6 +69,11 @@
       {
         "label": "auth-intent",
         "value": 4,
+        "kind": "unit"
+      },
+      {
+        "label": "auth-register-carrier",
+        "value": 3,
         "kind": "unit"
       },
       {
@@ -284,6 +289,31 @@
         },
         {
           "name": "normalizeAccountRole unifica roles",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        }
+      ]
+    },
+    {
+      "file": "tests/auth-register-carrier.test.js",
+      "suite": "auth-register-carrier",
+      "kind": "unit",
+      "cases": [
+        {
+          "name": "exige RUT y patente válidos",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "rechaza RUT inválido",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "rechaza patente vacía",
           "optional": false,
           "area": "other",
           "area_label": "Otros"

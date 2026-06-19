@@ -46,7 +46,17 @@ const FORGOT_OK_MESSAGE =
   'Si el email tiene cuenta, enviamos un enlace para restablecer la contraseña (revisa spam).';
 
 router.post('/register', async (req, res) => {
-  const { email, password, full_name, role, company_name, phone, admin_key } = req.body || {};
+  const {
+    email,
+    password,
+    full_name,
+    role,
+    company_name,
+    phone,
+    admin_key,
+    national_rut,
+    vehicle_plates,
+  } = req.body || {};
   if (!email?.trim() || !password) {
     return res.status(400).json({ ok: false, error: 'Email y contraseña requeridos' });
   }
@@ -55,10 +65,19 @@ router.post('/register', async (req, res) => {
     return res.status(400).json({ ok: false, error: policy.error });
   }
   if (!full_name?.trim()) {
-    return res.status(400).json({ ok: false, error: 'Nombre de contacto requerido' });
+    return res.status(400).json({ ok: false, error: 'Nombre completo requerido' });
   }
   if (!company_name?.trim() && role !== 'admin') {
     return res.status(400).json({ ok: false, error: 'Nombre de empresa requerido' });
+  }
+  const resolvedRole = role === 'carrier' ? 'carrier' : role === 'admin' ? 'admin' : 'shipper';
+  if (resolvedRole === 'carrier') {
+    if (!national_rut?.trim()) {
+      return res.status(400).json({ ok: false, error: 'RUT del titular requerido' });
+    }
+    if (!vehicle_plates?.trim()) {
+      return res.status(400).json({ ok: false, error: 'Patente del camión requerida' });
+    }
   }
   try {
     const result = await registerUser({
@@ -69,6 +88,8 @@ router.post('/register', async (req, res) => {
       company_name,
       phone,
       admin_key,
+      national_rut,
+      vehicle_plates,
     });
     const meta = requestMeta(req, req.body || {});
     if (deviceSessionsEnabled() && meta.deviceHash) {

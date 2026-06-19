@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const supabase = require('../services/supabase');
 const { enforceCarrierSessionGate } = require('./kyc-gate');
+const { validateCarrierRegistrationFields } = require('./auth-register');
 
 const JWT_SECRET = process.env.JWT_SECRET || 'uber-truck-dev-change-me';
 const JWT_EXPIRES = process.env.JWT_EXPIRES || '30d';
@@ -48,7 +49,17 @@ async function authMiddleware(req, res, next) {
   next();
 }
 
-async function registerUser({ email, password, full_name, role, company_name, phone, admin_key }) {
+async function registerUser({
+  email,
+  password,
+  full_name,
+  role,
+  company_name,
+  phone,
+  admin_key,
+  national_rut,
+  vehicle_plates,
+}) {
   if (!supabase.isConfigured()) {
     const err = new Error('Registro no disponible: la base de datos del servidor no está configurada');
     err.status = 503;
@@ -69,21 +80,62 @@ async function registerUser({ email, password, full_name, role, company_name, ph
     e.status = 400;
     throw e;
   }
+  if (!full_name?.trim()) {
+    const e = new Error('Nombre completo requerido');
+    e.status = 400;
+    throw e;
+  }
+
+  let nationalRut = null;
+  let vehiclePlates = null;
+  if (resolvedRole === 'carrier') {
+    const carrierFields = validateCarrierRegistrationFields({ national_rut, vehicle_plates });
+    if (!carrierFields.ok) {
+      const e = new Error(carrierFields.error);
+      e.status = 400;
+      throw e;
+    }
+    nationalRut = carrierFields.national_rut;
+    vehiclePlates = carrierFields.vehicle_plates;
+  }
+
   const hash = await bcrypt.hash(password, 10);
   const sb = supabase.getClient();
+
+  if (nationalRut) {
+    const { data: rutRow, error: rutErr } = await sb
+      .from('users')
+      .select('id')
+      .eq('national_rut', nationalRut)
+      .maybeSingle();
+    if (rutErr) throw rutErr;
+    if (rutRow?.id) {
+      const e = new Error('Ya existe una cuenta transportista con ese RUT');
+      e.status = 409;
+      throw e;
+    }
+  }
+
+  const insertRow = {
+    email: email.trim().toLowerCase(),
+    full_name: full_name.trim(),
+    role: resolvedRole,
+    company_name: company_name.trim(),
+    phone: phone?.trim() || null,
+    password_hash: hash,
+    kyc_status: resolvedRole === 'admin' ? 'approved' : 'pending',
+  };
+  if (nationalRut) {
+    insertRow.national_rut = nationalRut;
+    insertRow.onboarding_vehicle_plates = vehiclePlates;
+    insertRow.onboarding_updated_at = new Date().toISOString();
+  }
+
   const { data, error } = await sb
     .from('users')
-    .insert({
-      email: email.trim().toLowerCase(),
-      full_name: full_name.trim(),
-      role: resolvedRole,
-      company_name: company_name.trim(),
-      phone: phone?.trim() || null,
-      password_hash: hash,
-      kyc_status: resolvedRole === 'admin' ? 'approved' : 'pending',
-    })
+    .insert(insertRow)
     .select(
-      'id, email, full_name, role, company_name, phone, kyc_status, is_available, last_lat, last_lng, location_updated_at, default_truck_type_id'
+      'id, email, full_name, role, company_name, phone, kyc_status, national_rut, onboarding_vehicle_plates, is_available, last_lat, last_lng, location_updated_at, default_truck_type_id'
     )
     .single();
   if (error) {

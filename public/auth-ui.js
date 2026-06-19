@@ -357,9 +357,14 @@ function authIntentHeadline(role, register) {
 
 function authIntentRegisterIntro(role) {
   if (role === 'carrier') {
-    return 'Registra tu flota o servicio de transporte. Un administrador debe aprobar la cuenta antes de ofertar y emparejar.';
+    return 'Indica RUT, nombre completo y patente del camión. Luego validamos CI y licencia por WhatsApp (OCR). Un administrador aprueba la cuenta antes de ofertar.';
   }
   return 'Registra tu empresa embarcadora. Un administrador debe aprobar la cuenta antes de publicar cargas y emparejar.';
+}
+
+function syncCarrierRegisterUi(role) {
+  const panel = document.getElementById('auth-panel');
+  if (panel) panel.classList.toggle('is-carrier-register', role === 'carrier');
 }
 
 function syncAuthRoleFields(role) {
@@ -370,6 +375,7 @@ function syncAuthRoleFields(role) {
     btn.classList.toggle('active', pick === role);
     btn.setAttribute('aria-pressed', pick === role ? 'true' : 'false');
   });
+  syncCarrierRegisterUi(role);
   updateRegisterLabels();
 }
 
@@ -562,7 +568,9 @@ function isAuthFormEmpty() {
     const company = form.querySelector('[name="company_name"]')?.value?.trim();
     const fullName = form.querySelector('[name="full_name"]')?.value?.trim();
     const phone = form.querySelector('[name="phone"]')?.value?.trim();
-    if (company || fullName || phone) return false;
+    const rut = form.querySelector('[name="national_rut"]')?.value?.trim();
+    const plate = form.querySelector('[name="vehicle_plates"]')?.value?.trim();
+    if (company || fullName || phone || rut || plate) return false;
   }
   return true;
 }
@@ -786,7 +794,10 @@ function authErrorMessage(res, json, register) {
 
 function updateRegisterLabels() {
   const role = document.getElementById('auth-role')?.value || getAuthIntentRole() || 'shipper';
+  syncCarrierRegisterUi(role);
   const companyLabel = document.getElementById('auth-company-label');
+  const nameLabel = document.getElementById('auth-name-label');
+  const fullNameInput = document.getElementById('auth-full-name');
   const intro = document.getElementById('auth-register-intro');
   if (companyLabel) {
     companyLabel.textContent =
@@ -794,13 +805,28 @@ function updateRegisterLabels() {
         ? 'Nombre transportista / flota'
         : 'Razón social embarcadora';
   }
+  if (nameLabel) {
+    nameLabel.textContent =
+      role === 'carrier' ? 'Nombre completo titular (como en CI)' : 'Nombre contacto';
+  }
+  if (fullNameInput) {
+    fullNameInput.placeholder =
+      role === 'carrier' ? 'Ej. Juan Bastidas' : 'Ej. María González';
+  }
   if (intro && authRegisterMode) intro.textContent = authIntentRegisterIntro(role);
+  setRegisterFieldsRequired(authRegisterMode && !authForgotMode);
 }
 
 function setRegisterFieldsRequired(register) {
   ['auth-company', 'auth-full-name'].forEach((id) => {
     const el = document.getElementById(id);
     if (el) el.required = register;
+  });
+  const role = getAuthIntentRole() || document.getElementById('auth-role')?.value || 'shipper';
+  const carrierRegister = register && role === 'carrier';
+  ['auth-national-rut', 'auth-vehicle-plates'].forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) el.required = carrierRegister;
   });
 }
 
@@ -1173,6 +1199,20 @@ formAuth?.addEventListener('submit', async (e) => {
       showAuthError('Elige si eres transportista o empresa embarcadora');
       return;
     }
+    if (body.role === 'carrier') {
+      if (!body.national_rut?.trim()) {
+        showAuthError('Ingresa tu RUT (como en la cédula)');
+        return;
+      }
+      if (!body.vehicle_plates?.trim()) {
+        showAuthError('Ingresa la patente del camión principal');
+        return;
+      }
+      body.vehicle_plates = body.vehicle_plates.trim().toUpperCase().replace(/[\s.\-]/g, '');
+    } else {
+      delete body.national_rut;
+      delete body.vehicle_plates;
+    }
     if (typeof PasswordPolicy !== 'undefined') {
       const policy = PasswordPolicy.validate(body.password);
       if (!policy.ok) {
@@ -1188,6 +1228,8 @@ formAuth?.addEventListener('submit', async (e) => {
     delete body.full_name;
     delete body.phone;
     delete body.admin_key;
+    delete body.national_rut;
+    delete body.vehicle_plates;
   }
   if (submitBtn) {
     submitBtn.disabled = true;

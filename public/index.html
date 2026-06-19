@@ -428,7 +428,14 @@
       <label id="auth-company-label" class="register-only">Razón social / nombre empresa</label>
       <input name="company_name" id="auth-company" class="register-only" placeholder="Ej. Distribuidora Norte SpA" />
       <label id="auth-name-label" class="register-only">Nombre contacto</label>
-      <input name="full_name" id="auth-full-name" class="register-only" placeholder="Ej. María González" />
+      <input name="full_name" id="auth-full-name" class="register-only" placeholder="Ej. María González" autocomplete="name" />
+      <label id="auth-rut-label" class="register-only carrier-only">RUT titular (como en CI)</label>
+      <input name="national_rut" id="auth-national-rut" class="register-only carrier-only" inputmode="text" autocomplete="off" placeholder="Ej. 12.345.678-9" />
+      <label id="auth-plate-label" class="register-only carrier-only">Patente camión principal</label>
+      <input name="vehicle_plates" id="auth-vehicle-plates" class="register-only carrier-only" autocapitalize="characters" autocomplete="off" placeholder="Ej. DCYZ31" maxlength="8" />
+      <p id="auth-carrier-hint" class="register-only carrier-only muted auth-carrier-hint">
+        Debe coincidir con tu cédula y licencia. Luego envía fotos por WhatsApp Cubik para validación automática.
+      </p>
       <p id="auth-error" class="auth-error" role="alert" hidden></p>
       <label class="register-only">Teléfono (opcional)</label>
       <input name="phone" id="auth-phone" type="tel" class="register-only" placeholder="+56 9 …" />

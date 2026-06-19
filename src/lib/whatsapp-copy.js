@@ -158,9 +158,10 @@ Ya registramos CI/licencia si las enviaste. Para quedar *verificado (7/7)* falta
 *Un mensaje de texto con:*
 • Rubro: construcción / retail-alimentos / frío / general
 • Tipo camión: tracto, furgón 8t, tolva, thermo…
-• Patente(s): ej. ABCD12
 
-📌 Sin SOAP/RC puedes usar la app si CI y licencia están al día; la *oferta pública* queda pendiente hasta que el agente complete el checklist.
+📌 RUT, nombre y patente ya quedaron en tu registro de la app — WhatsApp valida que coincidan con CI y licencia (OCR).
+
+Sin SOAP/RC puedes usar la app si CI y licencia están al día; la *oferta pública* queda pendiente hasta que el agente complete el checklist.
 
 Escribe *soap*, *seguro* o *humano* cuando tengas los documentos.`;
 }
@@ -171,8 +172,9 @@ function carrierFleetTextPrompt() {
 
 Rubro: …
 Tipo camión: …
-Patente(s): …
-Email app: …`;
+Email app: …
+
+(Tu RUT, nombre y patente ya están en el registro de la app.)`;
 }
 
 const GENERIC = {
@@ -336,7 +338,11 @@ function ocrDocumentApplied({ docType, rut, expiresAt, fullName, licenseClass, c
       'Cuando renueves, escribe *licencia* y envía la foto actualizada.'
     );
   } else {
-    lines.push('', carrierDocsPendingReminder());
+    lines.push(
+      '',
+      '✅ Datos registrados en Cubik y cruzados con tu cuenta (RUT/nombre del registro).',
+      carrierDocsPendingReminder()
+    );
   }
   return lines.join('\n');
 }

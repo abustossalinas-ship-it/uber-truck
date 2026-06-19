@@ -56,10 +56,50 @@ body.cubik-app.app-authed #app-home-active-slot #active-trip-banner:not([hidden]
 body.cubik-app.app-authed[data-app-tab="account"] #app-account-admin-slot #admin-hub-nav:not([hidden]),
 body.cubik-app.app-authed[data-app-tab="account"] #app-account-admin-slot #admin-kyc-panel:not([hidden]),
 body.cubik-app.app-authed[data-app-tab="account"] #app-account-admin-slot #admin-ops-panel:not([hidden]),
-body.cubik-app.app-authed[data-app-tab="account"] #app-account-penalties-slot #account-penalties-panel:not([hidden]),
-body.cubik-app.app-authed[data-app-tab="account"] #app-account-kyc-slot #kyc-banner:not([hidden]),
-body.cubik-app.app-authed[data-app-tab="account"] #app-account-kyc-slot #carrier-docs-panel:not([hidden]) {
+body.cubik-app.app-authed[data-app-tab="account"] .app-profile-panel-slot #account-penalties-panel:not([hidden]),
+body.cubik-app.app-authed[data-app-tab="account"] .app-profile-panel-slot #kyc-banner:not([hidden]),
+body.cubik-app.app-authed[data-app-tab="account"] .app-profile-panel-slot #carrier-docs-panel:not([hidden]),
+body.cubik-app.app-authed[data-app-tab="account"] .app-profile-panel-slot #change-password-panel:not([hidden]),
+body.cubik-app.app-authed[data-app-tab="account"] .app-profile-panel-slot .notif-panel:not([hidden]) {
   display: block !important;
+}
+
+body.cubik-app.app-authed[data-app-tab="account"] .app-profile-panel-slot .notif-panel:not([hidden]) {
+  position: static;
+  top: auto;
+  left: auto;
+  right: auto;
+  z-index: auto;
+  max-height: none;
+  box-shadow: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+}
+
+body.cubik-app.app-authed[data-app-tab="account"] .app-profile-panel-slot #change-password-panel:not([hidden]) {
+  display: block !important;
+  position: static;
+  inset: auto;
+  z-index: auto;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 0.5rem 0.75rem 0.75rem;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  min-height: 0;
+}
+
+body.cubik-app.app-authed[data-app-tab="account"] .app-profile-panel-slot #change-password-panel::before {
+  display: none;
+}
+
+body.cubik-app.app-authed[data-app-tab="account"] .app-profile-panel-slot #change-password-panel > h2 {
+  font-size: 0.95rem;
+  margin: 0 0 0.65rem;
 }
 
 body.cubik-app .notif-panel:not([hidden]) {
@@ -723,6 +763,64 @@ body.cubik-app[data-app-role='admin']:not([data-app-super-admin]) #app-opt-carri
   height: 1rem;
   color: var(--cubik-nav-inactive);
   flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.app-profile-row[aria-expanded="true"] .app-profile-chevron {
+  transform: rotate(90deg);
+}
+
+.app-profile-accordion {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--cubik-radius-lg);
+  overflow: hidden;
+  background: var(--surface);
+  box-shadow: var(--cubik-card-shadow);
+}
+
+.app-profile-accordion-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-profile-panel-slot {
+  padding: 0 0.75rem 0.75rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.app-profile-accordion-item:last-child .app-profile-panel-slot:not([hidden]),
+.app-profile-accordion-item:last-child .app-profile-row {
+  border-bottom: none;
+}
+
+.app-profile-panel-slot[hidden] {
+  display: none !important;
+  padding: 0;
+  border-bottom: none;
+}
+
+.app-profile-panel-slot .card,
+.app-profile-panel-slot #account-penalties-panel,
+.app-profile-panel-slot #kyc-banner,
+.app-profile-panel-slot .carrier-docs-panel {
+  margin: 0;
+}
+
+.app-help-inline {
+  padding: 0.85rem;
+}
+
+.app-help-list {
+  margin: 0.5rem 0 0.75rem;
+  padding-left: 1.1rem;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.app-help-list li + li {
+  margin-top: 0.35rem;
 }
 
 .app-home-active {
@@ -1095,8 +1193,8 @@ body.cubik-app[data-app-role='admin']:not([data-app-super-admin]) #app-opt-carri
 body.cubik-app .app-account-admin-slot .admin-hub-nav,
 body.cubik-app .app-account-admin-slot .admin-kyc-panel,
 body.cubik-app .app-account-admin-slot .admin-ops-panel,
-body.cubik-app .app-account-kyc-slot .kyc-banner,
-body.cubik-app .app-account-penalties-slot #account-penalties-panel {
+body.cubik-app .app-profile-panel-slot #account-penalties-panel,
+body.cubik-app .app-profile-panel-slot #kyc-banner {
   margin: 0 0 0.65rem;
 }
 
@@ -1185,8 +1283,10 @@ body.cubik-app #active-trip-banner {
 
 body.cubik-app #kyc-banner,
 body.cubik-app #penalty-block-banner,
-body.cubik-app #account-penalties-panel {
-  margin: 0.5rem 1rem;
+body.cubik-app #account-penalties-panel,
+body.cubik-app .app-profile-panel-slot #account-penalties-panel,
+body.cubik-app .app-profile-panel-slot #kyc-banner {
+  margin: 0;
   max-width: none;
   padding: 0;
 }

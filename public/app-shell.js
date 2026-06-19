@@ -4,6 +4,7 @@
 const AppShell = {
   tab: 'home',
   deep: null,
+  _accountPanelOpen: null,
   _splashHidden: false,
   _pushPendingToken: null,
   _pushListenersBound: false,
@@ -79,6 +80,13 @@ const AppShell = {
 
   openChangePassword() {
     if (typeof Auth === 'undefined' || !Auth.user) return;
+    if (document.body.classList.contains('cubik-app')) {
+      if (this.tab !== 'account') this.setTab('account');
+      else this.renderAccount();
+      this._accountPanelOpen = 'password';
+      this.applyAccountPanel();
+      return;
+    }
     this.mountAuthInGate();
     const panel = document.getElementById('change-password-panel');
     if (!panel) return;
@@ -94,6 +102,13 @@ const AppShell = {
   },
 
   closeChangePassword() {
+    if (
+      document.body.classList.contains('cubik-app') &&
+      this._accountPanelOpen === 'password'
+    ) {
+      this.closeAccountPanel();
+      return;
+    }
     const panel = document.getElementById('change-password-panel');
     panel?.setAttribute('hidden', '');
     document.body.classList.remove('app-change-pw-open');
@@ -296,37 +311,134 @@ const AppShell = {
   },
 
   openNotifications() {
-    if (typeof Comms !== 'undefined' && typeof Comms.openNotifPanel === 'function') {
-      Comms.openNotifPanel();
-      return;
+    this._accountPanelOpen = 'notifications';
+    if (this.tab !== 'account') this.setTab('account');
+    else {
+      this.renderAccount();
+      this.applyAccountPanel();
     }
-    document.getElementById('btn-notifications')?.click();
   },
 
   async openAccountPenalties() {
+    this._accountPanelOpen = 'penalties';
     if (this.tab !== 'account') this.setTab('account');
-    this.renderAccount();
-    if (typeof Penalties !== 'undefined') await Penalties.refresh();
-    const panel = document.getElementById('account-penalties-panel');
-    if (panel) {
-      panel.hidden = false;
-      panel.removeAttribute('hidden');
-      requestAnimationFrame(() => this.scrollAppToElement(panel, 12));
+    else {
+      this.renderAccount();
+      await this.applyAccountPanel();
     }
   },
 
   async openAccountKyc() {
+    this._accountPanelOpen = 'kyc';
     if (this.tab !== 'account') this.setTab('account');
-    this.renderAccount();
-    if (typeof renderKycBanner === 'function') await renderKycBanner();
-    const target =
-      document.getElementById('carrier-docs-panel') ||
-      document.getElementById('kyc-banner') ||
-      document.getElementById('app-account-kyc-slot');
-    if (target) {
-      target.hidden = false;
-      target.removeAttribute('hidden');
-      requestAnimationFrame(() => this.scrollAppToElement(target, 12));
+    else {
+      this.renderAccount();
+      await this.applyAccountPanel();
+    }
+  },
+
+  closeAccountPanel() {
+    this._accountPanelOpen = null;
+    this.applyAccountPanel();
+  },
+
+  async toggleAccountPanel(action) {
+    this._accountPanelOpen = this._accountPanelOpen === action ? null : action;
+    await this.applyAccountPanel();
+  },
+
+  async applyAccountPanel() {
+    const open = this._accountPanelOpen;
+    const actions = ['kyc', 'password', 'penalties', 'notifications', 'help'];
+
+    actions.forEach((action) => {
+      const slot = document.getElementById(`app-panel-slot-${action}`);
+      const btn = document.querySelector(`[data-profile-action="${action}"]`);
+      const isOpen = open === action;
+      if (slot) {
+        slot.hidden = !isOpen;
+        if (isOpen) slot.removeAttribute('hidden');
+        else slot.setAttribute('hidden', '');
+      }
+      if (btn) btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
+    });
+
+    document.body.classList.toggle('app-account-panel-open', Boolean(open));
+
+    if (open !== 'kyc') {
+      document.getElementById('kyc-banner')?.setAttribute('hidden', '');
+      document.getElementById('carrier-docs-panel')?.setAttribute('hidden', '');
+    }
+    if (open !== 'penalties') {
+      document.getElementById('account-penalties-panel')?.setAttribute('hidden', '');
+    }
+    if (open !== 'notifications') {
+      document.getElementById('notif-panel')?.setAttribute('hidden', '');
+    }
+    if (open !== 'password') {
+      const pw = document.getElementById('change-password-panel');
+      if (pw?.closest('.app-profile-panel-slot')) {
+        pw.setAttribute('hidden', '');
+        document.getElementById('form-change-password')?.reset();
+        document.getElementById('change-password-error')?.setAttribute('hidden', '');
+      }
+      document.body.classList.remove('app-change-pw-open');
+    }
+
+    if (open === 'kyc') {
+      if (typeof renderKycBanner === 'function') await renderKycBanner();
+      this.mountPanelInSlot('kyc-banner', 'app-panel-slot-kyc');
+      this.mountPanelInSlot('carrier-docs-panel', 'app-panel-slot-kyc');
+    }
+
+    if (open === 'password') {
+      const panel = document.getElementById('change-password-panel');
+      if (panel) {
+        this.mountPanelInSlot('change-password-panel', 'app-panel-slot-password');
+        panel.hidden = false;
+        panel.removeAttribute('hidden');
+        document.body.classList.remove('app-change-pw-open');
+        panel.querySelector('[name="current_password"]')?.focus();
+      }
+    }
+
+    if (open === 'penalties') {
+      if (typeof Penalties !== 'undefined') await Penalties.refresh();
+      this.mountPanelInSlot('account-penalties-panel', 'app-panel-slot-penalties');
+      const panel = document.getElementById('account-penalties-panel');
+      if (panel) {
+        panel.hidden = false;
+        panel.removeAttribute('hidden');
+      }
+    }
+
+    if (open === 'notifications') {
+      this.mountPanelInSlot('notif-panel', 'app-panel-slot-notifications');
+      if (typeof Comms !== 'undefined') await Comms.openNotifPanel();
+    }
+
+    if (open === 'help') {
+      const slot = document.getElementById('app-panel-slot-help');
+      if (slot) {
+        slot.innerHTML = `
+          <div class="app-help-inline card">
+            <p class="muted">Durante un viaje en ruta puedes usar el chat, reportar incidentes o revisar multas y saldo en esta cuenta.</p>
+            <ul class="app-help-list">
+              <li><strong>Incidente:</strong> botón «Reportar incidente» en el viaje activo.</li>
+              <li><strong>Multas y saldo:</strong> sección Pagos arriba.</li>
+              <li><strong>Documentación:</strong> transportistas revisan el checklist KYC.</li>
+            </ul>
+            <button type="button" class="tab tab-sm" data-app-tab-link="activity">Ver actividad</button>
+          </div>`;
+        slot.querySelector('[data-app-tab-link]')?.addEventListener('click', () => {
+          this.setTab('activity');
+        });
+      }
+    }
+
+    if (open) {
+      const slot = document.getElementById(`app-panel-slot-${open}`);
+      if (slot) requestAnimationFrame(() => this.scrollAppToElement(slot, 12));
     }
   },
 
@@ -448,6 +560,9 @@ const AppShell = {
     const ids = [
       'account-penalties-panel',
       'kyc-banner',
+      'carrier-docs-panel',
+      'change-password-panel',
+      'notif-panel',
       'admin-hub-nav',
       'admin-kyc-panel',
       'admin-ops-panel',
@@ -456,11 +571,16 @@ const AppShell = {
     ids.forEach((id) => {
       const el = document.getElementById(id);
       if (!el) return;
-      if (el.parentElement?.id?.startsWith('app-account') || el.parentElement?.id === 'app-account-admin-slot') {
+      if (
+        el.parentElement?.id?.startsWith('app-account') ||
+        el.parentElement?.id?.startsWith('app-panel-slot') ||
+        el.parentElement?.id === 'app-account-admin-slot'
+      ) {
         after.insertAdjacentElement('afterend', el);
         after = el;
       }
     });
+    this.mountAuthInGate();
   },
 
   mountPanelInSlot(elementId, slotId) {
@@ -470,7 +590,12 @@ const AppShell = {
   },
 
   setTab(tab) {
+    const prev = this.tab;
     this.tab = tab;
+    if (prev === 'account' && tab !== 'account') {
+      this._accountPanelOpen = null;
+      this.restorePanelsHome();
+    }
     if (this.deep) this.exitDeep(false);
     document.body.dataset.appTab = tab;
     document.querySelectorAll('.app-nav-item').forEach((b) => {
@@ -518,6 +643,7 @@ const AppShell = {
         if (typeof refreshAdminOpsPanel === 'function') refreshAdminOpsPanel();
         if (typeof renderKycBanner === 'function') await renderKycBanner();
         if (typeof Penalties !== 'undefined') await Penalties.refresh();
+        await this.applyAccountPanel();
       })();
     }
   },
@@ -551,11 +677,8 @@ const AppShell = {
       return;
     }
     if (action === 'help') {
+      this._accountPanelOpen = 'help';
       this.setTab('account');
-      document.getElementById('account-penalties-panel')?.scrollIntoView({ behavior: 'smooth' });
-      alert(
-        'Ayuda Cubik: usa «Reportar incidente» en un viaje en ruta, emergencias en el chat, o multas en esta sección.'
-      );
       return;
     }
     this.deep = cfg.tab;
@@ -677,67 +800,49 @@ const AppShell = {
           : user.kyc_status || 'pending';
       const chevron =
         '<svg class="app-profile-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M9 18l6-6-6-6"/></svg>';
+      const accordionRow = (action, label, metaHtml = '') => `
+        <div class="app-profile-accordion-item">
+          <button type="button" class="app-profile-row" data-profile-action="${action}" aria-expanded="false" aria-controls="app-panel-slot-${action}">
+            <span>${label}</span>
+            <span class="app-profile-row-end">${metaHtml}${chevron}</span>
+          </button>
+          <div id="app-panel-slot-${action}" class="app-profile-panel-slot" data-profile-panel="${action}" hidden></div>
+        </div>`;
       sections.innerHTML = `
         <section class="app-account-group">
           <h3 class="app-account-group-title">Perfil</h3>
-          <nav class="app-profile-menu">
-            <button type="button" class="app-profile-row" data-profile-action="kyc">
-              <span>Verificación KYC</span>
-              <span class="app-profile-row-end"><span class="app-profile-row-meta">${kycMeta}</span>${chevron}</span>
-            </button>
-          </nav>
+          <div class="app-profile-accordion">
+            ${accordionRow('kyc', 'Verificación KYC', `<span class="app-profile-row-meta">${kycMeta}</span>`)}
+          </div>
         </section>
         <section class="app-account-group">
           <h3 class="app-account-group-title">Seguridad</h3>
-          <nav class="app-profile-menu">
-            <button type="button" class="app-profile-row" id="app-btn-change-pw">
-              <span>Cambiar contraseña</span>
-              <span class="app-profile-row-end">${chevron}</span>
-            </button>
-          </nav>
+          <div class="app-profile-accordion">
+            ${accordionRow('password', 'Cambiar contraseña')}
+          </div>
         </section>
         <section class="app-account-group">
           <h3 class="app-account-group-title">Pagos</h3>
-          <nav class="app-profile-menu">
-            <button type="button" class="app-profile-row" data-profile-action="penalties">
-              <span>Multas y billetera</span>
-              <span class="app-profile-row-end">${chevron}</span>
-            </button>
-          </nav>
+          <div class="app-profile-accordion">
+            ${accordionRow('penalties', 'Multas y billetera')}
+          </div>
         </section>
         <section class="app-account-group">
           <h3 class="app-account-group-title">Notificaciones</h3>
-          <nav class="app-profile-menu">
-            <button type="button" class="app-profile-row" data-profile-action="notifications">
-              <span>Centro de notificaciones</span>
-              <span class="app-profile-row-end">${chevron}</span>
-            </button>
-          </nav>
+          <div class="app-profile-accordion">
+            ${accordionRow('notifications', 'Centro de notificaciones')}
+          </div>
         </section>
         <section class="app-account-group">
           <h3 class="app-account-group-title">Ayuda</h3>
-          <nav class="app-profile-menu">
-            <button type="button" class="app-profile-row" data-profile-action="help">
-              <span>Ayuda con un viaje</span>
-              <span class="app-profile-row-end">${chevron}</span>
-            </button>
-          </nav>
+          <div class="app-profile-accordion">
+            ${accordionRow('help', 'Ayuda con un viaje')}
+          </div>
         </section>`;
-      sections.querySelector('#app-btn-change-pw')?.addEventListener('click', () => {
-        if (typeof AppShell?.openChangePassword === 'function') AppShell.openChangePassword();
-        else document.getElementById('btn-change-password')?.click();
-      });
-      sections.querySelector('[data-profile-action="kyc"]')?.addEventListener('click', () => {
-        this.openAccountKyc();
-      });
-      sections.querySelector('[data-profile-action="penalties"]')?.addEventListener('click', () => {
-        this.openAccountPenalties();
-      });
-      sections.querySelector('[data-profile-action="notifications"]')?.addEventListener('click', () => {
-        this.openNotifications();
-      });
-      sections.querySelector('[data-profile-action="help"]')?.addEventListener('click', () => {
-        this.openAction('help');
+      sections.querySelectorAll('[data-profile-action]').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          this.toggleAccountPanel(btn.dataset.profileAction);
+        });
       });
     }
     const adminSlot = document.getElementById('app-account-admin-slot');
@@ -751,8 +856,6 @@ const AppShell = {
         adminSlot.hidden = true;
       }
     }
-    this.mountPanelInSlot('account-penalties-panel', 'app-account-penalties-slot');
-    this.mountPanelInSlot('kyc-banner', 'app-account-kyc-slot');
     const notifSrc = document.getElementById('notif-count');
     const notifDst = document.getElementById('app-notif-count');
     if (notifSrc && notifDst) {

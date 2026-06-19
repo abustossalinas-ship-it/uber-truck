@@ -158,7 +158,9 @@ function docStatusIcon(status) {
 }
 
 async function renderCarrierDocumentsPanel() {
-  const slot = document.getElementById('app-account-kyc-slot');
+  const slot =
+    document.getElementById('app-panel-slot-kyc') ||
+    document.getElementById('app-account-kyc-slot');
   if (!slot) return;
   let panel = document.getElementById('carrier-docs-panel');
   if (!panel) {

@@ -376,6 +376,13 @@ document.getElementById('btn-notifications')?.addEventListener('click', () => {
   Comms.openNotifPanel();
 });
 document.getElementById('notif-close')?.addEventListener('click', () => {
+  if (
+    typeof AppShell?.closeAccountPanel === 'function' &&
+    AppShell._accountPanelOpen === 'notifications'
+  ) {
+    AppShell.closeAccountPanel();
+    return;
+  }
   document.getElementById('notif-panel').hidden = true;
 });
 document.getElementById('notif-list')?.addEventListener('click', async (e) => {
@@ -409,9 +416,9 @@ document.getElementById('notif-list')?.addEventListener('click', async (e) => {
   const accountBtn = e.target.closest('[data-goto-account-kyc]');
   if (accountBtn) {
     document.getElementById('notif-panel').hidden = true;
-    if (typeof AppShell?.showTab === 'function') AppShell.showTab('account');
+    if (typeof AppShell?.openAccountKyc === 'function') AppShell.openAccountKyc();
+    else if (typeof AppShell?.setTab === 'function') AppShell.setTab('account');
     else if (typeof showTab === 'function') showTab('account');
-    document.getElementById('kyc-banner')?.scrollIntoView({ behavior: 'smooth' });
     return;
   }
   const scrollBtn = e.target.closest('[data-scroll-match]');

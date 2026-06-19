@@ -247,6 +247,30 @@ describe('whatsapp-bot', () => {
     assert.match(replies[0], /licencia/i);
     assert.doesNotMatch(replies[0], /Indica tu RUT/i);
   });
+
+  it('pendientes lista documentacion faltante', async () => {
+    const phone = '56988888884';
+    const user = {
+      id: 'u3',
+      email: 'test@getcubik.cl',
+      full_name: 'Juan Bastidas',
+      kyc_status: 'pending',
+      role: 'carrier',
+      doc_ci_expires_at: '2032-02-03',
+      doc_license_expires_at: '2030-02-03',
+    };
+    const lookup = async () => ({ found: true, user });
+    await handleInbound({ from: phone, text: 'documentos', messageId: 'p-1' }, { lookupCarrierIdentity: lookup });
+    await handleInbound({ from: phone, text: 'soy transportista', messageId: 'p-2' }, { lookupCarrierIdentity: lookup });
+    await handleInbound({ from: phone, text: 'test@getcubik.cl', messageId: 'p-3' }, { lookupCarrierIdentity: lookup });
+    const { replies } = await handleInbound(
+      { from: phone, text: 'pendientes', messageId: 'p-4' },
+      { lookupCarrierIdentity: lookup }
+    );
+    assert.match(replies[0], /SOAP/i);
+    assert.match(replies[0], /Rubro/i);
+    assert.match(replies[0], /7\/7/i);
+  });
 });
 
 describe('whatsapp-cloud parse', () => {

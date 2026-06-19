@@ -18,6 +18,8 @@ const {
   docRenewInstruction,
   mediaReceivedAck,
   mediaReceivedNeedIdentity,
+  carrierDocsPendingReminder,
+  carrierFleetTextPrompt,
 } = require('./whatsapp-copy');
 const { evaluateDocumentCompliance } = require('./carrier-documents');
 const { isDocumentOcrEnabled } = require('./document-ocr');
@@ -39,6 +41,8 @@ const RENEW_CI_RE = /\b(ci|c[eé]dula|carnet)\b/i;
 const RENEW_LICENSE_RE = /\blicencia\b/i;
 const RENEW_INSURANCE_RE = /\b(seguro|p[oó]liza|rc)\b/i;
 const RENEW_SOAP_RE = /\bsoap\b/i;
+const PENDING_DOCS_RE = /\b(pendientes?|qu[eé] falta|checklist|falta document)\b/i;
+const FLEET_TEXT_RE = /\b(flota|patente|rubro|tipo cami[oó]n)\b/i;
 
 const DOCS_INTENT_HINT = `Para *documentos* responde *soy transportista*, envía tu *RUT* / *email*, o escribe *volver* para reiniciar.`;
 
@@ -300,6 +304,12 @@ async function buildReplies(text, session, deps = {}) {
   }
 
   if (session.linkedUser) {
+    if (PENDING_DOCS_RE.test(lower)) {
+      return [carrierDocsPendingReminder()];
+    }
+    if (FLEET_TEXT_RE.test(lower) && !parseRenewalKind(lower)) {
+      return [carrierFleetTextPrompt()];
+    }
     const renew = parseRenewalKind(lower);
     if (renew) {
       return repliesForDocRenewal(session, renew);

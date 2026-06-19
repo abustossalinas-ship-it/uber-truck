@@ -116,15 +116,18 @@ En *Mis viajes* ves estado, chat con la empresa, mapa en ruta y cierre de entreg
 • Demo: getcubik.cl/transportistas
 Tras registrarte, envía documentos (opción *6*).`,
     6: `*Documentos piloto (C3a)*
-Envía por este WhatsApp (fotos legibles):
-1️⃣ Cédula de identidad (anverso y reverso)
-2️⃣ Licencia de conducir vigente
-3️⃣ SOAP al día
-4️⃣ Póliza RC / seguro carga (según tu rubro)
-5️⃣ Rubro principal + tipo de camión + patente(s)
+*Fase 1 — ya con OCR automático:*
+1️⃣ Cédula (anverso y reverso)
+2️⃣ Licencia (solo anverso, fecha de control visible)
 
-Indica el *mismo email* con el que te registraste en la app.
-Un agente marca el checklist y te aprueba en 24 h hábiles.`,
+*Fase 2 — cuando los tengas:*
+3️⃣ SOAP del camión (patente + vencimiento)
+4️⃣ RC vehículo o póliza carga en tránsito (PDF/foto con vigencia)
+
+*Fase 3 — en un mensaje de texto:*
+5️⃣ Rubro + tipo de camión + patente(s)
+
+Indica el *mismo email* de la app. Escribe *pendientes* para ver qué falta.`,
   },
 };
 
@@ -132,16 +135,45 @@ const ONBOARDING_DOCS = {
   carrier: `*Checklist transportista — piloto Cubik*
 Regístrate primero en getcubik.cl/app (rol transportista).
 
-Luego envía por WhatsApp:
-• Cédula (anverso/reverso)
-• Licencia vigente
-• SOAP + póliza RC/carga
-• Rubro (construcción / retail / frío) + patente del camión
+*Envía por WhatsApp:*
+• Cédula + licencia (OCR automático)
+• Cuando los tengas: SOAP + póliza RC/carga
+• Texto: rubro + tipo camión + patente(s)
 
-Usa el *mismo email* de la app. Escribe *6* para ver el detalle o *humano* para soporte.`,
+Escribe *pendientes* para ver tu avance o *6* para el detalle.`,
   shipper:
     'Para empresas embarcadoras el registro es en getcubik.cl/app (rol empresa). Revisamos identidad y datos corporativos antes de publicar cargas.',
 };
+
+/** Lista copy-paste tras CI/licencia OK — SOAP/RC pueden llegar después. */
+function carrierDocsPendingReminder() {
+  return `*Documentación pendiente — Cubik*
+
+Ya registramos CI/licencia si las enviaste. Para quedar *verificado (7/7)* falta:
+
+*Fotos (cuando las tengas):*
+• *SOAP* — patente y fecha de vencimiento visibles
+• *Seguro* — RC del vehículo *o* póliza de *carga en tránsito* (PDF/foto con vigencia)
+
+*Un mensaje de texto con:*
+• Rubro: construcción / retail-alimentos / frío / general
+• Tipo camión: tracto, furgón 8t, tolva, thermo…
+• Patente(s): ej. ABCD12
+
+📌 Sin SOAP/RC puedes usar la app si CI y licencia están al día; la *oferta pública* queda pendiente hasta que el agente complete el checklist.
+
+Escribe *soap*, *seguro* o *humano* cuando tengas los documentos.`;
+}
+
+/** Texto corto para pedir datos de flota (admin puede reenviar). */
+function carrierFleetTextPrompt() {
+  return `Envía en *un solo mensaje* (copia y completa):
+
+Rubro: …
+Tipo camión: …
+Patente(s): …
+Email app: …`;
+}
 
 const GENERIC = {
   price:
@@ -304,11 +336,7 @@ function ocrDocumentApplied({ docType, rut, expiresAt, fullName, licenseClass, c
       'Cuando renueves, escribe *licencia* y envía la foto actualizada.'
     );
   } else {
-    lines.push(
-      '',
-      '✅ Datos registrados en Cubik. Falta SOAP/seguro/rubro/patentes si aún no los enviaste.',
-      'Un agente puede contrastar el original antes de aprobar tu cuenta.'
-    );
+    lines.push('', carrierDocsPendingReminder());
   }
   return lines.join('\n');
 }
@@ -395,4 +423,6 @@ module.exports = {
   ocrDocumentApplied,
   ocrDocumentFailed,
   ocrNeedIdentity,
+  carrierDocsPendingReminder,
+  carrierFleetTextPrompt,
 };

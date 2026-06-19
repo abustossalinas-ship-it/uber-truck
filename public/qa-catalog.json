@@ -1,19 +1,19 @@
 {
-  "generated_at": "2026-06-18T21:51:12.508Z",
+  "generated_at": "2026-06-19T00:06:25.930Z",
   "version": "0.0.129",
   "counts": {
-    "unit": 80,
+    "unit": 81,
     "e2e": 42,
     "e2e_optional": 3,
-    "required": 119,
+    "required": 120,
     "optional": 3,
-    "total": 122
+    "total": 123
   },
   "charts": {
     "by_kind": [
       {
         "label": "Unitarios (Node)",
-        "value": 80
+        "value": 81
       },
       {
         "label": "E2E (Playwright)",
@@ -23,7 +23,7 @@
     "by_coverage": [
       {
         "label": "Obligatorios (CI)",
-        "value": 119
+        "value": 120
       },
       {
         "label": "Opcionales (.env / Supabase)",
@@ -33,7 +33,7 @@
     "by_area": [
       {
         "label": "Docs / WhatsApp / OCR",
-        "value": 32
+        "value": 33
       },
       {
         "label": "Tablero / datos",
@@ -123,7 +123,7 @@
       },
       {
         "label": "whatsapp-bot",
-        "value": 20,
+        "value": 21,
         "kind": "unit"
       },
       {
@@ -799,6 +799,12 @@
         },
         {
           "name": "actualizar licencia con typo no reinicia flujo",
+          "optional": false,
+          "area": "compliance",
+          "area_label": "Docs / WhatsApp / OCR"
+        },
+        {
+          "name": "pendientes lista documentacion faltante",
           "optional": false,
           "area": "compliance",
           "area_label": "Docs / WhatsApp / OCR"

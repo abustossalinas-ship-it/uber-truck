@@ -49,6 +49,34 @@ test.describe('Cubik app — sesión mock (sin backend)', () => {
     await expect(page.locator('#app-btn-logout')).toBeVisible();
     await expect(page.locator('#app-view-account')).toBeVisible();
   });
+
+  test('Cuenta: acordeón multas se despliega antes de cerrar sesión', async ({ page }) => {
+    await loginAsMockUser(page, 'shipper');
+    await tapAppTab(page, 'account');
+    const logout = page.locator('#app-btn-logout');
+    const penaltiesBtn = page.locator('[data-profile-action="penalties"]');
+    await penaltiesBtn.click();
+    await expect(penaltiesBtn).toHaveAttribute('aria-expanded', 'true');
+    const slot = page.locator('#app-panel-slot-penalties');
+    await expect(slot).toBeVisible();
+    const logoutBox = await logout.boundingBox();
+    const slotBox = await slot.boundingBox();
+    expect(slotBox && logoutBox && slotBox.y < logoutBox.y).toBeTruthy();
+  });
+
+  test('Cuenta: acordeón no bloquea la navegación inferior', async ({ page }) => {
+    await loginAsMockUser(page, 'carrier');
+    await tapAppTab(page, 'account');
+    await page.locator('[data-profile-action="password"]').click();
+    await expect(page.locator('#app-panel-slot-password #change-password-panel')).toBeVisible();
+    await tapAppTab(page, 'home');
+    await expect(page.locator('#app-view-home')).toBeVisible();
+    await tapAppTab(page, 'account');
+    await page.locator('[data-profile-action="kyc"]').click();
+    await expect(page.locator('#app-panel-slot-kyc')).toBeVisible();
+    await tapAppTab(page, 'options');
+    await expect(page.locator('#app-view-options')).toBeVisible();
+  });
 });
 
 test.describe('Cubik app — login real (QA_* en .env)', () => {

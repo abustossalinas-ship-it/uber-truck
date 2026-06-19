@@ -1,29 +1,29 @@
 {
-  "generated_at": "2026-06-19T00:13:53.894Z",
+  "generated_at": "2026-06-19T19:33:42.989Z",
   "version": "0.0.129",
   "counts": {
-    "unit": 84,
-    "e2e": 42,
+    "unit": 90,
+    "e2e": 44,
     "e2e_optional": 3,
-    "required": 123,
+    "required": 131,
     "optional": 3,
-    "total": 126
+    "total": 134
   },
   "charts": {
     "by_kind": [
       {
         "label": "Unitarios (Node)",
-        "value": 84
+        "value": 90
       },
       {
         "label": "E2E (Playwright)",
-        "value": 42
+        "value": 44
       }
     ],
     "by_coverage": [
       {
         "label": "Obligatorios (CI)",
-        "value": 123
+        "value": 131
       },
       {
         "label": "Opcionales (.env / Supabase)",
@@ -44,16 +44,16 @@
         "value": 23
       },
       {
+        "label": "Otros",
+        "value": 21
+      },
+      {
         "label": "Welcome / login",
         "value": 20
       },
       {
-        "label": "Otros",
-        "value": 15
-      },
-      {
         "label": "Navegación app",
-        "value": 10
+        "value": 12
       },
       {
         "label": "Smoke producción",
@@ -84,6 +84,11 @@
       {
         "label": "auth-ui-syntax",
         "value": 1,
+        "kind": "unit"
+      },
+      {
+        "label": "bank-gate-wallet",
+        "value": 2,
         "kind": "unit"
       },
       {
@@ -127,13 +132,18 @@
         "kind": "unit"
       },
       {
+        "label": "wallet",
+        "value": 4,
+        "kind": "unit"
+      },
+      {
         "label": "whatsapp-bot",
         "value": 21,
         "kind": "unit"
       },
       {
         "label": "app-authed",
-        "value": 6,
+        "value": 8,
         "kind": "e2e"
       },
       {
@@ -373,6 +383,25 @@
           "optional": false,
           "area": "welcome",
           "area_label": "Welcome / login"
+        }
+      ]
+    },
+    {
+      "file": "tests/bank-gate-wallet.test.js",
+      "suite": "bank-gate-wallet",
+      "kind": "unit",
+      "cases": [
+        {
+          "name": "wallet sandbox pilot desactiva bank enforce",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "fetchPaymentSetup permite operar en wallet sandbox pilot sin banco",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
         }
       ]
     },
@@ -721,6 +750,37 @@
       ]
     },
     {
+      "file": "tests/wallet.test.js",
+      "suite": "wallet",
+      "kind": "unit",
+      "cases": [
+        {
+          "name": "escrowAmounts calcula retención 10/5",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "publishReserveRequired exige 20% del presupuesto máximo",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "walletEnabled solo con WALLET_ENABLED=true",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        },
+        {
+          "name": "ledgerLabel en español",
+          "optional": false,
+          "area": "other",
+          "area_label": "Otros"
+        }
+      ]
+    },
+    {
       "file": "tests/whatsapp-bot.test.js",
       "suite": "whatsapp-bot",
       "kind": "unit",
@@ -890,6 +950,20 @@
         },
         {
           "name": "Cuenta muestra perfil y cerrar sesión",
+          "group": "Cubik app — sesión mock (sin backend)",
+          "optional": false,
+          "area": "nav",
+          "area_label": "Navegación app"
+        },
+        {
+          "name": "Cuenta: acordeón multas se despliega antes de cerrar sesión",
+          "group": "Cubik app — sesión mock (sin backend)",
+          "optional": false,
+          "area": "nav",
+          "area_label": "Navegación app"
+        },
+        {
+          "name": "Cuenta: acordeón no bloquea la navegación inferior",
           "group": "Cubik app — sesión mock (sin backend)",
           "optional": false,
           "area": "nav",

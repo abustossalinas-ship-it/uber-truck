@@ -32,6 +32,17 @@ Producto: **marketplace de transporte por camión** (publicar carga, ofertar via
 - Mensajes al usuario final en **español**.
 - Git: **siempre commit + push a `main`** al terminar (mensaje claro). Railway despliega desde `main` → https://www.getcubik.cl — sin push no hay cambios en producción. No commitear secretos ni `.env`.
 
+## QA obligatorio (antes de commit/push)
+
+**Nunca** hacer push sin pasar QA local:
+
+```bash
+npm run test:qa      # unit + E2E (obligatorio)
+npm run qa:lab       # opcional: panel visual http://localhost:3001/qa-lab
+```
+
+Si `test:qa` falla: corregir y volver a correr. **No push** hasta verde.
+
 ## Comandos
 
 ```bash

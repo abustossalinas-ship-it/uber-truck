@@ -60,8 +60,10 @@ npm run android:install:remote  # APK apunta a prod
 
 ## Git (revisión)
 
-- Tras implementar: **commit** con mensaje claro (solo archivos del cambio).
-- Luego **push a `main`** para deploy en Railway, salvo que Ariel pida solo commit local o otra rama.
+- Tras implementar: **`npm run test:qa` en verde** (obligatorio; ver `docs/QA-AUTOMATIZADO.md`).
+- Opcional visual: **`npm run qa:lab`** → http://localhost:3001/qa-lab
+- Luego **commit** con mensaje claro (solo archivos del cambio).
+- Después **push a `main`** para deploy en Railway. **No push si QA falla.**
 - No commitear secretos, `.env`, ni basura temporal (`.tmp-*`, etc.).
 
 ## Lo que el agente no hace solo

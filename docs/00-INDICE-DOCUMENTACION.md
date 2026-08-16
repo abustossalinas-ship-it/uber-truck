@@ -11,6 +11,7 @@
 | Documento | Enlace |
 |-----------|--------|
 | **Memoria técnica** | [Memoria-tecnica-Uber-Truck.html](./Memoria-tecnica-Uber-Truck.html) |
+| **Línea de tiempo (1 pág.)** | [LINEA-TIEMPO-CUBIK.md](./LINEA-TIEMPO-CUBIK.md) — origen, 25 may 2026, hitos hasta hoy |
 
 Incluye en un solo archivo: visión producto (app tipo Uber), paridad UX **MVP cerrada**, hitos, **Gantt 16 sem**, **backlog vivo**, Cubik Saldo piloto, QA automatizado, plan comercial piloto 25/50, auth/correo/dominio, **captación (landing v3 + prospectos + bot WhatsApp Meta)**, **onboarding piloto por rubros (C3a–O4)**. La tabla **Post-MVP** es backlog planificado (no bugs). **Última actualización:** 16 jun 2026 · software **0.0.129** (frontend captación **v0.0.170**) · memoria **v4.5.3** · journey **v3.2**.
 
